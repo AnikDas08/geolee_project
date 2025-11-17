@@ -7,11 +7,13 @@ class AppString {
   static const String no = "No";
   static const String yes = "Yes";
   static const String areYouSure = "Are you sure";
+  static const String deleteAccountConfirmation = "Delete Account Confirmation";
   static const String enterYouPassword = "Enter you password";
   static const String cancel = "Cancel";
   static const String done = "Done";
+  static const String delete = "Delete";
   static const String deleteDetails =
-      "All your changes will be deleted and you will no longer be able to access them.";
+      "enter your account password to continue to Delete Account.";
 
   static const String someThingWrong = "Some Thing Wrong";
   static const String tryAgain = "Try Again";

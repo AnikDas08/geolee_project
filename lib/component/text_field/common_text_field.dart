@@ -20,7 +20,7 @@ class CommonTextField extends StatefulWidget {
     this.prefixText,
     this.paddingHorizontal = 16,
     this.paddingVertical = 14,
-    this.borderRadius = 10,
+    this.borderRadius = 8,
     this.inputFormatters,
     this.fillColor = AppColors.white,
     this.hintTextColor = AppColors.textFiledColor,
@@ -80,18 +80,14 @@ class _CommonTextFieldState extends State<CommonTextField> {
   Widget build(BuildContext context) {
     return Container(
       decoration: ShapeDecoration(
-        color: widget.fillColor,
+        color: Colors.white /* Icon-White */,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
-        shadows: [
-          BoxShadow(
-            color: const Color(0x19000000),
-            blurRadius: 4,
-            offset: const Offset(0, 1),
-            spreadRadius: 0,
+          side: BorderSide(
+            width: 1,
+            color: const Color(0xFFDEE2E3) /* Disable */,
           ),
-        ],
+          borderRadius: BorderRadius.circular(6),
+        ),
       ),
       child: TextFormField(
         autovalidateMode: AutovalidateMode.onUnfocus,
@@ -138,18 +134,18 @@ class _CommonTextFieldState extends State<CommonTextField> {
           ),
           suffixIcon: widget.isPassword
               ? GestureDetector(
-            onTap: toggle,
-            child: Padding(
-              padding: EdgeInsetsDirectional.only(end: 10.w),
-              child: Icon(
-                obscureText
-                    ? Icons.visibility_off_outlined
-                    : Icons.visibility_outlined,
-                size: 20.sp,
-                color: widget.textColor,
-              ),
-            ),
-          )
+                  onTap: toggle,
+                  child: Padding(
+                    padding: EdgeInsetsDirectional.only(end: 10.w),
+                    child: Icon(
+                      obscureText
+                          ? Icons.visibility_off_outlined
+                          : Icons.visibility_outlined,
+                      size: 20.sp,
+                      color: widget.textColor,
+                    ),
+                  ),
+                )
               : widget.suffixIcon,
         ),
       ),

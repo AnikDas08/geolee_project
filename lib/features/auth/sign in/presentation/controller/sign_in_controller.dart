@@ -22,6 +22,8 @@ class SignInController extends GetxController {
   /// Sign in Api call here
 
   Future<void> signInUser(GlobalKey<FormState> formKey) async {
+    Get.toNamed(AppRoutes.homeNav);
+    return;
     if (!formKey.currentState!.validate()) return;
     //
     // return;

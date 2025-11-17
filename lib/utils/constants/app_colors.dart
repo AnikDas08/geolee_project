@@ -4,6 +4,7 @@ class AppColors {
   static const Color primaryColor = Color(0xffEB0000);
   static const Color secondary = Color(0xff454545);
   static const Color background = Color(0xFFF6F8FA);
+  static const Color navBarColor = Color(0xFFDEE2E3);
 
   static const Color transparent = Colors.transparent;
   static const Color white = Colors.white;

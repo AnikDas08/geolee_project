@@ -125,7 +125,7 @@ class _VerifyUserState extends State<VerifyUser> {
                       ),
                     ),*/
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         CommonText(
                           text: "Didn't receive the code?",

@@ -104,6 +104,9 @@ class ProfileController extends GetxController {
 
   /// update profile function here
   Future<void> editProfileRepo() async {
+    Get.toNamed(AppRoutes.homeNav);
+    return;
+
     if (!formKey.currentState!.validate()) return;
 
     if (!LocalStorage.isLogIn) return;

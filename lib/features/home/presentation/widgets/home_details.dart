@@ -36,15 +36,16 @@ class HomeDetails extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 CommonText(
-                  text: LocalStorage.myName,
+                  text: "Shakir Ahmed",
                   fontSize: 16,
                   color: AppColors.textColorFirst,
                   fontWeight: FontWeight.w600,
                 ),
                 CommonText(
-                  text: "Electrician",
+                  text: "Thornridge Cir. Shiloh, Hawaii",
                   fontSize: 12,
                   fontWeight: FontWeight.w400,
+                  color: AppColors.secondaryText,
                 ),
               ],
             ),

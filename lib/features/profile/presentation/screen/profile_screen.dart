@@ -10,9 +10,7 @@ import 'package:giolee78/config/api/api_end_point.dart';
 import 'package:giolee78/config/route/app_routes.dart';
 import 'package:giolee78/features/auth/change_password/presentation/screen/change_password_screen.dart';
 import 'package:giolee78/features/profile/presentation/controller/profile_controller.dart';
-import 'package:giolee78/features/profile/presentation/screen/connect_stripe_account_screen.dart';
 import 'package:giolee78/features/profile/presentation/screen/help_support_screen.dart';
-import 'package:giolee78/features/profile/presentation/screen/my_post_screen.dart';
 import 'package:giolee78/features/profile/presentation/screen/my_profile_screen.dart';
 import 'package:giolee78/features/profile/presentation/screen/privacy_policy_screen.dart';
 import 'package:giolee78/features/profile/presentation/screen/terms_of_services_screen.dart';
@@ -58,18 +56,28 @@ class ProfileScreen extends StatelessWidget {
 
                     /// User Name here
                     CommonText(
-                      text: LocalStorage.myName,
+                      text: "Dianne Russell",
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
                       top: 16,
-                      bottom: 24,
+                    ),
+                    CommonText(
+                      text:
+                          "Exploring one city at a time Capturing stories beyond borders",
+                      fontSize: 12,
+                      fontWeight: FontWeight.w400,
+                      bottom: 20,
+                      maxLines: 2,
+                      left: 25,
+                      right: 25,
+                      color: AppColors.secondaryText,
                     ),
                     CommonButton(
-                      titleText: 'Be a Service Provider',
+                      titleText: 'Public',
                       onTap: () {
                         Get.toNamed(AppRoutes.serviceProviderInfo);
                       },
-                      buttonWidth: Get.width * 0.5,
+                      buttonWidth: 100.w,
                       titleSize: 12,
                     ),
 
@@ -116,20 +124,7 @@ final List<ProfileItemData> profileItems = [
       Get.to(() => const ChangePasswordScreen());
     },
   ),
-  ProfileItemData(
-    imageSrc: AppIcons.profile,
-    title: 'My Post',
-    onTap: () {
-      Get.to(() => const MyPostScreen());
-    },
-  ),
-  ProfileItemData(
-    imageSrc: AppIcons.profile,
-    title: 'Connect Stripe Account',
-    onTap: () {
-      Get.to(() => const ConnectStripeAccountScreen());
-    },
-  ),
+
   ProfileItemData(
     imageSrc: AppIcons.privacy,
     title: 'Privacy Policy',

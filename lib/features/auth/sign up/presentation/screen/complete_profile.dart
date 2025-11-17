@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:giolee78/config/route/app_routes.dart';
 import '../../../../../component/button/common_button.dart';
 import '../../../../../component/image/common_image.dart';
 import '../../../../../component/text/common_text.dart';
@@ -114,33 +113,38 @@ class _CompleteProfileState extends State<CompleteProfile> {
 
               // Date of Birth Field
               CommonText(
-                text: 'Date of Birth',
+                text: 'Bio',
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
                 color: AppColors.black,
                 textAlign: TextAlign.left,
                 bottom: 8,
               ),
-              GestureDetector(
-                onTap: () => controller.selectDate(context),
-                child: AbsorbPointer(
-                  child: CommonTextField(
-                    controller: controller.dateController,
-                    hintText: '01 January 2000',
-                    onTap: () => controller.selectDate(context),
-                    suffixIcon: Padding(
-                      padding: EdgeInsets.all(12.w),
-                      child: Icon(
-                        Icons.calendar_today_outlined,
-                        color: AppColors.secondaryText,
-                        size: 20.sp,
-                      ),
-                    ),
-                    fillColor: AppColors.white,
-                    hintTextColor: AppColors.black,
-                    textColor: AppColors.black,
-                  ),
-                ),
+              CommonTextField(
+                controller: controller.dateController,
+                hintText:
+                    'Exploring one city at a time | Capturing stories beyond borders',
+                fillColor: AppColors.white,
+                hintTextColor: AppColors.black,
+                textColor: AppColors.black,
+                maxLines: 2,
+              ),
+
+              // Date of Birth Field
+              CommonText(
+                text: 'Age',
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: AppColors.black,
+                textAlign: TextAlign.left,
+                bottom: 8,
+              ),
+              CommonTextField(
+                controller: controller.ageController,
+                hintText: '25 Years',
+                fillColor: AppColors.white,
+                hintTextColor: AppColors.black,
+                textColor: AppColors.black,
               ),
 
               SizedBox(height: 20.h),
@@ -210,43 +214,6 @@ class _CompleteProfileState extends State<CompleteProfile> {
                     controller.update();
                   },
                 ),
-              ),
-
-              SizedBox(height: 20.h),
-
-              // Address Field
-              CommonText(
-                text: 'Address',
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: AppColors.black,
-                textAlign: TextAlign.left,
-                bottom: 8,
-              ),
-              GetBuilder<SignUpController>(
-                id: 'address_field',
-                builder: (controller) {
-                  return CommonTextField(
-                    controller: controller.addressController,
-                    hintText: '8502 Preston Rd. Inglewood, Maine',
-                    suffixIcon: Padding(
-                      padding: EdgeInsets.all(12.w),
-                      child: GestureDetector(
-                        onTap: () => Get.toNamed(AppRoutes.addLocation),
-                        child: Icon(
-                          Icons.location_on_outlined,
-                          color: controller.currentPosition != null
-                              ? AppColors.primaryColor
-                              : AppColors.secondaryText,
-                          size: 20.sp,
-                        ),
-                      ),
-                    ),
-                    fillColor: AppColors.white,
-                    hintTextColor: AppColors.black,
-                    textColor: AppColors.black,
-                  );
-                },
               ),
 
               SizedBox(height: 40.h),

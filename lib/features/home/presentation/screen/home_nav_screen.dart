@@ -2,13 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:giolee78/features/history/presentation/screen/history_screen.dart';
+import 'package:giolee78/features/addpost/presentation/screen/add_post_screen.dart';
 import 'package:giolee78/utils/constants/app_colors.dart';
 
 // Import your screens
 import '../../../../utils/constants/app_icons.dart';
 import '../../../message/presentation/screen/chat_screen.dart';
-import '../../../profile/presentation/screen/profile_screen.dart';
 import 'home_screen.dart';
 
 class HomeNavController extends GetxController {
@@ -22,17 +21,11 @@ class HomeNav extends StatelessWidget {
 
   final List<Widget> screens = [
     HomeScreen(),
+    AddPostScreen(),
     ChatListScreen(),
-    HistoryScreen(),
-    ProfileScreen(),
   ];
 
-  final List<String> icons = [
-    AppIcons.homeIcon,
-    AppIcons.chatIcon,
-    AppIcons.historyIcon,
-    AppIcons.profileIcon,
-  ];
+  final List<String> icons = [AppIcons.homeIcon, AppIcons.chatIcon];
 
   @override
   Widget build(BuildContext context) {
@@ -43,43 +36,87 @@ class HomeNav extends StatelessWidget {
           children: screens,
         ),
       ),
-      bottomNavigationBar: Obx(
-        () => SafeArea(
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      floatingActionButton: SizedBox(
+        height: 70.w,
+        width: 70.w,
+        child: FloatingActionButton(
+          backgroundColor: AppColors.primaryColor,
+          elevation: 4,
+          shape: const CircleBorder(),
+          onPressed: () => controller.currentIndex.value = 1,
           child: Container(
-            height: 83.h,
-            color: AppColors.primaryColor, // background color
-            padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: List.generate(icons.length, (index) {
-                bool isSelected = controller.currentIndex.value == index;
-
-                return GestureDetector(
-                  onTap: () => controller.currentIndex.value = index,
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    padding: EdgeInsets.all(isSelected ? 12.w : 0),
-                    decoration: BoxDecoration(
-                      color: isSelected ? Colors.white : Colors.transparent,
-                      shape: BoxShape.circle,
-                    ),
-                    child: SvgPicture.asset(
-                      icons[index],
-                      height: 26.w,
-                      width: 26.w,
-                      colorFilter: ColorFilter.mode(
-                        isSelected
-                            ? AppColors.primaryColor
-                            : Colors.white.withOpacity(0.6),
-                        BlendMode.srcIn,
-                      ),
-                    ),
-                  ),
-                );
-              }),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(color: Colors.white, width: 4.w),
+            ),
+            child: Center(
+              child: Icon(Icons.add, color: Colors.white, size: 28.w),
             ),
           ),
         ),
+      ),
+      bottomNavigationBar: Obx(
+        () => BottomAppBar(
+          shape: const CircularNotchedRectangle(),
+          notchMargin: 14.w,
+          color: AppColors.navBarColor,
+          child: SizedBox(
+            height: 80.h,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _buildNavItem(
+                  index: 0,
+                  iconPath: icons[0],
+                  label: 'Home',
+                  isSelected: controller.currentIndex.value == 0,
+                ),
+                SizedBox(width: 40.w),
+                _buildNavItem(
+                  index: 2,
+                  iconPath: icons[1],
+                  label: 'Message',
+                  isSelected: controller.currentIndex.value == 2,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNavItem({
+    required int index,
+    required String iconPath,
+    required String label,
+    required bool isSelected,
+  }) {
+    return GestureDetector(
+      onTap: () => controller.currentIndex.value = index,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SvgPicture.asset(
+            iconPath,
+            height: 24.w,
+            width: 24.w,
+            colorFilter: ColorFilter.mode(
+              isSelected ? AppColors.primaryColor : Colors.black,
+              BlendMode.srcIn,
+            ),
+          ),
+          SizedBox(height: 4.h),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 12.sp,
+              color: isSelected ? AppColors.primaryColor : Colors.black,
+              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w600,
+            ),
+          ),
+        ],
       ),
     );
   }

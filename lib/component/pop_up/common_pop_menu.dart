@@ -161,6 +161,7 @@ deletePopUp({
     builder: (context) {
       return AnimationPopUp(
         child: AlertDialog(
+          backgroundColor: AppColors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12.0),
           ),
@@ -172,7 +173,7 @@ deletePopUp({
               children: [
                 Center(
                   child: CommonText(
-                    text: AppString.areYouSure,
+                    text: AppString.deleteAccountConfirmation,
                     fontSize: 20.sp,
                     fontWeight: FontWeight.w700,
                     color: AppColors.black,
@@ -187,6 +188,14 @@ deletePopUp({
                   color: AppColors.black,
                   maxLines: 2,
                   bottom: 20.h,
+                ),
+                const SizedBox(height: 16),
+                CommonText(
+                  text: AppString.password,
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.black,
+                  bottom: 10.h,
                 ),
                 CommonTextField(
                   controller: controller,
@@ -213,7 +222,7 @@ deletePopUp({
                 SizedBox(width: 16.w),
                 Expanded(
                   child: CommonButton(
-                    titleText: AppString.done,
+                    titleText: AppString.delete,
                     titleColor: AppColors.white,
                     buttonRadius: 4.r,
                     buttonHeight: 48.h,

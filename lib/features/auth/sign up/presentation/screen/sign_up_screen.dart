@@ -35,6 +35,8 @@ class SignUpScreen extends StatelessWidget {
                     text: AppString.createYourAccount,
                     fontSize: 32,
                     bottom: 20,
+                    color: AppColors.primaryColor,
+                    fontWeight: FontWeight.w600,
                   ),
 
                   /// All Text Filed here
@@ -65,18 +67,16 @@ class SignUpScreen extends StatelessWidget {
                         child: Container(
                           height: 48.h,
                           width: double.infinity,
-                          decoration: BoxDecoration(
-                            color: Colors.transparent,
-                            borderRadius: BorderRadius.circular(12.r),
-                            border: Border.all(color: Colors.grey, width: 2),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.grey.withOpacity(0.1),
-                                blurRadius: 8,
-                                spreadRadius: 2,
-                                offset: const Offset(0, 2),
+                          decoration: ShapeDecoration(
+                            shape: RoundedRectangleBorder(
+                              side: BorderSide(
+                                width: 1,
+                                color: const Color(
+                                  0xFFD1D5D6,
+                                ) /* Disable-Color */,
                               ),
-                            ],
+                              borderRadius: BorderRadius.circular(8),
+                            ),
                           ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -107,18 +107,16 @@ class SignUpScreen extends StatelessWidget {
                         child: Container(
                           height: 48.h,
                           width: double.infinity,
-                          decoration: BoxDecoration(
-                            color: Colors.transparent,
-                            borderRadius: BorderRadius.circular(12.r),
-                            border: Border.all(color: Colors.grey, width: 2),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.grey.withOpacity(0.1),
-                                blurRadius: 8,
-                                spreadRadius: 2,
-                                offset: const Offset(0, 2),
+                          decoration: ShapeDecoration(
+                            shape: RoundedRectangleBorder(
+                              side: BorderSide(
+                                width: 1,
+                                color: const Color(
+                                  0xFFD1D5D6,
+                                ) /* Disable-Color */,
                               ),
-                            ],
+                              borderRadius: BorderRadius.circular(8),
+                            ),
                           ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,

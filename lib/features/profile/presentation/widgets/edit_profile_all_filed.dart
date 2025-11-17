@@ -34,7 +34,7 @@ class EditProfileAllFiled extends StatelessWidget {
         16.height,
 
         /// About Field
-        _buildLabel('About'),
+        _buildLabel('Bio'),
         8.height,
         CommonTextField(
           controller: controller.aboutController,
@@ -51,22 +51,16 @@ class EditProfileAllFiled extends StatelessWidget {
         16.height,
 
         /// Date of Birth Field
-        _buildLabel('Date Of Birth'),
+        _buildLabel('Age'),
         8.height,
         CommonTextField(
           controller: controller.dateOfBirthController,
-          hintText: '01 January 2000',
+          hintText: '25 Years',
           keyboardType: TextInputType.none,
           borderColor: AppColors.borderColor,
           fillColor: AppColors.white,
           hintTextColor: AppColors.secondaryText,
           textColor: AppColors.black,
-          onTap: controller.selectDateOfBirth,
-          suffixIcon: Icon(
-            Icons.calendar_today_outlined,
-            color: AppColors.secondaryText,
-            size: 20.sp,
-          ),
         ),
 
         16.height,
@@ -77,24 +71,6 @@ class EditProfileAllFiled extends StatelessWidget {
         _buildGenderDropdown(),
 
         16.height,
-
-        /// Address Field
-        _buildLabel('Address'),
-        8.height,
-        CommonTextField(
-          controller: controller.addressController,
-          hintText: '8502 Preston Rd. Inglewood, Maine',
-          keyboardType: TextInputType.text,
-          borderColor: AppColors.borderColor,
-          fillColor: AppColors.white,
-          hintTextColor: AppColors.secondaryText,
-          textColor: AppColors.black,
-          suffixIcon: Icon(
-            Icons.location_on_outlined,
-            color: AppColors.secondaryText,
-            size: 20.sp,
-          ),
-        ),
       ],
     );
   }

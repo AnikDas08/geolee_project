@@ -70,6 +70,7 @@ class SignUpController extends GetxController {
 
   final TextEditingController dateController = TextEditingController();
   final TextEditingController addressController = TextEditingController();
+  final TextEditingController ageController = TextEditingController();
 
   String selectedGender = 'Male';
   final List<String> genderOptions = ['Male', 'Female', 'Other'];
@@ -114,6 +115,8 @@ class SignUpController extends GetxController {
   }
 
   signUpUser(GlobalKey<FormState> signUpFormKey) async {
+    Get.toNamed(AppRoutes.verifyUser);
+    return;
     if (!signUpFormKey.currentState!.validate()) return;
     isLoading = true;
     update();
@@ -160,6 +163,8 @@ class SignUpController extends GetxController {
   }
 
   Future<void> verifyOtpRepo() async {
+    Get.toNamed(AppRoutes.completeProfile);
+    return;
     isLoadingVerify = true;
     update();
     try {
@@ -468,6 +473,8 @@ class SignUpController extends GetxController {
   }
 
   Future<void> updateProfile() async {
+    Get.toNamed(AppRoutes.homeNav);
+    return;
     isLoading = true;
     update();
 
