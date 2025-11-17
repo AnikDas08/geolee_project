@@ -21,13 +21,16 @@ class HomeDetails extends StatelessWidget {
       children: [
         Row(
           children: [
-            CircleAvatar(
-              radius: 20,
-              child: ClipOval(
-                child: CommonImage(
-                  imageSrc: LocalStorage.myImage,
-                  size: 40,
-                  defaultImage: AppImages.profileImage,
+            GestureDetector(
+              onTap: () => Get.toNamed(AppRoutes.profile),
+              child: CircleAvatar(
+                radius: 20,
+                child: ClipOval(
+                  child: CommonImage(
+                    imageSrc: LocalStorage.myImage,
+                    size: 40,
+                    defaultImage: AppImages.profileImage,
+                  ),
                 ),
               ),
             ),

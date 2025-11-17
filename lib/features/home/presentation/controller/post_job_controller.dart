@@ -1,3 +1,5 @@
+// ignore_for_file: unused_element
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -46,14 +48,7 @@ class PostJobController extends GetxController {
   var subCategories = <String>[].obs;
 
   // Priority levels
-  final List<String> priorityLevels = ['EMERGENCY', 'HIGH', 'MEDIUM', 'LOW'];
-
-  @override
-  void onInit() {
-    super.onInit();
-    _getCurrentLocation();
-    fetchCategories();
-  }
+  final List<String> priorityLevels = ['Friend', 'Public', 'Only Me'];
 
   @override
   void onClose() {

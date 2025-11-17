@@ -8,7 +8,7 @@ import 'package:giolee78/features/home/presentation/screen/custom_offe_screen.da
 import 'package:giolee78/features/home/presentation/screen/first_message.dart';
 import 'package:giolee78/features/home/presentation/screen/home_nav_screen.dart';
 import 'package:giolee78/features/home/presentation/screen/home_screen.dart';
-import 'package:giolee78/features/home/presentation/screen/post_job_screen.dart';
+import 'package:giolee78/features/home/presentation/screen/my_post_screen.dart';
 import 'package:giolee78/features/message/presentation/screen/view_message.dart';
 import 'package:giolee78/features/notifications/presentation/screen/stripe_web_view_screen.dart';
 import 'package:giolee78/features/profile/presentation/screen/edit_post_screen.dart';
@@ -61,7 +61,7 @@ class AppRoutes {
   static const String history = "/history_screen.dart";
   static const String historyDetailsScreen = "/history_details_screen.dart";
   static const String customOffer = "/customOffer";
-  static const String postScreen = "/postScreen";
+  static const String myPostScreen = "/myPostScreen";
   static const String firstMessageScreen = "/firstMessageScreen";
   static const String viewMessageScreen = "/viewMessageScreen";
   static const String reviewScreen = "/reviewScreen";
@@ -97,7 +97,7 @@ class AppRoutes {
     GetPage(name: createPost, page: () => PostDetailsScreen()),
     GetPage(name: historyDetailsScreen, page: () => HistoryDetailsScreen()),
     GetPage(name: customOffer, page: () => CustomOfferScreen()),
-    GetPage(name: postScreen, page: () => PostJobScreen()),
+    GetPage(name: myPostScreen, page: () => MyPostScreen()),
     GetPage(name: firstMessageScreen, page: () => FirstMessage()),
     GetPage(name: viewMessageScreen, page: () => ViewMessageScreen()),
     GetPage(name: reviewScreen, page: () => ReviewScreen()),
