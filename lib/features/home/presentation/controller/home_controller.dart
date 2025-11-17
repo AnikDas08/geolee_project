@@ -1,0 +1,92 @@
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:giolee78/config/api/api_end_point.dart';
+
+import '../../../../services/api/api_service.dart';
+import '../../../../services/storage/storage_services.dart';
+import '../../data/data_model.dart';
+
+class HomeController extends GetxController {
+  bool isLoading = false;
+  List<Post> allPosts = [];
+  List<Post> filteredPosts = [];
+  String searchQuery = '';
+  RxString name = "".obs;
+  RxString image = "".obs;
+  String subCategory = "";
+  int notificationCount = 0;
+
+  @override
+  void onInit() {
+    super.onInit();
+    fetchPosts();
+  }
+
+  Future<void> fetchPosts() async {
+    isLoading = true;
+    update();
+
+    try {
+      final response = await ApiService.get(
+        ApiEndPoint.post,
+        header: {"Authorization": "Bearer ${LocalStorage.token}"},
+      ); // Replace with your actual endpoint
+
+      if (response.statusCode == 200) {
+        final postResponse = PostResponseModel.fromJson(response.data);
+        allPosts = postResponse.data;
+        filteredPosts = allPosts;
+      }
+    } catch (e) {
+      debugPrint('Error fetching posts: $e');
+    } finally {
+      isLoading = false;
+      update();
+    }
+  }
+
+  void getProfile() async {
+    try {
+      final response = await ApiService.get(
+        "user/profile",
+        header: {"Authorization": "Bearer ${LocalStorage.token}"},
+      ); // Replace with your actual endpoint
+
+      if (response.statusCode == 200) {
+        //final postResponse = PostResponseModel.fromJson(response.data);
+        name.value = response.data["data"]["name"];
+        image.value = response.data["data"]["image"];
+        if (response.data["data"].isNotEmpty) {
+          notificationCount = 0;
+        }
+      }
+    } catch (e) {
+      debugPrint('Error fetching posts: $e');
+    } finally {
+      isLoading = false;
+      update();
+    }
+  }
+
+  void searchPosts(String query) {
+    searchQuery = query.toLowerCase();
+
+    if (searchQuery.isEmpty) {
+      filteredPosts = allPosts;
+    } else {
+      filteredPosts = allPosts.where((post) {
+        return post.title.toLowerCase().contains(searchQuery) ||
+            post.description.toLowerCase().contains(searchQuery) ||
+            post.user.name.toLowerCase().contains(searchQuery);
+      }).toList();
+    }
+
+    update();
+  }
+
+  void clearSearch() {
+    searchQuery = '';
+    filteredPosts = allPosts;
+    update();
+  }
+}

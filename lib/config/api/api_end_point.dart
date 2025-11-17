@@ -1,0 +1,28 @@
+class ApiEndPoint {
+  static const baseUrl = "http://10.10.7.46:5001/api/v1/";
+  static const imageUrl = "http://10.10.7.46:5001";
+  static const socketUrl = "http://10.10.7.46:5001";
+
+  static const signUp = "user";
+  static const verifyEmail = "auth/verify-email";
+  static const signIn = "auth/login";
+  static const forgotPassword = "auth/forgot-password";
+  static const verifyOtp = "auth/verify-email";
+  static const resetPassword = "auth/reset-password";
+  static const post = "posts";
+  static const changePassword = "auth/change-password";
+  static const user = "user";
+  static const customOffer = "custom/offer";
+  static const profile = "user/profile";
+  static const notifications = "notification/all";
+  static const category = "category/service";
+  static const privacyPolicies = "app/rule/privacy";
+  static const termsOfServices = "app/rule/terms";
+  static const helpSupport = "help/support";
+  static const chats = "chats";
+  static const chatRoom = "chat/room";
+  static const messages = "messages";
+  static const servicePay = "pay/booked-service";
+  static const myServiceHistory = "pay/my-service-history";
+  static const updateRequest = "pay/my-service-history/";
+}
