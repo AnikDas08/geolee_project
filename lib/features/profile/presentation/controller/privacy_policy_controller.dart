@@ -39,7 +39,7 @@ class PrivacyPolicyController extends GetxController {
   /// Controller on Init here
   @override
   void onInit() {
-    getPrivacyPolicyRepo();
+    //getPrivacyPolicyRepo();
     super.onInit();
   }
 }

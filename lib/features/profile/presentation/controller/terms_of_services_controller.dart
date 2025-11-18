@@ -19,7 +19,7 @@ class TermsOfServicesController extends GetxController {
   /// Controller on Init here
   @override
   void onInit() {
-    geTermsOfServicesRepo();
+    //geTermsOfServicesRepo();
     super.onInit();
   }
 
