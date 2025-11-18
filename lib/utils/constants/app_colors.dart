@@ -35,5 +35,7 @@ class AppColors {
   static const Color upcoming = Color(0xFFE53935);
   static const Color complete = Color(0xFFE53935);
 
+  static const Color messageBubble = Color(0xFFFEEEEE);
+
   static const Color success = Color(0xFF2E7D32);
 }

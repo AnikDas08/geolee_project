@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:giolee78/config/route/app_routes.dart';
 import '../../../../component/text/common_text.dart';
 import '../../../../config/api/api_end_point.dart';
 import '../../../message/data/model/chat_message_model.dart';
@@ -38,79 +37,6 @@ class _MessageScreenState extends State<MessageScreen> {
     super.initState();
   }
 
-  void _showAttachmentOptions() {
-    showModalBottomSheet(
-      context: context,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
-      ),
-      builder: (context) {
-        return Container(
-          padding: EdgeInsets.all(20.w),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 40.w,
-                height: 4.h,
-                decoration: BoxDecoration(
-                  color: Colors.grey[300],
-                  borderRadius: BorderRadius.circular(2.r),
-                ),
-              ),
-              SizedBox(height: 20.h),
-              CommonText(
-                text: "Select Attachment",
-                fontSize: 18.sp,
-                fontWeight: FontWeight.w600,
-              ),
-              SizedBox(height: 20.h),
-              ListTile(
-                leading: Container(
-                  padding: EdgeInsets.all(10.w),
-                  decoration: BoxDecoration(
-                    color: AppColors.primaryColor.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8.r),
-                  ),
-                  child: Icon(
-                    Icons.photo_library,
-                    color: AppColors.primaryColor,
-                    size: 24.sp,
-                  ),
-                ),
-                title: CommonText(text: "Choose from Gallery", fontSize: 16.sp),
-                onTap: () async {
-                  Get.back();
-                  await MessageController.instance.pickImageFromGallery();
-                },
-              ),
-              SizedBox(height: 10.h),
-              ListTile(
-                leading: Container(
-                  padding: EdgeInsets.all(10.w),
-                  decoration: BoxDecoration(
-                    color: AppColors.primaryColor.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8.r),
-                  ),
-                  child: Icon(
-                    Icons.camera_alt,
-                    color: AppColors.primaryColor,
-                    size: 24.sp,
-                  ),
-                ),
-                title: CommonText(text: "Take Photo", fontSize: 16.sp),
-                onTap: () async {
-                  Get.back();
-                  await MessageController.instance.pickImageFromCamera();
-                },
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return GetBuilder<MessageController>(
@@ -142,171 +68,6 @@ class _MessageScreenState extends State<MessageScreen> {
                   padding: EdgeInsets.only(bottom: 20.h),
                   child: Column(
                     children: [
-                      /// Banner Section - Only show if post is not null
-                      InkWell(
-                        /*onTap: () => OfferDialog.show(
-                      Get.context!,
-                      budget: controller.price,
-                      serviceDate: DateTime.now(),
-                      serviceTime: "",
-                      onSubmit: () {},
-                    ),*/
-                        onTap: () {
-                          Get.toNamed(
-                            AppRoutes.viewMessageScreen,
-                            arguments: controller.postId,
-                          );
-                        },
-                        child: Container(
-                          margin: EdgeInsets.all(16.w),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(12.r),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.05),
-                                blurRadius: 10,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              ClipRRect(
-                                borderRadius: BorderRadius.vertical(
-                                  top: Radius.circular(12.r),
-                                ),
-                                child: Image.network(
-                                  ApiEndPoint.imageUrl +
-                                      controller.serviceImage,
-                                  height: 171.h,
-                                  width: double.infinity,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) {
-                                    return Container(
-                                      height: 171.h,
-                                      width: double.infinity,
-                                      color: Colors.grey[300],
-                                      child: Icon(
-                                        Icons.image_not_supported,
-                                        size: 50.sp,
-                                        color: Colors.grey[600],
-                                      ),
-                                    );
-                                  },
-                                  loadingBuilder:
-                                      (context, child, loadingProgress) {
-                                        if (loadingProgress == null)
-                                          return child;
-                                        return Container(
-                                          height: 171.h,
-                                          width: double.infinity,
-                                          color: Colors.grey[200],
-                                          child: Center(
-                                            child: CircularProgressIndicator(
-                                              value:
-                                                  loadingProgress
-                                                          .expectedTotalBytes !=
-                                                      null
-                                                  ? loadingProgress
-                                                            .cumulativeBytesLoaded /
-                                                        loadingProgress
-                                                            .expectedTotalBytes!
-                                                  : null,
-                                            ),
-                                          ),
-                                        );
-                                      },
-                                ),
-                              ),
-                              Padding(
-                                padding: EdgeInsets.all(12.w),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Expanded(
-                                          child: CommonText(
-                                            text: controller.serviceTitle,
-                                            fontSize: 14.sp,
-                                            color: AppColors.textColorFirst,
-                                            textAlign: TextAlign.start,
-                                            fontWeight: FontWeight.w600,
-                                            maxLines: 2,
-                                          ),
-                                        ),
-                                        SizedBox(width: 8.w),
-                                        CommonText(
-                                          text: "\$${controller.price.toInt()}",
-                                          fontSize: 16.sp,
-                                          fontWeight: FontWeight.w600,
-                                          color: Colors.orange,
-                                        ),
-                                      ],
-                                    ),
-                                    6.height,
-                                    CommonText(
-                                      text: "California, Fresno",
-                                      fontSize: 12.sp,
-                                      color: AppColors.textColorFirst,
-                                    ),
-                                    12.height,
-                                    GestureDetector(
-                                      /*onTap: () => OfferDialog.show(
-                                    Get.context!,
-                                    budget: controller.price,
-                                    serviceDate: DateTime.now(),
-                                    serviceTime: "",
-                                    onSubmit: () {},
-                                  ),*/
-                                      onTap: () {
-                                        Get.toNamed(
-                                          AppRoutes.viewMessageScreen,
-                                          arguments: controller.postId,
-                                        );
-                                      },
-                                      child: Container(
-                                        padding: EdgeInsets.symmetric(
-                                          horizontal: 12.w,
-                                          vertical: 6.h,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: AppColors.primaryColor,
-                                          borderRadius: BorderRadius.circular(
-                                            6.r,
-                                          ),
-                                        ),
-                                        child: CommonText(
-                                          text:
-                                              controller.clientStatus ==
-                                                  "RUNNING"
-                                              ? "Running"
-                                              : controller.clientStatus ==
-                                                    "COMPLETED"
-                                              ? "Completed"
-                                              : controller.clientStatus ==
-                                                    "REJECTED"
-                                              ? "Rejected"
-                                              : "Custom Offer",
-                                          fontSize: 12.sp,
-                                          fontWeight: FontWeight.w600,
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                                    ),
-                                    10.height,
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-
                       /// Messages Section
                       ListView.builder(
                         shrinkWrap: true,
@@ -371,7 +132,7 @@ class _MessageScreenState extends State<MessageScreen> {
                           vertical: 12.h,
                         ),
                         suffixIcon: GestureDetector(
-                          onTap: _showAttachmentOptions,
+                          onTap: () {},
                           child: Padding(
                             padding: EdgeInsets.all(8.w),
                             child: Icon(

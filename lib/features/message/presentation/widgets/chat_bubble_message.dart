@@ -57,15 +57,18 @@ class ChatBubbleMessage extends StatelessWidget {
           // Message bubble
           Flexible(
             child: Column(
-              crossAxisAlignment: isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+              crossAxisAlignment: isMe
+                  ? CrossAxisAlignment.end
+                  : CrossAxisAlignment.start,
               children: [
                 Container(
-                  constraints: BoxConstraints(
-                    maxWidth: 250.w,
+                  constraints: BoxConstraints(maxWidth: 250.w),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 16.w,
+                    vertical: 12.h,
                   ),
-                  padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
                   decoration: BoxDecoration(
-                    color: isMe ? AppColors.primaryColor : Colors.white,
+                    color: isMe ? AppColors.messageBubble : Colors.white,
                     borderRadius: BorderRadius.only(
                       topLeft: Radius.circular(isMe ? 16.r : 4.r),
                       topRight: Radius.circular(isMe ? 4.r : 16.r),
@@ -92,66 +95,75 @@ class ChatBubbleMessage extends StatelessWidget {
                               borderRadius: BorderRadius.circular(8.r),
                               child: messageImage!.startsWith('http')
                                   ? Image.network(
-                                messageImage!,
-                                width: 220.w,
-                                fit: BoxFit.cover,
-                                loadingBuilder: (context, child, loadingProgress) {
-                                  if (loadingProgress == null) return child;
-                                  return Container(
-                                    width: 220.w,
-                                    height: 200.h,
-                                    color: Colors.grey[200],
-                                    child: Center(
-                                      child: CircularProgressIndicator(
-                                        value: loadingProgress.expectedTotalBytes != null
-                                            ? loadingProgress.cumulativeBytesLoaded /
-                                            loadingProgress.expectedTotalBytes!
-                                            : null,
-                                      ),
-                                    ),
-                                  );
-                                },
-                                errorBuilder: (context, error, stackTrace) {
-                                  return Container(
-                                    width: 220.w,
-                                    height: 200.h,
-                                    color: Colors.grey[300],
-                                    child: Column(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        Icon(
-                                          Icons.broken_image,
-                                          size: 40.sp,
-                                          color: Colors.grey[600],
-                                        ),
-                                        SizedBox(height: 8.h),
-                                        CommonText(
-                                          text: "Failed to load",
-                                          fontSize: 10.sp,
-                                          color: Colors.grey[600]!,
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                },
-                              )
+                                      messageImage!,
+                                      width: 220.w,
+                                      fit: BoxFit.cover,
+                                      loadingBuilder: (context, child, loadingProgress) {
+                                        if (loadingProgress == null)
+                                          return child;
+                                        return Container(
+                                          width: 220.w,
+                                          height: 200.h,
+                                          color: Colors.grey[200],
+                                          child: Center(
+                                            child: CircularProgressIndicator(
+                                              value:
+                                                  loadingProgress
+                                                          .expectedTotalBytes !=
+                                                      null
+                                                  ? loadingProgress
+                                                            .cumulativeBytesLoaded /
+                                                        loadingProgress
+                                                            .expectedTotalBytes!
+                                                  : null,
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                      errorBuilder:
+                                          (context, error, stackTrace) {
+                                            return Container(
+                                              width: 220.w,
+                                              height: 200.h,
+                                              color: Colors.grey[300],
+                                              child: Column(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.center,
+                                                children: [
+                                                  Icon(
+                                                    Icons.broken_image,
+                                                    size: 40.sp,
+                                                    color: Colors.grey[600],
+                                                  ),
+                                                  SizedBox(height: 8.h),
+                                                  CommonText(
+                                                    text: "Failed to load",
+                                                    fontSize: 10.sp,
+                                                    color: Colors.grey[600]!,
+                                                  ),
+                                                ],
+                                              ),
+                                            );
+                                          },
+                                    )
                                   : Image.file(
-                                File(messageImage!),
-                                width: 220.w,
-                                fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) {
-                                  return Container(
-                                    width: 220.w,
-                                    height: 200.h,
-                                    color: Colors.grey[300],
-                                    child: Icon(
-                                      Icons.broken_image,
-                                      size: 40.sp,
-                                      color: Colors.grey[600],
+                                      File(messageImage!),
+                                      width: 220.w,
+                                      fit: BoxFit.cover,
+                                      errorBuilder:
+                                          (context, error, stackTrace) {
+                                            return Container(
+                                              width: 220.w,
+                                              height: 200.h,
+                                              color: Colors.grey[300],
+                                              child: Icon(
+                                                Icons.broken_image,
+                                                size: 40.sp,
+                                                color: Colors.grey[600],
+                                              ),
+                                            );
+                                          },
                                     ),
-                                  );
-                                },
-                              ),
                             ),
                             // Show uploading overlay
                             if (isUploading)
@@ -194,7 +206,7 @@ class ChatBubbleMessage extends StatelessWidget {
                         CommonText(
                           text: text,
                           fontSize: 14.sp,
-                          color: isMe ? Colors.white : Colors.black87,
+                          color: Colors.black87,
                           maxLines: 100,
                           textAlign: TextAlign.justify,
                         ),

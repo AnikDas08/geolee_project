@@ -7,7 +7,6 @@ import 'package:dio/dio.dart';
 import '../../../../services/api/api_service.dart';
 import '../../../../services/socket/socket_service.dart';
 import '../../../../services/storage/storage_services.dart';
-import '../../../../utils/app_utils.dart';
 import '../../../../utils/enum/enum.dart';
 import '../../../message/data/model/chat_message_model.dart';
 import '../../../message/data/model/message_model.dart';
@@ -24,11 +23,11 @@ class MessageController extends GetxController {
   String name = "";
   String image = "";
 
-  String servicename="";
-  String serviceImage="";
-  String serviceTitle="";
-  num price=0;
-  String postId="";
+  String servicename = "";
+  String serviceImage = "";
+  String serviceTitle = "";
+  num price = 0;
+  String postId = "";
 
   int page = 1;
   int currentIndex = 0;
@@ -36,7 +35,7 @@ class MessageController extends GetxController {
 
   bool isMessage = false;
   bool isInputField = false;
-  String clientStatus="";
+  String clientStatus = "";
 
   File? selectedAttachment;
   String? attachmentType;
@@ -67,10 +66,8 @@ class MessageController extends GetxController {
       print("chat room id 😍😍😍😍 $chatRoomId");
     }
 
-    // Load messages if chatId exists
-    if (chatId.isNotEmpty) {
-      getMessageRepo();
-    }
+    // Always load demo messages for UI preview
+    getMessageRepo();
   }
 
   // Scroll to bottom with animation
@@ -87,99 +84,61 @@ class MessageController extends GetxController {
   }
 
   Future<void> getMessageRepo() async {
-    if (chatId.isEmpty) return;
-
     isLoading = true;
     update();
 
-    try {
-      var response = await ApiService.get("/message/$chatId");
+    await Future.delayed(const Duration(milliseconds: 300));
 
-      if (response.statusCode == 200) {
-        var data = response.data['data']; // This is a List
+    // Demo service info for banner
+    serviceTitle = 'House Cleaning Service';
+    serviceImage =
+        'https://images.pexels.com/photos/4239097/pexels-photo-4239097.jpeg';
+    price = 120;
+    clientStatus = 'RUNNING';
+    postId = 'demo-post-1';
 
-        messages.clear();
-        List<ChatMessageModel> tempMessages = [];
+    messages.clear();
 
-        // Extract service information from the first message that has service data
-        if (data is List && data.isNotEmpty) {
-          // Find first message with non-null service
-          var messageWithService = data.firstWhere(
-                (msg) => msg['service'] != null,
-            orElse: () => null,
-          );
+    messages.addAll([
+      ChatMessageModel(
+        time: DateTime.now().subtract(const Duration(minutes: 25)),
+        text: 'Hi, I saw your service. Are you available tomorrow?',
+        image:
+            'https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg',
+        isMe: false,
+      ),
+      ChatMessageModel(
+        time: DateTime.now().subtract(const Duration(minutes: 20)),
+        text: 'Yes, I am available after 3 PM.',
+        image: LocalStorage.myImage,
+        isMe: true,
+      ),
+      ChatMessageModel(
+        time: DateTime.now().subtract(const Duration(minutes: 15)),
+        text: 'Great! Can you also bring your own equipment?',
+        image:
+            'https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg',
+        isMe: false,
+      ),
+      ChatMessageModel(
+        time: DateTime.now().subtract(const Duration(minutes: 10)),
+        text: 'Sure, I will bring everything needed.',
+        image: LocalStorage.myImage,
+        isMe: true,
+      ),
+      ChatMessageModel(
+        time: DateTime.now().subtract(const Duration(minutes: 5)),
+        text: 'Perfect, see you then!',
+        image:
+            'https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg',
+        isMe: false,
+      ),
+    ]);
 
-          if (messageWithService != null && messageWithService['service'] != null) {
-            serviceTitle = messageWithService['service']['title'] ?? "";
-            serviceImage = messageWithService['service']['image'] ?? "";
-            price = messageWithService['service']['price'] ?? 0;
+    isLoading = false;
+    update();
 
-            // Set clientStatus and postId from the first message with service
-            clientStatus = messageWithService['service']['bookingStatus'] ?? "";
-            postId = messageWithService['service']['_id'] ?? "";
-          } else {
-            serviceTitle = "";
-            serviceImage = "";
-            price = 0;
-            clientStatus = "";
-            postId = "";
-          }
-
-          print("😂😂😂😂 $serviceTitle");
-
-          // Now iterate through all messages
-          for (var messageData in data) {
-            // Safely access service data with null checks
-            String? messageClientStatus;
-            if (messageData['service'] != null) {
-              messageClientStatus = messageData['service']['bookingStatus'];
-            }
-
-            tempMessages.add(
-              ChatMessageModel(
-                time: DateTime.parse(messageData['createdAt']).toLocal(),
-                text: messageData['text'] ?? '',
-                image: messageData['sender']['image'] ?? '',
-                messageImage: messageData['image'],
-                clientStatus: messageClientStatus,
-                isNotice: false,
-                isMe: LocalStorage.userId == messageData['sender']['_id'],
-              ),
-            );
-          }
-
-          // Sort messages by time - oldest to newest
-          tempMessages.sort((a, b) => a.time.compareTo(b.time));
-
-          // Add sorted messages to main list
-          messages.addAll(tempMessages);
-
-          // Listen for new messages via socket
-          listenMessage(chatId);
-        }
-
-        isLoading = false;
-        update();
-
-        // Scroll to bottom after loading messages
-        scrollToBottom();
-      } else {
-        Utils.errorSnackBar(response.statusCode.toString(), response.message);
-        isLoading = false;
-        update();
-      }
-    } catch (e) {
-      print('Error fetching messages: $e');
-      Get.snackbar(
-        'Error',
-        'Failed to load messages',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
-      isLoading = false;
-      update();
-    }
+    scrollToBottom();
   }
 
   Future<void> pickImageFromGallery() async {
@@ -347,10 +306,7 @@ class MessageController extends GetxController {
 
     print("chat room id 😍😍😍😍 $chatRoomId");
 
-    var body = {
-      "chatId": chatRoomId,
-      "text": messageController.text,
-    };
+    var body = {"chatId": chatRoomId, "text": messageController.text};
 
     messageController.clear();
 
