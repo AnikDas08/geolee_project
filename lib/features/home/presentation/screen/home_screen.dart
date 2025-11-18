@@ -3,9 +3,10 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:giolee78/component/image/common_image.dart';
 import 'package:giolee78/component/other_widgets/item.dart';
-import 'package:giolee78/features/home/presentation/screen/friend_request_screen.dart';
-import 'package:giolee78/features/home/presentation/screen/my_friend_screen.dart';
-import 'package:giolee78/features/home/presentation/screen/my_post_screen.dart';
+import 'package:giolee78/features/clicker/presentation/screen/clicker_screen.dart';
+import 'package:giolee78/features/friend/presentation/screen/friend_request_screen.dart';
+import 'package:giolee78/features/friend/presentation/screen/my_friend_screen.dart';
+import 'package:giolee78/features/addpost/presentation/screen/my_post_screen.dart';
 import 'package:giolee78/utils/constants/app_icons.dart';
 import 'package:giolee78/utils/constants/app_images.dart';
 
@@ -42,7 +43,9 @@ class HomeScreen extends StatelessWidget {
                     Item(
                       imageSrc: AppIcons.clicker,
                       title: 'Clicker',
-                      onTap: () {},
+                      onTap: () {
+                        Get.to(() => ClickerScreen());
+                      },
                     ),
                     Item(
                       imageSrc: AppIcons.bubbleChat,
@@ -53,7 +56,7 @@ class HomeScreen extends StatelessWidget {
                       imageSrc: AppIcons.myPost,
                       title: 'My Post',
                       onTap: () {
-                        Get.to(() => const MyPostScreen());
+                        Get.to(() => MyPostScreen());
                       },
                     ),
                     Item(

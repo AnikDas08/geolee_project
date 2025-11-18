@@ -92,7 +92,5 @@ class ChatController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    getChatRepo();
-    moreChats();
   }
 }

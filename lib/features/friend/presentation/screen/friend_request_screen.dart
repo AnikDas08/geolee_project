@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 import 'package:giolee78/component/text/common_text.dart';
-import 'package:giolee78/features/home/presentation/widgets/my_post_card.dart';
+import 'package:giolee78/features/friend/presentation/screen/view_friend_screen.dart';
+import 'package:giolee78/features/friend/presentation/widgets/friend_request_card.dart';
 import 'package:giolee78/utils/constants/app_colors.dart';
-import 'package:giolee78/utils/constants/app_images.dart';
 
-class MyPostScreen extends StatelessWidget {
-  const MyPostScreen({super.key});
+class FriendRequestScreen extends StatelessWidget {
+  const FriendRequestScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +26,7 @@ class MyPostScreen extends StatelessWidget {
         ),
         centerTitle: true,
         title: const CommonText(
-          text: 'My Post',
+          text: 'Friend Request',
           fontSize: 18,
           fontWeight: FontWeight.w600,
           color: AppColors.black,
@@ -36,21 +37,19 @@ class MyPostScreen extends StatelessWidget {
           padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
           physics: const BouncingScrollPhysics(),
           itemBuilder: (context, index) {
-            // Later: read posts from Riverpod and pass here
-            return MyPostCard(
-              userName: 'Dianne Russell',
-              userAvatar: AppImages.profileImage,
-              timeAgo: '6 Min Ago',
-              location: 'Thornridge Cir, Shiloh, Hawaii',
-              postImage: index == 0 ? AppImages.postImage : AppImages.postImage,
-              description:
-                  'Take A Break And Enjoy The Beauty Of Nature.\n'
-                  'A Peaceful Park, Fresh Air, And The Perfect Spot To Unwind.\n'
-                  'Whether You’re Looking To Relax Or Take A Walk, This Serene Green Space Has It All.',
+            return FriendRequestCard(
+              userName: 'Arlene McCoy',
+              timeAgo: '2 Days Ago',
+              onTap: () {
+                Get.to(
+                  () =>
+                      const ViewFriendScreen(isFriend: false, isRequest: true),
+                );
+              },
             );
           },
           separatorBuilder: (_, __) => SizedBox(height: 12.h),
-          itemCount: 2, // later: posts.length
+          itemCount: 6,
         ),
       ),
     );

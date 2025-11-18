@@ -26,6 +26,7 @@ class ChatListScreen extends StatelessWidget {
           fontWeight: FontWeight.w600,
           fontSize: 24,
         ),
+        leading: SizedBox(),
       ),
 
       /// Body Section Starts here

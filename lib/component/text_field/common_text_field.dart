@@ -86,7 +86,7 @@ class _CommonTextFieldState extends State<CommonTextField> {
             width: 1,
             color: const Color(0xFFDEE2E3) /* Disable */,
           ),
-          borderRadius: BorderRadius.circular(6),
+          borderRadius: BorderRadius.circular(widget.borderRadius),
         ),
       ),
       child: TextFormField(

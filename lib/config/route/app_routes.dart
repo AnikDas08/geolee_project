@@ -1,7 +1,7 @@
 import 'package:get/get.dart';
 import 'package:giolee78/features/home/presentation/screen/home_nav_screen.dart';
 import 'package:giolee78/features/home/presentation/screen/home_screen.dart';
-import 'package:giolee78/features/home/presentation/screen/my_post_screen.dart';
+import 'package:giolee78/features/addpost/presentation/screen/my_post_screen.dart';
 import 'package:giolee78/features/notifications/presentation/screen/stripe_web_view_screen.dart';
 import 'package:giolee78/features/profile/presentation/screen/edit_post_screen.dart';
 import 'package:giolee78/features/profile/presentation/screen/edit_service_provider_profile.dart';
