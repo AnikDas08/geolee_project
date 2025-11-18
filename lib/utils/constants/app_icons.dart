@@ -47,4 +47,16 @@ class AppIcons {
   static const String upload2 = "$baseurl/upload2.svg";
   static const String workEdit = "$baseurl/work_edit.svg";
   static const String profile = "$baseurl/profile.svg";
+  static const String add = "$baseurl/add.svg";
+  static const String bubbleChat = "$baseurl/bubble_chat.svg";
+  static const String camera = "$baseurl/camera.svg";
+  static const String clicker = "$baseurl/clicker.svg";
+  static const String chat2 = "$baseurl/chat2.svg";
+  static const String time = "$baseurl/time.svg";
+  static const String friendRequest = "$baseurl/friend_request.svg";
+  static const String friend = "$baseurl/friend.svg";
+  static const String myFriend = "$baseurl/my_friend.svg";
+  static const String myPost = "$baseurl/my_post.svg";
+  static const String verified = "$baseurl/verify.svg";
+  static const String sent = "$baseurl/sent.svg";
 }

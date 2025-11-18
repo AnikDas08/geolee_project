@@ -1,8 +1,8 @@
 import 'package:get/get.dart';
+import 'package:giolee78/features/addpost/presentation/controller/post_controller.dart';
 import 'package:giolee78/features/home/presentation/controller/create_post_controller.dart';
 import 'package:giolee78/features/home/presentation/controller/first_message_controller.dart';
 import 'package:giolee78/features/home/presentation/controller/home_controller.dart';
-import 'package:giolee78/features/home/presentation/controller/post_job_controller.dart';
 import 'package:giolee78/features/profile/presentation/controller/edit_post_controller.dart';
 import 'package:giolee78/features/profile/presentation/controller/edit_service_provider_controller.dart';
 import 'package:giolee78/features/profile/presentation/controller/post_controller.dart';
@@ -38,9 +38,9 @@ class DependencyInjection extends Bindings {
     Get.lazyPut(() => MyPostController(), fenix: true);
     Get.lazyPut(() => EditPostController(), fenix: true);
     Get.lazyPut(() => EditProfileController(), fenix: true);
-    Get.lazyPut(() => PostJobController(), fenix: true);
     Get.lazyPut(() => ServiceProviderController(), fenix: true);
     Get.lazyPut(() => CreatePostController(), fenix: true);
     Get.lazyPut(() => FirstMessageController(), fenix: true);
+    Get.lazyPut(() => PostController(), fenix: true);
   }
 }

@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:giolee78/config/route/app_routes.dart';
-import 'package:giolee78/features/home/presentation/widgets/custom_offer_dialog.dart';
-import 'package:giolee78/features/notifications/data/model/custom_offer_model.dart';
 import 'package:giolee78/utils/app_utils.dart';
 import '../../data/model/notification_model.dart';
 import '../../repository/notification_repository.dart';
@@ -93,41 +91,11 @@ class NotificationsController extends GetxController {
       },
       ifRight: (customOffer) {
         if (customOffer.data != null) {
-          final offerData = customOffer.data!;
-          goToDialog(offerData);
         }
       },
     );
     isLoading = false;
     update();
-  }
-
-  //go to dialog
-  goToDialog(CustomOfferData offerData) {
-    CustomOfferRequestDialog.show(
-      Get.context!,
-      userName: offerData.user?.name ?? '',
-      userRole: (offerData.user?.skill?.isNotEmpty ?? false)
-          ? offerData.user!.skill!.first
-          : '',
-      userImage: offerData.user?.image ?? '',
-      rating: 4.5,
-      reviewCount: 4,
-      description: offerData.service?.description ?? '',
-      serviceDate: offerData.serviceDate?.split("T").first ?? '',
-      serviceTime: offerData.serviceTime?.split("T").first ?? '',
-      budget: offerData.customPrice?.toString() ?? '',
-      isPayment: offerData.service?.bookingStatus == "pending",
-      onAccept: () async {
-        acceptCustomOffer(offerData.id ?? '');
-      },
-      onReject: () async {
-        rejectCustomOffer(offerData.id ?? '');
-      },
-      onPay: () async {
-        getPaymentSession(offerData.service?.id ?? '');
-      },
-    );
   }
 
   /// Notification Accept function

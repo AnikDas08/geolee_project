@@ -119,7 +119,7 @@ class _VerifyScreenState extends State<VerifyScreen> {
                     ),
                   ),*/
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       CommonText(
                         text: "Didn't receive the code?",

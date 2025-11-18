@@ -1,15 +1,7 @@
 import 'package:get/get.dart';
-import 'package:giolee78/features/history/presentation/screen/complete_history_screen.dart';
-import 'package:giolee78/features/history/presentation/screen/history_details_screen.dart';
-import 'package:giolee78/features/history/presentation/screen/history_screen.dart';
-import 'package:giolee78/features/history/presentation/screen/review_screen.dart';
-import 'package:giolee78/features/home/presentation/screen/post_details_screen.dart';
-import 'package:giolee78/features/home/presentation/screen/custom_offe_screen.dart';
-import 'package:giolee78/features/home/presentation/screen/first_message.dart';
 import 'package:giolee78/features/home/presentation/screen/home_nav_screen.dart';
 import 'package:giolee78/features/home/presentation/screen/home_screen.dart';
 import 'package:giolee78/features/home/presentation/screen/my_post_screen.dart';
-import 'package:giolee78/features/message/presentation/screen/view_message.dart';
 import 'package:giolee78/features/notifications/presentation/screen/stripe_web_view_screen.dart';
 import 'package:giolee78/features/profile/presentation/screen/edit_post_screen.dart';
 import 'package:giolee78/features/profile/presentation/screen/edit_service_provider_profile.dart';
@@ -91,17 +83,9 @@ class AppRoutes {
     GetPage(name: editProfile, page: () => EditProfile()),
     GetPage(name: privacyPolicy, page: () => const PrivacyPolicyScreen()),
     GetPage(name: termsOfServices, page: () => const TermsOfServicesScreen()),
-    GetPage(name: history, page: () => const HistoryScreen()),
     GetPage(name: homeNav, page: () => HomeNav()),
     GetPage(name: homeScreen, page: () => HomeScreen()),
-    GetPage(name: createPost, page: () => PostDetailsScreen()),
-    GetPage(name: historyDetailsScreen, page: () => HistoryDetailsScreen()),
-    GetPage(name: customOffer, page: () => CustomOfferScreen()),
     GetPage(name: myPostScreen, page: () => MyPostScreen()),
-    GetPage(name: firstMessageScreen, page: () => FirstMessage()),
-    GetPage(name: viewMessageScreen, page: () => ViewMessageScreen()),
-    GetPage(name: reviewScreen, page: () => ReviewScreen()),
-    GetPage(name: completeHistoryScreen, page: () => CompleteHistoryScreen()),
     GetPage(name: serviceProviderInfo, page: () => ServiceProviderInfoScreen()),
     GetPage(name: editProfileScreen, page: () => EditProfileScreen()),
     GetPage(name: editPost, page: () => EditPostScreen()),

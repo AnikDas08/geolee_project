@@ -3,14 +3,15 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:giolee78/component/app_bar/custom_appbar.dart';
 import 'package:giolee78/component/button/common_button.dart';
+import 'package:giolee78/component/image/common_image.dart';
 import 'package:giolee78/component/text/common_text.dart';
-import 'package:giolee78/features/home/presentation/controller/post_job_controller.dart';
+import 'package:giolee78/features/addpost/presentation/controller/post_controller.dart';
 import 'package:giolee78/utils/constants/app_colors.dart';
+import 'package:giolee78/utils/constants/app_icons.dart';
 
 class AddPostScreen extends StatelessWidget {
   AddPostScreen({super.key});
-
-  final PostJobController controller = Get.put(PostJobController());
+  final PostController controller = Get.put(PostController());
 
   @override
   Widget build(BuildContext context) {
@@ -36,17 +37,19 @@ class AddPostScreen extends StatelessWidget {
                     children: [
                       Expanded(
                         child: _buildselectedImage(
-                          context,
-                          "Upload Image",
-                          Icons.cloud_upload_outlined,
+                          context: context,
+                          title: "Upload Image",
+                          imageSrc: AppIcons.upload2,
+                          onTap: () => controller.pickImageFromGallery(),
                         ),
                       ),
                       SizedBox(width: 16.w),
                       Expanded(
                         child: _buildselectedImage(
-                          context,
-                          "Take a Photo",
-                          Icons.camera_outlined,
+                          context: context,
+                          title: "Take a Photo",
+                          imageSrc: AppIcons.camera,
+                          onTap: () => controller.pickImageFromCamera(),
                         ),
                       ),
                     ],
@@ -343,13 +346,14 @@ class AddPostScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildselectedImage(
-    BuildContext context,
-    String title,
-    IconData icon,
-  ) {
+  Widget _buildselectedImage({
+    required BuildContext context,
+    required String title,
+    required String imageSrc,
+    required VoidCallback onTap,
+  }) {
     return GestureDetector(
-      onTap: () => controller.showImagePicker(context),
+      onTap: onTap,
       child: Container(
         height: 120.h,
         width: double.infinity,
@@ -363,14 +367,7 @@ class AddPostScreen extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Container(
-              padding: EdgeInsets.all(16.w),
-              decoration: BoxDecoration(
-                color: AppColors.primaryColor.withOpacity(0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(icon, color: AppColors.primaryColor, size: 40.sp),
-            ),
+            CommonImage(imageSrc: imageSrc),
             SizedBox(height: 12.h),
             CommonText(
               text: title,

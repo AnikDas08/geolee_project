@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:get/get.dart';
 import '../../component/button/common_button.dart';
 import '../../component/image/common_image.dart';
 import '../../component/text/common_text.dart';
-import '../../features/home/presentation/widgets/custom_offer_dialog.dart';
 import '../../utils/constants/app_colors.dart';
 
 class SuccessDialog {
@@ -55,52 +53,6 @@ class SuccessDialog {
                 buttonColor: AppColors.primaryColor,
                 onTap: () {
                   Navigator.pop(context); // Close current dialog
-
-                  // Show Custom Offer Request Dialog
-                  CustomOfferRequestDialog.show(
-                    context,
-                    userName: "Savannah Nguyen",
-                    userRole: "Electrician",
-                    userImage: "https://via.placeholder.com/150",
-                    rating: 4.5,
-                    reviewCount: 150,
-                    description:
-                        "We Are Looking For A Skilled And Reliable Plumber To Join Our Team. The Ideal Candidate Will Have Experience In Installing, Repairing, And Maintaining Residential And/Or Commercial Plumbing Systems.",
-                    serviceDate: "01 January 2000",
-                    serviceTime: "09:00 Am",
-                    budget: "\$150",
-                    isPayment: false,
-                    onAccept: () {
-                      // Handle accept
-                      Get.snackbar(
-                        'Success',
-                        'Offer Accepted!',
-                        snackPosition: SnackPosition.BOTTOM,
-                        backgroundColor: Colors.green,
-                        colorText: Colors.white,
-                      );
-                    },
-                    onReject: () {
-                      // Handle reject
-                      Get.snackbar(
-                        'Rejected',
-                        'Offer Rejected!',
-                        snackPosition: SnackPosition.BOTTOM,
-                        backgroundColor: Colors.red,
-                        colorText: Colors.white,
-                      );
-                    },
-                    onPay: () {
-                      // Handle pay
-                      Get.snackbar(
-                        'Pay',
-                        'Offer Pay!',
-                        snackPosition: SnackPosition.BOTTOM,
-                        backgroundColor: Colors.green,
-                        colorText: Colors.white,
-                      );
-                    },
-                  );
                 },
               ),
             ],

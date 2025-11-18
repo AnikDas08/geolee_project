@@ -9,4 +9,8 @@ class AppImages {
   static const String logo = "$baseurl/logo.png";
   static const String map = "$baseurl/map.png";
   static const String postImage = "$baseurl/post_image.png";
+  static const String banner1 = "$baseurl/banner1.png";
+  static const String banner2 = "$baseurl/banner2.png";
+  static const String banner3 = "$baseurl/banner3.png";
+  static const String postImage2 = "$baseurl/post_image2.png";
 }

@@ -40,31 +40,31 @@ class HomeScreen extends StatelessWidget {
                     ),
                     SizedBox(height: 20.h),
                     Item(
-                      imageSrc: AppIcons.edit,
+                      imageSrc: AppIcons.clicker,
                       title: 'Clicker',
                       onTap: () {},
                     ),
                     Item(
-                      imageSrc: AppIcons.edit,
+                      imageSrc: AppIcons.bubbleChat,
                       title: 'Chat Nearby',
                       onTap: () {},
                     ),
                     Item(
-                      imageSrc: AppIcons.edit,
+                      imageSrc: AppIcons.myPost,
                       title: 'My Post',
                       onTap: () {
                         Get.to(() => const MyPostScreen());
                       },
                     ),
                     Item(
-                      imageSrc: AppIcons.edit,
+                      imageSrc: AppIcons.myFriend,
                       title: 'My Friend',
                       onTap: () {
                         Get.to(() => const MyFriendScreen());
                       },
                     ),
                     Item(
-                      imageSrc: AppIcons.edit,
+                      imageSrc: AppIcons.friend,
                       title: 'Friend Request',
                       onTap: () {
                         Get.to(() => const FriendRequestScreen());

@@ -79,6 +79,8 @@ class ForgetPasswordController extends GetxController {
   /// Forget Password Api Call
 
   Future<void> forgotPasswordRepo() async {
+    Get.toNamed(AppRoutes.verifyEmail);
+    return;
     isLoadingEmail = true;
     update();
     try {
