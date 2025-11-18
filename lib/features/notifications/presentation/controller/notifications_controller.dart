@@ -7,7 +7,30 @@ import '../../repository/notification_repository.dart';
 
 class NotificationsController extends GetxController {
   /// Notification List
-  List notifications = [];
+  List notifications = [
+    NotificationModel(
+      id: "1",
+      title: "Notification",
+      text:
+          "our post has been successfully uploaded under the “Great Vibes” category.",
+      receiver: "Notification",
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+      read: false,
+      v: 0,
+    ),
+    NotificationModel(
+      id: "2",
+      title: "Notification",
+      text:
+          "our post has been successfully uploaded under the “Great Vibes” category.",
+      receiver: "Notification",
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+      read: false,
+      v: 0,
+    ),
+  ];
 
   /// Notification Loading Bar
   bool isLoading = false;
@@ -33,8 +56,8 @@ class NotificationsController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    getNotificationsRepo();
-    moreNotification();
+    //getNotificationsRepo();
+    //moreNotification();
   }
 
   void moreNotification() {
@@ -90,8 +113,7 @@ class NotificationsController extends GetxController {
         debugPrint('Error fetching custom offer: $error');
       },
       ifRight: (customOffer) {
-        if (customOffer.data != null) {
-        }
+        if (customOffer.data != null) {}
       },
     );
     isLoading = false;

@@ -31,7 +31,7 @@ class NotificationItem extends StatelessWidget {
           ],
         ),
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             /// Sender Profile Image
             if (item.sender != null)
@@ -39,85 +39,40 @@ class NotificationItem extends StatelessWidget {
                 width: 40.w,
                 height: 40.h,
                 margin: EdgeInsets.only(right: 12.w),
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  image: DecorationImage(
-                    image: NetworkImage(item.sender!.image),
-                    fit: BoxFit.cover,
+                decoration: ShapeDecoration(
+                  shape: RoundedRectangleBorder(
+                    side: BorderSide(
+                      width: 1,
+                      color: const Color(0xFFDEE2E3) /* Disable */,
+                    ),
                   ),
                 ),
               ),
 
             /// Notification Content
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      /// Notification Title
-                      Expanded(
-                        child: CommonText(
-                          text: item.title,
-                          fontSize: 14.sp,
-                          fontWeight: FontWeight.w600,
-                          textAlign: TextAlign.start,
-                          maxLines: 1,
-                        ),
-                      ),
-
-                      /// Read Status Indicator
-                      if (!item.read)
-                        Container(
-                          width: 8.w,
-                          height: 8.h,
-                          margin: EdgeInsets.only(left: 8.w),
-                          decoration: BoxDecoration(
-                            color: AppColors.primaryColor,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                    ],
+                  /// Notification Title
+                  Expanded(
+                    child: CommonText(
+                      text: item.text,
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w400,
+                      textAlign: TextAlign.start,
+                      maxLines: 3,
+                    ),
                   ),
 
-                  SizedBox(height: 4.h),
-
-                  /// Notification Text
+                  /// Read Status Indicator
                   CommonText(
-                    text: item.text,
-                    fontSize: 12.sp,
+                    text: item.createdAt.checkTime,
+                    fontSize: 11.sp,
                     fontWeight: FontWeight.w400,
-                    maxLines: 2,
-                    color: AppColors.black,
                     textAlign: TextAlign.start,
-                  ),
-
-                  SizedBox(height: 4.h),
-
-                  /// Sender Name and Time
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      if (item.sender != null)
-                        CommonText(
-                          text: item.sender!.name,
-                          fontSize: 11.sp,
-                          fontWeight: FontWeight.w500,
-                          color: AppColors.primaryColor,
-                          textAlign: TextAlign.start,
-                        ),
-
-                      /// Notification Time
-                      CommonText(
-                        text: item.createdAt.checkTime,
-                        fontSize: 11.sp,
-                        fontWeight: FontWeight.w400,
-                        textAlign: TextAlign.start,
-                        color: AppColors.black.withOpacity(0.6),
-                        maxLines: 1,
-                      ),
-                    ],
+                    color: AppColors.black.withOpacity(0.6),
+                    maxLines: 1,
                   ),
                 ],
               ),

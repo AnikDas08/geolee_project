@@ -2,10 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:giolee78/component/image/common_image.dart';
 import 'package:giolee78/features/addpost/presentation/screen/add_post_screen.dart';
 import 'package:giolee78/utils/constants/app_colors.dart';
-
-// Import your screens
 import '../../../../utils/constants/app_icons.dart';
 import '../../../message/presentation/screen/chat_screen.dart';
 import 'home_screen.dart';
@@ -46,13 +45,8 @@ class HomeNav extends StatelessWidget {
           shape: const CircleBorder(),
           onPressed: () => controller.currentIndex.value = 1,
           child: Container(
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(color: Colors.white, width: 4.w),
-            ),
-            child: Center(
-              child: Icon(Icons.add, color: Colors.white, size: 28.w),
-            ),
+            decoration: BoxDecoration(shape: BoxShape.circle),
+            child: Center(child: CommonImage(imageSrc: AppIcons.add)),
           ),
         ),
       ),

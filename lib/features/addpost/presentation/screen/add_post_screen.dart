@@ -24,7 +24,7 @@ class AddPostScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                CustomAppBar(title: "Create Post", showBackButton: true),
+                CustomAppBar(title: "Create Post", showBackButton: false),
                 SizedBox(height: 20.h),
 
                 // Upload Image Section
