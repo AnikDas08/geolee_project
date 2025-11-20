@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:giolee78/component/image/common_image.dart';
 import 'package:giolee78/component/other_widgets/item.dart';
+import 'package:giolee78/features/chat_nearby/presentation/screen/chat_nearby_screen.dart';
 import 'package:giolee78/features/clicker/presentation/screen/clicker_screen.dart';
 import 'package:giolee78/features/friend/presentation/screen/friend_request_screen.dart';
 import 'package:giolee78/features/friend/presentation/screen/my_friend_screen.dart';
@@ -50,7 +51,9 @@ class HomeScreen extends StatelessWidget {
                     Item(
                       imageSrc: AppIcons.bubbleChat,
                       title: 'Chat Nearby',
-                      onTap: () {},
+                      onTap: () {
+                        Get.to(() => const ChatNearbyScreen());
+                      },
                     ),
                     Item(
                       imageSrc: AppIcons.myPost,

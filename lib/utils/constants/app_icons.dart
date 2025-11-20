@@ -63,4 +63,6 @@ class AppIcons {
   static const String filter = "$baseurl/filter.svg";
   static const String public = "$baseurl/public.svg";
   static const String friend2 = "$baseurl/friend2.svg";
+  static const String lock = "$baseurl/lock.svg";
+  static const String addFriend = "$baseurl/add_friend.svg";
 }

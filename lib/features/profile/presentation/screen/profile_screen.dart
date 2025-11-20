@@ -124,6 +124,7 @@ class ProfileScreen extends StatelessWidget {
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
                       top: 16,
+                      bottom: 8.h,
                     ),
                     CommonText(
                       text:
@@ -141,8 +142,12 @@ class ProfileScreen extends StatelessWidget {
                       onTap: () {
                         Get.toNamed(AppRoutes.serviceProviderInfo);
                       },
-                      buttonWidth: 100.w,
+                      buttonWidth: 80.w,
                       titleSize: 12,
+                      buttonHeight: 32.h,
+                      borderWidth: 4,
+                      borderColor: AppColors.primaryColor2,
+                      buttonColor: AppColors.primaryColor2,
                     ),
 
                     16.height,
