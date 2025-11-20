@@ -79,7 +79,7 @@ class CreatePassword extends StatelessWidget {
 
                     /// Submit Button here
                     CommonButton(
-                      titleText: AppString.continues,
+                      titleText: "Update Password",
                       isLoading: controller.isLoadingReset,
                       onTap: () {
                         if (formKey.currentState!.validate()) {

@@ -39,7 +39,7 @@ class AppString {
   static const String logIntoYourAccount = "Login to Your Account";
   static const String forgotThePassword = "Forgot the password";
   static const String signIn = "Sign in";
-  static const String doNotHaveAccount = "Don’t have an account";
+  static const String doNotHaveAccount = "Don’t have an account? ";
   static const String signUp = "Sign up";
   static const String alreadyHaveAccount = "Already have an account?";
   static const String fullName = "Full Name";
@@ -47,7 +47,7 @@ class AppString {
   static const String otpVerify = "OTP Verification";
   static const String setNewPassword = "Set Your New Password";
   static const String inbox = "Inbox";
-  static const String searchDoctor = "search a doctor";
+  static const String search = "Search";
   static const String activeNow = "Active Now";
   static const String messageHere = "message here";
   static const String notifications = "Notifications";
@@ -78,7 +78,7 @@ class AppString {
   // Onboarding
   static const String onboardingHeadingText = "Onboarding Heading Text";
   static const String onboardingSubText =
-      "Find Verified Experts, Schedule Services Effortlessly, and Enjoy On-Time Service Every Time";
+      "Designed for outdoor enthusiasts, this app allows users to share their Unique Locations and Moments whether they are hiking, walking or on the move. ";
 
   // Sign Up
   static const String name = "Name";
@@ -94,4 +94,7 @@ class AppString {
   static const String changePasswordsubtitle =
       "Enter your registered email to get password reset instructions";
   static const String update = "Update";
+
+  static const String onboardingTitle =
+      "Find the Best Vibes / Charms/ Attractions or its opposite for quiet moments";
 }

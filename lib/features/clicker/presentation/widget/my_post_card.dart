@@ -16,6 +16,7 @@ class MyPostCard extends StatelessWidget {
     required this.postImage,
     required this.description,
     required this.isFriend,
+    required this.privacyImage,
   });
 
   final String userName;
@@ -25,6 +26,7 @@ class MyPostCard extends StatelessWidget {
   final String postImage;
   final String description;
   final bool isFriend;
+  final String privacyImage;
 
   @override
   Widget build(BuildContext context) {
@@ -109,13 +111,19 @@ class MyPostCard extends StatelessWidget {
                           ),
                           SizedBox(width: 4.w),
                           Expanded(
-                            child: CommonText(
-                              text: location,
-                              fontSize: 11,
-                              color: AppColors.secondaryText,
-                              textAlign: TextAlign.start,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
+                            child: Row(
+                              children: [
+                                CommonText(
+                                  text: location,
+                                  fontSize: 11,
+                                  color: AppColors.secondaryText,
+                                  textAlign: TextAlign.start,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                SizedBox(width: 8.w),
+                                CommonImage(imageSrc: privacyImage),
+                              ],
                             ),
                           ),
                         ],
@@ -126,12 +134,12 @@ class MyPostCard extends StatelessWidget {
                 SizedBox(width: 8.w),
 
                 /// More + options icon group
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    _buildCircleIcon(icon: Icons.more_horiz, onTap: () {}),
-                  ],
-                ),
+                // Row(
+                //   mainAxisSize: MainAxisSize.min,
+                //   children: [
+                //     _buildCircleIcon(icon: Icons.more_horiz, onTap: () {}),
+                //   ],
+                // ),
               ],
             ),
           ),
@@ -169,6 +177,7 @@ class MyPostCard extends StatelessWidget {
     );
   }
 
+  // ignore: unused_element
   Widget _buildCircleIcon({
     required IconData icon,
     required VoidCallback onTap,

@@ -8,6 +8,7 @@ import 'package:giolee78/component/pop_up/common_pop_menu.dart';
 import 'package:giolee78/component/text/common_text.dart';
 import 'package:giolee78/config/api/api_end_point.dart';
 import 'package:giolee78/config/route/app_routes.dart';
+import 'package:giolee78/features/ads/presentation/screen/history_ads_screen.dart';
 import 'package:giolee78/features/auth/change_password/presentation/screen/change_password_screen.dart';
 import 'package:giolee78/features/profile/presentation/controller/profile_controller.dart';
 import 'package:giolee78/features/profile/presentation/screen/help_support_screen.dart';
@@ -18,6 +19,7 @@ import 'package:giolee78/services/storage/storage_services.dart';
 import 'package:giolee78/utils/constants/app_images.dart';
 import 'package:giolee78/utils/constants/app_icons.dart';
 import 'package:giolee78/utils/constants/app_colors.dart';
+import 'package:giolee78/utils/enum/enum.dart';
 import 'package:giolee78/utils/extensions/extension.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -26,16 +28,78 @@ class ProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(),
       body: GetBuilder<ProfileController>(
         builder: (controller) {
+          final List<ProfileItemData> profileItems = [
+            ProfileItemData(
+              imageSrc: AppIcons.profile,
+              title: 'My Profile',
+              onTap: () {
+                Get.to(() => const MyProfileScreen());
+              },
+            ),
+            ProfileItemData(
+              imageSrc: AppIcons.edit,
+              title: 'Change Password',
+              onTap: () {
+                Get.to(() => const ChangePasswordScreen());
+              },
+            ),
+            if (LocalStorage.myRole == UserType.advertise.name)
+              ProfileItemData(
+                imageSrc: AppIcons.edit,
+                title: 'Ads History',
+                onTap: () {
+                  Get.to(() => const HistoryAdsScreen());
+                },
+              ),
+            ProfileItemData(
+              imageSrc: AppIcons.privacy,
+              title: 'Privacy Policy',
+              onTap: () {
+                Get.to(() => const PrivacyPolicyScreen());
+              },
+            ),
+            ProfileItemData(
+              imageSrc: AppIcons.terms,
+              title: 'Terms of Services',
+              onTap: () {
+                Get.to(() => const TermsOfServicesScreen());
+              },
+            ),
+            ProfileItemData(
+              imageSrc: AppIcons.support,
+              title: 'Help & Support',
+              onTap: () {
+                Get.to(() => const HelpSupportScreen());
+              },
+            ),
+            ProfileItemData(
+              imageSrc: AppIcons.deleteAccount,
+              title: 'Delete Account',
+              onTap: () {
+                deletePopUp(
+                  controller: TextEditingController(),
+                  onTap: () {},
+                  isLoading: false,
+                );
+              },
+            ),
+            ProfileItemData(
+              imageSrc: AppIcons.logout,
+              title: 'Log Out',
+              onTap: () {
+                _showLogoutDialog();
+              },
+            ),
+          ];
+
           return SafeArea(
             child: SingleChildScrollView(
               physics: const BouncingScrollPhysics(),
               child: Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: 20.w,
-                  vertical: MediaQuery.of(context).padding.top + 10.h,
-                ),
+                padding: EdgeInsets.symmetric(horizontal: 20.w),
                 child: Column(
                   children: [
                     /// User Profile Image here
@@ -107,64 +171,6 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 }
-
-// Profile Item Data
-final List<ProfileItemData> profileItems = [
-  ProfileItemData(
-    imageSrc: AppIcons.profile,
-    title: 'My Profile',
-    onTap: () {
-      Get.to(() => const MyProfileScreen());
-    },
-  ),
-  ProfileItemData(
-    imageSrc: AppIcons.edit,
-    title: 'Change Password',
-    onTap: () {
-      Get.to(() => const ChangePasswordScreen());
-    },
-  ),
-
-  ProfileItemData(
-    imageSrc: AppIcons.privacy,
-    title: 'Privacy Policy',
-    onTap: () {
-      Get.to(() => const PrivacyPolicyScreen());
-    },
-  ),
-  ProfileItemData(
-    imageSrc: AppIcons.terms,
-    title: 'Terms of Services',
-    onTap: () {
-      Get.to(() => const TermsOfServicesScreen());
-    },
-  ),
-  ProfileItemData(
-    imageSrc: AppIcons.support,
-    title: 'Help & Support',
-    onTap: () {
-      Get.to(() => const HelpSupportScreen());
-    },
-  ),
-  ProfileItemData(
-    imageSrc: AppIcons.deleteAccount,
-    title: 'Delete Account',
-    onTap: () {
-      deletePopUp(
-        controller: TextEditingController(),
-        onTap: () {},
-        isLoading: false,
-      );
-    },
-  ),
-  ProfileItemData(
-    imageSrc: AppIcons.logout,
-    title: 'Log Out',
-    onTap: () {
-      _showLogoutDialog();
-    },
-  ),
-];
 
 // Logout Dialog
 void _showLogoutDialog() {

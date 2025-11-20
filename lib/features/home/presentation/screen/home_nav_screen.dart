@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:giolee78/component/image/common_image.dart';
 import 'package:giolee78/features/addpost/presentation/screen/add_post_screen.dart';
-import 'package:giolee78/features/create_ads/presentation/screen/create_ads_screen.dart';
+import 'package:giolee78/features/ads/presentation/screen/create_ads_screen.dart';
 import 'package:giolee78/features/dashboard/presentation/screen/dashboard_screen.dart';
 import 'package:giolee78/features/home/presentation/controller/home_nav_controller.dart';
 import 'package:giolee78/utils/constants/app_colors.dart';

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-
 import 'package:giolee78/component/button/common_button.dart';
 import 'package:giolee78/component/image/common_image.dart';
 import 'package:giolee78/component/pop_up/common_pop_menu.dart';
@@ -9,7 +8,6 @@ import 'package:giolee78/component/text/common_text.dart';
 import 'package:giolee78/component/text_field/common_text_field.dart';
 import 'package:giolee78/utils/constants/app_colors.dart';
 import 'package:giolee78/utils/constants/app_icons.dart';
-import 'package:giolee78/utils/constants/app_images.dart';
 
 class CreateAdsScreen extends StatelessWidget {
   const CreateAdsScreen({super.key});
@@ -21,14 +19,7 @@ class CreateAdsScreen extends StatelessWidget {
       appBar: AppBar(
         elevation: 0,
         centerTitle: true,
-        leading: IconButton(
-          onPressed: () => Navigator.of(context).pop(),
-          icon: const Icon(
-            Icons.arrow_back_ios_new,
-            color: AppColors.black,
-            size: 18,
-          ),
-        ),
+        leading: SizedBox(),
         title: const CommonText(
           text: 'Create Ads',
           fontSize: 18,

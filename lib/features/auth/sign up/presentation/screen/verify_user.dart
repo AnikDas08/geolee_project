@@ -36,6 +36,7 @@ class _VerifyUserState extends State<VerifyUser> {
           text: AppString.otpVerify,
           fontWeight: FontWeight.w700,
           fontSize: 24,
+          color: AppColors.primaryColor,
         ),
       ),
 
@@ -78,9 +79,10 @@ class _VerifyUserState extends State<VerifyUser> {
                       child: PinCodeTextField(
                         controller: controller.otpController,
                         autoDisposeControllers: false,
-                        cursorColor: AppColors.black,
+                        cursorColor: AppColors.primaryColor,
                         appContext: (context),
                         autoFocus: true,
+                        textStyle: TextStyle(color: AppColors.primaryColor),
                         pinTheme: PinTheme(
                           shape: PinCodeFieldShape.box,
                           borderRadius: BorderRadius.circular(16.r),

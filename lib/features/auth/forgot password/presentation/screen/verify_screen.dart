@@ -43,7 +43,7 @@ class _VerifyScreenState extends State<VerifyScreen> {
               key: formKey,
               child: Column(
                 children: [
-                  CommonImage(imageSrc: AppIcons.forgotPassword, size: 250),
+                  CommonImage(imageSrc: AppIcons.enterotp, size: 250),
                   20.height,
                   const CommonText(
                     text: AppString.otpVerify,

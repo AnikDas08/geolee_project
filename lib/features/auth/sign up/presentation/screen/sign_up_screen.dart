@@ -19,7 +19,7 @@ class SignUpScreen extends StatelessWidget {
     final signUpFormKey = GlobalKey<FormState>();
     return Scaffold(
       /// App Bar Section Starts Here
-      appBar: AppBar(),
+      appBar: AppBar(leading: SizedBox()),
 
       /// Body Section Starts Here
       body: GetBuilder<SignUpController>(

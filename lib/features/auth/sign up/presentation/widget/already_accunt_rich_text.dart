@@ -36,7 +36,7 @@ class AlreadyAccountRichText extends StatelessWidget {
             style: GoogleFonts.plusJakartaSans(
               color: AppColors.primaryColor,
               fontSize: 16,
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w700,
             ),
           ),
         ],

@@ -305,6 +305,7 @@ successPopUps({
     builder: (context) {
       return AnimationPopUp(
         child: AlertDialog(
+          backgroundColor: AppColors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20.r),
           ),
@@ -323,6 +324,8 @@ successPopUps({
             maxLines: 3,
             fontWeight: FontWeight.w400,
             fontSize: 16.sp,
+            left: 10.w,
+            right: 10.w,
           ),
           actions: [CommonButton(titleText: buttonTitle, onTap: onTap)],
         ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:giolee78/config/route/app_routes.dart';
 import 'package:giolee78/services/storage/storage_services.dart';
+import 'package:giolee78/utils/constants/app_icons.dart';
 import 'package:giolee78/utils/extensions/extension.dart';
 
 import '../../../../component/image/common_image.dart';
@@ -39,16 +40,22 @@ class HomeDetails extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 CommonText(
-                  text: "Shakir Ahmed",
+                  text: "Hi Shakir Ahmed",
                   fontSize: 16,
                   color: AppColors.textColorFirst,
                   fontWeight: FontWeight.w600,
                 ),
-                CommonText(
-                  text: "Thornridge Cir. Shiloh, Hawaii",
-                  fontSize: 12,
-                  fontWeight: FontWeight.w400,
-                  color: AppColors.secondaryText,
+                Row(
+                  children: [
+                    CommonImage(imageSrc: AppIcons.location),
+                    10.width,
+                    CommonText(
+                      text: "Thornridge Cir. Shiloh, Hawaii",
+                      fontSize: 12,
+                      fontWeight: FontWeight.w400,
+                      color: AppColors.secondaryText,
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -62,7 +69,7 @@ class HomeDetails extends StatelessWidget {
               padding: const EdgeInsets.only(right: 10),
               child: GestureDetector(
                 onTap: () => Get.toNamed(AppRoutes.notifications),
-                child: Icon(Icons.notifications_outlined, size: 28),
+                child: CommonImage(imageSrc: AppIcons.notification, size: 28),
               ),
             ),
             if (notificationCount > 0)

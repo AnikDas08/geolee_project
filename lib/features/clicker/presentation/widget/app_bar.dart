@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:giolee78/config/route/app_routes.dart';
 import 'package:giolee78/services/storage/storage_services.dart';
+import 'package:giolee78/utils/constants/app_icons.dart';
 import 'package:giolee78/utils/extensions/extension.dart';
 
 import '../../../../component/image/common_image.dart';
@@ -32,13 +33,11 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
             children: [
               Row(
                 children: [
-                  IconButton(
-                    onPressed: () => Get.back(),
-                    icon: const Icon(Icons.arrow_back_ios_new_rounded),
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
-                    color: AppColors.textColorFirst,
+                  GestureDetector(
+                    onTap: () => Get.back(),
+                    child: const Icon(Icons.arrow_back_ios_new_rounded),
                   ),
+                  10.width,
 
                   GestureDetector(
                     onTap: () => Get.toNamed(AppRoutes.profile),
@@ -81,7 +80,10 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                     padding: const EdgeInsets.only(right: 4),
                     child: GestureDetector(
                       onTap: () => Get.toNamed(AppRoutes.notifications),
-                      child: const Icon(Icons.notifications_outlined, size: 26),
+                      child: CommonImage(
+                        imageSrc: AppIcons.notification,
+                        size: 26,
+                      ),
                     ),
                   ),
                   if (notificationCount > 0)

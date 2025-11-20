@@ -117,12 +117,12 @@ class MyPostCard extends StatelessWidget {
                 SizedBox(width: 8.w),
 
                 /// More + options icon group
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    _buildCircleIcon(icon: Icons.more_horiz, onTap: () {}),
-                  ],
-                ),
+                // Row(
+                //   mainAxisSize: MainAxisSize.min,
+                //   children: [
+                //     _buildCircleIcon(icon: Icons.more_horiz, onTap: () {}),
+                //   ],
+                // ),
               ],
             ),
           ),
@@ -160,6 +160,7 @@ class MyPostCard extends StatelessWidget {
     );
   }
 
+  // ignore: unused_element
   Widget _buildCircleIcon({
     required IconData icon,
     required VoidCallback onTap,

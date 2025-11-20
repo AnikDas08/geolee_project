@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
+import 'package:giolee78/component/pop_up/common_pop_menu.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:intl_phone_field/countries.dart';
@@ -473,7 +474,11 @@ class SignUpController extends GetxController {
   }
 
   Future<void> updateProfile() async {
-    Get.toNamed(AppRoutes.homeNav);
+    successPopUps(
+      message: "Your Registration has been successfully Complete.",
+      onTap: () => Get.offAllNamed(AppRoutes.signIn),
+      buttonTitle: "Go to Login ",
+    );
     return;
     isLoading = true;
     update();

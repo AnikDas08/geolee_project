@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
-import 'package:giolee78/features/dashboard/presentation/screen/view_ads_screen.dart';
+import 'package:giolee78/features/ads/presentation/screen/view_ads_screen.dart';
 
 import '../../../../component/image/common_image.dart';
 import '../../../../component/text/common_text.dart';

@@ -107,27 +107,36 @@ class ViewFriendScreen extends StatelessWidget {
         ),
         CommonText(
           text: "Exploring one city at a time Capturing stories beyond borders",
-          fontSize: 12,
+          fontSize: 13,
           fontWeight: FontWeight.w400,
           bottom: 4,
           maxLines: 2,
-          left: 25,
-          right: 25,
+          left: 40,
+          right: 40,
           color: AppColors.secondaryText,
         ),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 30),
+          padding: const EdgeInsets.symmetric(horizontal: 50),
           child: Divider(height: 2.h),
         ),
-        CommonText(
-          text: 'Thornridge Cir. Shiloh, Hawaii',
-          fontSize: 12,
-          fontWeight: FontWeight.w400,
-          color: AppColors.secondaryText,
-          textAlign: TextAlign.start,
-          top: 4,
-          bottom: 16,
+        SizedBox(height: 8.h),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CommonImage(imageSrc: AppIcons.location, size: 12),
+            SizedBox(width: 8.w),
+            CommonText(
+              text: 'Thornridge Cir. Shiloh, Hawaii',
+              fontSize: 13,
+              fontWeight: FontWeight.w400,
+              color: AppColors.secondaryText,
+              textAlign: TextAlign.start,
+            ),
+          ],
         ),
+
+        SizedBox(height: 16.h),
+
         isRequest
             ? _buildFriendRequest()
             : isFriend

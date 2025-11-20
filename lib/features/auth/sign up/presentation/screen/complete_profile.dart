@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:giolee78/utils/extensions/extension.dart';
 import '../../../../../component/button/common_button.dart';
 import '../../../../../component/image/common_image.dart';
 import '../../../../../component/text/common_text.dart';
@@ -36,9 +37,9 @@ class _CompleteProfileState extends State<CompleteProfile> {
         ),
         title: CommonText(
           text: 'Complete Your Profile',
-          fontSize: 18,
-          fontWeight: FontWeight.w600,
-          color: AppColors.black,
+          fontSize: 24,
+          fontWeight: FontWeight.w700,
+          color: AppColors.primaryColor,
           textAlign: TextAlign.left,
         ),
         centerTitle: true,
@@ -49,8 +50,6 @@ class _CompleteProfileState extends State<CompleteProfile> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SizedBox(height: 24.h),
-
               // Profile Image Section
               Center(
                 child: GetBuilder<SignUpController>(
@@ -108,10 +107,13 @@ class _CompleteProfileState extends State<CompleteProfile> {
                   },
                 ),
               ),
+              SizedBox(height: 8.h),
+
+              _buildPrivacyDropdown().center,
 
               SizedBox(height: 32.h),
 
-              // Date of Birth Field
+              // Bio Field
               CommonText(
                 text: 'Bio',
                 fontSize: 14,
@@ -138,6 +140,7 @@ class _CompleteProfileState extends State<CompleteProfile> {
                 color: AppColors.black,
                 textAlign: TextAlign.left,
                 bottom: 8,
+                top: 8.h,
               ),
               CommonTextField(
                 controller: controller.ageController,
@@ -157,6 +160,7 @@ class _CompleteProfileState extends State<CompleteProfile> {
                 color: AppColors.black,
                 textAlign: TextAlign.left,
                 bottom: 8,
+                top: 8.h,
               ),
               Container(
                 decoration: BoxDecoration(
@@ -234,6 +238,62 @@ class _CompleteProfileState extends State<CompleteProfile> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildPrivacyDropdown() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        spacing: 4,
+        children: [
+          Container(
+            width: 10,
+            height: 10,
+            clipBehavior: Clip.antiAlias,
+            decoration: BoxDecoration(),
+            child: Stack(
+              children: [
+                Positioned(
+                  left: 0,
+                  top: 0,
+                  child: Container(
+                    width: 10,
+                    height: 10,
+                    clipBehavior: Clip.antiAlias,
+                    decoration: BoxDecoration(),
+                    child: Stack(),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Text(
+            'Public',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: const Color(0xFF373737) /* Primary-Text */,
+              fontSize: 12,
+              fontFamily: 'Poppins',
+              fontWeight: FontWeight.w400,
+              height: 1.50,
+            ),
+          ),
+          Container(
+            transform: Matrix4.identity()
+              ..translate(0.0, 0.0)
+              ..rotateZ(-1.57),
+            width: 29.01,
+            height: 16,
+            clipBehavior: Clip.antiAlias,
+            decoration: BoxDecoration(),
+            child: Stack(),
+          ),
+        ],
       ),
     );
   }

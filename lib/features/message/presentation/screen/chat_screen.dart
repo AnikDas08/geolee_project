@@ -25,10 +25,7 @@ class ChatListScreen extends StatelessWidget {
         appBar: AppBar(
           centerTitle: true,
           elevation: 0,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.black),
-            onPressed: () => Get.back(),
-          ),
+          leading: SizedBox(),
           title: const CommonText(
             text: "Message",
             fontWeight: FontWeight.w600,
@@ -124,7 +121,7 @@ class ChatListScreen extends StatelessWidget {
               /// User Search bar here
               CommonTextField(
                 prefixIcon: const Icon(Icons.search),
-                hintText: AppString.searchDoctor,
+                hintText: AppString.search,
               ),
 
               SizedBox(height: 12.h),

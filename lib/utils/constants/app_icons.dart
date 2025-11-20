@@ -59,4 +59,8 @@ class AppIcons {
   static const String myPost = "$baseurl/my_post.svg";
   static const String verified = "$baseurl/verify.svg";
   static const String sent = "$baseurl/sent.svg";
+  static const String notification = "$baseurl/notification.svg";
+  static const String filter = "$baseurl/filter.svg";
+  static const String public = "$baseurl/public.svg";
+  static const String friend2 = "$baseurl/friend2.svg";
 }

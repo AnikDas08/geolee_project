@@ -166,7 +166,7 @@ class _VerifyUserState extends State<VerifyUser> {
                               LocalStorage.myRole,
                             );
                             appLog(LocalStorage.myRole.toString());
-                            Get.toNamed(AppRoutes.homeNav);
+                            Get.offAllNamed(AppRoutes.homeNav);
                           },
                           buttonTitle: 'Go to Dashboard',
                         );

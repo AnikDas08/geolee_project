@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
+import 'package:giolee78/component/pop_up/common_pop_menu.dart';
 import 'package:giolee78/features/auth/sign%20up/presentation/widget/success_profile.dart';
 
 import '../../../../../config/route/app_routes.dart';
@@ -107,6 +108,8 @@ class ForgetPasswordController extends GetxController {
   /// Verify OTP Api Call
 
   Future<void> verifyOtpRepo() async {
+    Get.toNamed(AppRoutes.createPassword);
+    return;
     isLoadingVerify = true;
     update();
     try {
@@ -134,6 +137,15 @@ class ForgetPasswordController extends GetxController {
   /// Create New Password Api Call
 
   Future<void> resetPasswordRepo() async {
+    successPopUps(
+      message:
+          "Your password has been successfully reset. You can now log in using your new password.",
+      onTap: () {
+        Get.offAllNamed(AppRoutes.signIn);
+      },
+      buttonTitle: "Login",
+    );
+    return;
     isLoadingReset = true;
     update();
     try {
