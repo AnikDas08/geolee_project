@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -9,9 +11,26 @@ class ServiceProviderController extends GetxController {
   var skillInput = ''.obs;
   var skills = <String>[].obs;
 
+  Timer? _timer;
+  int start = 0;
+
+  String time = "";
+
+  var businessNameController = TextEditingController();
+  var businessTypeController = TextEditingController();
+  var businessLicenseNumberController = TextEditingController();
+  var phoneNumberController = TextEditingController();
+  var bioController = TextEditingController();
+  var emailController = TextEditingController();
+  var otpController = TextEditingController();
+
   // Dropdown options
   final categories = ['Electrician', 'Plumber', 'Carpenter', 'Painter'].obs;
-  final subCategories = ['Electrician', 'Home Electrician', 'Industrial Electrician'].obs;
+  final subCategories = [
+    'Electrician',
+    'Home Electrician',
+    'Industrial Electrician',
+  ].obs;
 
   // Text controller for skill input
   final skillController = TextEditingController();
@@ -103,5 +122,23 @@ class ServiceProviderController extends GetxController {
     );
 
     Get.back();
+  }
+
+  void startTimer() {
+    _timer?.cancel(); // Cancel any existing timer
+    start = 180; // Reset the start value
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (start > 0) {
+        start--;
+        final minutes = (start ~/ 60).toString().padLeft(2, '0');
+        final seconds = (start % 60).toString().padLeft(2, '0');
+
+        time = "$minutes:$seconds";
+
+        update();
+      } else {
+        _timer?.cancel();
+      }
+    });
   }
 }

@@ -13,4 +13,5 @@ class AppImages {
   static const String banner2 = "$baseurl/banner2.png";
   static const String banner3 = "$baseurl/banner3.png";
   static const String postImage2 = "$baseurl/post_image2.png";
+  static const String success = "$baseurl/success_image.png";
 }

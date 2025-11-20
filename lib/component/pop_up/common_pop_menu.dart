@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:giolee78/component/image/common_image.dart';
+import 'package:giolee78/utils/constants/app_images.dart';
 import 'package:giolee78/utils/helpers/other_helper.dart';
 import '../../../services/storage/storage_services.dart';
 import '../../../utils/constants/app_colors.dart';
@@ -286,6 +288,43 @@ logOutPopUps() {
               ],
             ),
           ],
+        ),
+      );
+    },
+  );
+}
+
+successPopUps({
+  String? title,
+  required String message,
+  required VoidCallback onTap,
+  required String buttonTitle,
+}) {
+  showDialog(
+    context: Get.context!,
+    builder: (context) {
+      return AnimationPopUp(
+        child: AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20.r),
+          ),
+          contentPadding: EdgeInsets.all(12.sp),
+          icon: CommonImage(imageSrc: AppImages.success, size: 150),
+          title: title != null
+              ? CommonText(
+                  text: title,
+                  maxLines: 3,
+                  fontWeight: FontWeight.w400,
+                  fontSize: 16.sp,
+                )
+              : null,
+          content: CommonText(
+            text: message,
+            maxLines: 3,
+            fontWeight: FontWeight.w400,
+            fontSize: 16.sp,
+          ),
+          actions: [CommonButton(titleText: buttonTitle, onTap: onTap)],
         ),
       );
     },

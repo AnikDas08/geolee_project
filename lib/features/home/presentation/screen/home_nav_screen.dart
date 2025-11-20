@@ -4,37 +4,45 @@ import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:giolee78/component/image/common_image.dart';
 import 'package:giolee78/features/addpost/presentation/screen/add_post_screen.dart';
+import 'package:giolee78/features/create_ads/presentation/screen/create_ads_screen.dart';
+import 'package:giolee78/features/dashboard/presentation/screen/dashboard_screen.dart';
+import 'package:giolee78/features/home/presentation/controller/home_nav_controller.dart';
 import 'package:giolee78/utils/constants/app_colors.dart';
+import 'package:giolee78/utils/enum/enum.dart';
 import '../../../../utils/constants/app_icons.dart';
 import '../../../message/presentation/screen/chat_screen.dart';
 import 'home_screen.dart';
-
-class HomeNavController extends GetxController {
-  var currentIndex = 0.obs;
-}
 
 class HomeNav extends StatelessWidget {
   HomeNav({super.key});
 
   final HomeNavController controller = Get.put(HomeNavController());
 
-  final List<Widget> screens = [
+  final List<Widget> userScreens = [
     HomeScreen(),
     AddPostScreen(),
     ChatListScreen(),
   ];
 
+  final List<Widget> advertiseScreens = [
+    HomeScreen(),
+    CreateAdsScreen(),
+    DashboardScreen(),
+  ];
+
   final List<String> icons = [AppIcons.homeIcon, AppIcons.chatIcon];
+  final List<String> advertiseIcons = [AppIcons.homeIcon, AppIcons.chatIcon];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Obx(
-        () => IndexedStack(
+      body: Obx(() {
+        final isUser = controller.userType == UserType.user;
+        return IndexedStack(
           index: controller.currentIndex.value,
-          children: screens,
-        ),
-      ),
+          children: isUser ? userScreens : advertiseScreens,
+        );
+      }),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: SizedBox(
         height: 70.w,
@@ -50,8 +58,9 @@ class HomeNav extends StatelessWidget {
           ),
         ),
       ),
-      bottomNavigationBar: Obx(
-        () => BottomAppBar(
+      bottomNavigationBar: Obx(() {
+        final isUser = controller.userType == UserType.user;
+        return BottomAppBar(
           shape: const CircularNotchedRectangle(),
           notchMargin: 14.w,
           color: AppColors.navBarColor,
@@ -69,15 +78,15 @@ class HomeNav extends StatelessWidget {
                 SizedBox(width: 40.w),
                 _buildNavItem(
                   index: 2,
-                  iconPath: icons[1],
-                  label: 'Message',
+                  iconPath: isUser ? icons[1] : advertiseIcons[1],
+                  label: isUser ? 'Message' : 'Dashboard',
                   isSelected: controller.currentIndex.value == 2,
                 ),
               ],
             ),
           ),
-        ),
-      ),
+        );
+      }),
     );
   }
 

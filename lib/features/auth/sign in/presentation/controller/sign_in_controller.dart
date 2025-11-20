@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
+import 'package:giolee78/utils/enum/enum.dart';
+import 'package:giolee78/utils/log/app_log.dart';
 import '../../../../../config/route/app_routes.dart';
 import '../../../../../services/api/api_service.dart';
 import '../../../../../config/api/api_end_point.dart';
@@ -22,6 +24,9 @@ class SignInController extends GetxController {
   /// Sign in Api call here
 
   Future<void> signInUser(GlobalKey<FormState> formKey) async {
+    LocalStorage.myRole = UserType.user.name;
+    LocalStorage.setString(LocalStorageKeys.myRole, LocalStorage.myRole);
+    appLog(LocalStorage.myRole.toString());
     Get.toNamed(AppRoutes.homeNav);
     return;
     if (!formKey.currentState!.validate()) return;
