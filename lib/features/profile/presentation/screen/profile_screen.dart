@@ -110,7 +110,7 @@ class ProfileScreen extends StatelessWidget {
                         child: ClipOval(
                           child: CommonImage(
                             imageSrc:
-                                ApiEndPoint.imageUrl + LocalStorage.myImage,
+                                "assets/images/profile_image.png",
                             size: 100,
                             defaultImage: AppImages.profileImage,
                           ),
@@ -120,7 +120,7 @@ class ProfileScreen extends StatelessWidget {
 
                     /// User Name here
                     CommonText(
-                      text: "Dianne Russell",
+                      text: "Sakir Ahamed",
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
                       top: 16,
@@ -139,9 +139,6 @@ class ProfileScreen extends StatelessWidget {
                     ),
                     CommonButton(
                       titleText: 'Public',
-                      onTap: () {
-                        Get.toNamed(AppRoutes.serviceProviderInfo);
-                      },
                       buttonWidth: 80.w,
                       titleSize: 12,
                       buttonHeight: 32.h,
@@ -166,6 +163,15 @@ class ProfileScreen extends StatelessWidget {
                         );
                       },
                     ),
+                    SizedBox(height: 20.h,),
+                    CommonButton(
+                        titleText: "Adverise with Us",
+                      onTap: (){
+                          Get.toNamed(
+                              AppRoutes.serviceProviderInfo
+                          );
+                      },
+                    )
                   ],
                 ),
               ),

@@ -3,12 +3,16 @@ class ChatModel {
   final Participant participant;
   final bool status;
   final LatestMessage latestMessage;
+  final int unreadCount; // Add this field
+  final bool isSeen; // Add this field to track if message is seen
 
   ChatModel({
     required this.id,
     required this.participant,
     required this.status,
     required this.latestMessage,
+    required this.unreadCount,
+    required this.isSeen
   });
 
   factory ChatModel.fromJson(Map<String, dynamic> json) {
@@ -36,6 +40,8 @@ class ChatModel {
       latestMessage: LatestMessage.fromJson(
         lastMessageData as Map<String, dynamic>,
       ),
+      unreadCount: json['unreadCount'] ?? 0,
+      isSeen: json['isSeen'] ?? true,
     );
   }
 }
@@ -66,13 +72,13 @@ class Participant {
 class LatestMessage {
   final String id;
   final String sender;
-  final String? text;
+  final String text;
   final DateTime createdAt;
 
   LatestMessage({
     required this.id,
     required this.sender,
-    this.text,
+    this.text="",
     required this.createdAt,
   });
 

@@ -24,21 +24,6 @@ class EditProfile extends StatelessWidget {
 
           /// App Bar
           appBar: AppBar(
-            backgroundColor: AppColors.background,
-            elevation: 0,
-            leading: GestureDetector(
-              onTap: () => Get.back(),
-              child: Container(
-                margin: EdgeInsets.only(left: 20.w),
-                alignment: Alignment.center,
-                child: Icon(
-                  Icons.arrow_back_ios,
-                  color: AppColors.black,
-                  size: 20.sp,
-                ),
-              ),
-            ),
-            leadingWidth: 50.w,
             centerTitle: true,
             title: CommonText(
               text: 'Edit Profile',

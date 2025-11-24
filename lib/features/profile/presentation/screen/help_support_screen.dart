@@ -52,7 +52,7 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
             SizedBox(height: 16.h),
             _buildDescriptionField(),
             SizedBox(height: 16.h),
-            _buildAttachFileSection(),
+            Center(child: _buildAttachFileSection()),
             SizedBox(height: 24.h),
             _buildSubmitButton(),
           ],
@@ -119,7 +119,7 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
     return GetBuilder<HelpSupportController>(
       builder: (controller) {
         return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             InkWell(
               onTap: () {

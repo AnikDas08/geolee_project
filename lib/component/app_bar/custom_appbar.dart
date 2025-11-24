@@ -57,7 +57,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
             Positioned(
               left: 0,
               child: GestureDetector(
-                onTap: onBackTap ?? () => Get.back(), // 👈 Default is Get.back()
+                onTap: onBackTap ?? () => Navigator.pop(context), // 👈 Default is Get.back()
                 child: Container(
                   margin: const EdgeInsets.symmetric(horizontal: 8),
                   decoration: const BoxDecoration(

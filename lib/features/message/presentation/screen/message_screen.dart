@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../component/text/common_text.dart';
+import '../../../../component/image/common_image.dart';
 import '../../../../config/api/api_end_point.dart';
 import '../../../message/data/model/chat_message_model.dart';
 import '../../../../../../utils/extensions/extension.dart';
@@ -20,8 +21,8 @@ class _MessageScreenState extends State<MessageScreen> {
   String chatId = Get.parameters["chatId"] ?? "";
   String name = Get.parameters["name"] ?? "";
   String image = Get.parameters["image"] ?? "";
+  bool isActive = Get.arguments?["isActive"] ?? true; // Get active status
 
-  // ignore: unused_element
   String _getImageUrl(String imagePath) {
     if (imagePath.startsWith('http')) {
       return imagePath;
@@ -44,62 +45,128 @@ class _MessageScreenState extends State<MessageScreen> {
         return Scaffold(
           backgroundColor: Colors.grey[100],
 
-          /// App Bar
+          /// App Bar with Profile
           appBar: AppBar(
             backgroundColor: Colors.white,
             elevation: 0,
             leading: IconButton(
               icon: const Icon(Icons.arrow_back, color: Colors.black),
-              onPressed: () => Get.back(),
+              onPressed: () => Navigator.pop(context),
             ),
-            title: CommonText(
-              text: "Chat & Offer",
-              fontWeight: FontWeight.w600,
-              fontSize: 18,
+            title: Row(
+              children: [
+                /// Profile Image with Online Status
+                Stack(
+                  children: [
+                    CircleAvatar(
+                      radius: 20.r,
+                      child: ClipOval(
+                        child: CommonImage(
+                          imageSrc: _getImageUrl(image),
+                          //imageType: ImageType.network,
+                          height: 40.r,
+                          width: 40.r,
+                          //fit: BoxFit.cover,
+                        ),
+                      ),
+                    ),
+                    if (isActive)
+                      Positioned(
+                        bottom: 0,
+                        right: 0,
+                        child: Container(
+                          width: 12.w,
+                          height: 12.h,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF0FE16D),
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: Colors.white,
+                              width: 2,
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+
+                SizedBox(width: 12.w),
+
+                /// Name and Active Status
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      CommonText(
+                        text: name,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 16.sp,
+                        color: Colors.black,
+                        maxLines: 1,
+                        //textOverflow: TextOverflow.ellipsis,
+                      ),
+                      SizedBox(height: 2.h),
+                      if (isActive)
+                        CommonText(
+                          text: "Active now",
+                          fontWeight: FontWeight.w500,
+                          fontSize: 12.sp,
+                          color: const Color(0xFF0FE16D),
+                        ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-            centerTitle: true,
+            actions: [
+              IconButton(
+                icon: Icon(Icons.person, color: Colors.black),
+                onPressed: () {},
+              ),
+            ],
           ),
 
           /// Full Scrollable Body
           body: controller.isLoading
               ? const Center(child: CircularProgressIndicator())
               : SingleChildScrollView(
-                  controller: controller.scrollController,
-                  padding: EdgeInsets.only(bottom: 20.h),
-                  child: Column(
-                    children: [
-                      /// Messages Section
-                      ListView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: controller.isMoreLoading
-                            ? controller.messages.length + 1
-                            : controller.messages.length,
-                        padding: EdgeInsets.symmetric(horizontal: 16.w),
-                        itemBuilder: (context, index) {
-                          if (index < controller.messages.length) {
-                            ChatMessageModel message =
-                                controller.messages[index];
-                            return ChatBubbleMessage(
-                              index: index,
-                              image: message.image,
-                              time: message.time,
-                              text: message.text,
-                              messageImage: message.messageImage,
-                              isMe: message.isMe,
-                              isUploading: message.isUploading,
-                              onTap: () {},
-                            );
-                          } else {
-                            return const Center(
-                              child: CircularProgressIndicator(),
-                            );
-                          }
-                        },
-                      ),
-                    ],
-                  ),
+            controller: controller.scrollController,
+            padding: EdgeInsets.only(bottom: 20.h),
+            child: Column(
+              children: [
+                /// Messages Section
+                ListView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: controller.isMoreLoading
+                      ? controller.messages.length + 1
+                      : controller.messages.length,
+                  padding: EdgeInsets.symmetric(horizontal: 16.w),
+                  itemBuilder: (context, index) {
+                    if (index < controller.messages.length) {
+                      ChatMessageModel message =
+                      controller.messages[index];
+                      return ChatBubbleMessage(
+                        index: index,
+                        image: message.image,
+                        time: message.time,
+                        text: message.text,
+                        messageImage: message.messageImage,
+                        isMe: message.isMe,
+                        isUploading: message.isUploading,
+                        onTap: () {},
+                      );
+                    } else {
+                      return const Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    }
+                  },
                 ),
+              ],
+            ),
+          ),
 
           /// Bottom Navigation Bar
           bottomNavigationBar: Container(

@@ -2,6 +2,10 @@ import 'package:get/get.dart';
 import 'package:giolee78/features/home/presentation/screen/home_nav_screen.dart';
 import 'package:giolee78/features/home/presentation/screen/home_screen.dart';
 import 'package:giolee78/features/addpost/presentation/screen/my_post_screen.dart';
+import 'package:giolee78/features/message/presentation/screen/add_member_sceen.dart';
+import 'package:giolee78/features/message/presentation/screen/frient_pending.dart';
+import 'package:giolee78/features/message/presentation/screen/group_setting_screen.dart';
+import 'package:giolee78/features/message/presentation/screen/search_screen.dart';
 import 'package:giolee78/features/notifications/presentation/screen/stripe_web_view_screen.dart';
 import 'package:giolee78/features/profile/presentation/screen/edit_post_screen.dart';
 import 'package:giolee78/features/profile/presentation/screen/edit_service_provider_profile.dart';
@@ -63,6 +67,10 @@ class AppRoutes {
   static const String editProfileScreen = "/editProfileScreen";
   static const String editPost = "/editPost";
   static const String stripeWebViewScreen = "/stripeWebViewScreen";
+  static const String searchScreen = "/searchScreen";
+  static const String groupSetting = "/groupSetting";
+  static const String addMemberScreen = "/addMemberScreen";
+  static const String friendPendingScreenHere = "/friendPendingScreenHere";
 
   static List<GetPage> routes = [
     GetPage(name: splash, page: () => const SplashScreen()),
@@ -93,5 +101,9 @@ class AppRoutes {
       name: stripeWebViewScreen,
       page: () => StripeWebViewPage(checkoutUrl: Get.arguments),
     ),
+    GetPage(name: searchScreen, page: () => SearchFriendScreen()),
+    GetPage(name: groupSetting, page: () => GroupSettingsScreen()),
+    GetPage(name: addMemberScreen, page: () => AddMemberScreen()),
+    GetPage(name: friendPendingScreenHere, page: () => PendingRequestScreen()),
   ];
 }

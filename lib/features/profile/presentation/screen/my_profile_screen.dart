@@ -25,7 +25,9 @@ class MyProfileScreen extends StatelessWidget {
             backgroundColor: AppColors.background,
             elevation: 0,
             leading: GestureDetector(
-              onTap: controller.goBack,
+              onTap: (){
+                Navigator.pop(context);
+              },
               child: Container(
                 margin: EdgeInsets.only(left: 20.w),
                 alignment: Alignment.center,

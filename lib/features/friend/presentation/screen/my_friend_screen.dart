@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 
 import 'package:giolee78/component/text/common_text.dart';
 import 'package:giolee78/component/text_field/common_text_field.dart';
+import 'package:giolee78/features/message/presentation/screen/message_screen.dart';
 import 'package:giolee78/utils/constants/app_colors.dart';
 import 'package:giolee78/utils/constants/app_images.dart';
 
@@ -63,9 +65,14 @@ class MyFriendScreen extends StatelessWidget {
               4,
               (index) => Padding(
                 padding: EdgeInsets.only(bottom: 10.h),
-                child: _FriendListItem(
-                  userName: 'Arlene McCoy',
-                  avatar: AppImages.profileImage,
+                child: GestureDetector(
+                  onTap: () {
+                    Get.to(MessageScreen());
+                  },
+                  child: _FriendListItem(
+                    userName: 'Arlene McCoy',
+                    avatar: AppImages.profileImage,
+                  ),
                 ),
               ),
             ),

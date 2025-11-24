@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 import 'package:giolee78/component/button/common_button.dart';
 import 'package:giolee78/component/image/common_image.dart';
 import 'package:giolee78/component/text/common_text.dart';
 import 'package:giolee78/config/api/api_end_point.dart';
+import 'package:giolee78/config/route/app_routes.dart';
 import 'package:giolee78/features/addpost/presentation/widgets/my_post_card.dart';
 import 'package:giolee78/services/storage/storage_services.dart';
 import 'package:giolee78/utils/constants/app_colors.dart';
@@ -90,7 +92,7 @@ class ViewFriendScreen extends StatelessWidget {
             backgroundColor: Colors.transparent,
             child: ClipOval(
               child: CommonImage(
-                imageSrc: ApiEndPoint.imageUrl + LocalStorage.myImage,
+                imageSrc: "assets/images/profile_image.png",
                 size: 100,
                 defaultImage: AppImages.profileImage,
               ),
@@ -100,7 +102,7 @@ class ViewFriendScreen extends StatelessWidget {
 
         /// User Name here
         CommonText(
-          text: "Dianne Russell",
+          text: "John Doe",
           fontSize: 16,
           fontWeight: FontWeight.w600,
           top: 16,
@@ -140,12 +142,17 @@ class ViewFriendScreen extends StatelessWidget {
         isRequest
             ? _buildFriendRequest()
             : isFriend
-            ? _buildButton(
-                title: 'Message',
-                image: AppIcons.chat2,
-                onTap: () {},
-                color: AppColors.primaryColor,
-              )
+            ? GestureDetector(
+          onTap: (){
+            Get.toNamed(AppRoutes.message);
+          },
+              child: _buildButton(
+                  title: 'Message',
+                  image: AppIcons.chat2,
+                  onTap: () {},
+                  color: AppColors.primaryColor,
+                ),
+            )
             : _buildButton(
                 title: 'Add Friend',
                 image: AppIcons.friendRequest,

@@ -1,3 +1,4 @@
+import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -8,6 +9,7 @@ import 'package:giolee78/component/text/common_text.dart';
 import 'package:giolee78/features/addpost/presentation/controller/post_controller.dart';
 import 'package:giolee78/utils/constants/app_colors.dart';
 import 'package:giolee78/utils/constants/app_icons.dart';
+import 'dart:io'; // Import for File
 
 class AddPostScreen extends StatelessWidget {
   AddPostScreen({super.key});
@@ -24,37 +26,17 @@ class AddPostScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                CustomAppBar(title: "Create Post", showBackButton: false),
+                CustomAppBar(title: "Create Clicker", showBackButton: false),
                 SizedBox(height: 20.h),
 
-                // Upload Image Section
-                Obx(() {
-                  if (controller.selectedImage.value != null) {
-                    return _buildimageUpload();
-                  }
-
-                  return Row(
-                    children: [
-                      Expanded(
-                        child: _buildselectedImage(
-                          context: context,
-                          title: "Upload Image",
-                          imageSrc: AppIcons.upload2,
-                          onTap: () => controller.pickImageFromGallery(),
-                        ),
-                      ),
-                      SizedBox(width: 16.w),
-                      Expanded(
-                        child: _buildselectedImage(
-                          context: context,
-                          title: "Take a Photo",
-                          imageSrc: AppIcons.camera,
-                          onTap: () => controller.pickImageFromCamera(),
-                        ),
-                      ),
-                    ],
-                  );
-                }),
+                // 🌟 UPDATED: Upload Image Section
+                CommonText(
+                  text: "Upload Images",
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w400,
+                ),
+                SizedBox(height: 10.h),
+                Obx(() => _buildImageUploadSection(context)),
                 SizedBox(height: 20.h),
 
                 // Description
@@ -66,8 +48,7 @@ class AddPostScreen extends StatelessWidget {
                 SizedBox(height: 5.h),
                 _buildTextField(
                   controller: controller.descriptionController,
-                  hintText:
-                      "About The Role\nWe Are Looking For A Skilled And Reliable Plumber To Join Our Team. The Ideal Candidate Will Have Experience In Installing, Repairing, And Monitoring Residential And/Or Commercial Plumbing Systems.",
+                  hintText: "About The Role...",
                   maxLines: 5,
                 ),
                 SizedBox(height: 16.h),
@@ -80,13 +61,13 @@ class AddPostScreen extends StatelessWidget {
                 ),
                 SizedBox(height: 6.h),
                 Obx(
-                  () => Row(
+                      () => Row(
                     children: [
                       Expanded(
                         child: _buildPricingOption(
                           title: "Great Vibes",
                           isSelected:
-                              controller.selectedPricingOption.value ==
+                          controller.selectedPricingOption.value ==
                               'Great Vibes',
                           onTap: () =>
                               controller.selectPricingOption('Great Vibes'),
@@ -97,7 +78,7 @@ class AddPostScreen extends StatelessWidget {
                         child: _buildPricingOption(
                           title: "Off Vibes",
                           isSelected:
-                              controller.selectedPricingOption.value ==
+                          controller.selectedPricingOption.value ==
                               'Off Vibes',
                           onTap: () =>
                               controller.selectPricingOption('Off Vibes'),
@@ -114,7 +95,7 @@ class AddPostScreen extends StatelessWidget {
                       child: _buildPricingOption(
                         title: "Charming Gentleman",
                         isSelected:
-                            controller.selectedPricingOption.value ==
+                        controller.selectedPricingOption.value ==
                             'Charming Gentleman',
                         onTap: () => controller.selectPricingOption(
                           'Charming Gentleman',
@@ -126,7 +107,7 @@ class AddPostScreen extends StatelessWidget {
                       child: _buildPricingOption(
                         title: "Lovely Lady",
                         isSelected:
-                            controller.selectedPricingOption.value ==
+                        controller.selectedPricingOption.value ==
                             'Lovely Lady',
                         onTap: () =>
                             controller.selectPricingOption('Lovely Lady'),
@@ -146,7 +127,7 @@ class AddPostScreen extends StatelessWidget {
                 ),
                 SizedBox(height: 8.h),
                 Obx(
-                  () => _buildDropdown(
+                      () => _buildDropdown(
                     value: controller.selectedPriorityLevel.value.isEmpty
                         ? null
                         : controller.selectedPriorityLevel.value,
@@ -167,9 +148,7 @@ class AddPostScreen extends StatelessWidget {
                         : "Post",
                     buttonColor: AppColors.primaryColor,
                     buttonRadius: 8,
-                    onTap: controller.isLoading.value
-                        ? null
-                        : () => controller.createPost(),
+                    onTap: () => controller.createPost(),
                   );
                 }),
                 SizedBox(height: 40.h),
@@ -181,6 +160,237 @@ class AddPostScreen extends StatelessWidget {
     );
   }
 
+  // 🌟 NEW/REPLACED: Main section for handling image display and options
+  Widget _buildImageUploadSection(BuildContext context) {
+    final images = controller.selectedImages;
+    final maxImages = controller.maxImages;
+    final bool canAddMore = images.length < maxImages;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Grid of Selected Images
+        if (images.isNotEmpty)
+          _buildSelectedImagesGrid(context, images, maxImages),
+
+        SizedBox(height: images.isNotEmpty ? 16.h : 0),
+
+        // Add Image Buttons (only show if more can be added)
+        if (canAddMore)
+          Row(
+            children: [
+              Expanded(
+                child: _buildImageOptionButton(
+                  title: "Gallery",
+                  imageSrc: AppIcons.upload2,
+                  onTap: () => controller.pickImageFromGallery(),
+                ),
+              ),
+              SizedBox(width: 16.w),
+              Expanded(
+                child: _buildImageOptionButton(
+                  title: "Camera",
+                  imageSrc: AppIcons.camera,
+                  onTap: () => controller.pickImageFromCamera(),
+                ),
+              ),
+            ],
+          ),
+      ],
+    );
+  }
+
+  // 🌟 NEW: Grid View for Selected Images
+  Widget _buildSelectedImagesGrid(BuildContext context, List<File> images, int max) {
+    // Add an empty spot if we haven't reached the max limit
+    int itemCount = images.length;
+    bool showEmptySlot = images.length < max;
+    if (showEmptySlot) {
+      itemCount += 1; // For the "Add More" slot
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        CommonText(
+          text: "Selected: (${images.length}/$max)",
+          fontSize: 12.sp,
+          fontWeight: FontWeight.w400,
+          color: AppColors.textSecond,
+        ),
+        SizedBox(height: 8.h),
+        GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: itemCount,
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 4, // More compact grid
+            crossAxisSpacing: 10.w,
+            mainAxisSpacing: 10.h,
+            childAspectRatio: 1.0,
+          ),
+          itemBuilder: (context, index) {
+            if (index < images.length) {
+              return _buildImageThumbnail(
+                file: images[index],
+                onRemove: () => controller.removeImageAtIndex(index),
+              );
+            } else {
+              // This is the empty slot for adding more
+              return _buildAddMoreSlot(context);
+            }
+          },
+        ),
+      ],
+    );
+  }
+
+  // 🌟 NEW: Add More slot (if images are already present)
+  Widget _buildAddMoreSlot(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        // Show a dialog/bottom sheet to choose source (Gallery/Camera)
+        Get.bottomSheet(
+          Container(
+            padding: EdgeInsets.all(20.w),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(20.r),
+                topRight: Radius.circular(20.r),
+              ),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CommonText(
+                  text: "Add Image",
+                  fontSize: 18.sp,
+                  fontWeight: FontWeight.bold,
+                ),
+                SizedBox(height: 20.h),
+                _buildImageOptionButton(
+                  title: "Upload from Gallery",
+                  imageSrc: AppIcons.upload2,
+                  onTap: () {
+                    controller.pickImageFromGallery();
+                    Get.back();
+                  },
+                ),
+                SizedBox(height: 10.h),
+                _buildImageOptionButton(
+                  title: "Take a Photo",
+                  imageSrc: AppIcons.camera,
+                  onTap: () {
+                    controller.pickImageFromCamera();
+                    Get.back();
+                  },
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+      child: DottedBorder(
+        borderType: BorderType.RRect,
+        radius: Radius.circular(8.r),
+        dashPattern: const [6, 3],
+        color: AppColors.textSecond,
+        strokeWidth: 1,
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.grey.shade100,
+            borderRadius: BorderRadius.circular(8.r),
+          ),
+          child: Center(
+            child: Icon(Icons.add_a_photo_outlined, size: 28.sp, color: AppColors.textSecond),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // 🌟 NEW: Individual Image Thumbnail with Remove Button
+  Widget _buildImageThumbnail({
+    required File file,
+    required VoidCallback onRemove,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(8.r),
+        border: Border.all(color: Colors.grey[300]!, width: 1),
+      ),
+      child: Stack(
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8.r),
+            child: Image.file(
+              file,
+              width: double.infinity,
+              height: double.infinity,
+              fit: BoxFit.cover,
+            ),
+          ),
+          Positioned(
+            top: 4.h,
+            right: 4.w,
+            child: GestureDetector(
+              onTap: onRemove,
+              child: Container(
+                padding: EdgeInsets.all(2.w),
+                decoration: BoxDecoration(
+                  color: Colors.red.withOpacity(0.8),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(Icons.close, color: Colors.white, size: 16.sp),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // 🌟 MODIFIED: Option button for initial selection (made smaller/more general)
+  Widget _buildImageOptionButton({
+    required String title,
+    required String imageSrc,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 100.h, // Adjusted height
+        width: double.infinity,
+        decoration: BoxDecoration(
+          border: Border.all(
+            color: Colors.grey[300]!,
+            style: BorderStyle.solid,
+          ),
+          borderRadius: BorderRadius.circular(12.r),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CommonImage(imageSrc: imageSrc, height: 28.h),
+            SizedBox(height: 8.h),
+            CommonText(
+              text: title,
+              fontSize: 13.sp,
+              fontWeight: FontWeight.w500,
+              color: AppColors.primaryColor,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // --- Existing Helper Widgets ---
+
+  // NOTE: _buildimageUpload and _buildselectedImage were removed as they are obsolete
+  // _buildTextField, _buildDropdown, and _buildPricingOption are unchanged.
+
   Widget _buildTextField({
     required TextEditingController controller,
     required String hintText,
@@ -190,6 +400,7 @@ class AddPostScreen extends StatelessWidget {
     VoidCallback? onTap,
     TextInputType? keyboardType,
   }) {
+    // ... (unchanged implementation)
     return Container(
       decoration: BoxDecoration(
         color: Colors.transparent,
@@ -226,6 +437,7 @@ class AddPostScreen extends StatelessWidget {
     required List<String> items,
     required void Function(String?)? onChanged,
   }) {
+    // ... (unchanged implementation)
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
       decoration: BoxDecoration(
@@ -252,17 +464,17 @@ class AddPostScreen extends StatelessWidget {
                 items: items.isEmpty
                     ? null
                     : items.map((String item) {
-                        return DropdownMenuItem<String>(
-                          value: item,
-                          child: Text(
-                            item,
-                            style: TextStyle(
-                              fontSize: 14.sp,
-                              color: Colors.black,
-                            ),
-                          ),
-                        );
-                      }).toList(),
+                  return DropdownMenuItem<String>(
+                    value: item,
+                    child: Text(
+                      item,
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        color: Colors.black,
+                      ),
+                    ),
+                  );
+                }).toList(),
                 onChanged: items.isEmpty ? null : onChanged,
               ),
             ),
@@ -277,6 +489,7 @@ class AddPostScreen extends StatelessWidget {
     required bool isSelected,
     required VoidCallback onTap,
   }) {
+    // ... (unchanged implementation)
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -304,80 +517,8 @@ class AddPostScreen extends StatelessWidget {
       ),
     );
   }
-
-  Widget _buildimageUpload() {
-    return Container(
-      height: 150.h,
-      width: double.infinity,
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey[300]!, style: BorderStyle.solid),
-        borderRadius: BorderRadius.circular(12.r),
-      ),
-      child: Stack(
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(12.r),
-            child: Image.file(
-              controller.selectedImage.value!,
-              width: double.infinity,
-              height: 150.h,
-              fit: BoxFit.cover,
-            ),
-          ),
-          Positioned(
-            top: 8.h,
-            right: 8.w,
-            child: GestureDetector(
-              onTap: () {
-                controller.selectedImage.value = null;
-              },
-              child: Container(
-                padding: EdgeInsets.all(4.w),
-                decoration: const BoxDecoration(
-                  color: Colors.red,
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(Icons.close, color: Colors.white, size: 20.sp),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildselectedImage({
-    required BuildContext context,
-    required String title,
-    required String imageSrc,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        height: 120.h,
-        width: double.infinity,
-        decoration: BoxDecoration(
-          border: Border.all(
-            color: Colors.grey[300]!,
-            style: BorderStyle.solid,
-          ),
-          borderRadius: BorderRadius.circular(12.r),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            CommonImage(imageSrc: imageSrc),
-            SizedBox(height: 12.h),
-            CommonText(
-              text: title,
-              fontSize: 14.sp,
-              fontWeight: FontWeight.w500,
-              color: AppColors.primaryColor,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 }
+
+// ⚠️ IMPORTANT: You must also import this package for the DottedBorder widget.
+// Add this to your pubspec.yaml:
+// dotted_border: ^2.0.0+2

@@ -58,11 +58,9 @@ class MyPostCard extends StatelessWidget {
                     radius: 18.r,
                     backgroundColor: Colors.transparent,
                     child: ClipOval(
-                      child: CommonImage(
-                        imageSrc: userAvatar,
-                        size: 36.r,
-                        fill: BoxFit.cover,
-                      ),
+                      child: Image.asset(
+                        "assets/images/profile_image.png"
+                      )
                     ),
                   ),
                 ),
@@ -72,7 +70,7 @@ class MyPostCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       CommonText(
-                        text: userName,
+                        text: "John Doe",
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
                         color: AppColors.black,

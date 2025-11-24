@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:giolee78/config/route/app_routes.dart';
 
 import '../../../../component/button/common_button.dart';
 import '../../../../component/image/common_image.dart';
@@ -44,7 +45,9 @@ class ChatNearbyProfileScreen extends StatelessWidget {
                 titleText: 'Send Greetings',
                 buttonHeight: 48.h,
                 buttonRadius: 6.r,
-                onTap: onSendGreetings,
+                onTap: (){
+                  Get.toNamed(AppRoutes.homeNav);
+                },
               ),
             ],
           ),

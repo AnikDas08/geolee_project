@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:giolee78/features/chat_nearby/presentation/screen/chat_nearby_profile_screen.dart';
 
+import '../../../../component/image/common_image.dart';
 import '../../../../component/text/common_text.dart';
 import '../../../../utils/constants/app_colors.dart';
 
@@ -60,23 +61,55 @@ class _ChatNearbyAppBar extends StatelessWidget {
               IconButton(
                 icon: const Icon(Icons.arrow_back_ios_new_rounded),
                 onPressed: () {
-                  Get.back();
+                  Navigator.pop(context);
                 },
               ),
-              const Expanded(
+              Expanded(
                 child: Center(
                   child: CommonText(
                     text: 'Chat Nearby',
-                    fontSize: 18,
+                    fontSize: 18.sp,
                     fontWeight: FontWeight.w600,
                     color: AppColors.textColorFirst,
                     textAlign: TextAlign.center,
                   ),
                 ),
               ),
-              IconButton(
+              // Replaced IconButton with PopupMenuButton
+              PopupMenuButton<String>(
+                onSelected: (String result) {
+                  if (result == 'clear_data') {
+                    // TODO: Implement the actual clear data logic (e.g., clearing a list/database)
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Clear Data action selected! (To be implemented)'),
+                        duration: Duration(seconds: 2),
+                      ),
+                    );
+                  }
+                },
+                itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                  PopupMenuItem<String>(
+                    value: 'clear_data',
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.delete_outline_rounded,
+                          color: AppColors.black,
+                        ),
+                        SizedBox(width: 8.w),
+                        CommonText(
+                          text: 'Clear Data',
+                          fontSize: 14.sp,
+                          color: AppColors.black,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
                 icon: const Icon(Icons.more_horiz_rounded),
-                onPressed: () {},
+                // Ensure padding is handled consistently
+                padding: EdgeInsets.zero,
               ),
             ],
           ),
@@ -101,7 +134,7 @@ class _NearbyUserCard extends StatelessWidget {
         decoration: ShapeDecoration(
           color: Colors.white,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          shadows: [
+          shadows: const [
             BoxShadow(
               color: Color(0x0C000000),
               blurRadius: 4,
@@ -113,14 +146,16 @@ class _NearbyUserCard extends StatelessWidget {
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
         child: Row(
           children: [
-            Container(
-              width: 40.r,
-              height: 40.r,
-              decoration: const BoxDecoration(
-                color: AppColors.black,
-                shape: BoxShape.circle,
+            CircleAvatar(
+              radius: 20.r,
+              backgroundColor: Colors.transparent,
+              child: ClipOval(
+                child: CommonImage(
+                  imageSrc: "assets/images/profile_image.png",
+                  size: 40.r,
+                  fill: BoxFit.cover,
+                ),
               ),
-              child: const Icon(Icons.person, color: AppColors.white, size: 20),
             ),
             SizedBox(width: 16.w),
             Expanded(
