@@ -11,9 +11,6 @@ class NotificationScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Notification"),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: const BackButton(),
       ),
 
       /// Body Section starts here

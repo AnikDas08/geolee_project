@@ -97,7 +97,7 @@ class _CommonTextFieldState extends State<CommonTextField> {
         textInputAction: widget.textInputAction,
         maxLength: widget.mexLength,
         maxLines: widget.maxLines ?? 1,
-        cursorColor: AppColors.white,
+        cursorColor: AppColors.black,
         inputFormatters: widget.inputFormatters,
         style: TextStyle(fontSize: 14, color: widget.textColor),
         onFieldSubmitted: widget.onSubmitted,

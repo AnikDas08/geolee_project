@@ -7,7 +7,6 @@ import 'package:giolee78/features/message/presentation/screen/group_message.dart
 import '../../../../../../config/route/app_routes.dart';
 import '../../../../component/other_widgets/common_loader.dart';
 import '../../../../component/text/common_text.dart';
-import '../../../../component/text_field/common_text_field.dart';
 import '../controller/chat_controller.dart';
 import '../../data/model/chat_list_model.dart';
 import '../../../../../../utils/enum/enum.dart';
@@ -39,17 +38,15 @@ class ChatListScreen extends StatelessWidget {
                 return IconButton(
                   icon: const Icon(Icons.add, color: Colors.black),
                   onPressed: () {
-                    final TabController? tabController = DefaultTabController.of(context);
-                    if (tabController != null) {
-                      if (tabController.index == 0) {
-                        // Chat tab is selected
-                        Get.toNamed(AppRoutes.searchScreen);
-                      } else {
-                        // Group tab is selected
-                        Get.to(() => CreateGroupScreen());
-                      }
+                    final TabController tabController = DefaultTabController.of(context);
+                    if (tabController.index == 0) {
+                      // Chat tab is selected
+                      Get.toNamed(AppRoutes.searchScreen);
+                    } else {
+                      // Group tab is selected
+                      Get.to(() => CreateGroupScreen());
                     }
-                  },
+                                    },
                 );
               },
             ),
@@ -58,13 +55,9 @@ class ChatListScreen extends StatelessWidget {
             preferredSize: Size.fromHeight(48.h),
             child: Builder(
               builder: (context) {
-                final TabController? tabController = DefaultTabController.of(
+                final TabController tabController = DefaultTabController.of(
                   context,
                 );
-
-                if (tabController == null) {
-                  return const SizedBox.shrink();
-                }
 
                 return AnimatedBuilder(
                   animation: tabController,

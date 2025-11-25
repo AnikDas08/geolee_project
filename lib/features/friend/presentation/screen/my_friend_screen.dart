@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 
 import 'package:giolee78/component/text/common_text.dart';
 import 'package:giolee78/component/text_field/common_text_field.dart';
-import 'package:giolee78/features/message/presentation/screen/message_screen.dart';
+import 'package:giolee78/config/route/app_routes.dart';
 import 'package:giolee78/utils/constants/app_colors.dart';
 import 'package:giolee78/utils/constants/app_images.dart';
 
@@ -67,7 +67,7 @@ class MyFriendScreen extends StatelessWidget {
                 padding: EdgeInsets.only(bottom: 10.h),
                 child: GestureDetector(
                   onTap: () {
-                    Get.to(MessageScreen());
+                    //Get.to(MessageScreen());
                   },
                   child: _FriendListItem(
                     userName: 'Arlene McCoy',
@@ -198,10 +198,15 @@ class _FriendListItem extends StatelessWidget {
             ),
           ),
           SizedBox(width: 12.w),
-          Icon(
-            Icons.chat_bubble_outline,
-            size: 20.sp,
-            color: AppColors.secondaryText,
+          GestureDetector(
+            onTap: (){
+              Get.toNamed(AppRoutes.message);
+            },
+            child: Icon(
+              Icons.chat_bubble_outline,
+              size: 20.sp,
+              color: AppColors.secondaryText,
+            ),
           ),
           SizedBox(width: 16.w),
           Icon(Icons.close, size: 20.sp, color: AppColors.secondaryText),

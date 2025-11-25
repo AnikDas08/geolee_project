@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:giolee78/features/profile/data/model/user_profile_model.dart';
 import 'package:giolee78/services/storage/storage_keys.dart';
 import 'package:giolee78/services/storage/storage_services.dart';
-import 'package:giolee78/utils/helpers/other_helper.dart';
 
 import '../../../../config/api/api_end_point.dart';
 import '../../../../config/route/app_routes.dart';
@@ -28,6 +28,9 @@ class ProfileController extends GetxController {
 
   UserProfileModel? profileModel;
 
+  /// Image picker instance
+  final ImagePicker _picker = ImagePicker();
+
   /// all controller here
   TextEditingController nameController = TextEditingController()
     ..text = LocalStorage.myName;
@@ -42,10 +45,70 @@ class ProfileController extends GetxController {
     ..text = LocalStorage.gender;
   TextEditingController addressController = TextEditingController();
 
-  /// select image function here
-  getProfileImage() async {
-    image = await OtherHelper.openGalleryForProfile();
-    update();
+  /// Select image from gallery or camera
+  Future<void> getProfileImage() async {
+    try {
+      // Show bottom sheet to choose source
+      final ImageSource? source = await Get.bottomSheet<ImageSource>(
+        Container(
+          padding: EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Choose Image Source',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+              ),
+              SizedBox(height: 20),
+              ListTile(
+                leading: Icon(Icons.camera_alt, color: Colors.blue),
+                title: Text('Camera'),
+                onTap: () => Get.back(result: ImageSource.camera),
+              ),
+              ListTile(
+                leading: Icon(Icons.photo_library, color: Colors.green),
+                title: Text('Gallery'),
+                onTap: () => Get.back(result: ImageSource.gallery),
+              ),
+              SizedBox(height: 10),
+              TextButton(
+                onPressed: () => Get.back(),
+                child: Text('Cancel'),
+              ),
+            ],
+          ),
+        ),
+        isDismissible: true,
+      );
+
+      if (source == null) return;
+
+      // Pick image
+      final XFile? pickedFile = await _picker.pickImage(
+        source: source,
+        maxWidth: 1080,
+        maxHeight: 1080,
+        imageQuality: 85,
+      );
+
+      if (pickedFile != null && pickedFile.path.isNotEmpty) {
+        image = pickedFile.path;
+        update();
+      }
+    } catch (e) {
+      print('Error picking image: $e');
+      Get.snackbar(
+        'Error',
+        'Failed to pick image',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    }
   }
 
   /// select language  function here
@@ -66,7 +129,7 @@ class ProfileController extends GetxController {
 
     if (pickedDate != null) {
       dateOfBirthController.text =
-          "${pickedDate.day.toString().padLeft(2, '0')} ${_getMonthName(pickedDate.month)} ${pickedDate.year}";
+      "${pickedDate.day.toString().padLeft(2, '0')} ${_getMonthName(pickedDate.month)} ${pickedDate.year}";
       update();
     }
   }
@@ -160,7 +223,6 @@ class ProfileController extends GetxController {
     var response = await ApiService.post(ApiEndPoint.user, body: body);
 
     if (response.statusCode == 200) {
-      // Parse response to model
       profileModel = UserProfileModel.fromJson(
         response.data as Map<String, dynamic>,
       );
@@ -168,7 +230,6 @@ class ProfileController extends GetxController {
       if (profileModel?.data != null) {
         final data = profileModel!.data!;
 
-        // Update LocalStorage variables
         LocalStorage.userId = data.id ?? "";
         LocalStorage.myImage = data.image ?? "";
         LocalStorage.myName = data.name ?? "";
@@ -187,7 +248,6 @@ class ProfileController extends GetxController {
         LocalStorage.createdAt = data.createdAt ?? "";
         LocalStorage.updatedAt = data.updatedAt ?? "";
 
-        // Save to SharedPreferences
         await LocalStorage.setBool(
           LocalStorageKeys.isLogIn,
           LocalStorage.isLogIn,

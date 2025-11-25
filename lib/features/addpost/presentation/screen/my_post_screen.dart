@@ -5,7 +5,6 @@ import 'package:giolee78/features/addpost/presentation/widgets/my_post_card.dart
 import 'package:giolee78/utils/constants/app_colors.dart';
 import 'package:giolee78/utils/constants/app_images.dart';
 
-import '../widgets/confirm_delete_dialog.dart';
 
 class MyPostScreen extends StatelessWidget {
   const MyPostScreen({super.key});

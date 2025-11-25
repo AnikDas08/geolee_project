@@ -4,11 +4,10 @@ import 'package:get/get.dart';
 import 'package:giolee78/component/button/common_button.dart';
 import 'package:giolee78/component/image/common_image.dart';
 import 'package:giolee78/component/text_field/common_text_field.dart';
-import 'package:giolee78/config/api/api_end_point.dart';
 import 'package:giolee78/features/advertise/presentation/screen/verify_user.dart';
-import 'package:giolee78/services/storage/storage_services.dart';
 import 'package:giolee78/utils/constants/app_colors.dart';
 import 'package:giolee78/utils/constants/app_images.dart';
+import 'dart:io'; // Import for File
 import '../controller/provider_info_controller.dart';
 
 class ServiceProviderInfoScreen extends StatelessWidget {
@@ -45,16 +44,47 @@ class ServiceProviderInfoScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Center(
-                child: CircleAvatar(
-                  radius: 50.sp,
-                  backgroundColor: Colors.transparent,
-                  child: ClipOval(
-                    child: CommonImage(
-                      imageSrc: ApiEndPoint.imageUrl + LocalStorage.myImage,
-                      size: 100,
-                      defaultImage: AppImages.profileImage,
+                child: Stack(
+                  children: [
+                    Obx(() {
+                      return CircleAvatar(
+                        radius: 50.sp,
+                        backgroundColor: Colors.transparent,
+                        child: ClipOval(
+                          child: controller.profileImagePath.value.isEmpty
+                              ? CommonImage(
+                            imageSrc: "assets/images/profile_image.png",
+                            size: 100,
+                            defaultImage: AppImages.profileImage,
+                          )
+                              : Image.file(
+                            File(controller.profileImagePath.value),
+                            width: 100.w,
+                            height: 100.h,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      );
+                    }),
+                    Positioned(
+                      bottom: 0,
+                      right: 0,
+                      child: GestureDetector(
+                        onTap: () {
+                          controller.pickImage();
+                        },
+                        child: CircleAvatar(
+                          radius: 18.sp,
+                          backgroundColor: AppColors.primaryColor,
+                          child: Icon(
+                            Icons.edit,
+                            color: Colors.white,
+                            size: 20.sp,
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
+                  ],
                 ),
               ),
               const SizedBox(height: 20),

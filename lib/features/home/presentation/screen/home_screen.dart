@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:giolee78/component/image/common_image.dart';
 import 'package:giolee78/component/other_widgets/item.dart';
 import 'package:giolee78/features/chat_nearby/presentation/screen/chat_nearby_screen.dart';
 import 'package:giolee78/features/clicker/presentation/screen/clicker_screen.dart';

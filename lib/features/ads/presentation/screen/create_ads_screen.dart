@@ -1,25 +1,32 @@
+import 'dart:io'; // Needed for File image display
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+
 import 'package:giolee78/component/button/common_button.dart';
 import 'package:giolee78/component/image/common_image.dart';
-import 'package:giolee78/component/pop_up/common_pop_menu.dart';
 import 'package:giolee78/component/text/common_text.dart';
 import 'package:giolee78/component/text_field/common_text_field.dart';
 import 'package:giolee78/utils/constants/app_colors.dart';
 import 'package:giolee78/utils/constants/app_icons.dart';
+
+import '../controller/create_add_controller.dart';
 
 class CreateAdsScreen extends StatelessWidget {
   const CreateAdsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // Inject the controller
+    final CreateAdsController controller = Get.put(CreateAdsController());
+
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
         elevation: 0,
         centerTitle: true,
-        leading: SizedBox(),
+        // Since you used SizedBox(), I'll assume you don't want a back button here
+        leading: const SizedBox(),
         title: const CommonText(
           text: 'Create Ads',
           fontSize: 18,
@@ -57,29 +64,46 @@ class CreateAdsScreen extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildselectedImage(
-                      context: context,
-                      title: 'Upload Cover Image',
-                      imageSrc: AppIcons.upload2,
-                      onTap: () {},
-                    ),
+                    // --- Image Upload Section (Wrapped in Obx) ---
+                    Obx(() {
+                      return _buildselectedImage(
+                        context: context,
+                        imagePath: controller.coverImagePath.value,
+                        onTap: controller.pickImage,
+                      );
+                    }),
                     SizedBox(height: 16.h),
+
+                    // --- Ads Title ---
                     _buildLabel('Ads Title'),
                     SizedBox(height: 6.h),
-                    const CommonTextField(hintText: 'Delicious Fast Food'),
+                    CommonTextField(
+                      controller: controller.titleController, // Use controller
+                      hintText: 'Delicious Fast Food',
+                    ),
                     SizedBox(height: 14.h),
+
+                    // --- Description ---
                     _buildLabel('Description'),
                     SizedBox(height: 6.h),
-                    const CommonTextField(
+                    CommonTextField(
+                      controller: controller.descriptionController, // Use controller
                       hintText:
-                          'Satisfy Your Cravings With Delicious Fast Food, Where Every Bite Is Packed With Flavor From Juicy Burgers And Crispy Fries To Cheesy Pizzas And Spicy Wraps',
+                      'Satisfy Your Cravings With Delicious Fast Food, Where Every Bite Is Packed With Flavor...',
                       maxLines: 3,
                     ),
                     SizedBox(height: 14.h),
+
+                    // --- Focus Area ---
                     _buildLabel('Focus Area'),
                     SizedBox(height: 6.h),
-                    const CommonTextField(hintText: 'California, New York'),
+                    CommonTextField(
+                      controller: controller.focusAreaController, // Use controller
+                      hintText: 'California, New York',
+                    ),
                     SizedBox(height: 14.h),
+
+                    // --- Date Fields (Start/End) ---
                     Row(
                       children: [
                         Expanded(
@@ -88,9 +112,12 @@ class CreateAdsScreen extends StatelessWidget {
                             children: [
                               _buildLabel('Start Date'),
                               SizedBox(height: 6.h),
-                              const CommonTextField(
+                              CommonTextField(
+                                controller: controller.startDateController, // Use controller
                                 hintText: '01 Jan 2020',
-                                suffixIcon: Icon(
+                                //readOnly: true, // Make it read-only
+                                onTap: () => controller.selectDate(context, controller.startDateController), // Add onTap for date picker
+                                suffixIcon: const Icon(
                                   Icons.calendar_today_outlined,
                                   size: 18,
                                   color: AppColors.textSecond,
@@ -106,9 +133,12 @@ class CreateAdsScreen extends StatelessWidget {
                             children: [
                               _buildLabel('End Date'),
                               SizedBox(height: 6.h),
-                              const CommonTextField(
+                              CommonTextField(
+                                controller: controller.endDateController, // Use controller
                                 hintText: '01 Jan 2020',
-                                suffixIcon: Icon(
+                                //readOnly: true, // Make it read-only
+                                onTap: () => controller.selectDate(context, controller.endDateController), // Add onTap for date picker
+                                suffixIcon: const Icon(
                                   Icons.calendar_today_outlined,
                                   size: 18,
                                   color: AppColors.textSecond,
@@ -120,6 +150,8 @@ class CreateAdsScreen extends StatelessWidget {
                       ],
                     ),
                     SizedBox(height: 14.h),
+
+                    // --- Time Fields (Start/End) ---
                     Row(
                       children: [
                         Expanded(
@@ -128,9 +160,12 @@ class CreateAdsScreen extends StatelessWidget {
                             children: [
                               _buildLabel('Start Time'),
                               SizedBox(height: 6.h),
-                              const CommonTextField(
-                                hintText: '01 Jan 2020',
-                                suffixIcon: Icon(
+                              CommonTextField(
+                                controller: controller.startTimeController, // Use controller
+                                hintText: '10:00 AM',
+                                //readOnly: true, // Make it read-only
+                                onTap: () => controller.selectTime(context, controller.startTimeController), // Add onTap for time picker
+                                suffixIcon: const Icon(
                                   Icons.access_time,
                                   size: 18,
                                   color: AppColors.textSecond,
@@ -146,9 +181,12 @@ class CreateAdsScreen extends StatelessWidget {
                             children: [
                               _buildLabel('End Time'),
                               SizedBox(height: 6.h),
-                              const CommonTextField(
-                                hintText: '01 Jan 2020',
-                                suffixIcon: Icon(
+                              CommonTextField(
+                                controller: controller.endTimeController, // Use controller
+                                hintText: '10:00 PM',
+                                //readOnly: true, // Make it read-only
+                                onTap: () => controller.selectTime(context, controller.endTimeController), // Add onTap for time picker
+                                suffixIcon: const Icon(
                                   Icons.access_time,
                                   size: 18,
                                   color: AppColors.textSecond,
@@ -160,23 +198,19 @@ class CreateAdsScreen extends StatelessWidget {
                       ],
                     ),
                     SizedBox(height: 14.h),
+
+                    // --- Website Link ---
                     _buildLabel('Website Link'),
                     SizedBox(height: 6.h),
-                    const CommonTextField(
+                    CommonTextField(
+                      controller: controller.websiteLinkController, // Use controller
                       hintText: 'www.website.com/restaurant',
                     ),
                     SizedBox(height: 20.h),
+
+                    // --- Submit Button ---
                     CommonButton(
-                      onTap: () {
-                        successPopUps(
-                          message:
-                              'Your Asd Submit successful. Please wait for admin approval before your ad goes live.',
-                          onTap: () {
-                            Get.back();
-                          },
-                          buttonTitle: 'Done',
-                        );
-                      },
+                      onTap: () => controller.submitAd(context), // Use controller method
                       titleText: 'Submit',
                       buttonColor: AppColors.primaryColor,
                       titleColor: AppColors.white,
@@ -195,12 +229,36 @@ class CreateAdsScreen extends StatelessWidget {
     );
   }
 
+  // Helper method for the upload area
   Widget _buildselectedImage({
     required BuildContext context,
-    required String title,
-    required String imageSrc,
+    required String imagePath, // Now takes the path string
     required VoidCallback onTap,
   }) {
+    // If an image is selected, display it using Image.file
+    if (imagePath.isNotEmpty) {
+      return GestureDetector(
+        onTap: onTap,
+        child: Container(
+          height: 120.h,
+          width: double.infinity,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12.r),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(12.r),
+            child: Image.file(
+              File(imagePath),
+              fit: BoxFit.cover,
+              width: double.infinity,
+              height: 120.h,
+            ),
+          ),
+        ),
+      );
+    }
+
+    // If no image is selected, display the default upload UI
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -216,10 +274,10 @@ class CreateAdsScreen extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            CommonImage(imageSrc: imageSrc),
+            CommonImage(imageSrc: AppIcons.upload2), // Use your default upload icon
             SizedBox(height: 12.h),
             CommonText(
-              text: title,
+              text: 'Upload Cover Image',
               fontSize: 14.sp,
               fontWeight: FontWeight.w500,
               color: AppColors.primaryColor,

@@ -6,7 +6,6 @@ import 'package:giolee78/component/image/common_image.dart';
 import 'package:giolee78/component/other_widgets/item.dart';
 import 'package:giolee78/component/pop_up/common_pop_menu.dart';
 import 'package:giolee78/component/text/common_text.dart';
-import 'package:giolee78/config/api/api_end_point.dart';
 import 'package:giolee78/config/route/app_routes.dart';
 import 'package:giolee78/features/ads/presentation/screen/history_ads_screen.dart';
 import 'package:giolee78/features/auth/change_password/presentation/screen/change_password_screen.dart';
@@ -164,6 +163,7 @@ class ProfileScreen extends StatelessWidget {
                       },
                     ),
                     SizedBox(height: 20.h,),
+                    if (LocalStorage.myRole != UserType.advertise.name)
                     CommonButton(
                         titleText: "Adverise with Us",
                       onTap: (){

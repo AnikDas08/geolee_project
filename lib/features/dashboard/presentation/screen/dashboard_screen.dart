@@ -41,7 +41,7 @@ class DashboardScreen extends StatelessWidget {
                 description:
                     'Satisfy Your Cravings With Delicious Fast Food, Where Every Bite Is Packed With Flavour From Juicy Burgers And Crispy Fries To Cheesy Pizzas And Spicy Wraps.',
                 onTap: () {
-                  Get.to(() => const ViewAdsScreen());
+                  Get.to(() => ViewAdsScreen());
                 },
               ),
               SizedBox(height: 16.h),
@@ -51,7 +51,7 @@ class DashboardScreen extends StatelessWidget {
                 description:
                     'Satisfy Your Cravings With Delicious Fast Food, Where Every Bite Is Packed With Flavour From Juicy Burgers And Crispy Fries To Cheesy Pizzas And Spicy Wraps.',
                 onTap: () {
-                  Get.to(() => const ViewAdsScreen());
+                  Get.to(() => ViewAdsScreen());
                 },
               ),
             ],

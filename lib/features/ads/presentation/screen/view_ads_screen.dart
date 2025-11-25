@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 
 import 'package:giolee78/component/button/common_button.dart';
 import 'package:giolee78/component/text/common_text.dart';
+import 'package:giolee78/config/route/app_routes.dart';
 import 'package:giolee78/features/ads/presentation/screen/edit_ads_screen.dart';
 import 'package:giolee78/utils/constants/app_colors.dart';
 import 'package:giolee78/utils/constants/app_images.dart';
@@ -11,6 +12,71 @@ import 'package:giolee78/utils/constants/app_images.dart';
 class ViewAdsScreen extends StatelessWidget {
   final bool? isFromHistory;
   const ViewAdsScreen({super.key, this.isFromHistory = false});
+  void showDeletePostDialog(
+      BuildContext context,
+
+      ) {
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          // Text changed to 'delete this post'
+          title: Text(
+            textAlign: TextAlign.center,
+            'Are you sure you want to delete this post?',
+            style: TextStyle(
+              fontSize: 18.0,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          contentPadding: const EdgeInsets.fromLTRB(24.0, 20.0, 24.0, 0.0),
+          actions: <Widget>[
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // 'No' Button
+                Container(
+                  decoration: BoxDecoration(
+                    color: AppColors.grey,
+                    borderRadius: BorderRadius.circular(12.r),
+                  ),
+                  child: TextButton(
+                    onPressed: () => Get.back(),
+                    child: const Text('No', style: TextStyle(color: Colors.black54)),
+                  ),
+                ),
+
+                const SizedBox(width: 12),
+
+                // 'Yes' Button (Confirmation)
+                ElevatedButton(
+                  onPressed: () {
+                    Get.back();
+                    Get.snackbar('Success', 'Post deleted successfully');
+                    Get.offNamed(AppRoutes.homeNav);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: const Text(
+                    'Yes',
+                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                  ),
+                ),
+                SizedBox(width: 8.w),
+              ],
+            ),
+            SizedBox(height: 10.h),
+          ],
+        );
+      },
+    );
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -42,6 +108,7 @@ class ViewAdsScreen extends StatelessWidget {
             children: [
               if (isFromHistory == true) _buildStatsGrid(),
               Container(
+                // ... (Container content remains the same)
                 width: double.infinity,
                 decoration: BoxDecoration(
                   color: AppColors.white,
@@ -87,7 +154,7 @@ class ViewAdsScreen extends StatelessWidget {
                       SizedBox(height: 8.h),
                       const CommonText(
                         text:
-                            'Seafood Treat Carnival. Enjoy Delicious Sea Food, Wholesome Every Bite! Seafood Pasta, Grilled Prawns, Atlas Burgers, And Crispy Wings To Endless Flavors And Tasty Bites.',
+                        'Seafood Treat Carnival. Enjoy Delicious Sea Food, Wholesome Every Bite! Seafood Pasta, Grilled Prawns, Atlas Burgers, And Crispy Wings To Endless Flavors And Tasty Bites.',
                         fontSize: 12,
                         fontWeight: FontWeight.w400,
                         color: AppColors.textSecond,
@@ -116,7 +183,10 @@ class ViewAdsScreen extends StatelessWidget {
                           children: [
                             Expanded(
                               child: CommonButton(
-                                onTap: null,
+                                // 3. The corrected call to the dialog function
+                                onTap: () {
+                                  showDeletePostDialog(context,);
+                                },
                                 titleText: 'Delete Post',
                                 buttonColor: AppColors.white,
                                 titleColor: AppColors.primaryColor,
@@ -156,11 +226,13 @@ class ViewAdsScreen extends StatelessWidget {
     );
   }
 
+  // ... (Other helper methods _buildInfoRow, _buildStatsGrid, _StatsCard)
   Widget _buildInfoRow({
     required String label,
     required String value,
     bool isLink = false,
   }) {
+    // ... (implementation)
     return Padding(
       padding: EdgeInsets.only(top: 4.h),
       child: Row(
@@ -192,6 +264,7 @@ class ViewAdsScreen extends StatelessWidget {
   }
 
   Widget _buildStatsGrid() {
+    // ... (implementation)
     return GridView.count(
       crossAxisCount: 2,
       crossAxisSpacing: 12.w,

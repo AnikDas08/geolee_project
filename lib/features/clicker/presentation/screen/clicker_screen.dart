@@ -27,90 +27,92 @@ class ClickerScreen extends StatelessWidget {
       appBar: CustomAppBar(notificationCount: 0),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: Column(
-          children: [
-            CommonTextField(
-              prefixIcon: const Icon(Icons.search),
-              hintText: AppString.search,
-              borderRadius: 20.r,
-            ),
-            CarouselSlider(
-              items: controller.banners,
-              options: CarouselOptions(
-                height: 150.h,
-                aspectRatio: 16 / 9,
-                viewportFraction: 0.5,
-                initialPage: controller.currentPosition,
-                enableInfiniteScroll: true,
-                reverse: false,
-                autoPlay: true,
-                autoPlayInterval: const Duration(seconds: 3),
-                autoPlayAnimationDuration: const Duration(milliseconds: 800),
-                autoPlayCurve: Curves.fastOutSlowIn,
-                enlargeCenterPage: true,
-                enlargeFactor: 0.2,
-                onPageChanged: (index, reason) {
-                  controller.changePosition(index);
-                },
-                scrollDirection: Axis.horizontal,
+        child: SafeArea(
+          child: Column(
+            children: [
+              CommonTextField(
+                prefixIcon: const Icon(Icons.search),
+                hintText: AppString.search,
+                borderRadius: 20.r,
               ),
-            ),
-            Obx(() {
-              return DotsIndicator(
-                dotsCount: controller.banners.length,
-                position: controller.currentPosition,
-                decorator: DotsDecorator(
-                  activeColor: AppColors.primaryColor,
-                  color: Colors.grey,
-                  size: const Size.square(9.0),
-                  activeSize: const Size.square(9.0),
-                  activeShape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(5.0),
-                  ),
-                ),
-              );
-            }),
-            Padding(
-              padding: const EdgeInsets.only(top: 16.0),
-              child: Row(
-                children: [
-                  CommonText(
-                    text: 'All Posts',
-                    fontSize: 20,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textColorFirst,
-                    textAlign: TextAlign.start,
-                  ),
-                  const Spacer(),
-                  _buildFilterSection(context), // Pass context here
-                ],
-              ),
-            ),
-            ListView.separated(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: 10,
-              separatorBuilder: (context, index) => const SizedBox(height: 16),
-              itemBuilder: (context, index) {
-                return GestureDetector(
-                  onTap: (){
-                    Get.to(() => ViewFriendScreen(isFriend: index % 2 == 0));
+              CarouselSlider(
+                items: controller.banners,
+                options: CarouselOptions(
+                  height: 150.h,
+                  aspectRatio: 16 / 9,
+                  viewportFraction: 0.5,
+                  initialPage: controller.currentPosition,
+                  enableInfiniteScroll: true,
+                  reverse: false,
+                  autoPlay: true,
+                  autoPlayInterval: const Duration(seconds: 3),
+                  autoPlayAnimationDuration: const Duration(milliseconds: 800),
+                  autoPlayCurve: Curves.fastOutSlowIn,
+                  enlargeCenterPage: true,
+                  enlargeFactor: 0.2,
+                  onPageChanged: (index, reason) {
+                    controller.changePosition(index);
                   },
-                  child: MyPostCard(
-                    userName: 'John Doe',
-                    userAvatar: AppImages.profileImage,
-                    timeAgo: '2 hours ago',
-                    location: 'New York, NY',
-                    postImage: AppImages.postImage,
-                    description: 'This is a test post.',
-                    isFriend: index % 2 == 0,
-                    privacyImage: AppIcons.public,
+                  scrollDirection: Axis.horizontal,
+                ),
+              ),
+              Obx(() {
+                return DotsIndicator(
+                  dotsCount: controller.banners.length,
+                  position: controller.currentPosition,
+                  decorator: DotsDecorator(
+                    activeColor: AppColors.primaryColor,
+                    color: Colors.grey,
+                    size: const Size.square(9.0),
+                    activeSize: const Size.square(9.0),
+                    activeShape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(5.0),
+                    ),
                   ),
                 );
-              },
-            ),
-          ],
+              }),
+              Padding(
+                padding: const EdgeInsets.only(top: 16.0),
+                child: Row(
+                  children: [
+                    CommonText(
+                      text: 'All Posts',
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textColorFirst,
+                      textAlign: TextAlign.start,
+                    ),
+                    const Spacer(),
+                    _buildFilterSection(context), // Pass context here
+                  ],
+                ),
+              ),
+              ListView.separated(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: 10,
+                separatorBuilder: (context, index) => const SizedBox(height: 16),
+                itemBuilder: (context, index) {
+                  return GestureDetector(
+                    onTap: (){
+                      Get.to(() => ViewFriendScreen(isFriend: index % 2 == 0));
+                    },
+                    child: MyPostCards(
+                      userName: 'John Doe',
+                      userAvatar: AppImages.profileImage,
+                      timeAgo: '2 hours ago',
+                      location: 'New York, NY',
+                      postImage: AppImages.postImage,
+                      description: 'This is a test post.',
+                      isFriend: index % 2 == 0,
+                      privacyImage: AppIcons.public,
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -181,56 +183,58 @@ class ClickerScreen extends StatelessWidget {
     return Obx(() {
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 8.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Handle for visual appeal
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                margin: const EdgeInsets.symmetric(vertical: 8),
-                decoration: BoxDecoration(
-                  color: Colors.grey[300],
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-            ),
-
-            ...controller.filterOptions.map((option) {
-              final bool isSelected = controller.selectedFilter == option;
-
-              return InkWell(
-                onTap: () {
-                  controller.changeFilter(option);
-                  // Dismiss the bottom sheet after selection
-                  Navigator.pop(context);
-                },
+        child: SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Handle for visual appeal
+              Center(
                 child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 14.0),
-                  child: Row(
-                    children: [
-                      Icon(
-                        isSelected ? Icons.radio_button_checked : Icons.radio_button_off,
-                        color: isSelected ? AppColors.primaryColor : Colors.grey,
-                        size: 24.0,
-                      ),
-                      const SizedBox(width: 16.0),
-                      CommonText(
-                        text: option,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w400,
-                        color: isSelected ? AppColors.primaryColor : Colors.black,
-                        textAlign: TextAlign.start,
-                      ),
-                    ],
+                  width: 40,
+                  height: 4,
+                  margin: const EdgeInsets.symmetric(vertical: 8),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(2),
                   ),
                 ),
-              );
-            }).toList(),
-          ],
+              ),
+          
+              ...controller.filterOptions.map((option) {
+                final bool isSelected = controller.selectedFilter == option;
+          
+                return InkWell(
+                  onTap: () {
+                    controller.changeFilter(option);
+                    // Dismiss the bottom sheet after selection
+                    Navigator.pop(context);
+                  },
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 14.0),
+                    child: Row(
+                      children: [
+                        Icon(
+                          isSelected ? Icons.radio_button_checked : Icons.radio_button_off,
+                          color: isSelected ? AppColors.primaryColor : Colors.grey,
+                          size: 24.0,
+                        ),
+                        const SizedBox(width: 16.0),
+                        CommonText(
+                          text: option,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w400,
+                          color: isSelected ? AppColors.primaryColor : Colors.black,
+                          textAlign: TextAlign.start,
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }),
+            ],
+          ),
         ),
       );
     });

@@ -1,7 +1,8 @@
 import 'dart:async';
-
+// Import for File
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart'; // Import image_picker
 
 class ServiceProviderController extends GetxController {
   // Observable variables
@@ -10,6 +11,7 @@ class ServiceProviderController extends GetxController {
   var experience = ''.obs;
   var skillInput = ''.obs;
   var skills = <String>[].obs;
+  var profileImagePath = ''.obs; // New: to store the path of the picked image
 
   Timer? _timer;
   int start = 0;
@@ -35,6 +37,8 @@ class ServiceProviderController extends GetxController {
   // Text controller for skill input
   final skillController = TextEditingController();
 
+  final ImagePicker _picker = ImagePicker(); // New: ImagePicker instance
+
   @override
   void onInit() {
     super.onInit();
@@ -48,7 +52,23 @@ class ServiceProviderController extends GetxController {
   @override
   void onClose() {
     skillController.dispose();
+    businessNameController.dispose();
+    businessTypeController.dispose();
+    businessLicenseNumberController.dispose();
+    phoneNumberController.dispose();
+    bioController.dispose();
+    emailController.dispose();
+    otpController.dispose();
+    _timer?.cancel();
     super.onClose();
+  }
+
+  // New: Method to pick an image
+  Future<void> pickImage() async {
+    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+    if (image != null) {
+      profileImagePath.value = image.path; // Update the observable path
+    }
   }
 
   // Method to add skill

@@ -9,7 +9,7 @@ import 'package:giolee78/component/text/common_text.dart';
 import 'package:giolee78/features/addpost/presentation/controller/post_controller.dart';
 import 'package:giolee78/utils/constants/app_colors.dart';
 import 'package:giolee78/utils/constants/app_icons.dart';
-import 'dart:io'; // Import for File
+import 'dart:io';
 
 class AddPostScreen extends StatelessWidget {
   AddPostScreen({super.key});
@@ -29,7 +29,7 @@ class AddPostScreen extends StatelessWidget {
                 CustomAppBar(title: "Create Clicker", showBackButton: false),
                 SizedBox(height: 20.h),
 
-                // 🌟 UPDATED: Upload Image Section
+                // Upload Image Section
                 CommonText(
                   text: "Upload Images",
                   fontSize: 14.sp,
@@ -53,7 +53,7 @@ class AddPostScreen extends StatelessWidget {
                 ),
                 SizedBox(height: 16.h),
 
-                // Pricing / Fee Options
+                // ✅ FIXED: Pricing / Fee Options with proper layout
                 CommonText(
                   text: "Select Clicker",
                   fontSize: 14.sp,
@@ -61,60 +61,51 @@ class AddPostScreen extends StatelessWidget {
                 ),
                 SizedBox(height: 6.h),
                 Obx(
-                      () => Row(
+                      () => Column(
                     children: [
-                      Expanded(
-                        child: _buildPricingOption(
-                          title: "Great Vibes",
-                          isSelected:
-                          controller.selectedPricingOption.value ==
-                              'Great Vibes',
-                          onTap: () =>
-                              controller.selectPricingOption('Great Vibes'),
-                        ),
+                      // First Row
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _buildPricingOption(
+                              title: "Great Vibes",
+                              isSelected: controller.selectedPricingOption.value == 'Great Vibes',
+                              onTap: () => controller.selectPricingOption('Great Vibes'),
+                            ),
+                          ),
+                          SizedBox(width: 8.w),
+                          Expanded(
+                            child: _buildPricingOption(
+                              title: "Off Vibes",
+                              isSelected: controller.selectedPricingOption.value == 'Off Vibes',
+                              onTap: () => controller.selectPricingOption('Off Vibes'),
+                            ),
+                          ),
+                        ],
                       ),
-                      SizedBox(width: 8.w),
-                      Expanded(
-                        child: _buildPricingOption(
-                          title: "Off Vibes",
-                          isSelected:
-                          controller.selectedPricingOption.value ==
-                              'Off Vibes',
-                          onTap: () =>
-                              controller.selectPricingOption('Off Vibes'),
-                        ),
+                      SizedBox(height: 8.h),
+                      // Second Row
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _buildPricingOption(
+                              title: "Charming Gentleman",
+                              isSelected: controller.selectedPricingOption.value == 'Charming Gentleman',
+                              onTap: () => controller.selectPricingOption('Charming Gentleman'),
+                            ),
+                          ),
+                          SizedBox(width: 8.w),
+                          Expanded(
+                            child: _buildPricingOption(
+                              title: "Lovely Lady",
+                              isSelected: controller.selectedPricingOption.value == 'Lovely Lady',
+                              onTap: () => controller.selectPricingOption('Lovely Lady'),
+                            ),
+                          ),
+                        ],
                       ),
-                      SizedBox(width: 8.w),
                     ],
                   ),
-                ),
-                SizedBox(height: 16.h),
-                Row(
-                  children: [
-                    Expanded(
-                      child: _buildPricingOption(
-                        title: "Charming Gentleman",
-                        isSelected:
-                        controller.selectedPricingOption.value ==
-                            'Charming Gentleman',
-                        onTap: () => controller.selectPricingOption(
-                          'Charming Gentleman',
-                        ),
-                      ),
-                    ),
-                    SizedBox(width: 8.w),
-                    Expanded(
-                      child: _buildPricingOption(
-                        title: "Lovely Lady",
-                        isSelected:
-                        controller.selectedPricingOption.value ==
-                            'Lovely Lady',
-                        onTap: () =>
-                            controller.selectPricingOption('Lovely Lady'),
-                      ),
-                    ),
-                    SizedBox(width: 8.w),
-                  ],
                 ),
 
                 SizedBox(height: 16.h),
@@ -143,9 +134,7 @@ class AddPostScreen extends StatelessWidget {
                 // Post Button
                 Obx(() {
                   return CommonButton(
-                    titleText: controller.isLoading.value
-                        ? "Posting..."
-                        : "Post",
+                    titleText: controller.isLoading.value ? "Posting..." : "Post",
                     buttonColor: AppColors.primaryColor,
                     buttonRadius: 8,
                     onTap: () => controller.createPost(),
@@ -160,7 +149,7 @@ class AddPostScreen extends StatelessWidget {
     );
   }
 
-  // 🌟 NEW/REPLACED: Main section for handling image display and options
+  // Image Upload Section
   Widget _buildImageUploadSection(BuildContext context) {
     final images = controller.selectedImages;
     final maxImages = controller.maxImages;
@@ -200,8 +189,9 @@ class AddPostScreen extends StatelessWidget {
     );
   }
 
-  // 🌟 NEW: Grid View for Selected Images
-  Widget _buildSelectedImagesGrid(BuildContext context, List<File> images, int max) {
+  // Grid View for Selected Images
+  Widget _buildSelectedImagesGrid(
+      BuildContext context, List<File> images, int max) {
     // Add an empty spot if we haven't reached the max limit
     int itemCount = images.length;
     bool showEmptySlot = images.length < max;
@@ -224,7 +214,7 @@ class AddPostScreen extends StatelessWidget {
           physics: const NeverScrollableScrollPhysics(),
           itemCount: itemCount,
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 4, // More compact grid
+            crossAxisCount: 4,
             crossAxisSpacing: 10.w,
             mainAxisSpacing: 10.h,
             childAspectRatio: 1.0,
@@ -245,11 +235,10 @@ class AddPostScreen extends StatelessWidget {
     );
   }
 
-  // 🌟 NEW: Add More slot (if images are already present)
+  // Add More slot
   Widget _buildAddMoreSlot(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        // Show a dialog/bottom sheet to choose source (Gallery/Camera)
         Get.bottomSheet(
           Container(
             padding: EdgeInsets.all(20.w),
@@ -303,14 +292,15 @@ class AddPostScreen extends StatelessWidget {
             borderRadius: BorderRadius.circular(8.r),
           ),
           child: Center(
-            child: Icon(Icons.add_a_photo_outlined, size: 28.sp, color: AppColors.textSecond),
+            child: Icon(Icons.add_a_photo_outlined,
+                size: 28.sp, color: AppColors.textSecond),
           ),
         ),
       ),
     );
   }
 
-  // 🌟 NEW: Individual Image Thumbnail with Remove Button
+  // Individual Image Thumbnail with Remove Button
   Widget _buildImageThumbnail({
     required File file,
     required VoidCallback onRemove,
@@ -351,7 +341,7 @@ class AddPostScreen extends StatelessWidget {
     );
   }
 
-  // 🌟 MODIFIED: Option button for initial selection (made smaller/more general)
+  // Image Option Button
   Widget _buildImageOptionButton({
     required String title,
     required String imageSrc,
@@ -360,7 +350,7 @@ class AddPostScreen extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        height: 100.h, // Adjusted height
+        height: 100.h,
         width: double.infinity,
         decoration: BoxDecoration(
           border: Border.all(
@@ -386,11 +376,7 @@ class AddPostScreen extends StatelessWidget {
     );
   }
 
-  // --- Existing Helper Widgets ---
-
-  // NOTE: _buildimageUpload and _buildselectedImage were removed as they are obsolete
-  // _buildTextField, _buildDropdown, and _buildPricingOption are unchanged.
-
+  // Text Field
   Widget _buildTextField({
     required TextEditingController controller,
     required String hintText,
@@ -400,7 +386,6 @@ class AddPostScreen extends StatelessWidget {
     VoidCallback? onTap,
     TextInputType? keyboardType,
   }) {
-    // ... (unchanged implementation)
     return Container(
       decoration: BoxDecoration(
         color: Colors.transparent,
@@ -430,6 +415,7 @@ class AddPostScreen extends StatelessWidget {
     );
   }
 
+  // Dropdown
   Widget _buildDropdown({
     required String? value,
     required String hint,
@@ -437,7 +423,6 @@ class AddPostScreen extends StatelessWidget {
     required List<String> items,
     required void Function(String?)? onChanged,
   }) {
-    // ... (unchanged implementation)
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
       decoration: BoxDecoration(
@@ -484,12 +469,12 @@ class AddPostScreen extends StatelessWidget {
     );
   }
 
+  // Pricing Option Button
   Widget _buildPricingOption({
     required String title,
     required bool isSelected,
     required VoidCallback onTap,
   }) {
-    // ... (unchanged implementation)
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -518,7 +503,3 @@ class AddPostScreen extends StatelessWidget {
     );
   }
 }
-
-// ⚠️ IMPORTANT: You must also import this package for the DottedBorder widget.
-// Add this to your pubspec.yaml:
-// dotted_border: ^2.0.0+2

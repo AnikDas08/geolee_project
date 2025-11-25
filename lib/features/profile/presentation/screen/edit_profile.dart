@@ -83,6 +83,14 @@ class EditProfile extends StatelessWidget {
 
   /// Profile Image Widget
   Widget _buildProfileImage(ProfileController controller) {
+    // --- FIX: Check for both null and empty path before using Image.file ---
+    final bool hasSelectedImage = controller.image != null && controller.image!.isNotEmpty;
+
+    // Determine the default/network image source
+    String networkImageUrl = LocalStorage.myImage.isNotEmpty
+        ? ApiEndPoint.imageUrl + LocalStorage.myImage
+        : "assets/images/profile_image.png";
+
     return Stack(
       children: [
         Container(
@@ -101,19 +109,28 @@ class EditProfile extends StatelessWidget {
             ],
           ),
           child: ClipOval(
-            child: controller.image != null
+            child: hasSelectedImage
                 ? Image.file(
-                    File(controller.image!),
-                    width: 100.w,
-                    height: 100.h,
-                    fit: BoxFit.cover,
-                  )
+              // Safe to use File() here
+              File(controller.image!),
+              width: 100.w,
+              height: 100.h,
+              fit: BoxFit.cover,
+            )
+                : networkImageUrl.startsWith('assets')
+                ? CommonImage(
+              imageSrc: networkImageUrl,
+              width: 100.w,
+              height: 100.h,
+              fill: BoxFit.cover,
+            )
+            // Assuming CommonImage or Image.network handles network URLs
                 : CommonImage(
-                    imageSrc: ApiEndPoint.imageUrl + LocalStorage.myImage,
-                    width: 100.w,
-                    height: 100.h,
-                    fill: BoxFit.cover,
-                  ),
+              imageSrc: networkImageUrl, // This assumes CommonImage supports network image
+              width: 100.w,
+              height: 100.h,
+              fill: BoxFit.cover,
+            ),
           ),
         ),
 

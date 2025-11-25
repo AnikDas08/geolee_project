@@ -6,21 +6,28 @@ import 'package:image_picker/image_picker.dart';
 class PostController extends GetxController {
   final isLoading = false.obs;
 
-  // ➡️ UPDATED: Use a list for multiple images
+  // Image handling
   final selectedImages = <File>[].obs;
   final int maxImages = 4; // Define max image limit
 
+  // Form controllers
   final descriptionController = TextEditingController();
-  final selectedPricingOption = 'Great Vibes'.obs;
+
+  // ✅ FIXED: Empty initial value - no button selected by default
+  final selectedPricingOption = ''.obs;
+
   final selectedPriorityLevel = ''.obs;
   final priceController = TextEditingController();
   final serviceTimeController = TextEditingController();
   final selectedGender = ''.obs;
+
   final List<String> priorityLevels = ['Friend', 'Public', 'Only Me'];
   final ImagePicker _picker = ImagePicker();
 
+  // ✅ This method now works for all 4 options
   void selectPricingOption(String option) {
     selectedPricingOption.value = option;
+    print('Selected: $option'); // Debug print
   }
 
   void selectGender(String gender) {
@@ -28,13 +35,79 @@ class PostController extends GetxController {
   }
 
   void createPost() {
+    // Validation
+    if (selectedImages.isEmpty) {
+      Get.snackbar(
+        'Error',
+        'Please select at least one image',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+      return;
+    }
+
+
+    if (descriptionController.text.trim().isEmpty) {
+      Get.snackbar(
+        'Error',
+        'Please enter a description',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+      return;
+    }
+
+    if (selectedPricingOption.value.isEmpty) {
+      Get.snackbar(
+        'Error',
+        'Please select a clicker type',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+      return;
+    }
+
+    if (selectedPriorityLevel.value.isEmpty) {
+      Get.snackbar(
+        'Error',
+        'Please select privacy level',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+      return;
+    }
+
     isLoading.value = true;
-    // Implement post creation logic here
-    // Example: send selectedImages.value and other data
-    // After logic: isLoading.value = false;
+
+    // TODO: Implement your API call here
+    // Example data structure:
+    Map<String, dynamic> postData = {
+      'description': descriptionController.text.trim(),
+      'clicker_type': selectedPricingOption.value,
+      'privacy': selectedPriorityLevel.value,
+      'images': selectedImages.map((file) => file.path).toList(),
+    };
+
+    print('Post Data: $postData');
+
+    // Simulate API call
+    Future.delayed(const Duration(seconds: 2), () {
+      isLoading.value = false;
+      Get.snackbar(
+        'Success',
+        'Post created successfully!',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+      );
+    });
   }
 
-  // ➡️ NEW: Method to remove an image by index
+  // Image management methods
   void removeImageAtIndex(int index) {
     if (index >= 0 && index < selectedImages.length) {
       selectedImages.removeAt(index);
@@ -49,7 +122,6 @@ class PostController extends GetxController {
     }
   }
 
-  // ➡️ UPDATED: Logic to add image to the list
   Future<void> _pickImage(ImageSource source) async {
     if (selectedImages.length >= maxImages) {
       Get.snackbar(
@@ -65,12 +137,12 @@ class PostController extends GetxController {
     try {
       final XFile? image = await _picker.pickImage(
         source: source,
-        imageQuality: 70, // Slightly reduced quality for performance
+        imageQuality: 70,
       );
 
       if (image != null) {
         File file = File(image.path);
-        selectedImages.add(file); // Add to the list
+        selectedImages.add(file);
 
         Get.snackbar(
           'Success',
@@ -98,5 +170,13 @@ class PostController extends GetxController {
 
   Future<void> pickImageFromCamera() async {
     await _pickImage(ImageSource.camera);
+  }
+
+  @override
+  void onClose() {
+    descriptionController.dispose();
+    priceController.dispose();
+    serviceTimeController.dispose();
+    super.onClose();
   }
 }

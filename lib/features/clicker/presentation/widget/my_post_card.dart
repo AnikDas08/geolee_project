@@ -6,8 +6,8 @@ import 'package:giolee78/component/text/common_text.dart';
 import 'package:giolee78/features/friend/presentation/screen/view_friend_screen.dart';
 import 'package:giolee78/utils/constants/app_colors.dart';
 
-class MyPostCard extends StatelessWidget {
-  const MyPostCard({
+class MyPostCards extends StatelessWidget {
+  const MyPostCards({
     super.key,
     required this.userName,
     required this.userAvatar,
