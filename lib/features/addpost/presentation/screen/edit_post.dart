@@ -6,14 +6,14 @@ import 'package:giolee78/component/app_bar/custom_appbar.dart';
 import 'package:giolee78/component/button/common_button.dart';
 import 'package:giolee78/component/image/common_image.dart';
 import 'package:giolee78/component/text/common_text.dart';
-import 'package:giolee78/features/addpost/presentation/controller/post_controller.dart';
+import 'package:giolee78/features/addpost/presentation/controller/edit_post_controller.dart';
 import 'package:giolee78/utils/constants/app_colors.dart';
 import 'package:giolee78/utils/constants/app_icons.dart';
 import 'dart:io';
 
-class AddPostScreen extends StatelessWidget {
-  AddPostScreen({super.key});
-  final PostController controller = Get.put(PostController());
+class EditPost extends StatelessWidget {
+  EditPost({super.key});
+  final EditPostControllers controller = Get.put(EditPostControllers());
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +26,7 @@ class AddPostScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                CustomAppBar(title: "Create Clicker", showBackButton: false),
+                CustomAppBar(title: "Edit Post"),
                 SizedBox(height: 20.h),
 
                 // Upload Image Section
@@ -134,7 +134,7 @@ class AddPostScreen extends StatelessWidget {
                 // Post Button
                 Obx(() {
                   return CommonButton(
-                    titleText: controller.isLoading.value ? "Posting..." : "CLICKER COUNT",
+                    titleText: controller.isLoading.value ? "Posting..." : "Post",
                     buttonColor: AppColors.primaryColor,
                     buttonRadius: 8,
                     onTap: () => controller.createPost(),
@@ -152,58 +152,48 @@ class AddPostScreen extends StatelessWidget {
   // Image Upload Section
   Widget _buildImageUploadSection(BuildContext context) {
     final images = controller.selectedImages;
-    final maxImages = controller.maxImages;
-    final bool canAddMore = images.length < maxImages;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Grid of Selected Images
-        if (images.isNotEmpty)
-          _buildSelectedImagesGrid(context, images, maxImages),
+        if (images.isNotEmpty) _buildSelectedImagesGrid(context, images),
 
         SizedBox(height: images.isNotEmpty ? 16.h : 0),
 
-        // Add Image Buttons (only show if more can be added)
-        if (canAddMore)
-          Row(
-            children: [
-              Expanded(
-                child: _buildImageOptionButton(
-                  title: "Gallery",
-                  imageSrc: AppIcons.upload2,
-                  onTap: () => controller.pickImageFromGallery(),
-                ),
+        // Add Image Buttons
+        Row(
+          children: [
+            Expanded(
+              child: _buildImageOptionButton(
+                title: "Gallery",
+                imageSrc: AppIcons.upload2,
+                onTap: () => controller.pickImageFromGallery(),
               ),
-              SizedBox(width: 16.w),
-              Expanded(
-                child: _buildImageOptionButton(
-                  title: "Camera",
-                  imageSrc: AppIcons.camera,
-                  onTap: () => controller.pickImageFromCamera(),
-                ),
+            ),
+            SizedBox(width: 16.w),
+            Expanded(
+              child: _buildImageOptionButton(
+                title: "Camera",
+                imageSrc: AppIcons.camera,
+                onTap: () => controller.pickImageFromCamera(),
               ),
-            ],
-          ),
+            ),
+          ],
+        ),
       ],
     );
   }
 
   // Grid View for Selected Images
-  Widget _buildSelectedImagesGrid(
-      BuildContext context, List<File> images, int max) {
-    // Add an empty spot if we haven't reached the max limit
+  Widget _buildSelectedImagesGrid(BuildContext context, List<File> images) {
     int itemCount = images.length;
-    bool showEmptySlot = images.length < max;
-    if (showEmptySlot) {
-      itemCount += 1; // For the "Add More" slot
-    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         CommonText(
-          text: "Selected: (${images.length}/$max)",
+          text: "Selected: (${images.length})",
           fontSize: 12.sp,
           fontWeight: FontWeight.w400,
           color: AppColors.textSecond,
@@ -226,7 +216,6 @@ class AddPostScreen extends StatelessWidget {
                 onRemove: () => controller.removeImageAtIndex(index),
               );
             } else {
-              // This is the empty slot for adding more
               return _buildAddMoreSlot(context);
             }
           },

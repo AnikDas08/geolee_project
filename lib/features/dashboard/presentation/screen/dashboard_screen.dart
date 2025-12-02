@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
+import 'package:giolee78/config/route/app_routes.dart';
 import 'package:giolee78/features/ads/presentation/screen/view_ads_screen.dart';
+import 'package:giolee78/features/profile/presentation/screen/dashboard_profile.dart';
 
 import '../../../../component/image/common_image.dart';
 import '../../../../component/text/common_text.dart';
@@ -66,57 +68,62 @@ class DashboardScreen extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Container(
-              height: 40.w,
-              width: 40.w,
-              decoration: BoxDecoration(
-                color: AppColors.white,
-                borderRadius: BorderRadius.circular(12.r),
-              ),
-              child: Center(
-                child: CommonImage(
-                  imageSrc: AppImages.logo,
-                  borderRadius: 12.r,
-                  size: 28.w,
-                  fill: BoxFit.cover,
+        GestureDetector(
+          onTap: (){
+            Get.to(() => const DashBoardProfile());
+          },
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Container(
+                height: 40.w,
+                width: 40.w,
+                decoration: BoxDecoration(
+                  color: AppColors.white,
+                  borderRadius: BorderRadius.circular(12.r),
+                ),
+                child: Center(
+                  child: CommonImage(
+                    imageSrc: AppImages.logo,
+                    borderRadius: 12.r,
+                    size: 28.w,
+                    fill: BoxFit.cover,
+                  ),
                 ),
               ),
-            ),
-            SizedBox(width: 12.w),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const CommonText(
-                  text: 'Fast Food Company',
-                  textAlign: TextAlign.left,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textColorFirst,
-                ),
-                SizedBox(height: 4.h),
-                Row(
-                  children: [
-                    SvgPicture.asset(
-                      AppIcons.location,
-                      height: 14.w,
-                      width: 14.w,
-                    ),
-                    SizedBox(width: 4.w),
-                    const CommonText(
-                      text: 'Thomridge Cir. Shiloh, Hawaii',
-                      textAlign: TextAlign.left,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w400,
-                      color: AppColors.secondaryText,
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ],
+              SizedBox(width: 12.w),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const CommonText(
+                    text: 'Fast Food Company',
+                    textAlign: TextAlign.left,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textColorFirst,
+                  ),
+                  SizedBox(height: 4.h),
+                  Row(
+                    children: [
+                      SvgPicture.asset(
+                        AppIcons.location,
+                        height: 14.w,
+                        width: 14.w,
+                      ),
+                      SizedBox(width: 4.w),
+                      const CommonText(
+                        text: 'Thomridge Cir. Shiloh, Hawaii',
+                        textAlign: TextAlign.left,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w400,
+                        color: AppColors.secondaryText,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
         Container(
           height: 34.w,

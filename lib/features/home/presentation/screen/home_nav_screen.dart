@@ -2,14 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:giolee78/component/image/common_image.dart';
-import 'package:giolee78/features/addpost/presentation/screen/add_post_screen.dart';
-import 'package:giolee78/features/ads/presentation/screen/create_ads_screen.dart';
-import 'package:giolee78/features/dashboard/presentation/screen/dashboard_screen.dart';
 import 'package:giolee78/features/home/presentation/controller/home_nav_controller.dart';
-import 'package:giolee78/utils/constants/app_colors.dart';
-import 'package:giolee78/utils/enum/enum.dart';
+
+import '../../../../component/image/common_image.dart';
+import '../../../../utils/constants/app_colors.dart';
 import '../../../../utils/constants/app_icons.dart';
+import '../../../../utils/enum/enum.dart';
+import '../../../addpost/presentation/screen/add_post_screen.dart';
+import '../../../ads/presentation/screen/create_ads_screen.dart';
+import '../../../dashboard/presentation/screen/dashboard_screen.dart';
 import '../../../message/presentation/screen/chat_screen.dart';
 import 'home_screen.dart';
 
@@ -37,10 +38,11 @@ class HomeNav extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Obx(() {
-        final isUser = controller.userType == UserType.user;
+        // Core Logic: This switches the content list based on the state variable
+        final showUserScreens = controller.isUserScreenActive.value;
         return IndexedStack(
           index: controller.currentIndex.value,
-          children: isUser ? userScreens : advertiseScreens,
+          children: showUserScreens ? userScreens : advertiseScreens,
         );
       }),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
@@ -53,7 +55,7 @@ class HomeNav extends StatelessWidget {
           shape: const CircleBorder(),
           onPressed: () => controller.currentIndex.value = 1,
           child: Container(
-            decoration: BoxDecoration(shape: BoxShape.circle),
+            decoration: const BoxDecoration(shape: BoxShape.circle),
             child: Center(child: CommonImage(imageSrc: AppIcons.add)),
           ),
         ),
@@ -97,7 +99,24 @@ class HomeNav extends StatelessWidget {
     required bool isSelected,
   }) {
     return GestureDetector(
-      onTap: () => controller.currentIndex.value = index,
+      onTap: () {
+        // Logic: Advertiser controls which screen list is active
+        if (controller.userType != UserType.user) {
+          if (index == 0) {
+            // Click Home: Switch to User Screens List (Home/AddPost/ChatList)
+            controller.isUserScreenActive.value = true;
+          } else if (index == 2) {
+            // Click Dashboard: Switch back to Advertiser Screens List (Home/Ads/Dashboard)
+            controller.isUserScreenActive.value = false;
+          }
+        } else {
+          // Regular User: always ensure User Screens are active
+          controller.isUserScreenActive.value = true;
+        }
+
+        // Set the index for the navigation
+        controller.currentIndex.value = index;
+      },
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [

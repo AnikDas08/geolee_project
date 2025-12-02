@@ -3,17 +3,16 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 
-class PostController extends GetxController {
+class EditPostControllers extends GetxController {
   final isLoading = false.obs;
 
   // Image handling
   final selectedImages = <File>[].obs;
-  final int maxImages = 4; // Define max image limit
 
   // Form controllers
   final descriptionController = TextEditingController();
 
-  // ✅ FIXED: Empty initial value - no button selected by default
+  // ✅ FIXED: Single selection for all 4 options (empty initially)
   final selectedPricingOption = ''.obs;
 
   final selectedPriorityLevel = ''.obs;
@@ -36,7 +35,27 @@ class PostController extends GetxController {
 
   void createPost() {
     // Validation
+    if (selectedImages.isEmpty) {
+      Get.snackbar(
+        'Error',
+        'Please select at least one image',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+      return;
+    }
 
+    if (descriptionController.text.trim().isEmpty) {
+      Get.snackbar(
+        'Error',
+        'Please enter a description',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+      return;
+    }
 
     if (selectedPricingOption.value.isEmpty) {
       Get.snackbar(
@@ -71,11 +90,12 @@ class PostController extends GetxController {
       'images': selectedImages.map((file) => file.path).toList(),
     };
 
-    //print('Post Data: $postData');
+    print('Post Data: $postData');
 
     // Simulate API call
     Future.delayed(const Duration(seconds: 2), () {
       isLoading.value = false;
+      Get.back(); // Go back after posting
       Get.snackbar(
         'Success',
         'Post created successfully!',
@@ -102,17 +122,6 @@ class PostController extends GetxController {
   }
 
   Future<void> _pickImage(ImageSource source) async {
-    if (selectedImages.length >= maxImages) {
-      Get.snackbar(
-        'Limit Reached',
-        'You can only upload a maximum of $maxImages images.',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.amber.shade700,
-        colorText: Colors.white,
-      );
-      return;
-    }
-
     try {
       final XFile? image = await _picker.pickImage(
         source: source,
@@ -125,7 +134,7 @@ class PostController extends GetxController {
 
         Get.snackbar(
           'Success',
-          'Image selected (${selectedImages.length}/$maxImages)',
+          'Image selected (${selectedImages.length})',
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.green,
           colorText: Colors.white,

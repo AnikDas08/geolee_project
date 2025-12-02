@@ -14,6 +14,7 @@ import 'package:giolee78/features/profile/presentation/screen/help_support_scree
 import 'package:giolee78/features/profile/presentation/screen/my_profile_screen.dart';
 import 'package:giolee78/features/profile/presentation/screen/privacy_policy_screen.dart';
 import 'package:giolee78/features/profile/presentation/screen/terms_of_services_screen.dart';
+import 'package:giolee78/services/storage/storage_keys.dart';
 import 'package:giolee78/services/storage/storage_services.dart';
 import 'package:giolee78/utils/constants/app_images.dart';
 import 'package:giolee78/utils/constants/app_icons.dart';
@@ -21,8 +22,8 @@ import 'package:giolee78/utils/constants/app_colors.dart';
 import 'package:giolee78/utils/enum/enum.dart';
 import 'package:giolee78/utils/extensions/extension.dart';
 
-class ProfileScreen extends StatelessWidget {
-  const ProfileScreen({super.key});
+class DashBoardProfile extends StatelessWidget {
+  const DashBoardProfile({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -45,6 +46,14 @@ class ProfileScreen extends StatelessWidget {
                 Get.to(() => const ChangePasswordScreen());
               },
             ),
+            if (LocalStorage.myRole == UserType.advertise.name)
+              ProfileItemData(
+                imageSrc: AppIcons.edit,
+                title: 'Ads History',
+                onTap: () {
+                  Get.to(() => const HistoryAdsScreen());
+                },
+              ),
             ProfileItemData(
               imageSrc: AppIcons.privacy,
               title: 'Privacy Policy',
@@ -101,7 +110,7 @@ class ProfileScreen extends StatelessWidget {
                         child: ClipOval(
                           child: CommonImage(
                             imageSrc:
-                                "assets/images/profile_image.png",
+                            "assets/images/profile_image.png",
                             size: 100,
                             defaultImage: AppImages.profileImage,
                           ),
@@ -119,7 +128,7 @@ class ProfileScreen extends StatelessWidget {
                     ),
                     CommonText(
                       text:
-                          "Exploring one city at a time Capturing stories beyond borders",
+                      "Exploring one city at a time Capturing stories beyond borders",
                       fontSize: 12,
                       fontWeight: FontWeight.w400,
                       bottom: 20,
@@ -129,15 +138,15 @@ class ProfileScreen extends StatelessWidget {
                       color: AppColors.secondaryText,
                     ),
                     if(LocalStorage.myRole==UserType.user.name)
-                    CommonButton(
-                      titleText: 'Public',
-                      buttonWidth: 80.w,
-                      titleSize: 12,
-                      buttonHeight: 32.h,
-                      borderWidth: 4,
-                      borderColor: AppColors.primaryColor2,
-                      buttonColor: AppColors.primaryColor2,
-                    ),
+                      CommonButton(
+                        titleText: 'Public',
+                        buttonWidth: 80.w,
+                        titleSize: 12,
+                        buttonHeight: 32.h,
+                        borderWidth: 4,
+                        borderColor: AppColors.primaryColor2,
+                        buttonColor: AppColors.primaryColor2,
+                      ),
 
                     16.height,
 
@@ -157,14 +166,34 @@ class ProfileScreen extends StatelessWidget {
                     ),
                     SizedBox(height: 20.h,),
                     if (LocalStorage.myRole != UserType.advertise.name)
-                    CommonButton(
+                      CommonButton(
                         titleText: "Adverise with Us",
-                      onTap: (){
+                        onTap: (){
                           Get.toNamed(
                               AppRoutes.serviceProviderInfo
                           );
-                      },
-                    ),
+                        },
+                      ),
+                    if (LocalStorage.myRole != UserType.user.name)
+                      CommonButton(
+                        titleText: "Become a User",
+                        onTap: () {
+                          successPopUps(
+                            message:
+                            'Your Role now User.',
+                            onTap: () {
+                              LocalStorage.myRole = UserType.user.name;
+                              LocalStorage.setString(
+                                LocalStorageKeys.myRole,
+                                LocalStorage.myRole,
+                              );
+                              //appLog(LocalStorage.myRole.toString());
+                              Get.offAllNamed(AppRoutes.homeNav);
+                            },
+                            buttonTitle: 'Go to HomeScreen',
+                          );
+                        },
+                      ),
                   ],
                 ),
               ),

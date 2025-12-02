@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:giolee78/config/api/api_end_point.dart';
+import 'package:giolee78/features/home/presentation/controller/home_nav_controller.dart';
+import 'package:giolee78/utils/enum/enum.dart';
 
 import '../../../../services/api/api_service.dart';
+import '../../../../services/storage/storage_keys.dart';
 import '../../../../services/storage/storage_services.dart';
 import '../../data/data_model.dart';
 
@@ -30,6 +33,12 @@ class HomeController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    LocalStorage.myRole==UserType.user.name;
+    LocalStorage.setString(
+      LocalStorageKeys.myRole,
+      LocalStorage.myRole,
+    );
+    Get.find<HomeNavController>().refresh();
     fetchPosts();
   }
 
