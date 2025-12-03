@@ -10,6 +10,15 @@ GeneratedPluginRegistrant.java
 /android/GRADLE_USER_HOME/
 **/GRADLE_USER_HOME/
 
+/build/
+/android/app/build/
+/android/.gradle/
+/.dart_tool/
+/.cxx/
+*.apk
+*.aab
+*.so
+
 # Remember to never publicly share your keystore.
 # See https://flutter.dev/to/reference-keystore
 key.properties
