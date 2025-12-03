@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:giolee78/component/text/common_text.dart';
 import 'package:giolee78/component/text_field/common_text_field.dart';
 import 'package:giolee78/config/route/app_routes.dart';
+import 'package:giolee78/features/friend/presentation/screen/view_friend_screen.dart';
 import 'package:giolee78/utils/constants/app_colors.dart';
 import 'package:giolee78/utils/constants/app_images.dart';
 
@@ -143,15 +144,111 @@ class _SuggestedFriendCard extends StatelessWidget {
     return Obx(() {
       final isRequestSent = controller.isRequestSent(userId);
 
-      return Container(
+      return GestureDetector(
+        onTap: (){
+          Get.to(()=>ViewFriendScreen(isFriend: false));
+        },
+        child: Container(
+          decoration: BoxDecoration(
+            color: AppColors.white,
+            borderRadius: BorderRadius.circular(14.r),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.04),
+                blurRadius: 10.r,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+          child: Row(
+            children: [
+              CircleAvatar(
+                radius: 22.r,
+                backgroundImage: AssetImage(avatar ?? AppImages.profileImage),
+              ),
+              SizedBox(width: 12.w),
+              Expanded(
+                child: CommonText(
+                  text: userName,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.black,
+                  textAlign: TextAlign.start,
+                  maxLines: 1,
+                ),
+              ),
+              SizedBox(width: 12.w),
+
+              // Show checkmark if request sent, otherwise show Add button
+              if (isRequestSent)
+                Container(
+                  height: 32.h,
+                  width: 32.h,
+                  decoration: BoxDecoration(
+                    color: Colors.green.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8.r),
+                  ),
+                  alignment: Alignment.center,
+                  child: Icon(
+                    Icons.check_circle,
+                    size: 20.sp,
+                    color: Colors.green,
+                  ),
+                )
+              else
+                GestureDetector(
+                  onTap: () => controller.sendFriendRequest(userId),
+                  child: Container(
+                    height: 32.h,
+                    padding: EdgeInsets.symmetric(horizontal: 16.w),
+                    decoration: BoxDecoration(
+                      color: AppColors.red,
+                      borderRadius: BorderRadius.circular(8.r),
+                    ),
+                    alignment: Alignment.center,
+                    child: const CommonText(
+                      text: 'Add',
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.white,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      );
+    });
+  }
+}
+
+class _FriendListItem extends StatelessWidget {
+  const _FriendListItem({
+    required this.userId,
+    required this.userName,
+    required this.controller,
+    this.avatar,
+  });
+
+  final String userId;
+  final String userName;
+  final String? avatar;
+  final MyFriendController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => Get.to(()=>ViewFriendScreen(isFriend: true)),
+      child: Container(
         decoration: BoxDecoration(
           color: AppColors.white,
           borderRadius: BorderRadius.circular(14.r),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.04),
-              blurRadius: 10.r,
-              offset: const Offset(0, 4),
+              color: Colors.black.withOpacity(0.02),
+              blurRadius: 6.r,
+              offset: const Offset(0, 2),
             ),
           ],
         ),
@@ -174,157 +271,69 @@ class _SuggestedFriendCard extends StatelessWidget {
               ),
             ),
             SizedBox(width: 12.w),
-
-            // Show checkmark if request sent, otherwise show Add button
-            if (isRequestSent)
-              Container(
-                height: 32.h,
-                width: 32.h,
-                decoration: BoxDecoration(
-                  color: Colors.green.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8.r),
-                ),
-                alignment: Alignment.center,
-                child: Icon(
-                  Icons.check_circle,
-                  size: 20.sp,
-                  color: Colors.green,
-                ),
-              )
-            else
-              GestureDetector(
-                onTap: () => controller.sendFriendRequest(userId),
-                child: Container(
-                  height: 32.h,
-                  padding: EdgeInsets.symmetric(horizontal: 16.w),
-                  decoration: BoxDecoration(
-                    color: AppColors.red,
-                    borderRadius: BorderRadius.circular(8.r),
-                  ),
-                  alignment: Alignment.center,
-                  child: const CommonText(
-                    text: 'Add',
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.white,
-                  ),
-                ),
+            GestureDetector(
+              onTap: () {
+                Get.toNamed(AppRoutes.message);
+              },
+              child: Icon(
+                Icons.chat_bubble_outline,
+                size: 20.sp,
+                color: AppColors.secondaryText,
               ),
+            ),
+            SizedBox(width: 16.w),
+            GestureDetector(
+              onTap: () {
+                // Show confirmation dialog before removing
+                Get.dialog(
+                  AlertDialog(
+                    title: const CommonText(
+                      text: 'Remove Friend',
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.black,
+                    ),
+                    content: CommonText(
+                      text: 'Are you sure you want to remove $userName from your friends?',
+                      fontSize: 14,
+                      fontWeight: FontWeight.w400,
+                      color: AppColors.secondaryText,
+                      maxLines: 4,
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Get.back(),
+                        child: const CommonText(
+                          text: 'Cancel',
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.secondaryText,
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          Get.back();
+                          controller.removeFriend(userId);
+                        },
+                        child: const CommonText(
+                          text: 'Remove',
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.red,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+              child: Icon(
+                Icons.close,
+                size: 20.sp,
+                color: AppColors.secondaryText,
+              ),
+            ),
           ],
         ),
-      );
-    });
-  }
-}
-
-class _FriendListItem extends StatelessWidget {
-  const _FriendListItem({
-    required this.userId,
-    required this.userName,
-    required this.controller,
-    this.avatar,
-  });
-
-  final String userId;
-  final String userName;
-  final String? avatar;
-  final MyFriendController controller;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(14.r),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.02),
-            blurRadius: 6.r,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
-      child: Row(
-        children: [
-          CircleAvatar(
-            radius: 22.r,
-            backgroundImage: AssetImage(avatar ?? AppImages.profileImage),
-          ),
-          SizedBox(width: 12.w),
-          Expanded(
-            child: CommonText(
-              text: userName,
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: AppColors.black,
-              textAlign: TextAlign.start,
-              maxLines: 1,
-            ),
-          ),
-          SizedBox(width: 12.w),
-          GestureDetector(
-            onTap: () {
-              Get.toNamed(AppRoutes.message);
-            },
-            child: Icon(
-              Icons.chat_bubble_outline,
-              size: 20.sp,
-              color: AppColors.secondaryText,
-            ),
-          ),
-          SizedBox(width: 16.w),
-          GestureDetector(
-            onTap: () {
-              // Show confirmation dialog before removing
-              Get.dialog(
-                AlertDialog(
-                  title: const CommonText(
-                    text: 'Remove Friend',
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.black,
-                  ),
-                  content: CommonText(
-                    text: 'Are you sure you want to remove $userName from your friends?',
-                    fontSize: 14,
-                    fontWeight: FontWeight.w400,
-                    color: AppColors.secondaryText,
-                    maxLines: 4,
-                  ),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Get.back(),
-                      child: const CommonText(
-                        text: 'Cancel',
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.secondaryText,
-                      ),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        Get.back();
-                        controller.removeFriend(userId);
-                      },
-                      child: const CommonText(
-                        text: 'Remove',
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.red,
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            },
-            child: Icon(
-              Icons.close,
-              size: 20.sp,
-              color: AppColors.secondaryText,
-            ),
-          ),
-        ],
       ),
     );
   }

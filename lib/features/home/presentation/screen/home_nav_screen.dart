@@ -17,7 +17,8 @@ import 'home_screen.dart';
 class HomeNav extends StatelessWidget {
   HomeNav({super.key});
 
-  final HomeNavController controller = Get.put(HomeNavController());
+  HomeNavController controller = Get.put(HomeNavController());
+
 
   final List<Widget> userScreens = [
     HomeScreen(),

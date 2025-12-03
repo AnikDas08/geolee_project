@@ -26,6 +26,7 @@ class HomeController extends GetxController {
   var selectedPeriod = 'Last 3 Hours'.obs;
   var startDate = DateTime.now().obs;
   var endDate = DateTime.now().obs;
+  String? argument;
 
   List<String> clickerOptions = ["All", "Great Vibes", "Off Vibes", "Charming Gentleman","Lovely Leady"];
   List<String> filterOptions = ["Option 1", "Option 2", "Option 3"];
@@ -33,6 +34,7 @@ class HomeController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    argument=Get.arguments;
     LocalStorage.myRole==UserType.user.name;
     LocalStorage.setString(
       LocalStorageKeys.myRole,

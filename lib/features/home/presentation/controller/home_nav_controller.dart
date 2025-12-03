@@ -9,6 +9,7 @@ class HomeNavController extends GetxController {
   // Tracks whether the IndexedStack should be displaying the userScreens list (true)
   // or the advertiseScreens list (false).
   late final RxBool isUserScreenActive;
+  String argument="";
 
   @override
   void onInit() {
@@ -16,7 +17,7 @@ class HomeNavController extends GetxController {
 
     // Determine if the user is a standard user
     final isUser = userType == UserType.user;
-
+    argument=Get.arguments;
     // Initialize the screen list state
     isUserScreenActive = isUser.obs;
 

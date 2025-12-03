@@ -7,6 +7,7 @@ import 'package:giolee78/features/clicker/presentation/screen/clicker_screen.dar
 import 'package:giolee78/features/friend/presentation/screen/friend_request_screen.dart';
 import 'package:giolee78/features/friend/presentation/screen/my_friend_screen.dart';
 import 'package:giolee78/features/addpost/presentation/screen/my_post_screen.dart';
+import 'package:giolee78/features/home/presentation/controller/home_nav_controller.dart';
 import 'package:giolee78/utils/constants/app_icons.dart';
 import 'package:giolee78/utils/constants/app_images.dart';
 
@@ -17,7 +18,10 @@ import '../widgets/filter_main.dart';
 import '../widgets/home_details.dart';
 
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+  HomeScreen({super.key});
+
+  final homeController=Get.find<HomeNavController>();
+
 
   @override
   Widget build(BuildContext context) {
@@ -143,6 +147,7 @@ class HomeScreen extends StatelessWidget {
                               Get.to(() => ClickerScreen());
                             },
                           ),
+                          if(homeController.argument!="skip")
                           Item(
                             imageSrc: AppIcons.bubbleChat,
                             title: 'Chat Nearby',
@@ -150,6 +155,7 @@ class HomeScreen extends StatelessWidget {
                               _showConfirmationDialog();
                             },
                           ),
+                          if(homeController.argument!="skip")
                           Item(
                             imageSrc: AppIcons.myPost,
                             title: 'My Post',
@@ -157,6 +163,7 @@ class HomeScreen extends StatelessWidget {
                               Get.to(() => MyPostScreen());
                             },
                           ),
+                          if(homeController.argument!="skip")
                           Item(
                             imageSrc: AppIcons.myFriend,
                             title: 'My Friend',
@@ -164,6 +171,7 @@ class HomeScreen extends StatelessWidget {
                               Get.to(() => const MyFriendScreen());
                             },
                           ),
+                          if(homeController.argument!="skip")
                           Item(
                             imageSrc: AppIcons.friend,
                             title: 'Friend Request',

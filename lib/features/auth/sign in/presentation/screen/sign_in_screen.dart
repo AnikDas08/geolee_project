@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:giolee78/component/image/common_image.dart';
+import 'package:giolee78/features/home/presentation/screen/home_nav_screen.dart';
 import 'package:giolee78/utils/constants/app_images.dart';
 import '../../../../../../../config/route/app_routes.dart';
 import '../../../../../../../utils/extensions/extension.dart';
@@ -31,7 +32,7 @@ class SignInScreen extends StatelessWidget {
             onTap: () {
               // Using Get.offNamed to navigate to the home screen and remove the current route from the stack.
               // Assuming AppRoutes.home is the main route after skipping.
-              Get.offNamed(AppRoutes.homeNav);
+              Get.offNamed(AppRoutes.homeNav,arguments: "skip",);
             },
             child: Padding(
               padding: EdgeInsets.only(right: 20.w),
@@ -102,7 +103,9 @@ class SignInScreen extends StatelessWidget {
                   CommonButton(
                     titleText: AppString.login,
                     isLoading: controller.isLoading,
-                    onTap: () => controller.signInUser(formKey),
+                    onTap: () => {
+                      Get.offAllNamed(AppRoutes.homeNav,arguments: "kdjkfd")
+                    },
                   ),
                   30.height,
 

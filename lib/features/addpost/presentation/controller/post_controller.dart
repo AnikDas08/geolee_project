@@ -49,17 +49,6 @@ class PostController extends GetxController {
       return;
     }
 
-    if (selectedPriorityLevel.value.isEmpty) {
-      Get.snackbar(
-        'Error',
-        'Please select privacy level',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
-      return;
-    }
-
     isLoading.value = true;
 
     // TODO: Implement your API call here
