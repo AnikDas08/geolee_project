@@ -13,6 +13,7 @@ Future<void> main() async {
   runApp(const MyApp());
 }
 
+
 init() async {
   DependencyInjection dI = DependencyInjection();
   dI.dependencies();
