@@ -59,7 +59,7 @@ class HistoryAdsScreen extends StatelessWidget {
                           title: ad.title,
                           description: ad.description,
                           onTap: () {
-                            Get.to(() => ViewAdsScreen(isFromHistory: true));
+                            Get.to(() => ViewAdsScreen());
                           },
                         );
                       },

@@ -32,7 +32,7 @@ class SignInScreen extends StatelessWidget {
             onTap: () {
               // Using Get.offNamed to navigate to the home screen and remove the current route from the stack.
               // Assuming AppRoutes.home is the main route after skipping.
-              Get.offNamed(AppRoutes.homeNav,arguments: "skip",);
+              Get.offNamed(AppRoutes.homeNav);
             },
             child: Padding(
               padding: EdgeInsets.only(right: 20.w),
@@ -104,7 +104,7 @@ class SignInScreen extends StatelessWidget {
                     titleText: AppString.login,
                     isLoading: controller.isLoading,
                     onTap: () => {
-                      Get.offAllNamed(AppRoutes.homeNav,arguments: "kdjkfd")
+                      controller.signInUser(formKey)
                     },
                   ),
                   30.height,

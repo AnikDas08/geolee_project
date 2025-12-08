@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:giolee78/component/button/common_button.dart'; // Import CommonButton
+import 'package:giolee78/utils/constants/app_colors.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../../component/pop_up/common_pop_menu.dart';
@@ -30,7 +32,7 @@ class CreateAdsController extends GetxController {
     }
   }
 
-  // --- Date Picker Logic ---
+  // --- Date/Time Picker Logic (omitted for brevity) ---
   Future<void> selectDate(BuildContext context, TextEditingController controller) async {
     final DateTime? picked = await showDatePicker(
       context: context,
@@ -76,10 +78,88 @@ class CreateAdsController extends GetxController {
     }
   }
 
-  void submitAd(BuildContext context) {
+  // --- Payment & Dialog Logic (omitted for brevity) ---
+  void showPaymentConfirmationDialog(BuildContext context, double price) {
+    Get.dialog(
+      AlertDialog(
+        title: const Text('Confirm Ad Creation & Payment'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const Text('Your ad is ready to be submitted. Please confirm the price and proceed to payment:'),
+            const SizedBox(height: 16),
+            Card(
+              elevation: 2,
+              color: Colors.blue.shade50,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8.0),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Ad Price:',
+                      style: TextStyle(fontSize: 14, color: Colors.black54),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '\$${price.toStringAsFixed(2)}',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 24,
+                        color: Colors.blue,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+        actions: <Widget>[
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Expanded(
+                child: CommonButton(
+                  titleText: "Cancel",
+                  onTap: () => Get.back(),
+                  buttonColor: Colors.white,
+                  borderColor: Colors.grey.shade300,
+                  titleColor: Colors.black,
+                  buttonHeight: 40,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: CommonButton(
+                  titleText: "Pay",
+                  onTap: () {
+                    Get.back();
+                    _showSuccessPopup();
+                  },
+                  buttonColor: AppColors.primaryColor,
+                  titleColor: Colors.white,
+                  buttonHeight: 40,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+        ],
+      ),
+      barrierDismissible: false,
+    );
+  }
+
+  // Helper function for the final success message
+  void _showSuccessPopup() {
     successPopUps(
       message:
-      'Your Asd Submit successful. Please wait for admin approval before your ad goes live.',
+      'Your Ad Submit successful. Please wait for admin approval before your ad goes live.',
       onTap: () {
         Get.offAllNamed(AppRoutes.homeNav);
       },
@@ -87,4 +167,28 @@ class CreateAdsController extends GetxController {
     );
   }
 
+
+  // --- Submit Ad Logic (omitted for brevity) ---
+  void submitAd(BuildContext context) {
+    const double adPrice = 10.00;
+    showPaymentConfirmationDialog(context, adPrice);
+  }
+
+  // =========================================================
+  // 👇 MODIFICATION: DISPOSE TEXT EDITING CONTROLLERS
+  // =========================================================
+  @override
+  void onClose() {
+    /*titleController.dispose();
+    descriptionController.dispose();
+    focusAreaController.dispose();
+    startDateController.dispose();
+    endDateController.dispose();
+    startTimeController.dispose();
+    endTimeController.dispose();
+    websiteLinkController.dispose();*/
+
+    // Call super.onClose() at the end
+    super.onClose();
+  }
 }

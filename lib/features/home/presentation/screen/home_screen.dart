@@ -147,7 +147,6 @@ class HomeScreen extends StatelessWidget {
                               Get.to(() => ClickerScreen());
                             },
                           ),
-                          if(homeController.argument!="skip")
                           Item(
                             imageSrc: AppIcons.bubbleChat,
                             title: 'Chat Nearby',
@@ -155,7 +154,6 @@ class HomeScreen extends StatelessWidget {
                               _showConfirmationDialog();
                             },
                           ),
-                          if(homeController.argument!="skip")
                           Item(
                             imageSrc: AppIcons.myPost,
                             title: 'My Post',
@@ -163,7 +161,6 @@ class HomeScreen extends StatelessWidget {
                               Get.to(() => MyPostScreen());
                             },
                           ),
-                          if(homeController.argument!="skip")
                           Item(
                             imageSrc: AppIcons.myFriend,
                             title: 'My Friend',
@@ -171,7 +168,6 @@ class HomeScreen extends StatelessWidget {
                               Get.to(() => const MyFriendScreen());
                             },
                           ),
-                          if(homeController.argument!="skip")
                           Item(
                             imageSrc: AppIcons.friend,
                             title: 'Friend Request',
