@@ -140,9 +140,9 @@ class HomeController extends GetxController {
     update();
   }
 
-  void clearSearch() {
+  /*void clearSearch() {
     searchQuery = '';
     filteredPosts = allPosts;
     update();
-  }
+  }*/
 }

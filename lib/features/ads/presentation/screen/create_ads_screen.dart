@@ -1,4 +1,4 @@
-import 'dart:io'; // Needed for File image display
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -17,7 +17,8 @@ class CreateAdsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Inject the controller
+    // Delete any existing instance first, then create fresh controller
+    //Get.delete<CreateAdsController>(force: true);
     final CreateAdsController controller = Get.put(CreateAdsController());
 
     return Scaffold(
@@ -25,7 +26,6 @@ class CreateAdsScreen extends StatelessWidget {
       appBar: AppBar(
         elevation: 0,
         centerTitle: true,
-        // Since you used SizedBox(), I'll assume you don't want a back button here
         leading: const SizedBox(),
         title: const CommonText(
           text: 'Create Ads',
@@ -64,7 +64,7 @@ class CreateAdsScreen extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // --- Image Upload Section (Wrapped in Obx) ---
+                    // --- Image Upload Section ---
                     Obx(() {
                       return _buildselectedImage(
                         context: context,
@@ -78,7 +78,7 @@ class CreateAdsScreen extends StatelessWidget {
                     _buildLabel('Ads Title'),
                     SizedBox(height: 6.h),
                     CommonTextField(
-                      controller: controller.titleController, // Use controller
+                      controller: controller.titleController,
                       hintText: 'Delicious Fast Food',
                     ),
                     SizedBox(height: 14.h),
@@ -87,7 +87,7 @@ class CreateAdsScreen extends StatelessWidget {
                     _buildLabel('Description'),
                     SizedBox(height: 6.h),
                     CommonTextField(
-                      controller: controller.descriptionController, // Use controller
+                      controller: controller.descriptionController,
                       hintText:
                       'Satisfy Your Cravings With Delicious Fast Food, Where Every Bite Is Packed With Flavor...',
                       maxLines: 3,
@@ -98,104 +98,8 @@ class CreateAdsScreen extends StatelessWidget {
                     _buildLabel('Focus Area'),
                     SizedBox(height: 6.h),
                     CommonTextField(
-                      controller: controller.focusAreaController, // Use controller
+                      controller: controller.focusAreaController,
                       hintText: 'California, New York',
-                    ),
-                    SizedBox(height: 14.h),
-
-                    // --- Date Fields (Start/End) ---
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              _buildLabel('Start Date'),
-                              SizedBox(height: 6.h),
-                              CommonTextField(
-                                controller: controller.startDateController, // Use controller
-                                hintText: '01 Jan 2020',
-                                //readOnly: true, // Make it read-only
-                                onTap: () => controller.selectDate(context, controller.startDateController), // Add onTap for date picker
-                                suffixIcon: const Icon(
-                                  Icons.calendar_today_outlined,
-                                  size: 18,
-                                  color: AppColors.textSecond,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(width: 10.w),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              _buildLabel('End Date'),
-                              SizedBox(height: 6.h),
-                              CommonTextField(
-                                controller: controller.endDateController, // Use controller
-                                hintText: '01 Jan 2020',
-                                //readOnly: true, // Make it read-only
-                                onTap: () => controller.selectDate(context, controller.endDateController), // Add onTap for date picker
-                                suffixIcon: const Icon(
-                                  Icons.calendar_today_outlined,
-                                  size: 18,
-                                  color: AppColors.textSecond,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 14.h),
-
-                    // --- Time Fields (Start/End) ---
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              _buildLabel('Start Time'),
-                              SizedBox(height: 6.h),
-                              CommonTextField(
-                                controller: controller.startTimeController, // Use controller
-                                hintText: '10:00 AM',
-                                //readOnly: true, // Make it read-only
-                                onTap: () => controller.selectTime(context, controller.startTimeController), // Add onTap for time picker
-                                suffixIcon: const Icon(
-                                  Icons.access_time,
-                                  size: 18,
-                                  color: AppColors.textSecond,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(width: 10.w),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              _buildLabel('End Time'),
-                              SizedBox(height: 6.h),
-                              CommonTextField(
-                                controller: controller.endTimeController, // Use controller
-                                hintText: '10:00 PM',
-                                //readOnly: true, // Make it read-only
-                                onTap: () => controller.selectTime(context, controller.endTimeController), // Add onTap for time picker
-                                suffixIcon: const Icon(
-                                  Icons.access_time,
-                                  size: 18,
-                                  color: AppColors.textSecond,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
                     ),
                     SizedBox(height: 14.h),
 
@@ -203,14 +107,55 @@ class CreateAdsScreen extends StatelessWidget {
                     _buildLabel('Website Link'),
                     SizedBox(height: 6.h),
                     CommonTextField(
-                      controller: controller.websiteLinkController, // Use controller
+                      controller: controller.websiteLinkController,
                       hintText: 'www.website.com/restaurant',
                     ),
                     SizedBox(height: 20.h),
 
+                    // --- Pricing Plan Selection ---
+                    _buildLabel('Select Pricing Plan'),
+                    SizedBox(height: 10.h),
+                    Obx(() => _buildPricingCards(controller)),
+                    SizedBox(height: 16.h),
+
+                    // --- Ad Start Date (shown after selection) ---
+                    Obx(() {
+                      if (controller.selectedPricingPlan.value.isNotEmpty) {
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildLabel('Ad Start Date'),
+                            SizedBox(height: 6.h),
+                            CommonTextField(
+                              controller: controller.adStartDateController,
+                              hintText: 'Select start date',
+                              //readOnly: true,
+                              suffixIcon: GestureDetector(
+                                onTap: () => controller.selectDate(
+                                  context,
+                                  controller.adStartDateController,
+                                ),
+                                child: Icon(
+                                  Icons.calendar_today,
+                                  color: AppColors.primaryColor,
+                                  size: 20.sp,
+                                ),
+                              ),
+                              onTap: () => controller.selectDate(
+                                context,
+                                controller.adStartDateController,
+                              ),
+                            ),
+                            SizedBox(height: 20.h),
+                          ],
+                        );
+                      }
+                      return const SizedBox.shrink();
+                    }),
+
                     // --- Submit Button ---
                     CommonButton(
-                      onTap: () => controller.submitAd(context), // Use controller method
+                      onTap: () => controller.submitAd(context),
                       titleText: 'Submit',
                       buttonColor: AppColors.primaryColor,
                       titleColor: AppColors.white,
@@ -229,13 +174,133 @@ class CreateAdsScreen extends StatelessWidget {
     );
   }
 
-  // Helper method for the upload area
+  // --- Pricing Cards with Radio Buttons ---
+  Widget _buildPricingCards(CreateAdsController controller) {
+    return Column(
+      children: [
+        // Weekly Card
+        GestureDetector(
+          onTap: () => controller.selectPricingPlan('weekly'),
+          child: Card(
+            elevation: 2,
+            color: controller.selectedPricingPlan.value == 'weekly'
+                ? Colors.blue.shade50
+                : Colors.grey.shade50,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8.0),
+              side: BorderSide(
+                color: controller.selectedPricingPlan.value == 'weekly'
+                    ? Colors.blue
+                    : Colors.grey.shade300,
+                width: 2,
+              ),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Row(
+                children: [
+                  Radio<String>(
+                    value: 'weekly',
+                    groupValue: controller.selectedPricingPlan.value,
+                    onChanged: (value) {
+                      if (value != null) {
+                        controller.selectPricingPlan(value);
+                      }
+                    },
+                    activeColor: Colors.blue,
+                  ),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Ad Price:',
+                          style: TextStyle(fontSize: 14, color: Colors.black54),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '\$10.00/Weekly',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 24.sp,
+                            color: Colors.blue,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        SizedBox(height: 12.h),
+
+        // Monthly Card
+        GestureDetector(
+          onTap: () => controller.selectPricingPlan('monthly'),
+          child: Card(
+            elevation: 2,
+            color: controller.selectedPricingPlan.value == 'monthly'
+                ? Colors.blue.shade50
+                : Colors.grey.shade50,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8.0),
+              side: BorderSide(
+                color: controller.selectedPricingPlan.value == 'monthly'
+                    ? Colors.blue
+                    : Colors.grey.shade300,
+                width: 2,
+              ),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Row(
+                children: [
+                  Radio<String>(
+                    value: 'monthly',
+                    groupValue: controller.selectedPricingPlan.value,
+                    onChanged: (value) {
+                      if (value != null) {
+                        controller.selectPricingPlan(value);
+                      }
+                    },
+                    activeColor: Colors.blue,
+                  ),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Ad Price:',
+                          style: TextStyle(fontSize: 14, color: Colors.black54),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '\$50.00/Monthly',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 24.sp,
+                            color: Colors.blue,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildselectedImage({
     required BuildContext context,
-    required String imagePath, // Now takes the path string
+    required String imagePath,
     required VoidCallback onTap,
   }) {
-    // If an image is selected, display it using Image.file
     if (imagePath.isNotEmpty) {
       return GestureDetector(
         onTap: onTap,
@@ -258,7 +323,6 @@ class CreateAdsScreen extends StatelessWidget {
       );
     }
 
-    // If no image is selected, display the default upload UI
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -274,7 +338,7 @@ class CreateAdsScreen extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            CommonImage(imageSrc: AppIcons.upload2), // Use your default upload icon
+            CommonImage(imageSrc: AppIcons.upload2),
             SizedBox(height: 12.h),
             CommonText(
               text: 'Upload Cover Image',

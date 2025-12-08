@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:giolee78/component/button/common_button.dart'; // Import CommonButton
+import 'package:giolee78/component/button/common_button.dart';
 import 'package:giolee78/utils/constants/app_colors.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -9,7 +9,8 @@ import '../../../../config/route/app_routes.dart';
 
 class CreateAdsController extends GetxController {
   // --- Observable State ---
-  var coverImagePath = ''.obs; // Holds the file path of the selected image
+  var coverImagePath = ''.obs;
+  var selectedPricingPlan = 'weekly'.obs; // 'weekly' or 'monthly'
 
   // --- Text Controllers ---
   var titleController = TextEditingController();
@@ -20,8 +21,16 @@ class CreateAdsController extends GetxController {
   var startTimeController = TextEditingController();
   var endTimeController = TextEditingController();
   var websiteLinkController = TextEditingController();
+  var adStartDateController = TextEditingController(); // New controller for ad start date
 
   final ImagePicker _picker = ImagePicker();
+
+  // --- Pricing Logic ---
+  double get selectedPrice => selectedPricingPlan.value == 'weekly' ? 10.00 : 50.00;
+
+  void selectPricingPlan(String plan) {
+    selectedPricingPlan.value = plan;
+  }
 
   // --- Image Picking Logic ---
   Future<void> pickImage() async {
@@ -32,22 +41,20 @@ class CreateAdsController extends GetxController {
     }
   }
 
-  // --- Date/Time Picker Logic (omitted for brevity) ---
+  // --- Date/Time Picker Logic ---
   Future<void> selectDate(BuildContext context, TextEditingController controller) async {
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
-      firstDate: DateTime.now(), // Start from today
+      firstDate: DateTime.now(),
       lastDate: DateTime(2101),
     );
     if (picked != null) {
-      // Format the date as 'DD Mon YYYY' (e.g., 01 Jan 2020)
       controller.text = "${picked.day.toString().padLeft(2, '0')} ${
           _getMonthAbbreviation(picked.month)} ${picked.year}";
     }
   }
 
-  // Helper to get month abbreviation
   String _getMonthAbbreviation(int month) {
     switch (month) {
       case 1: return 'Jan';
@@ -72,13 +79,12 @@ class CreateAdsController extends GetxController {
       initialTime: TimeOfDay.now(),
     );
     if (picked != null) {
-      // Format the time as 'hh:mm AM/PM'
       final MaterialLocalizations localizations = MaterialLocalizations.of(context);
       controller.text = localizations.formatTimeOfDay(picked, alwaysUse24HourFormat: false);
     }
   }
 
-  // --- Payment & Dialog Logic (omitted for brevity) ---
+  // --- Payment & Dialog Logic ---
   void showPaymentConfirmationDialog(BuildContext context, double price) {
     Get.dialog(
       AlertDialog(
@@ -106,7 +112,7 @@ class CreateAdsController extends GetxController {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      '\$${price.toStringAsFixed(2)}',
+                      '\$${price.toStringAsFixed(2)}/${selectedPricingPlan.value == 'weekly' ? 'Weekly' : 'Monthly'}',
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 24,
@@ -155,7 +161,6 @@ class CreateAdsController extends GetxController {
     );
   }
 
-  // Helper function for the final success message
   void _showSuccessPopup() {
     successPopUps(
       message:
@@ -167,28 +172,22 @@ class CreateAdsController extends GetxController {
     );
   }
 
-
-  // --- Submit Ad Logic (omitted for brevity) ---
   void submitAd(BuildContext context) {
-    const double adPrice = 10.00;
-    showPaymentConfirmationDialog(context, adPrice);
+    showPaymentConfirmationDialog(context, selectedPrice);
   }
 
-  // =========================================================
-  // 👇 MODIFICATION: DISPOSE TEXT EDITING CONTROLLERS
-  // =========================================================
   @override
   void onClose() {
-    /*titleController.dispose();
+    // Dispose all text controllers properly
+    titleController.dispose();
     descriptionController.dispose();
     focusAreaController.dispose();
     startDateController.dispose();
     endDateController.dispose();
     startTimeController.dispose();
     endTimeController.dispose();
-    websiteLinkController.dispose();*/
-
-    // Call super.onClose() at the end
+    websiteLinkController.dispose();
+    adStartDateController.dispose();
     super.onClose();
   }
 }

@@ -11,7 +11,7 @@ class PostController extends GetxController {
   final int maxImages = 4; // Define max image limit
 
   // Form controllers
-  final descriptionController = TextEditingController();
+  final discriptions = TextEditingController();
 
   // ✅ FIXED: Empty initial value - no button selected by default
   final selectedPricingOption = ''.obs;
@@ -54,7 +54,7 @@ class PostController extends GetxController {
     // TODO: Implement your API call here
     // Example data structure:
     Map<String, dynamic> postData = {
-      'description': descriptionController.text.trim(),
+      'description': discriptions.text.trim(),
       'clicker_type': selectedPricingOption.value,
       'privacy': selectedPriorityLevel.value,
       'images': selectedImages.map((file) => file.path).toList(),
@@ -142,7 +142,7 @@ class PostController extends GetxController {
 
   @override
   void onClose() {
-    descriptionController.dispose();
+    //discriptions.dispose();
     priceController.dispose();
     serviceTimeController.dispose();
     super.onClose();

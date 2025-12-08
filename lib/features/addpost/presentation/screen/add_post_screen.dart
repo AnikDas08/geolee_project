@@ -47,7 +47,7 @@ class AddPostScreen extends StatelessWidget {
                 ),
                 SizedBox(height: 5.h),
                 _buildTextField(
-                  controller: controller.descriptionController,
+                  controller: controller.discriptions,
                   hintText: "About The Role...",
                   maxLines: 5,
                 ),
