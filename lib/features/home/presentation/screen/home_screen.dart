@@ -147,6 +147,7 @@ class HomeScreen extends StatelessWidget {
                               Get.to(() => ClickerScreen());
                             },
                           ),
+                          //dfdf
                           Item(
                             imageSrc: AppIcons.bubbleChat,
                             title: 'Chat Nearby',
