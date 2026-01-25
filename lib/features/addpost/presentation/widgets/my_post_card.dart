@@ -151,10 +151,21 @@ class MyPostCard extends StatelessWidget {
               ),
             ),
           ),
+          
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: CommonText(
+              text: "Great Vibes",
+              fontSize: 12,
+              textAlign: TextAlign.start,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
 
           /// Description
           Padding(
             padding: EdgeInsets.fromLTRB(12.w, 12.h, 12.w, 12.h),
+
             child: CommonText(
               text: description,
               fontSize: 12,

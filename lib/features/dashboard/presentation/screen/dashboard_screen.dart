@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:giolee78/config/route/app_routes.dart';
 import 'package:giolee78/features/ads/presentation/screen/view_ads_screen.dart';
+import 'package:giolee78/features/clicker/presentation/widget/app_bar.dart';
 import 'package:giolee78/features/profile/presentation/screen/dashboard_profile.dart';
 
 import '../../../../component/image/common_image.dart';
@@ -18,48 +19,48 @@ class DashboardScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildHeader(),
-              SizedBox(height: 20.h),
-              _buildStatsGrid(),
-              SizedBox(height: 24.h),
-              const CommonText(
-                text: 'My Active Ads',
-                textAlign: TextAlign.left,
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: AppColors.textColorFirst,
-              ),
-              SizedBox(height: 16.h),
-              _buildAdCard(
-                image: AppImages.banner1,
-                title: 'Delicious Fast Food',
-                description:
-                    'Satisfy Your Cravings With Delicious Fast Food, Where Every Bite Is Packed With Flavour From Juicy Burgers And Crispy Fries To Cheesy Pizzas And Spicy Wraps.',
-                onTap: () {
-                  Get.to(() => ViewAdsScreen());
-                },
-              ),
-              SizedBox(height: 16.h),
-              _buildAdCard(
-                image: AppImages.banner2,
-                title: 'Delicious Fast Food',
-                description:
-                    'Satisfy Your Cravings With Delicious Fast Food, Where Every Bite Is Packed With Flavour From Juicy Burgers And Crispy Fries To Cheesy Pizzas And Spicy Wraps.',
-                onTap: () {
-                  Get.to(() => ViewAdsScreen());
-                },
-              ),
-            ],
+        backgroundColor: AppColors.background,
+        body: SafeArea(
+          child: SingleChildScrollView(
+            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildHeader(),
+                SizedBox(height: 20.h),
+                _buildStatsGrid(),
+                SizedBox(height: 24.h),
+                const CommonText(
+                  text: 'My Active Ads',
+                  textAlign: TextAlign.left,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textColorFirst,
+                ),
+                SizedBox(height: 16.h),
+                _buildAdCard(
+                  image: AppImages.banner1,
+                  title: 'Delicious Fast Food',
+                  description:
+                      'Satisfy Your Cravings With Delicious Fast Food, Where Every Bite Is Packed With Flavour From Juicy Burgers And Crispy Fries To Cheesy Pizzas And Spicy Wraps.',
+                  onTap: () {
+                    Get.to(() => ViewAdsScreen());
+                  },
+                ),
+                SizedBox(height: 16.h),
+                _buildAdCard(
+                  image: AppImages.banner2,
+                  title: 'Delicious Fast Food',
+                  description:
+                      'Satisfy Your Cravings With Delicious Fast Food, Where Every Bite Is Packed With Flavour From Juicy Burgers And Crispy Fries To Cheesy Pizzas And Spicy Wraps.',
+                  onTap: () {
+                    Get.to(() => ViewAdsScreen());
+                  },
+                ),
+              ],
+            ),
           ),
         ),
-      ),
     );
   }
 

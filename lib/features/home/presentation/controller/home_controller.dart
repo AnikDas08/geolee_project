@@ -23,7 +23,7 @@ class HomeController extends GetxController {
   var filterOption = RxnString();
 
   // Filter parameters
-  var selectedPeriod = 'Last 3 Hours'.obs;
+  var selectedPeriod = 'Last 24 Hours'.obs;
   var startDate = DateTime.now().obs;
   var endDate = DateTime.now().obs;
   String? argument;
@@ -54,13 +54,11 @@ class HomeController extends GetxController {
     if (period != 'Custom Range') {
       // Auto-calculate date range based on period
       end = DateTime.now();
-      if (period == 'Last 3 Hours') {
+      if (period == 'Last 24 Hours') {
         start = end.subtract(Duration(hours: 3));
-      } else if (period == 'Last 24 Hours') {
+      } else if (period == 'Last 7 days') {
         start = end.subtract(Duration(hours: 24));
-      } else if (period == 'Last 7 Days') {
-        start = end.subtract(Duration(days: 7));
-      } else if (period == 'Last 30 Days') {
+      }else if (period == 'Last 30 Days') {
         start = end.subtract(Duration(days: 30));
       }
       startDate.value = start;

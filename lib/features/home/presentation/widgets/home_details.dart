@@ -72,7 +72,7 @@ class HomeDetails extends StatelessWidget {
                 child: CommonImage(imageSrc: AppIcons.notification, size: 28),
               ),
             ),
-            if (notificationCount > 0)
+            if (notificationCount == 0)
               Positioned(
                 right: 4,
                 top: -4,

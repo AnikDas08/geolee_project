@@ -10,6 +10,7 @@ import 'package:giolee78/component/text_field/common_text_field.dart';
 import 'package:giolee78/utils/constants/app_colors.dart';
 import 'package:giolee78/utils/constants/app_icons.dart';
 
+import '../../../../config/route/app_routes.dart';
 import '../controller/create_add_controller.dart';
 
 class CreateAdsScreen extends StatelessWidget {
@@ -21,150 +22,164 @@ class CreateAdsScreen extends StatelessWidget {
     //Get.delete<CreateAdsController>(force: true);
     final CreateAdsController controller = Get.put(CreateAdsController());
 
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        elevation: 0,
-        centerTitle: true,
-        leading: const SizedBox(),
-        title: const CommonText(
-          text: 'Create Ads',
-          fontSize: 18,
-          fontWeight: FontWeight.w600,
-          color: AppColors.black,
-          textAlign: TextAlign.center,
-        ),
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (didPop) {
+        if (didPop) return;
+
+        Get.offAllNamed(AppRoutes.homeNav);
+      },
+      child: Scaffold(
         backgroundColor: AppColors.background,
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
-          child: Center(
-            child: Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: AppColors.white,
-                borderRadius: BorderRadius.circular(12.r),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Padding(
-                padding: EdgeInsets.only(
-                  left: 12.w,
-                  right: 12.w,
-                  top: 12.h,
-                  bottom: 16.h,
+        appBar: AppBar(
+          elevation: 0,
+          centerTitle: true,
+          leading: GestureDetector(
+            onTap:(){
+              Get.offAllNamed(AppRoutes.homeNav);
+            },
+              child: Icon(
+                  Icons.arrow_back_ios)
+          ),
+          title: const CommonText(
+            text: 'Create Ads',
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+            color: AppColors.black,
+            textAlign: TextAlign.center,
+          ),
+          backgroundColor: AppColors.background,
+        ),
+        body: SafeArea(
+          child: SingleChildScrollView(
+            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
+            child: Center(
+              child: Container(
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: AppColors.white,
+                  borderRadius: BorderRadius.circular(12.r),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                 ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // --- Image Upload Section ---
-                    Obx(() {
-                      return _buildselectedImage(
-                        context: context,
-                        imagePath: controller.coverImagePath.value,
-                        onTap: controller.pickImage,
-                      );
-                    }),
-                    SizedBox(height: 16.h),
+                child: Padding(
+                  padding: EdgeInsets.only(
+                    left: 12.w,
+                    right: 12.w,
+                    top: 12.h,
+                    bottom: 16.h,
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // --- Image Upload Section ---
+                      Obx(() {
+                        return _buildselectedImage(
+                          context: context,
+                          imagePath: controller.coverImagePath.value,
+                          onTap: controller.pickImage,
+                        );
+                      }),
+                      SizedBox(height: 16.h),
 
-                    // --- Ads Title ---
-                    _buildLabel('Ads Title'),
-                    SizedBox(height: 6.h),
-                    CommonTextField(
-                      controller: controller.titleController,
-                      hintText: 'Delicious Fast Food',
-                    ),
-                    SizedBox(height: 14.h),
+                      // --- Ads Title ---
+                      _buildLabel('Ads Title'),
+                      SizedBox(height: 6.h),
+                      CommonTextField(
+                        controller: controller.titleController,
+                        hintText: 'Delicious Fast Food',
+                      ),
+                      SizedBox(height: 14.h),
 
-                    // --- Description ---
-                    _buildLabel('Description'),
-                    SizedBox(height: 6.h),
-                    CommonTextField(
-                      controller: controller.descriptionController,
-                      hintText:
-                      'Satisfy Your Cravings With Delicious Fast Food, Where Every Bite Is Packed With Flavor...',
-                      maxLines: 3,
-                    ),
-                    SizedBox(height: 14.h),
+                      // --- Description ---
+                      _buildLabel('Description'),
+                      SizedBox(height: 6.h),
+                      CommonTextField(
+                        controller: controller.descriptionController,
+                        hintText:
+                        'Satisfy Your Cravings With Delicious Fast Food, Where Every Bite Is Packed With Flavor...',
+                        maxLines: 3,
+                      ),
+                      SizedBox(height: 14.h),
 
-                    // --- Focus Area ---
-                    _buildLabel('Focus Area'),
-                    SizedBox(height: 6.h),
-                    CommonTextField(
-                      controller: controller.focusAreaController,
-                      hintText: 'California, New York',
-                    ),
-                    SizedBox(height: 14.h),
+                      // --- Focus Area ---
+                      _buildLabel('Focus Area'),
+                      SizedBox(height: 6.h),
+                      CommonTextField(
+                        controller: controller.focusAreaController,
+                        hintText: 'California, New York',
+                      ),
+                      SizedBox(height: 14.h),
 
-                    // --- Website Link ---
-                    _buildLabel('Website Link'),
-                    SizedBox(height: 6.h),
-                    CommonTextField(
-                      controller: controller.websiteLinkController,
-                      hintText: 'www.website.com/restaurant',
-                    ),
-                    SizedBox(height: 20.h),
+                      // --- Website Link ---
+                      _buildLabel('Website Link'),
+                      SizedBox(height: 6.h),
+                      CommonTextField(
+                        controller: controller.websiteLinkController,
+                        hintText: 'www.website.com/restaurant',
+                      ),
+                      SizedBox(height: 20.h),
 
-                    // --- Pricing Plan Selection ---
-                    _buildLabel('Select Pricing Plan'),
-                    SizedBox(height: 10.h),
-                    Obx(() => _buildPricingCards(controller)),
-                    SizedBox(height: 16.h),
+                      // --- Pricing Plan Selection ---
+                      _buildLabel('Select Pricing Plan'),
+                      SizedBox(height: 10.h),
+                      Obx(() => _buildPricingCards(controller)),
+                      SizedBox(height: 16.h),
 
-                    // --- Ad Start Date (shown after selection) ---
-                    Obx(() {
-                      if (controller.selectedPricingPlan.value.isNotEmpty) {
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _buildLabel('Ad Start Date'),
-                            SizedBox(height: 6.h),
-                            CommonTextField(
-                              controller: controller.adStartDateController,
-                              hintText: 'Select start date',
-                              //readOnly: true,
-                              suffixIcon: GestureDetector(
+                      // --- Ad Start Date (shown after selection) ---
+                      Obx(() {
+                        if (controller.selectedPricingPlan.value.isNotEmpty) {
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildLabel('Ad Start Date'),
+                              SizedBox(height: 6.h),
+                              CommonTextField(
+                                controller: controller.adStartDateController,
+                                hintText: 'Select start date',
+                                //readOnly: true,
+                                suffixIcon: GestureDetector(
+                                  onTap: () => controller.selectDate(
+                                    context,
+                                    controller.adStartDateController,
+                                  ),
+                                  child: Icon(
+                                    Icons.calendar_today,
+                                    color: AppColors.primaryColor,
+                                    size: 20.sp,
+                                  ),
+                                ),
                                 onTap: () => controller.selectDate(
                                   context,
                                   controller.adStartDateController,
                                 ),
-                                child: Icon(
-                                  Icons.calendar_today,
-                                  color: AppColors.primaryColor,
-                                  size: 20.sp,
-                                ),
                               ),
-                              onTap: () => controller.selectDate(
-                                context,
-                                controller.adStartDateController,
-                              ),
-                            ),
-                            SizedBox(height: 20.h),
-                          ],
-                        );
-                      }
-                      return const SizedBox.shrink();
-                    }),
+                              SizedBox(height: 20.h),
+                            ],
+                          );
+                        }
+                        return const SizedBox.shrink();
+                      }),
 
-                    // --- Submit Button ---
-                    CommonButton(
-                      onTap: () => controller.submitAd(context),
-                      titleText: 'Submit',
-                      buttonColor: AppColors.primaryColor,
-                      titleColor: AppColors.white,
-                      borderColor: AppColors.primaryColor,
-                      buttonHeight: 44.h,
-                      buttonRadius: 8.r,
-                      titleSize: 16,
-                    ),
-                  ],
+                      // --- Submit Button ---
+                      CommonButton(
+                        onTap: () => controller.submitAd(context),
+                        titleText: 'Submit',
+                        buttonColor: AppColors.primaryColor,
+                        titleColor: AppColors.white,
+                        borderColor: AppColors.primaryColor,
+                        buttonHeight: 44.h,
+                        buttonRadius: 8.r,
+                        titleSize: 16,
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),

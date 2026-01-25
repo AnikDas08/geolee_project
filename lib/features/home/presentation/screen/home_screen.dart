@@ -25,7 +25,12 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return WillPopScope(
+        onWillPop: () async {
+          Get.back();
+          return false;
+        },
+        child: Scaffold(
       backgroundColor: AppColors.background,
       body: GetBuilder<HomeController>(
         init: HomeController(),
@@ -185,8 +190,10 @@ class HomeScreen extends StatelessWidget {
             ),
           );
         },
-      ),
+      )
+    )
     );
+
   }
   void _showConfirmationDialog() {
     Get.dialog(

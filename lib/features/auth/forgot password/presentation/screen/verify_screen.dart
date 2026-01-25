@@ -122,7 +122,7 @@ class _VerifyScreenState extends State<VerifyScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       CommonText(
-                        text: "Didn't receive the code?",
+                        text: "Didn't get the code?",
                         fontSize: 16,
                         bottom: 40,
                         maxLines: 3,

@@ -6,6 +6,7 @@ import 'package:giolee78/component/app_bar/custom_appbar.dart';
 import 'package:giolee78/component/button/common_button.dart';
 import 'package:giolee78/component/image/common_image.dart';
 import 'package:giolee78/component/text/common_text.dart';
+import 'package:giolee78/config/route/app_routes.dart';
 import 'package:giolee78/features/addpost/presentation/controller/post_controller.dart';
 import 'package:giolee78/utils/constants/app_colors.dart';
 import 'package:giolee78/utils/constants/app_icons.dart';
@@ -17,131 +18,139 @@ class AddPostScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: SingleChildScrollView(
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                CustomAppBar(title: "Create Clicker", showBackButton: false),
-                SizedBox(height: 20.h),
+    return WillPopScope(
+      onWillPop: ()async{
+        Get.offAllNamed(AppRoutes.homeNav);
+        return false;
+      },
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        body: SingleChildScrollView(
+          child: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  CustomAppBar(title: "Create Clicker", showBackButton: true,onBackTap: (){
+                    Get.offAllNamed(AppRoutes.homeNav);
+                  },),
+                  SizedBox(height: 20.h),
 
-                // Upload Image Section
-                CommonText(
-                  text: "Upload Images",
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.w400,
-                ),
-                SizedBox(height: 10.h),
-                Obx(() => _buildImageUploadSection(context)),
-                SizedBox(height: 20.h),
-
-                // Description
-                CommonText(
-                  text: "Description",
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.w400,
-                ),
-                SizedBox(height: 5.h),
-                _buildTextField(
-                  controller: controller.discriptions,
-                  hintText: "About The Role...",
-                  maxLines: 5,
-                ),
-                SizedBox(height: 16.h),
-
-                // ✅ FIXED: Pricing / Fee Options with proper layout
-                CommonText(
-                  text: "Select Clicker",
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.w400,
-                ),
-                SizedBox(height: 6.h),
-                Obx(
-                      () => Column(
-                    children: [
-                      // First Row
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _buildPricingOption(
-                              title: "Great Vibes",
-                              isSelected: controller.selectedPricingOption.value == 'Great Vibes',
-                              onTap: () => controller.selectPricingOption('Great Vibes'),
-                            ),
-                          ),
-                          SizedBox(width: 8.w),
-                          Expanded(
-                            child: _buildPricingOption(
-                              title: "Off Vibes",
-                              isSelected: controller.selectedPricingOption.value == 'Off Vibes',
-                              onTap: () => controller.selectPricingOption('Off Vibes'),
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 8.h),
-                      // Second Row
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _buildPricingOption(
-                              title: "Charming Gentleman",
-                              isSelected: controller.selectedPricingOption.value == 'Charming Gentleman',
-                              onTap: () => controller.selectPricingOption('Charming Gentleman'),
-                            ),
-                          ),
-                          SizedBox(width: 8.w),
-                          Expanded(
-                            child: _buildPricingOption(
-                              title: "Lovely Lady",
-                              isSelected: controller.selectedPricingOption.value == 'Lovely Lady',
-                              onTap: () => controller.selectPricingOption('Lovely Lady'),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
+                  // Upload Image Section
+                  CommonText(
+                    text: "Upload Images",
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w400,
                   ),
-                ),
+                  SizedBox(height: 10.h),
+                  Obx(() => _buildImageUploadSection(context)),
+                  SizedBox(height: 20.h),
 
-                SizedBox(height: 16.h),
-
-                // Priority Level
-                CommonText(
-                  text: "Privacy",
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.w600,
-                ),
-                SizedBox(height: 8.h),
-                Obx(
-                      () => _buildDropdown(
-                    value: controller.selectedPriorityLevel.value.isEmpty
-                        ? null
-                        : controller.selectedPriorityLevel.value,
-                    hint: "Select Privacy",
-                    items: controller.priorityLevels,
-                    onChanged: (value) {
-                      controller.selectedPriorityLevel.value = value!;
-                    },
+                  // Description
+                  CommonText(
+                    text: "Description",
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w400,
                   ),
-                ),
-                SizedBox(height: 32.h),
+                  SizedBox(height: 5.h),
+                  _buildTextField(
+                    controller: controller.discriptions,
+                    hintText: "About The Role...",
+                    maxLines: 5,
+                  ),
+                  SizedBox(height: 16.h),
 
-                // Post Button
-                Obx(() {
-                  return CommonButton(
-                    titleText: controller.isLoading.value ? "Posting..." : "CLICKER COUNT",
-                    buttonColor: AppColors.primaryColor,
-                    buttonRadius: 8,
-                    onTap: () => controller.createPost(),
-                  );
-                }),
-                SizedBox(height: 40.h),
-              ],
+                  // ✅ FIXED: Pricing / Fee Options with proper layout
+                  CommonText(
+                    text: "Select Clicker",
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w400,
+                  ),
+                  SizedBox(height: 6.h),
+                  Obx(
+                        () => Column(
+                      children: [
+                        // First Row
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _buildPricingOption(
+                                title: "Great Vibes",
+                                isSelected: controller.selectedPricingOption.value == 'Great Vibes',
+                                onTap: () => controller.selectPricingOption('Great Vibes'),
+                              ),
+                            ),
+                            SizedBox(width: 8.w),
+                            Expanded(
+                              child: _buildPricingOption(
+                                title: "Off Vibes",
+                                isSelected: controller.selectedPricingOption.value == 'Off Vibes',
+                                onTap: () => controller.selectPricingOption('Off Vibes'),
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 8.h),
+                        // Second Row
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _buildPricingOption(
+                                title: "Charming Gentleman",
+                                isSelected: controller.selectedPricingOption.value == 'Charming Gentleman',
+                                onTap: () => controller.selectPricingOption('Charming Gentleman'),
+                              ),
+                            ),
+                            SizedBox(width: 8.w),
+                            Expanded(
+                              child: _buildPricingOption(
+                                title: "Lovely Lady",
+                                isSelected: controller.selectedPricingOption.value == 'Lovely Lady',
+                                onTap: () => controller.selectPricingOption('Lovely Lady'),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  SizedBox(height: 16.h),
+
+                  // Priority Level
+                  CommonText(
+                    text: "Privacy",
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  SizedBox(height: 8.h),
+                  Obx(
+                        () => _buildDropdown(
+                      value: controller.selectedPriorityLevel.value.isEmpty
+                          ? null
+                          : controller.selectedPriorityLevel.value,
+                      hint: "Select Privacy",
+                      items: controller.priorityLevels,
+                      onChanged: (value) {
+                        controller.selectedPriorityLevel.value = value!;
+                      },
+                    ),
+                  ),
+                  SizedBox(height: 32.h),
+
+                  // Post Button
+                  Obx(() {
+                    return CommonButton(
+                      titleText: controller.isLoading.value ? "Posting..." : "CLICKER COUNT",
+                      buttonColor: AppColors.primaryColor,
+                      buttonRadius: 8,
+                      onTap: () => controller.createPost(),
+                    );
+                  }),
+                  SizedBox(height: 40.h),
+                ],
+              ),
             ),
           ),
         ),

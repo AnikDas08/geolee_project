@@ -73,7 +73,7 @@ class SignUpController extends GetxController {
   final TextEditingController addressController = TextEditingController();
   final TextEditingController ageController = TextEditingController();
 
-  String selectedGender = 'Male';
+  String? selectedGender;
   final List<String> genderOptions = ['Male', 'Female', 'Other'];
 
   Future<void> selectDate(BuildContext context) async {
@@ -487,7 +487,7 @@ class SignUpController extends GetxController {
       "birthDate": dateController.text,
       "lat": currentPosition?.latitude.toString() ?? "",
       "log": currentPosition?.longitude.toString() ?? "",
-      "gender": selectedGender,
+      "gender": selectedGender!,
     };
 
     ApiResponseModel response;

@@ -90,7 +90,7 @@ class ForgetPasswordController extends GetxController {
         ApiEndPoint.forgotPassword,
         body: body,
       );
-
+//
       if (response.statusCode == 200) {
         Utils.successSnackBar(response.statusCode.toString(), response.message);
         Get.toNamed(AppRoutes.verifyEmail);
@@ -104,7 +104,7 @@ class ForgetPasswordController extends GetxController {
       update();
     }
   }
-
+//
   /// Verify OTP Api Call
 
   Future<void> verifyOtpRepo() async {
@@ -133,7 +133,7 @@ class ForgetPasswordController extends GetxController {
       update();
     }
   }
-
+//
   /// Create New Password Api Call
 
   Future<void> resetPasswordRepo() async {

@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:giolee78/config/route/app_routes.dart';
 import 'package:intl/intl.dart';
 import '../../../../utils/constants/app_colors.dart';
 import '../controller/message_controller.dart';
@@ -89,185 +90,191 @@ class _MessageScreenState extends State<MessageScreen> {
   Widget build(BuildContext context) {
     return GetBuilder<MessageController>(
       builder: (controller) {
-        return Scaffold(
-          backgroundColor: Colors.grey[100],
+        return WillPopScope(
+          onWillPop: ()async{
+            Get.back();
+            return true;
+          },
+          child: Scaffold(
+            backgroundColor: Colors.grey[100],
 
-          /// App Bar with Profile
-          appBar: AppBar(
-            backgroundColor: Colors.white,
-            elevation: 0,
-            leading: IconButton(
-              icon: const Icon(Icons.arrow_back, color: Colors.black),
-              onPressed: () => Navigator.pop(context),
-            ),
-            title: Row(
-              children: [
-                /// Profile Image with Online Status
-                Stack(
-                  children: [
-                    CircleAvatar(
-                      radius: 20.r,
-                      backgroundImage: controller.image.isNotEmpty
-                          ? NetworkImage(_getImageUrl(controller.image))
-                          : null,
-                      child: controller.image.isEmpty
-                          ? Icon(Icons.person, size: 20.sp)
-                          : null,
-                    ),
-                    if (controller.isActive)
-                      Positioned(
-                        bottom: 0,
-                        right: 0,
-                        child: Container(
-                          width: 12.w,
-                          height: 12.h,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF0FE16D),
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: Colors.white,
-                              width: 2,
+            /// App Bar with Profile
+            appBar: AppBar(
+              backgroundColor: Colors.white,
+              elevation: 0,
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back, color: Colors.black),
+                onPressed: () => Get.back(),
+              ),
+              title: Row(
+                children: [
+                  /// Profile Image with Online Status
+                  Stack(
+                    children: [
+                      CircleAvatar(
+                        radius: 20.r,
+                        backgroundImage: controller.image.isNotEmpty
+                            ? NetworkImage(_getImageUrl(controller.image))
+                            : null,
+                        child: controller.image.isEmpty
+                            ? Icon(Icons.person, size: 20.sp)
+                            : null,
+                      ),
+                      if (controller.isActive)
+                        Positioned(
+                          bottom: 0,
+                          right: 0,
+                          child: Container(
+                            width: 12.w,
+                            height: 12.h,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF0FE16D),
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: Colors.white,
+                                width: 2,
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                  ],
+                    ],
+                  ),
+
+                  SizedBox(width: 12.w),
+
+                  /// Name and Active Status
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          controller.name.isNotEmpty ? controller.name : 'Chat',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 16.sp,
+                            color: Colors.black,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        SizedBox(height: 2.h),
+                        if (controller.isActive)
+                          Text(
+                            "Active now",
+                            style: TextStyle(
+                              fontWeight: FontWeight.w500,
+                              fontSize: 12.sp,
+                              color: const Color(0xFF0FE16D),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.person, color: Colors.black),
+                  onPressed: () {},
+                ),
+              ],
+            ),
+
+            /// Body with Messages
+            body: controller.isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : Column(
+              children: [
+                /// Messages List
+                Expanded(
+                  child: ListView.builder(
+                    controller: controller.scrollController,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 16.w,
+                      vertical: 16.h,
+                    ),
+                    itemCount: controller.messages.length,
+                    itemBuilder: (context, index) {
+                      final message = controller.messages[index];
+                      return _buildMessageBubble(message);
+                    },
+                  ),
                 ),
 
-                SizedBox(width: 12.w),
-
-                /// Name and Active Status
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
+                /// Input Area
+                Container(
+                  color: Colors.white,
+                  padding: EdgeInsets.only(
+                    left: 16.w,
+                    right: 16.w,
+                    bottom: MediaQuery.of(context).padding.bottom + 16.h,
+                    top: 16.h,
+                  ),
+                  child: Row(
                     children: [
-                      Text(
-                        controller.name.isNotEmpty ? controller.name : 'Chat',
-                        style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 16.sp,
-                          color: Colors.black,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      SizedBox(height: 2.h),
-                      if (controller.isActive)
-                        Text(
-                          "Active now",
-                          style: TextStyle(
-                            fontWeight: FontWeight.w500,
-                            fontSize: 12.sp,
-                            color: const Color(0xFF0FE16D),
+                      Expanded(
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.grey[100],
+                            borderRadius: BorderRadius.circular(24.r),
+                          ),
+                          child: TextField(
+                            controller: controller.messageController,
+                            decoration: InputDecoration(
+                              hintText: "Write your message",
+                              hintStyle: TextStyle(
+                                fontSize: 14.sp,
+                                color: Colors.grey[400],
+                              ),
+                              border: InputBorder.none,
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: 20.w,
+                                vertical: 12.h,
+                              ),
+                              suffixIcon: GestureDetector(
+                                onTap: () => _showAttachmentPicker(context, controller),
+                                child: Padding(
+                                  padding: EdgeInsets.all(8.w),
+                                  child: Icon(
+                                    Icons.attach_file,
+                                    color: Colors.grey[600],
+                                    size: 22.sp,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            style: TextStyle(
+                              fontSize: 14.sp,
+                              color: Colors.black,
+                            ),
+                            onSubmitted: (value) => controller.sendMessage(),
                           ),
                         ),
+                      ),
+                      SizedBox(width: 12.w),
+                      GestureDetector(
+                        onTap: controller.isUploadingImage
+                            ? null
+                            : controller.sendMessage,
+                        child: Container(
+                          padding: EdgeInsets.all(10.w),
+                          decoration: BoxDecoration(
+                            color: AppColors.primaryColor,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            Icons.send,
+                            color: Colors.white,
+                            size: 20.sp,
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),
               ],
             ),
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.person, color: Colors.black),
-                onPressed: () {},
-              ),
-            ],
-          ),
-
-          /// Body with Messages
-          body: controller.isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : Column(
-            children: [
-              /// Messages List
-              Expanded(
-                child: ListView.builder(
-                  controller: controller.scrollController,
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 16.w,
-                    vertical: 16.h,
-                  ),
-                  itemCount: controller.messages.length,
-                  itemBuilder: (context, index) {
-                    final message = controller.messages[index];
-                    return _buildMessageBubble(message);
-                  },
-                ),
-              ),
-
-              /// Input Area
-              Container(
-                color: Colors.white,
-                padding: EdgeInsets.only(
-                  left: 16.w,
-                  right: 16.w,
-                  bottom: MediaQuery.of(context).padding.bottom + 16.h,
-                  top: 16.h,
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.grey[100],
-                          borderRadius: BorderRadius.circular(24.r),
-                        ),
-                        child: TextField(
-                          controller: controller.messageController,
-                          decoration: InputDecoration(
-                            hintText: "Write your message",
-                            hintStyle: TextStyle(
-                              fontSize: 14.sp,
-                              color: Colors.grey[400],
-                            ),
-                            border: InputBorder.none,
-                            contentPadding: EdgeInsets.symmetric(
-                              horizontal: 20.w,
-                              vertical: 12.h,
-                            ),
-                            suffixIcon: GestureDetector(
-                              onTap: () => _showAttachmentPicker(context, controller),
-                              child: Padding(
-                                padding: EdgeInsets.all(8.w),
-                                child: Icon(
-                                  Icons.attach_file,
-                                  color: Colors.grey[600],
-                                  size: 22.sp,
-                                ),
-                              ),
-                            ),
-                          ),
-                          style: TextStyle(
-                            fontSize: 14.sp,
-                            color: Colors.black,
-                          ),
-                          onSubmitted: (value) => controller.sendMessage(),
-                        ),
-                      ),
-                    ),
-                    SizedBox(width: 12.w),
-                    GestureDetector(
-                      onTap: controller.isUploadingImage
-                          ? null
-                          : controller.sendMessage,
-                      child: Container(
-                        padding: EdgeInsets.all(10.w),
-                        decoration: BoxDecoration(
-                          color: AppColors.primaryColor,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          Icons.send,
-                          color: Colors.white,
-                          size: 20.sp,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
           ),
         );
       },

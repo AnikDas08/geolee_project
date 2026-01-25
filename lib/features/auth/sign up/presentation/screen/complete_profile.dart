@@ -125,9 +125,9 @@ class _CompleteProfileState extends State<CompleteProfile> {
               CommonTextField(
                 controller: controller.dateController,
                 hintText:
-                    'Exploring one city at a time | Capturing stories beyond borders',
+                    'Type...',
                 fillColor: AppColors.white,
-                hintTextColor: AppColors.black,
+                hintTextColor: Colors.grey,
                 textColor: AppColors.black,
                 maxLines: 2,
               ),
@@ -144,9 +144,9 @@ class _CompleteProfileState extends State<CompleteProfile> {
               ),
               CommonTextField(
                 controller: controller.ageController,
-                hintText: '25 Years',
+                hintText: 'Type your age',
                 fillColor: AppColors.white,
-                hintTextColor: AppColors.black,
+                hintTextColor: AppColors.grey,
                 textColor: AppColors.black,
               ),
 
@@ -217,6 +217,7 @@ class _CompleteProfileState extends State<CompleteProfile> {
                     controller.selectedGender = newValue!;
                     controller.update();
                   },
+                  hint: Text("Select Gender", style: TextStyle(color: AppColors.grey)),
                 ),
               ),
 
