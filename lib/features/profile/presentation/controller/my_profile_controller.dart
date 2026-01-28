@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:get/get.dart';
 import 'package:giolee78/config/api/api_end_point.dart';
 import 'package:giolee78/config/route/app_routes.dart';
@@ -29,16 +31,14 @@ class MyProfileController extends GetxController {
 
   String get gender => LocalStorage.gender;
   String get experience => LocalStorage.experience;
-  String get bio => LocalStorage.bio;
+  String get bio => LocalStorage.bio.isEmpty?LocalStorage.bio:"Bio Not Set Yet";
   double get balance => LocalStorage.balance;
   bool get verified => LocalStorage.verified;
   double get lat => LocalStorage.lat;
   double get log => LocalStorage.log;
   bool get accountInfoStatus => LocalStorage.accountInfoStatus;
   String get address => "Dhaka, Bangladesh";
-  String get about => LocalStorage.bio.isNotEmpty
-      ? LocalStorage.bio
-      : "Skilled professionals offering reliable, on-demand services to meet your everyday needs quickly and efficiently.";
+   String get about => LocalStorage.bio.isNotEmpty ? LocalStorage.bio : "Bio Not Set yet";
 
   @override
   void onInit() {
@@ -57,36 +57,42 @@ class MyProfileController extends GetxController {
 
     try {
       var response = await ApiService.get(
+        header: {
+          "Authorization": "Bearer ${LocalStorage.token}",
+          "Content-Type": "application/json",
+        },
         ApiEndPoint.profile,
       ).timeout(const Duration(seconds: 30));
 
       if (response.statusCode == 200) {
-        // Parse response to model
         profileModel = UserProfileModel.fromJson(
           response.data as Map<String, dynamic>,
         );
-
         if (profileModel?.data != null) {
-          final data = profileModel!.data!;
 
-          // Update LocalStorage variables
-          LocalStorage.userId = data.id ?? "";
-          LocalStorage.myImage = data.image ?? "";
+
+          final data = profileModel!.data!;
+          LocalStorage.userId = data.sId ?? "";
           LocalStorage.myName = data.name ?? "";
           LocalStorage.myEmail = data.email ?? "";
           LocalStorage.myRole = data.role ?? "";
-          LocalStorage.dateOfBirth = data.birthDate ?? "";
-          LocalStorage.gender = data.gender ?? "";
-          LocalStorage.experience = data.experience ?? "";
-          LocalStorage.balance = data.balance ?? 0.0;
-          LocalStorage.verified = data.verified ?? false;
-          LocalStorage.bio = data.bio ?? "";
-          LocalStorage.lat = data.lat ?? 0.0;
-          LocalStorage.log = data.log ?? 0.0;
-          LocalStorage.accountInfoStatus =
-              data.accountInformation?.status ?? false;
+          LocalStorage.myImage = data.image ?? "";
+          LocalStorage.bio = data.bio ?? "Bio Yet Not Set";
+          LocalStorage.gender = data.gender ?? "Not Selected";
+          LocalStorage.dateOfBirth = data.dob ?? "Not Selected";
           LocalStorage.createdAt = data.createdAt ?? "";
           LocalStorage.updatedAt = data.updatedAt ?? "";
+          LocalStorage.verified = data.isVerified ?? false;
+
+
+          await LocalStorage.setString(LocalStorageKeys.userId, LocalStorage.userId);
+          await LocalStorage.setString(LocalStorageKeys.myName, LocalStorage.myName);
+          await LocalStorage.setString(LocalStorageKeys.myEmail, LocalStorage.myEmail);
+          await LocalStorage.setString(LocalStorageKeys.myRole, LocalStorage.myRole);
+          await LocalStorage.setString(LocalStorageKeys.myImage, LocalStorage.myImage);
+          await LocalStorage.setBool(LocalStorageKeys.verified, LocalStorage.verified);
+
+
 
           // Save to SharedPreferences
           await LocalStorage.setBool(

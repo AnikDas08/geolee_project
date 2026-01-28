@@ -1,12 +1,12 @@
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import '../../config/route/app_routes.dart';
 import '../../utils/log/app_log.dart';
 import 'storage_keys.dart';
 
 class LocalStorage {
   static String token = "";
+  static String forgotPasswordToken="";
   static String refreshToken = "";
   static bool isLogIn = false;
   static String userId = "";
@@ -117,4 +117,5 @@ class LocalStorage {
     final localStorage = await _getStorage();
     await localStorage.setDouble(key, value);
   }
+
 }

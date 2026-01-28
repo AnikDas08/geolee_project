@@ -61,10 +61,9 @@ class ApiService {
           await MultipartFile.fromFile(
             imagePath,
             filename: "$imageName.$extension",
-            contentType:
-                mimeType != null
-                    ? DioMediaType.parse(mimeType)
-                    : DioMediaType.parse("image/jpeg"),
+            contentType: mimeType != null
+                ? DioMediaType.parse(mimeType)
+                : DioMediaType.parse("image/jpeg"),
           ),
         ),
       );
@@ -81,12 +80,12 @@ class ApiService {
   }
 
   static Future<ApiResponseModel> multipartImage(
-      String url, {
-        Map<String, String> header = const {},
-        Map<String, String> body = const {},
-        String method = "POST",
-        List files = const [],
-      }) async {
+    String url, {
+    Map<String, String> header = const {},
+    Map<String, String> body = const {},
+    String method = "POST",
+    List files = const [],
+  }) async {
     FormData formData = FormData();
 
     for (var item in files) {
@@ -196,8 +195,9 @@ Dio _getMyDio() {
           ..receiveDataWhenStatusError = true
           ..responseType = ResponseType.json
           ..receiveTimeout = const Duration(seconds: 30)
-          ..baseUrl =
-              options.baseUrl.startsWith("http") ? "" : ApiEndPoint.baseUrl;
+          ..baseUrl = options.baseUrl.startsWith("http")
+              ? ""
+              : ApiEndPoint.baseUrl;
         handler.next(options);
       },
       onResponse: (response, handler) {

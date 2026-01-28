@@ -6,6 +6,7 @@ import 'package:giolee78/component/image/common_image.dart';
 import 'package:giolee78/component/text/common_text.dart';
 import 'package:giolee78/config/route/app_routes.dart';
 import 'package:giolee78/features/addpost/presentation/widgets/my_post_card.dart';
+import 'package:giolee78/features/clicker/presentation/controller/clicker_controller.dart';
 import 'package:giolee78/utils/constants/app_colors.dart';
 import 'package:giolee78/utils/constants/app_icons.dart';
 import 'package:giolee78/utils/constants/app_images.dart';
@@ -20,8 +21,12 @@ class ViewFriendScreen extends StatelessWidget {
     this.isRequest = false,
   });
 
+
+
+
   @override
   Widget build(BuildContext context) {
+    final ClickerController controller=Get.put(ClickerController());
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
@@ -57,11 +62,12 @@ class ViewFriendScreen extends StatelessWidget {
                 physics: const NeverScrollableScrollPhysics(),
                 itemBuilder: (context, index) {
                   // Later: read posts from Riverpod and pass here
+                  final data=controller.banners[index];
                   return MyPostCard(
                     userName: 'Dianne Russell',
                     userAvatar: AppImages.profileImage,
                     timeAgo: '6 Min Ago',
-                    location: 'Thornridge Cir, Shiloh, Hawaii',
+                    location: 'Mohakhali Dhaka',
                     postImage: index == 0
                         ? AppImages.postImage
                         : AppImages.postImage,
@@ -72,7 +78,7 @@ class ViewFriendScreen extends StatelessWidget {
                   );
                 },
                 separatorBuilder: (_, __) => SizedBox(height: 12.h),
-                itemCount: 2, // later: posts.length
+                itemCount: controller.banners.length, // later: posts.length
               ),
             ],
           ),
@@ -82,6 +88,7 @@ class ViewFriendScreen extends StatelessWidget {
   }
 
   Widget _buildHeader() {
+    final ClickerController controller = Get.find();
     return Column(
       children: [
         Center(

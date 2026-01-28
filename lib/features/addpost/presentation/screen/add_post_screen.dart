@@ -448,6 +448,9 @@ class AddPostScreen extends StatelessWidget {
           Expanded(
             child: DropdownButtonHideUnderline(
               child: DropdownButton<String>(
+                dropdownColor: Colors.white,
+                borderRadius: BorderRadius.circular(4.r),
+
                 value: value,
                 hint: Text(
                   hint,

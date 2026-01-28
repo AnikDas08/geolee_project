@@ -128,7 +128,7 @@ class MyProfileScreen extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         CommonText(
-          text: 'Bio',
+          text: controller.about,
           fontSize: 16.sp,
           fontWeight: FontWeight.w600,
           color: AppColors.black,
@@ -155,9 +155,9 @@ class MyProfileScreen extends StatelessWidget {
         16.height,
         _buildDetailRow('E-mail', controller.userEmail),
         16.height,
-        _buildDetailRow('Date o\' Birth', '25 Years'),
+        _buildDetailRow('Date o\' Birth', controller.dateOfBirth),
         16.height,
-        _buildDetailRow('Gender', 'Male'),
+        _buildDetailRow('Gender', controller.gender),
       ],
     );
   }

@@ -51,16 +51,16 @@ class SignUpController extends GetxController {
   static SignUpController get instance => Get.put(SignUpController());
 
   TextEditingController nameController = TextEditingController(
-    text: kDebugMode ? "Namimul Hassan" : "",
+    text: kDebugMode ? "Md Ibrahim Nazmul" : "",
   );
   TextEditingController emailController = TextEditingController(
     text: kDebugMode ? "developernaimul00@gmail.com" : '',
   );
   TextEditingController passwordController = TextEditingController(
-    text: kDebugMode ? 'hello123' : '',
+    text: kDebugMode ? 'password123' : '',
   );
   TextEditingController confirmPasswordController = TextEditingController(
-    text: kDebugMode ? 'hello123' : '',
+    text: kDebugMode ? 'password123' : '',
   );
   TextEditingController numberController = TextEditingController(
     text: kDebugMode ? '1865965581' : '',
@@ -115,9 +115,12 @@ class SignUpController extends GetxController {
     update();
   }
 
+  ///============================================Sign Up
+
   signUpUser(GlobalKey<FormState> signUpFormKey) async {
-    Get.toNamed(AppRoutes.verifyUser);
-    return;
+    // Get.toNamed(AppRoutes.verifyUser);
+    // return;
+
     if (!signUpFormKey.currentState!.validate()) return;
     isLoading = true;
     update();
@@ -126,13 +129,155 @@ class SignUpController extends GetxController {
         "name": nameController.text,
         "email": emailController.text,
         "password": passwordController.text,
-        "confirmPassword": confirmPasswordController.text,
-        "role": selectRole,
+        // "confirmPassword": confirmPasswordController.text,
+        // "role": selectRole,
       };
 
       var response = await ApiService.post(ApiEndPoint.signUp, body: body);
 
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        Get.toNamed(AppRoutes.verifyUser);
+      } else {
+        Utils.errorSnackBar(response.statusCode.toString(), response.message);
+      }
+    } catch (e) {
+      Utils.errorSnackBar("Error", e.toString());
+    } finally {
+      isLoading = false;
+      update();
+    }
+  }
+
+  ///===========================================================================verify OTP
+
+  Future<void> verifyOtpRepo() async {
+    // Get.toNamed(AppRoutes.completeProfile);
+    // return;
+    isLoadingVerify = true;
+    update();
+    try {
+      debugPrint(emailController.text);
+      Map<String, dynamic> body = {
+        "email": emailController.text.trim(),
+        "oneTimeCode": int.parse(otpController.text.trim()),
+      };
+
+      Map<String, String> header = {'Content-Type': "application/json"};
+
+      var response = await ApiService.post(
+        ApiEndPoint.verifyEmail,
+        body: body,
+        header: header,
+      );
+
       if (response.statusCode == 200) {
+        var data = response.data;
+
+        debugPrint('===============================${response.statusCode}');
+
+        if (data['success'] == true) {
+
+          String bearerToken = data['data']['accessToken'];
+
+          LocalStorage.setString(LocalStorageKeys.token,LocalStorage.token=bearerToken);
+
+          Get.toNamed(AppRoutes.completeProfile);
+        } else {
+          Utils.errorSnackBar("Error", data['message'] ?? "Unknown error");
+        }
+      } else {
+        debugPrint(
+          'error ===============================${response.statusCode}',
+        );
+
+        Utils.errorSnackBar(response.statusCode.toString(), response.message);
+      }
+    } catch (e) {
+      Get.snackbar("Error", e.toString());
+    } finally {
+      isLoadingVerify = false;
+      update();
+    }
+  }
+
+  ///===================================================Update Profile and Complete Profile
+  Future<void> updateProfile() async {
+    isLoading = true;
+    update();
+
+    debugPrint("token is ==============================${LocalStorage.token}");
+
+    Map<String, String> body = {
+      // "birthDate": dateController.text,
+      // "lat": currentPosition?.latitude.toString() ?? "",
+      // "log": currentPosition?.longitude.toString() ?? "",
+      // "gender": selectedGender!,
+      // "dob": '2000-11-24T12:44:23.000Z',
+      'address': "Dhaka",
+    };
+
+    try {
+      ApiResponseModel response;
+
+      Map<String, String> header = {
+        'Authorization': 'Bearer ${LocalStorage.token}',
+      };
+
+      if (image != null && image!.isNotEmpty) {
+        debugPrint("📸 Uploading profile image: $image");
+        response = await ApiService.multipart(
+          ApiEndPoint.updateProfile,
+          body: body,
+          imagePath: image!,
+          imageName: "image",
+          method: "PATCH",
+          header: header,
+        );
+      } else {
+
+        debugPrint("⚠️ No image selected, updating profile without image");
+
+        response = await ApiService.patch(
+          ApiEndPoint.updateProfile,
+          body: body,
+          header: header,
+        );
+      }
+
+      if (response.statusCode == 200) {
+        SuccessProfileDialogHere.show(
+          Get.context!,
+          title: "Your Registration Successfully Complete.",
+        );
+
+
+        Get.offAllNamed(AppRoutes.signIn);
+      } else {
+        Utils.errorSnackBar("Error ${response.statusCode}", response.message);
+      }
+    } catch (e) {
+      Utils.errorSnackBar("Error", e.toString());
+    } finally {
+      isLoading = false;
+      update();
+    }
+  }
+
+  Future<void> resendOtp() async {
+    isLoading = true;
+    update();
+    try {
+      Map<String, String> body = {
+        "name": nameController.text,
+        "email": emailController.text,
+        "password": passwordController.text,
+        // "confirmPassword": confirmPasswordController.text,
+        // "role": selectRole,
+      };
+
+      var response = await ApiService.post(ApiEndPoint.signUp, body: body);
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
         Get.toNamed(AppRoutes.verifyUser);
       } else {
         Utils.errorSnackBar(response.statusCode.toString(), response.message);
@@ -146,8 +291,8 @@ class SignUpController extends GetxController {
   }
 
   void startTimer() {
-    _timer?.cancel(); // Cancel any existing timer
-    start = 180; // Reset the start value
+    _timer?.cancel();
+    start = 180;
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (start > 0) {
         start--;
@@ -161,44 +306,6 @@ class SignUpController extends GetxController {
         _timer?.cancel();
       }
     });
-  }
-
-  Future<void> verifyOtpRepo() async {
-    Get.toNamed(AppRoutes.completeProfile);
-    return;
-    isLoadingVerify = true;
-    update();
-    try {
-      Map<String, String> body = {
-        "email": emailController.text,
-        "oneTimeCode": otpController.text,
-      };
-      Map<String, String> header = {"SignUpToken": "signUpToken $signUpToken"};
-      var response = await ApiService.post(
-        ApiEndPoint.verifyEmail,
-        body: body,
-        header: header,
-      );
-
-      if (response.statusCode == 200) {
-        var data = response.data;
-
-        LocalStorage.token = data['data']["accessToken"];
-        LocalStorage.isLogIn = true;
-
-        LocalStorage.setBool(LocalStorageKeys.isLogIn, LocalStorage.isLogIn);
-        LocalStorage.setString(LocalStorageKeys.token, LocalStorage.token);
-
-        Get.toNamed(AppRoutes.completeProfile);
-      } else {
-        Get.snackbar(response.statusCode.toString(), response.message);
-      }
-    } catch (e) {
-      Get.snackbar("Error", e.toString());
-    } finally {
-      isLoadingVerify = false;
-      update();
-    }
   }
 
   // Location permission
@@ -268,6 +375,7 @@ class SignUpController extends GetxController {
       }
 
       // Show loading indicator
+
       Get.snackbar(
         "Getting Location",
         "Please wait...",
@@ -471,53 +579,6 @@ class SignUpController extends GetxController {
         duration: const Duration(seconds: 3),
       );
     }
-  }
-
-  Future<void> updateProfile() async {
-    successPopUps(
-      message: "Your Registration has been successfully Complete.",
-      onTap: () => Get.offAllNamed(AppRoutes.signIn),
-      buttonTitle: "Go to Login ",
-    );
-    return;
-    isLoading = true;
-    update();
-
-    Map<String, String> body = {
-      "birthDate": dateController.text,
-      "lat": currentPosition?.latitude.toString() ?? "",
-      "log": currentPosition?.longitude.toString() ?? "",
-      "gender": selectedGender!,
-    };
-
-    ApiResponseModel response;
-
-    // If image is selected, use multipart request
-    if (image != null && image!.isNotEmpty) {
-      debugPrint("📸 Uploading profile image: $image");
-      response = await ApiService.multipart(
-        ApiEndPoint.user,
-        body: body,
-        imagePath: image!,
-        imageName: "image",
-        method: "PATCH",
-      );
-    } else {
-      debugPrint("⚠️ No image selected, updating profile without image");
-      // If no image, use regular patch request
-      response = await ApiService.patch(ApiEndPoint.user, body: body);
-    }
-
-    if (response.statusCode == 200) {
-      SuccessProfileDialogHere.show(
-        Get.context!,
-        title: "Your Registration Successfully Complete.",
-      );
-    } else {
-      Utils.errorSnackBar(response.statusCode.toString(), response.message);
-    }
-    isLoading = false;
-    update();
   }
 
   @override

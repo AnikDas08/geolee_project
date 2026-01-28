@@ -25,6 +25,10 @@ class ClickerController extends GetxController {
     CommonImage(imageSrc: AppImages.banner3),
   ].obs;
 
+
+
+
+
   @override
   void onInit() {
     super.onInit();

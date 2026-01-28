@@ -16,10 +16,10 @@ class SignInController extends GetxController {
 
   /// email and password Controller here
   TextEditingController emailController = TextEditingController(
-    text: kDebugMode ? 'vikopoj570@dropeso.com' : '',
+    text: kDebugMode ? 'jalad63157@juhxs.com' : '',
   );
   TextEditingController passwordController = TextEditingController(
-    text: kDebugMode ? 'hello123' : "",
+    text: kDebugMode ? 'password123' : "",
   );
 
   /// Sign in Api call here
@@ -28,10 +28,10 @@ class SignInController extends GetxController {
     LocalStorage.myRole = UserType.user.name;
     LocalStorage.setString(LocalStorageKeys.myRole, LocalStorage.myRole);
     appLog(LocalStorage.myRole.toString());
-    Get.toNamed(AppRoutes.homeNav);
-    return;
+    // Get.toNamed(AppRoutes.homeNav);
+    // return;
+
     if (!formKey.currentState!.validate()) return;
-    //
     // return;
 
     isLoading = true;
@@ -42,13 +42,22 @@ class SignInController extends GetxController {
         "password": passwordController.text,
       };
 
+
+      Map<String, String> header = {
+        'Authorization': 'Bearer ${LocalStorage.token}',
+      };
+
       var response = await ApiService.post(
+        header: header,
         ApiEndPoint.signIn,
         body: body,
       ).timeout(const Duration(seconds: 30));
 
       if (response.statusCode == 200) {
         var data = response.data;
+
+
+       Utils.successSnackBar('Login', "Successfully Login To Your Account");
 
         LocalStorage.token = data['data']["accessToken"];
         LocalStorage.isLogIn = true;

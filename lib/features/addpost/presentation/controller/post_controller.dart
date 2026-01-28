@@ -4,6 +4,13 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 
 class PostController extends GetxController {
+
+  @override
+  void onInit() {
+    // TODO: implement onInit
+    super.onInit();
+    print(selectedPriorityLevel);
+  }
   final isLoading = false.obs;
 
   // Image handling
@@ -36,7 +43,6 @@ class PostController extends GetxController {
 
   void createPost() {
     // Validation
-
 
     if (selectedPricingOption.value.isEmpty) {
       Get.snackbar(

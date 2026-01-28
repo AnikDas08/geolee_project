@@ -68,9 +68,7 @@ class ChatListScreen extends StatelessWidget {
               child: Builder(
                 builder: (context) {
                   final TabController tabController = DefaultTabController.of(
-                    context,
-                  );
-
+                    context,);
                   return AnimatedBuilder(
                     animation: tabController,
                     builder: (context, _) {
@@ -248,15 +246,14 @@ class ChatListScreen extends StatelessWidget {
                                   ),
                                 ],
                               ),
-                            )
-                                : ListView.builder(
+                            ) : ListView.builder(
                               itemCount: controller.filteredChats.length,
                               padding: EdgeInsets.only(top: 16.h),
                               itemBuilder: (context, index) {
                                 ChatModel item = controller.filteredChats[index];
                                 return GestureDetector(
                                   onTap: () {
-                                    // Mark chat as seen before navigating
+
                                     controller.markChatAsSeen(item.id);
 
                                     Get.toNamed(
@@ -283,6 +280,7 @@ class ChatListScreen extends StatelessWidget {
                           },
 
                           /// Group Tab (CORRECTED NAVIGATION HERE)
+
                           switch (controller.status) {
                             Status.loading => const CommonLoader(),
                             Status.error => SizedBox(

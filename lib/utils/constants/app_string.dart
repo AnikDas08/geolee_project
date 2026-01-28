@@ -69,8 +69,7 @@ class AppString {
   static const String requestTimeOut = "Request Time Out";
   static const String thisFieldIsRequired = "This field is required";
   static const String enterValidEmail = "Enter valid email";
-  static const String passwordMustBeeEightCharacters =
-      "Password must be 8 characters & contain both alphabets and numerics";
+  static const String passwordMustBeeEightCharacters ="Password must be 8 characters & contain both alphabets and numerics";
   static const String thePasswordDoesNotMatch = "The password does not match";
   static const String startServer = "Please, start the Server";
   static const String unknownError = "Unknown Error";

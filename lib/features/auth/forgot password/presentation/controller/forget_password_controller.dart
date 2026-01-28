@@ -8,6 +8,8 @@ import 'package:giolee78/features/auth/sign%20up/presentation/widget/success_pro
 import '../../../../../config/route/app_routes.dart';
 import '../../../../../services/api/api_service.dart';
 import '../../../../../config/api/api_end_point.dart';
+import '../../../../../services/storage/storage_keys.dart';
+import '../../../../../services/storage/storage_services.dart';
 import '../../../../../utils/app_utils.dart';
 
 class ForgetPasswordController extends GetxController {
@@ -49,7 +51,7 @@ class ForgetPasswordController extends GetxController {
 
   @override
   void dispose() {
-    startTimer();
+    _timer?.cancel();
     emailController.dispose();
     otpController.dispose();
     passwordController.dispose();
@@ -80,8 +82,8 @@ class ForgetPasswordController extends GetxController {
   /// Forget Password Api Call
 
   Future<void> forgotPasswordRepo() async {
-    Get.toNamed(AppRoutes.verifyEmail);
-    return;
+    // Get.toNamed(AppRoutes.verifyEmail);
+    // return;
     isLoadingEmail = true;
     update();
     try {
@@ -89,42 +91,60 @@ class ForgetPasswordController extends GetxController {
       var response = await ApiService.post(
         ApiEndPoint.forgotPassword,
         body: body,
+        header: {'Content-Type': "application/json"},
       );
-//
+      //
       if (response.statusCode == 200) {
+        var data = response.data;
         Utils.successSnackBar(response.statusCode.toString(), response.message);
         Get.toNamed(AppRoutes.verifyEmail);
       } else {
+        Utils.errorSnackBar(response.statusCode, response.message);
         Get.snackbar(response.statusCode.toString(), response.message);
       }
     } catch (e) {
-      Get.snackbar("Error", e.toString());
+      Get.snackbar("Error is =============================", e.toString());
     } finally {
       isLoadingEmail = false;
       update();
     }
   }
-//
+
   /// Verify OTP Api Call
 
   Future<void> verifyOtpRepo() async {
-    Get.toNamed(AppRoutes.createPassword);
-    return;
     isLoadingVerify = true;
     update();
-    try {
-      Map<String, String> body = {
-        "email": emailController.text,
-        "oneTimeCode": otpController.text,
-      };
-      var response = await ApiService.post(ApiEndPoint.verifyOtp, body: body);
 
-      if (response.statusCode == 200) {
-        var data = response.data;
-        forgetPasswordToken = data['data'];
-        Get.toNamed(AppRoutes.createPassword);
+    try {
+      final body = {
+        "email": emailController.text.trim(),
+        "oneTimeCode": int.parse(otpController.text.trim()),
+      };
+
+      final response = await ApiService.post(
+        ApiEndPoint.verifyOtp,
+        body: body,
+        header: {"Content-Type": "application/json"},
+      );
+
+      final data = response.data;
+      if (response.statusCode == 200 && data['success'] == true) {
+
+        Get.offAllNamed(AppRoutes.createPassword);
+
+       final String token = data['data']['resetToken'];
+       forgetPasswordToken=token;
+       LocalStorage.setString(LocalStorageKeys.forgotPasswordToken, LocalStorage.forgotPasswordToken=token);
+        debugPrint("OTP VERIFIED → Navigating...");
+
+
+
       } else {
-        Get.snackbar(response.statusCode.toString(), response.message);
+        Utils.errorSnackBar(
+          "Error ${response.statusCode}",
+          data['message'] ?? "OTP verification failed",
+        );
       }
     } catch (e) {
       Get.snackbar("Error", e.toString());
@@ -133,23 +153,30 @@ class ForgetPasswordController extends GetxController {
       update();
     }
   }
-//
+
+  //
   /// Create New Password Api Call
 
   Future<void> resetPasswordRepo() async {
-    successPopUps(
-      message:
-          "Your password has been successfully reset. You can now log in using your new password.",
-      onTap: () {
-        Get.offAllNamed(AppRoutes.signIn);
-      },
-      buttonTitle: "Login",
-    );
-    return;
+
+    print("====================================${forgetPasswordToken}");
+    // successPopUps(
+    //   message:
+    //       "Your password has been successfully reset. You can now log in using your new password.",
+    //   onTap: () {
+    //     Get.offAllNamed(AppRoutes.signIn);
+    //   },
+    //   buttonTitle: "Login",
+    // );
+    // return;
+
     isLoadingReset = true;
     update();
     try {
-      Map<String, String> header = {"Authorization": forgetPasswordToken};
+      Map<String, String> header = {
+        "Content-Type": "application/json",
+        "Authorization": forgetPasswordToken,
+      };
 
       Map<String, String> body = {
         "newPassword": passwordController.text,
@@ -173,6 +200,7 @@ class ForgetPasswordController extends GetxController {
         otpController.clear();
         passwordController.clear();
         confirmPasswordController.clear();
+        Get.offAllNamed(AppRoutes.signIn);
       } else {
         Get.snackbar(response.statusCode.toString(), response.message);
       }

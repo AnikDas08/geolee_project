@@ -29,7 +29,6 @@ class PostCard extends StatelessWidget {
       onTap: onTap,
       child: Stack(
         children: [
-          /// মূল কার্ড
           Container(
             width: 170.w,
             padding: EdgeInsets.all(10),

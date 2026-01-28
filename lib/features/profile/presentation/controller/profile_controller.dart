@@ -4,6 +4,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:giolee78/features/profile/data/model/user_profile_model.dart';
 import 'package:giolee78/services/storage/storage_keys.dart';
 import 'package:giolee78/services/storage/storage_services.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'dart:io';
 
 import '../../../../config/api/api_end_point.dart';
 import '../../../../config/route/app_routes.dart';
@@ -45,9 +47,40 @@ class ProfileController extends GetxController {
     ..text = LocalStorage.gender;
   TextEditingController addressController = TextEditingController();
 
+  /// Request permission based on platform and Android version
+  Future<bool> _requestImagePermission(ImageSource source) async {
+    if (source == ImageSource.camera) {
+      final status = await Permission.camera.request();
+      return status.isGranted;
+    } else {
+      // For gallery/photos
+      if (Platform.isAndroid) {
+        // Check Android version
+        final androidInfo = await Permission.storage.status;
+
+        // Android 13+ uses Permission.photos
+        if (await Permission.photos.status.isDenied) {
+          final status = await Permission.photos.request();
+          if (status.isGranted) return true;
+        }
+
+        // Android 12 and below uses Permission.storage
+        final storageStatus = await Permission.storage.request();
+        return storageStatus.isGranted;
+      } else if (Platform.isIOS) {
+        final status = await Permission.photos.request();
+        return status.isGranted;
+      }
+      return false;
+    }
+  }
+
+  /// Select image from gallery or camera
   /// Select image from gallery or camera
   Future<void> getProfileImage() async {
     try {
+      print('=== Starting getProfileImage ===');
+
       // Show bottom sheet to choose source
       final ImageSource? source = await Get.bottomSheet<ImageSource>(
         Container(
@@ -85,7 +118,63 @@ class ProfileController extends GetxController {
         isDismissible: true,
       );
 
-      if (source == null) return;
+      print('Selected source: $source');
+      if (source == null) {
+        print('No source selected');
+        return;
+      }
+
+      // Request permissions
+      bool permissionGranted = false;
+
+      if (source == ImageSource.camera) {
+        print('Requesting camera permission');
+        var status = await Permission.camera.status;
+        if (!status.isGranted) {
+          status = await Permission.camera.request();
+        }
+        permissionGranted = status.isGranted;
+      } else {
+        print('Requesting storage/photos permission');
+
+        // Try photos permission first (Android 13+)
+        var photosStatus = await Permission.photos.status;
+        if (!photosStatus.isGranted) {
+          photosStatus = await Permission.photos.request();
+        }
+
+        if (photosStatus.isGranted) {
+          permissionGranted = true;
+        } else {
+          // Fallback to storage permission (Android 12 and below)
+          var storageStatus = await Permission.storage.status;
+          if (!storageStatus.isGranted) {
+            storageStatus = await Permission.storage.request();
+          }
+          permissionGranted = storageStatus.isGranted;
+        }
+      }
+
+      print('Permission granted: $permissionGranted');
+
+      if (!permissionGranted) {
+        print('Permission denied');
+        Get.snackbar(
+          'Permission Required',
+          'Please allow ${source == ImageSource.camera ? 'camera' : 'storage'} access to continue',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.orange,
+          colorText: Colors.white,
+          duration: Duration(seconds: 4),
+          mainButton: TextButton(
+            onPressed: () => openAppSettings(),
+            child: Text('Open Settings', style: TextStyle(color: Colors.white)),
+          ),
+        );
+        return;
+      }
+
+      print('Opening image picker...');
 
       // Pick image
       final XFile? pickedFile = await _picker.pickImage(
@@ -95,18 +184,35 @@ class ProfileController extends GetxController {
         imageQuality: 85,
       );
 
+      print('Image picker result: ${pickedFile?.path}');
+
       if (pickedFile != null && pickedFile.path.isNotEmpty) {
         image = pickedFile.path;
+        print('✅ Image selected successfully: $image');
         update();
+
+        Get.snackbar(
+          'Success',
+          'Image selected',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+          duration: Duration(seconds: 2),
+        );
+      } else {
+        print('❌ No image selected');
       }
-    } catch (e) {
-      print('Error picking image: $e');
+    } catch (e, stackTrace) {
+      print('=== ERROR ===');
+      print('Error: $e');
+      print('StackTrace: $stackTrace');
       Get.snackbar(
         'Error',
-        'Failed to pick image',
+        'Failed to select image: $e',
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
         colorText: Colors.white,
+        duration: Duration(seconds: 3),
       );
     }
   }
@@ -118,8 +224,7 @@ class ProfileController extends GetxController {
     Get.back();
   }
 
-  /// select date of birth function here
-  Future<void> selectDateOfBirth() async {
+  Future<void> pickDateOfBirth() async {
     DateTime? pickedDate = await showDatePicker(
       context: Get.context!,
       initialDate: DateTime(2000, 1, 1),
@@ -128,8 +233,9 @@ class ProfileController extends GetxController {
     );
 
     if (pickedDate != null) {
+      // API format
       dateOfBirthController.text =
-      "${pickedDate.day.toString().padLeft(2, '0')} ${_getMonthName(pickedDate.month)} ${pickedDate.year}";
+      "${pickedDate.year}-${pickedDate.month.toString().padLeft(2, '0')}-${pickedDate.day.toString().padLeft(2, '0')}";
       update();
     }
   }
@@ -167,9 +273,8 @@ class ProfileController extends GetxController {
 
   /// update profile function here
   Future<void> editProfileRepo() async {
-    Get.toNamed(AppRoutes.homeNav);
-    return;
-
+    // Get.toNamed(AppRoutes.homeNav);
+    // return;
     if (!formKey.currentState!.validate()) return;
 
     if (!LocalStorage.isLogIn) return;
@@ -186,7 +291,8 @@ class ProfileController extends GetxController {
       "log": "90.4125",
     };
 
-    var response = await ApiService.patch(ApiEndPoint.user, body: body);
+    var response =
+    await ApiService.patch(ApiEndPoint.updateProfile, body: body);
 
     if (response.statusCode == 200) {
       var data = response.data;
@@ -194,11 +300,18 @@ class ProfileController extends GetxController {
       LocalStorage.userId = data['data']?["_id"] ?? "";
       LocalStorage.myName = data['data']?["name"] ?? "";
       LocalStorage.myEmail = data['data']?["email"] ?? "";
+      LocalStorage.dateOfBirth = data['data']?['dob'] ?? "Not Selected";
+      LocalStorage.bio = data['data']?['bio'] ?? "Not Selected";
+      LocalStorage.gender = data['data']?['gender'] ?? "Not Selected";
 
       LocalStorage.setString("userId", LocalStorage.userId);
       LocalStorage.setString("myImage", LocalStorage.myImage);
       LocalStorage.setString("myName", LocalStorage.myName);
       LocalStorage.setString("myEmail", LocalStorage.myEmail);
+      LocalStorage.setString(LocalStorageKeys.bio, LocalStorage.bio);
+      LocalStorage.setString(
+          LocalStorageKeys.dateOfBirth, LocalStorage.dateOfBirth);
+      LocalStorage.setString(LocalStorageKeys.gender, LocalStorage.gender);
 
       Utils.successSnackBar("Successfully Profile Updated", response.message);
       Get.toNamed(AppRoutes.profile);
@@ -230,21 +343,15 @@ class ProfileController extends GetxController {
       if (profileModel?.data != null) {
         final data = profileModel!.data!;
 
-        LocalStorage.userId = data.id ?? "";
+        LocalStorage.userId = data.sId ?? "";
         LocalStorage.myImage = data.image ?? "";
         LocalStorage.myName = data.name ?? "";
         LocalStorage.myEmail = data.email ?? "";
         LocalStorage.myRole = data.role ?? "";
-        LocalStorage.dateOfBirth = data.birthDate ?? "";
+        LocalStorage.dateOfBirth = data.dob ?? "";
         LocalStorage.gender = data.gender ?? "";
-        LocalStorage.experience = data.experience ?? "";
-        LocalStorage.balance = data.balance ?? 0.0;
-        LocalStorage.verified = data.verified ?? false;
         LocalStorage.bio = data.bio ?? "";
-        LocalStorage.lat = data.lat ?? 0.0;
-        LocalStorage.log = data.log ?? 0.0;
-        LocalStorage.accountInfoStatus =
-            data.accountInformation?.status ?? false;
+
         LocalStorage.createdAt = data.createdAt ?? "";
         LocalStorage.updatedAt = data.updatedAt ?? "";
 

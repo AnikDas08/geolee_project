@@ -51,17 +51,21 @@ class EditProfileAllFiled extends StatelessWidget {
         16.height,
 
         /// Date of Birth Field
-        _buildLabel('Age'),
+        _buildLabel('Date Of Birth'),
         8.height,
         CommonTextField(
           controller: controller.dateOfBirthController,
-          hintText: '25 Years',
+          hintText: 'Date of Birth',
           keyboardType: TextInputType.none,
           borderColor: AppColors.borderColor,
           fillColor: AppColors.white,
           hintTextColor: AppColors.secondaryText,
           textColor: AppColors.black,
+          onTap: () {
+            controller.pickDateOfBirth();
+          },
         ),
+
 
         16.height,
 

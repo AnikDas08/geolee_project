@@ -24,7 +24,7 @@ class ClickerScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppBar(notificationCount: 0),
+      appBar: CustomAppBar(notificationCount: 1),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 16),
         child: SafeArea(
@@ -91,7 +91,7 @@ class ClickerScreen extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
-                itemCount: 10,
+                itemCount: 5,
                 separatorBuilder: (context, index) => const SizedBox(height: 16),
                 itemBuilder: (context, index) {
                   return GestureDetector(
@@ -119,6 +119,7 @@ class ClickerScreen extends StatelessWidget {
   }
 
   // Updated to take BuildContext for showModalBottomSheet
+
   Widget _buildFilterSection(BuildContext context) {
     return GestureDetector(
       onTap: () => _showFilterBottomSheet(context),
@@ -178,7 +179,11 @@ class ClickerScreen extends StatelessWidget {
     );
   }
 
+
   // Widget to build the content inside the modal bottom sheet
+
+
+
   Widget _buildFilterContent(BuildContext context) {
     return Obx(() {
       return Padding(
