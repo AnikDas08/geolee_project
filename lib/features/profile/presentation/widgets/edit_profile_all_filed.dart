@@ -39,7 +39,7 @@ class EditProfileAllFiled extends StatelessWidget {
         CommonTextField(
           controller: controller.aboutController,
           hintText:
-              'Skilled professionals offering reliable, on-demand services...',
+              'Skilled professionals offering reliable, on-demand services..',
           keyboardType: TextInputType.multiline,
           maxLines: 3,
           borderColor: AppColors.borderColor,
@@ -61,6 +61,7 @@ class EditProfileAllFiled extends StatelessWidget {
           fillColor: AppColors.white,
           hintTextColor: AppColors.secondaryText,
           textColor: AppColors.black,
+          suffixIcon: Icon(Icons.calendar_month,),
           onTap: () {
             controller.pickDateOfBirth();
           },
@@ -92,7 +93,7 @@ class EditProfileAllFiled extends StatelessWidget {
 
   /// Build Gender Dropdown
   Widget _buildGenderDropdown() {
-    final genderOptions = ['Male', 'Female', 'Other'];
+    final genderOptions = ['male', 'female', 'other'];
 
     // Normalize the current value to match dropdown items
     String? currentValue;

@@ -21,6 +21,8 @@ import 'package:giolee78/utils/constants/app_colors.dart';
 import 'package:giolee78/utils/enum/enum.dart';
 import 'package:giolee78/utils/extensions/extension.dart';
 
+import '../../../../config/api/api_end_point.dart';
+
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
@@ -100,8 +102,11 @@ class ProfileScreen extends StatelessWidget {
                         backgroundColor: Colors.transparent,
                         child: ClipOval(
                           child: CommonImage(
-                            imageSrc:
-                                "assets/images/profile_image.png",
+                            fill: BoxFit.fill,
+                            imageSrc: LocalStorage.myImage != null &&
+                                LocalStorage.myImage!.isNotEmpty
+                                ? ApiEndPoint.imageUrl + LocalStorage.myImage!
+                                : "",
                             size: 100,
                             defaultImage: AppImages.profileImage,
                           ),
@@ -111,15 +116,14 @@ class ProfileScreen extends StatelessWidget {
 
                     /// User Name here
                     CommonText(
-                      text: "Sakir Ahamed",
+                      text: LocalStorage.myName,
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
                       top: 16,
                       bottom: 8.h,
                     ),
                     CommonText(
-                      text:
-                          "Exploring one city at a time Capturing stories beyond borders",
+                      text:LocalStorage.bio.isNotEmpty?LocalStorage.bio:"Bio Not Set Yet",
                       fontSize: 12,
                       fontWeight: FontWeight.w400,
                       bottom: 20,

@@ -17,19 +17,19 @@ class ApiEndPoint {
   // User ===========================================
   static const String updateProfile = "${baseUrl}users/profile";
   static const String getProfile = "${baseUrl}users/profile";
-  static const String getUserSingleProfileById = "${baseUrl}users/single/69678d792b633a89eaf51e9f?lng=90.4125&lat=23.8103";
+  static const String getUserSingleProfileById = "${baseUrl}users/single/";
   static const String nearByUsers = "${baseUrl}users";
 
   // Post ===========================================
   static const String createPost = "${baseUrl}posts/create";
   static const String updatePost = "${baseUrl}posts/update/6968735eb38f9e7d204de36d";
-  static const String getSinglePost = "${baseUrl}posts/single/6968735eb38f9e7d204de36d";
-  static const String getUserById = "${baseUrl}posts/user/69678d792b633a89eaf51e9f";
+  static const String getSinglePost = "${baseUrl}posts/single/";
+  static const String getUserById = "${baseUrl}posts/user/";
   static const String getMyPost = "${baseUrl}posts/my-posts";
   static const String getAllPost = "${baseUrl}posts";
 
   // Friend =========================================
-  static const String createFriendRequest = "${baseUrl}friend-requests/create";
+  static const String createFriendRequest = "${baseUrl}friend-requests/create/";
   static const String getMyFriendRequest = "${baseUrl}friend-requests/my-requests";
 
   // Chat ===========================================

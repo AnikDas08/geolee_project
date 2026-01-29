@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:giolee78/features/notifications/presentation/widgets/notification_item.dart';
+
 import '../controller/notifications_controller.dart';
+import '../widgets/notification_item.dart';
 
 class NotificationScreen extends StatelessWidget {
   const NotificationScreen({super.key});
@@ -10,23 +11,58 @@ class NotificationScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Notification"),
+        title: const Text("Notifications"),
       ),
 
-      /// Body Section starts here
       body: GetBuilder<NotificationsController>(
+        init: NotificationsController(), // controller init
         builder: (controller) {
-          return Padding(
+
+          /// First loading
+          if (controller.isLoading && controller.notifications.isEmpty) {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+
+          /// No notifications
+          if (controller.notifications.isEmpty) {
+            return const Center(
+              child: Text(
+                "No notifications found",
+                style: TextStyle(fontSize: 14),
+              ),
+            );
+          }
+
+          return ListView.builder(
+            controller: controller.scrollController,
             padding: const EdgeInsets.all(20),
-            child: ListView.builder(
-              itemCount: controller.notifications.length,
-              itemBuilder: (context, index) {
-                return NotificationItem(
-                  item: controller.notifications[index],
-                  onTap: () {},
+            itemCount: controller.notifications.length +
+                (controller.isLoadingMore ? 1 : 0),
+            itemBuilder: (context, index) {
+
+              /// Bottom loader
+              if (index == controller.notifications.length) {
+                return const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 20),
+                  child: Center(child: CircularProgressIndicator()),
                 );
-              },
-            ),
+              }
+
+              final item = controller.notifications[index];
+
+              return NotificationItem(
+
+                item: item,
+                onTap: () {
+                  controller.markAsRead(index);
+
+                  /// Navigation example
+                  // Get.toNamed(AppRoutes.notificationDetails, arguments: item);
+                },
+              );
+            },
           );
         },
       ),

@@ -33,7 +33,6 @@ class EditProfile extends StatelessWidget {
             ),
           ),
 
-          //dlk
           /// Body
           body: SafeArea(
             child: SingleChildScrollView(
@@ -50,7 +49,6 @@ class EditProfile extends StatelessWidget {
 
                       32.height,
 
-                      //kljdklf
                       /// All Form Fields
                       EditProfileAllFiled(controller: controller),
 
@@ -81,16 +79,8 @@ class EditProfile extends StatelessWidget {
     );
   }
 
-  /// Profile Image Widget
+  /// Profile Image Widget - ✅ FIXED
   Widget _buildProfileImage(ProfileController controller) {
-    // --- FIX: Check for both null and empty path before using Image.file ---
-    final bool hasSelectedImage = controller.image != null && controller.image!.isNotEmpty;
-
-    // Determine the default/network image source
-    String networkImageUrl = LocalStorage.myImage.isNotEmpty
-        ? ApiEndPoint.imageUrl + LocalStorage.myImage
-        : "assets/images/profile_image.png";
-
     return Stack(
       children: [
         Container(
@@ -109,28 +99,7 @@ class EditProfile extends StatelessWidget {
             ],
           ),
           child: ClipOval(
-            child: hasSelectedImage
-                ? Image.file(
-              // Safe to use File() here
-              File(controller.image!),
-              width: 100.w,
-              height: 100.h,
-              fit: BoxFit.cover,
-            )
-                : networkImageUrl.startsWith('assets')
-                ? CommonImage(
-              imageSrc: networkImageUrl,
-              width: 100.w,
-              height: 100.h,
-              fill: BoxFit.cover,
-            )
-            // Assuming CommonImage or Image.network handles network URLs
-                : CommonImage(
-              imageSrc: networkImageUrl, // This assumes CommonImage supports network image
-              width: 100.w,
-              height: 100.h,
-              fill: BoxFit.cover,
-            ),
+            child: _buildImage(controller),
           ),
         ),
 
@@ -153,6 +122,46 @@ class EditProfile extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+
+  /// ✅ FIXED: Build Image Widget
+  Widget _buildImage(ProfileController controller) {
+    // Check if new image is selected
+    if (controller.selectedImage != null) {
+      return Image.file(
+        controller.selectedImage!,
+        width: 100.w,
+        height: 100.h,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          print('Error loading selected image: $error');
+          return _buildNetworkOrDefaultImage();
+        },
+      );
+    }
+
+    // Show existing network image or default
+    return _buildNetworkOrDefaultImage();
+  }
+
+  /// Build Network or Default Image
+  Widget _buildNetworkOrDefaultImage() {
+    if (LocalStorage.myImage.isNotEmpty) {
+      return CommonImage(
+        imageSrc: ApiEndPoint.imageUrl + LocalStorage.myImage,
+        width: 100.w,
+        height: 100.h,
+        fill: BoxFit.cover,
+      );
+    }
+
+    // Default placeholder image
+    return CommonImage(
+      imageSrc: "assets/images/profile_image.png",
+      width: 100.w,
+      height: 100.h,
+      fill: BoxFit.cover,
     );
   }
 }

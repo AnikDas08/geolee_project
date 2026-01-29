@@ -16,6 +16,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final VoidCallback? onBackTap; // 👈 Added custom back button handler
 
   const CustomAppBar({
+
     super.key,
     this.title,
     this.showBackButton = true,

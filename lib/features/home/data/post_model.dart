@@ -1,35 +1,31 @@
+// post_model.dart
+import '../../clicker/data/all_post_model.dart';
+
 class PostModel {
-  final String id;
-  final String userName;
-  final String userImage;
-  final String postTime;
-  final String title;
-  final String location;
-  final String price;
-  final String category;
-  final String subCategory;
-  final String date;
-  final String time;
-  final String description;
-  final List<String> responsibilities;
-  final List<String> requirements;
-  final String imageUrl;
+  bool success;
+  String message;
+  Pagination pagination;
+  List<PostData> data;
 
   PostModel({
-    required this.id,
-    required this.userName,
-    required this.userImage,
-    required this.postTime,
-    required this.title,
-    required this.location,
-    required this.price,
-    required this.category,
-    required this.subCategory,
-    required this.date,
-    required this.time,
-    required this.description,
-    required this.responsibilities,
-    required this.requirements,
-    required this.imageUrl,
+    required this.success,
+    required this.message,
+    required this.pagination,
+    required this.data,
   });
+
+  factory PostModel.fromJson(Map<String, dynamic> json) => PostModel(
+    success: json["success"],
+    message: json["message"],
+    pagination: Pagination.fromJson(json["pagination"]),
+    data: List<PostData>.from(
+        json["data"].map((x) => PostData.fromJson(x))),
+  );
+
+  Map<String, dynamic> toJson() => {
+    "success": success,
+    "message": message,
+    "pagination": pagination.toJson(),
+    "data": List<dynamic>.from(data.map((x) => x.toJson())),
+  };
 }

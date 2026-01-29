@@ -20,6 +20,7 @@ class MyPostCard extends StatelessWidget {
     required this.location,
     required this.postImage,
     required this.description,
+    this.isMyPost = false, // 🌟 নতুন parameter
   });
 
   final String userName;
@@ -28,10 +29,10 @@ class MyPostCard extends StatelessWidget {
   final String location;
   final String postImage;
   final String description;
+  final bool isMyPost; // 🌟 নতুন field
 
   @override
   Widget build(BuildContext context) {
-    // NOTE: Assuming AppColors has necessary properties like 'white', 'black', 'secondaryText', 'textColorFirst'
     return Container(
       decoration: BoxDecoration(
         color: AppColors.white,
@@ -61,7 +62,7 @@ class MyPostCard extends StatelessWidget {
                         backgroundColor: Colors.transparent,
                         child: ClipOval(
                           child: CommonImage(
-                            imageSrc: "assets/images/profile_image.png",
+                            imageSrc: userAvatar,
                             size: 36.r,
                             fill: BoxFit.cover,
                           ),
@@ -131,8 +132,8 @@ class MyPostCard extends StatelessWidget {
                   ),
                 ),
 
-                // 🌟 REPLACED: Use PopupMenuButton instead of a static Icon
-                _buildPopupMenuButton(context),
+                // 🌟 Menu icon শুধু নিজের পোস্টে দেখাবে
+                if (isMyPost) _buildPopupMenuButton(context),
               ],
             ),
           ),
@@ -151,7 +152,7 @@ class MyPostCard extends StatelessWidget {
               ),
             ),
           ),
-          
+
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12),
             child: CommonText(
@@ -165,7 +166,6 @@ class MyPostCard extends StatelessWidget {
           /// Description
           Padding(
             padding: EdgeInsets.fromLTRB(12.w, 12.h, 12.w, 12.h),
-
             child: CommonText(
               text: description,
               fontSize: 12,
@@ -181,22 +181,20 @@ class MyPostCard extends StatelessWidget {
     );
   }
 
-  // 🌟 NEW: Helper method to build the PopupMenuButton
+  // 🌟 Helper method to build the PopupMenuButton
   Widget _buildPopupMenuButton(BuildContext context) {
     return PopupMenuButton<PostAction>(
-      // Customize the icon that triggers the menu
       icon: Icon(
         Icons.more_vert_rounded,
         size: 24.sp,
-        color: AppColors.secondaryText, // Use a consistent color
+        color: AppColors.secondaryText,
       ),
-      // Define the menu items
       itemBuilder: (context) => [
         _buildPopupMenuItem(
           PostAction.edit,
           Icons.edit_outlined,
           "Edit Post",
-          () {
+              () {
             Get.to(EditPost());
           },
         ),
@@ -204,7 +202,7 @@ class MyPostCard extends StatelessWidget {
           PostAction.delete,
           Icons.delete_outline,
           "Delete Post",
-          () {
+              () {
             showDeletePostDialog(context, onConfirmDelete: () {});
           },
         ),
@@ -212,7 +210,7 @@ class MyPostCard extends StatelessWidget {
           PostAction.privacy,
           Icons.lock_outline,
           "Change Privacy",
-          () {
+              () {
             Navigator.pop(context);
           },
         ),
@@ -223,7 +221,7 @@ class MyPostCard extends StatelessWidget {
     );
   }
 
-  // 🌟 NEW: Helper method for a consistent MenuItem look
+  // 🌟 Helper method for a consistent MenuItem look
   PopupMenuItem<PostAction> _buildPopupMenuItem(
       PostAction value,
       IconData icon,
@@ -248,12 +246,10 @@ class MyPostCard extends StatelessWidget {
     );
   }
 
-  // ignore: unused_element
   Widget _buildCircleIcon({
     required IconData icon,
     required VoidCallback onTap,
   }) {
-    // ... (unchanged)
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(16.r),

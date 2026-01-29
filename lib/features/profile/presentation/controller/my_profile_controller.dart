@@ -12,6 +12,9 @@ class MyProfileController extends GetxController {
   bool isLoading = false;
   UserProfileModel? profileModel;
 
+  String _dateOfBirth = "";
+  String _gender = "";
+
   /// User profile data
   String get userName =>
       LocalStorage.myName.isNotEmpty ? LocalStorage.myName : "Shakir Ahmed";
@@ -23,22 +26,36 @@ class MyProfileController extends GetxController {
       : "Example@gmail.com";
 
   String get mobile => LocalStorage.mobile;
+
   String get dateOfBirth {
-    if (LocalStorage.dateOfBirth.isEmpty) return "";
+    if (LocalStorage.dateOfBirth.isEmpty) return "Not Selected";
     // Extract only the date part (YYYY-MM-DD) from ISO timestamp
     return LocalStorage.dateOfBirth.split('T').first;
   }
 
-  String get gender => LocalStorage.gender;
+  String get gender =>
+      LocalStorage.gender.isNotEmpty ? LocalStorage.gender : "Not Selected";
+
   String get experience => LocalStorage.experience;
-  String get bio => LocalStorage.bio.isEmpty?LocalStorage.bio:"Bio Not Set Yet";
+
+  // Fixed: Corrected the condition logic
+  String get bio =>
+      LocalStorage.bio.isNotEmpty ? LocalStorage.bio : "Bio Not Set Yet";
+
   double get balance => LocalStorage.balance;
+
   bool get verified => LocalStorage.verified;
+
   double get lat => LocalStorage.lat;
+
   double get log => LocalStorage.log;
+
   bool get accountInfoStatus => LocalStorage.accountInfoStatus;
+
   String get address => "Dhaka, Bangladesh";
-   String get about => LocalStorage.bio.isNotEmpty ? LocalStorage.bio : "Bio Not Set yet";
+
+  // Fixed: Using the bio getter for consistency
+  String get about => bio;
 
   @override
   void onInit() {
@@ -68,92 +85,88 @@ class MyProfileController extends GetxController {
         profileModel = UserProfileModel.fromJson(
           response.data as Map<String, dynamic>,
         );
+
         if (profileModel?.data != null) {
-
-
           final data = profileModel!.data!;
+
+          _dateOfBirth = data.dob ?? "";
+          _gender = data.gender ?? "";
+
+          // Update LocalStorage variables
           LocalStorage.userId = data.sId ?? "";
           LocalStorage.myName = data.name ?? "";
           LocalStorage.myEmail = data.email ?? "";
           LocalStorage.myRole = data.role ?? "";
           LocalStorage.myImage = data.image ?? "";
-          LocalStorage.bio = data.bio ?? "Bio Yet Not Set";
+          LocalStorage.bio = data.bio ?? "Bio Not Set Yet";
           LocalStorage.gender = data.gender ?? "Not Selected";
-          LocalStorage.dateOfBirth = data.dob ?? "Not Selected";
+          LocalStorage.dateOfBirth = data.dob ?? "";
           LocalStorage.createdAt = data.createdAt ?? "";
           LocalStorage.updatedAt = data.updatedAt ?? "";
           LocalStorage.verified = data.isVerified ?? false;
 
-
-          await LocalStorage.setString(LocalStorageKeys.userId, LocalStorage.userId);
-          await LocalStorage.setString(LocalStorageKeys.myName, LocalStorage.myName);
-          await LocalStorage.setString(LocalStorageKeys.myEmail, LocalStorage.myEmail);
-          await LocalStorage.setString(LocalStorageKeys.myRole, LocalStorage.myRole);
-          await LocalStorage.setString(LocalStorageKeys.myImage, LocalStorage.myImage);
-          await LocalStorage.setBool(LocalStorageKeys.verified, LocalStorage.verified);
-
-
-
-          // Save to SharedPreferences
-          await LocalStorage.setBool(
-            LocalStorageKeys.isLogIn,
-            LocalStorage.isLogIn,
-          );
-          await LocalStorage.setString(
-            LocalStorageKeys.userId,
-            LocalStorage.userId,
-          );
-          await LocalStorage.setString(
-            LocalStorageKeys.myImage,
-            LocalStorage.myImage,
-          );
-          await LocalStorage.setString(
-            LocalStorageKeys.myName,
-            LocalStorage.myName,
-          );
-          await LocalStorage.setString(
-            LocalStorageKeys.myEmail,
-            LocalStorage.myEmail,
-          );
-          await LocalStorage.setString(
-            LocalStorageKeys.myRole,
-            LocalStorage.myRole,
-          );
-          await LocalStorage.setString(
-            LocalStorageKeys.dateOfBirth,
-            LocalStorage.dateOfBirth,
-          );
-          await LocalStorage.setString(
-            LocalStorageKeys.gender,
-            LocalStorage.gender,
-          );
-          await LocalStorage.setString(
-            LocalStorageKeys.experience,
-            LocalStorage.experience,
-          );
-          await LocalStorage.setDouble(
-            LocalStorageKeys.balance,
-            LocalStorage.balance,
-          );
-          await LocalStorage.setBool(
-            LocalStorageKeys.verified,
-            LocalStorage.verified,
-          );
-          await LocalStorage.setString(LocalStorageKeys.bio, LocalStorage.bio);
-          await LocalStorage.setDouble(LocalStorageKeys.lat, LocalStorage.lat);
-          await LocalStorage.setDouble(LocalStorageKeys.log, LocalStorage.log);
-          await LocalStorage.setBool(
-            LocalStorageKeys.accountInfoStatus,
-            LocalStorage.accountInfoStatus,
-          );
-          await LocalStorage.setString(
-            LocalStorageKeys.createdAt,
-            LocalStorage.createdAt,
-          );
-          await LocalStorage.setString(
-            LocalStorageKeys.updatedAt,
-            LocalStorage.updatedAt,
-          );
+          // Save all to SharedPreferences in one place (removed duplicates)
+          await Future.wait([
+            LocalStorage.setBool(
+              LocalStorageKeys.isLogIn,
+              LocalStorage.isLogIn,
+            ),
+            LocalStorage.setString(
+              LocalStorageKeys.userId,
+              LocalStorage.userId,
+            ),
+            LocalStorage.setString(
+              LocalStorageKeys.myName,
+              LocalStorage.myName,
+            ),
+            LocalStorage.setString(
+              LocalStorageKeys.myEmail,
+              LocalStorage.myEmail,
+            ),
+            LocalStorage.setString(
+              LocalStorageKeys.myRole,
+              LocalStorage.myRole,
+            ),
+            LocalStorage.setString(
+              LocalStorageKeys.myImage,
+              LocalStorage.myImage,
+            ),
+            LocalStorage.setString(LocalStorageKeys.bio, LocalStorage.bio),
+            LocalStorage.setString(
+              LocalStorageKeys.gender,
+              LocalStorage.gender,
+            ),
+            LocalStorage.setString(
+              LocalStorageKeys.dateOfBirth,
+              LocalStorage.dateOfBirth,
+            ),
+            LocalStorage.setString(
+              LocalStorageKeys.experience,
+              LocalStorage.experience,
+            ),
+            LocalStorage.setDouble(
+              LocalStorageKeys.balance,
+              LocalStorage.balance,
+            ),
+            LocalStorage.setBool(
+              LocalStorageKeys.verified,
+              LocalStorage.verified,
+            ),
+            LocalStorage.setDouble(LocalStorageKeys.lat, LocalStorage.lat),
+            LocalStorage.setDouble(LocalStorageKeys.log, LocalStorage.log),
+            LocalStorage.setBool(
+              LocalStorageKeys.accountInfoStatus,
+              LocalStorage.accountInfoStatus,
+            ),
+            LocalStorage.setString(
+              LocalStorageKeys.createdAt,
+              LocalStorage.createdAt,
+            ),
+            LocalStorage.setString(
+              LocalStorageKeys.updatedAt,
+              LocalStorage.updatedAt,
+            ),
+          ]);
         }
       } else {
         Get.snackbar(response.statusCode.toString(), response.message);

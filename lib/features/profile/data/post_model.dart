@@ -1,17 +1,17 @@
-class MyPostsModel {
+class MyPostsModelOne {
   bool? success;
   String? message;
   Pagination? pagination;
-  List<PostData>? data;
+  List<PostDataOne>? data;
 
-  MyPostsModel({
+  MyPostsModelOne({
     this.success,
     this.message,
     this.pagination,
     this.data,
   });
 
-  factory MyPostsModel.fromJson(Map<dynamic, dynamic> json) => MyPostsModel(
+  factory MyPostsModelOne.fromJson(Map<dynamic, dynamic> json) => MyPostsModelOne(
     success: json["success"],
     message: json["message"],
     pagination: json["pagination"] == null
@@ -19,8 +19,8 @@ class MyPostsModel {
         : Pagination.fromJson(json["pagination"]),
     data: json["data"] == null
         ? []
-        : List<PostData>.from(
-        json["data"]!.map((x) => PostData.fromJson(x))),
+        : List<PostDataOne>.from(
+        json["data"]!.map((x) => PostDataOne.fromJson(x))),
   );
 
   Map<String, dynamic> toJson() => {
@@ -61,7 +61,7 @@ class Pagination {
   };
 }
 
-class PostData {
+class PostDataOne {
   String? id;
   String? title;
   String? description;
@@ -78,7 +78,7 @@ class PostData {
   String? createdAt;
   String? updatedAt;
 
-  PostData({
+  PostDataOne({
     this.id,
     this.title,
     this.description,
@@ -96,7 +96,7 @@ class PostData {
     this.updatedAt,
   });
 
-  factory PostData.fromJson(Map<String, dynamic> json) => PostData(
+  factory PostDataOne.fromJson(Map<String, dynamic> json) => PostDataOne(
     id: json["_id"],
     title: json["title"],
     description: json["description"],

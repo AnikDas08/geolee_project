@@ -103,7 +103,7 @@ class _FriendRequestScreenState extends State<FriendRequestScreen> {
               onTap: () {
                 Get.to(
                       () => const ViewFriendScreen(
-                      isFriend: false, isRequest: true),
+                      isFriend: false, isRequest: true, userId: '',),
                 );
               },
               onAccept: request['status'] == 'pending' ? () => _acceptRequest(index, request['name']!) : () {},

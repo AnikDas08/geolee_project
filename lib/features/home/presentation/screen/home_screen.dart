@@ -8,6 +8,7 @@ import 'package:giolee78/features/friend/presentation/screen/friend_request_scre
 import 'package:giolee78/features/friend/presentation/screen/my_friend_screen.dart';
 import 'package:giolee78/features/addpost/presentation/screen/my_post_screen.dart';
 import 'package:giolee78/features/home/presentation/controller/home_nav_controller.dart';
+import 'package:giolee78/features/notifications/presentation/controller/notifications_controller.dart';
 import 'package:giolee78/utils/constants/app_icons.dart';
 import 'package:giolee78/utils/constants/app_images.dart';
 
@@ -43,8 +44,14 @@ class HomeScreen extends StatelessWidget {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      HomeDetails(
-                        notificationCount: controller.notificationCount,
+                      GetBuilder<NotificationsController>(
+                        init: NotificationsController(),
+                        builder: (controller) {
+                          return HomeDetails(
+
+                            notificationCount: controller.unreadCount,
+                          );
+                        }
                       ),
                       SizedBox(height: 20.h),
                       Container(

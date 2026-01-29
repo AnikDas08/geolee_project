@@ -7,6 +7,7 @@ import 'package:giolee78/utils/extensions/extension.dart';
 
 import '../../../../component/image/common_image.dart';
 import '../../../../component/text/common_text.dart';
+import '../../../../config/api/api_end_point.dart';
 import '../../../../utils/constants/app_colors.dart';
 import '../../../../utils/constants/app_images.dart';
 
@@ -45,7 +46,11 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                       radius: 20,
                       child: ClipOval(
                         child: CommonImage(
-                          imageSrc: LocalStorage.myImage,
+                          fill: BoxFit.fill,
+                          imageSrc: LocalStorage.myImage != null &&
+                              LocalStorage.myImage!.isNotEmpty
+                              ? ApiEndPoint.imageUrl + LocalStorage.myImage!
+                              : "",
                           size: 40,
                           defaultImage: AppImages.profileImage,
                         ),
@@ -58,7 +63,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       CommonText(
-                        text: "Shakir Ahmed",
+                        text: LocalStorage.myName,
                         fontSize: 16,
                         color: AppColors.textColorFirst,
                         fontWeight: FontWeight.w600,

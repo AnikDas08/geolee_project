@@ -52,17 +52,21 @@ class MyPostCards extends StatelessWidget {
               children: [
                 GestureDetector(
                   onTap: () {
-                    Get.to(() => ViewFriendScreen(isFriend: isFriend));
+                    Get.to(() => ViewFriendScreen(isFriend: isFriend, userId: '',));
                   },
                   child: CircleAvatar(
                     radius: 18.r,
                     backgroundColor: Colors.transparent,
                     child: ClipOval(
-                      child: Image.asset(
-                        "assets/images/profile_image.png"
-                      )
+                      child: Image.network(
+                        userAvatar,
+                        width: 36.r,
+                        height: 36.r,
+                        fit: BoxFit.cover,
+                      ),
                     ),
                   ),
+
                 ),
                 SizedBox(width: 10.w),
                 Expanded(
@@ -70,7 +74,7 @@ class MyPostCards extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       CommonText(
-                        text: "John Doe",
+                        text: userName,
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
                         color: AppColors.black,

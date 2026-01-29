@@ -146,7 +146,7 @@ class _SuggestedFriendCard extends StatelessWidget {
 
       return GestureDetector(
         onTap: (){
-          Get.to(()=>ViewFriendScreen(isFriend: false));
+          Get.to(()=>ViewFriendScreen(isFriend: false, userId: '',));
         },
         child: Container(
           decoration: BoxDecoration(
@@ -239,7 +239,7 @@ class _FriendListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => Get.to(()=>ViewFriendScreen(isFriend: true)),
+      onTap: () => Get.to(()=>ViewFriendScreen(isFriend: true, userId: '',)),
       child: Container(
         decoration: BoxDecoration(
           color: AppColors.white,
