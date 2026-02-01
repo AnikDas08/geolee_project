@@ -45,7 +45,7 @@ class MyPostController extends GetxController {
         print("===============================${response.data}");
 
         final myPostModel = MyPostModel.fromJson(response.data as Map<String, dynamic>);
-        myPost.assignAll(myPostModel.data ?? []); // ✅ Use assignAll for RxList
+        myPost.assignAll(myPostModel.data ?? []);
       }
     } catch (e) {
       debugPrint('Error fetching posts: $e');

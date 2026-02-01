@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -10,6 +11,7 @@ import 'package:giolee78/services/storage/storage_services.dart';
 import 'package:giolee78/utils/app_utils.dart';
 import 'package:giolee78/utils/constants/app_images.dart';
 import '../../../../config/api/api_end_point.dart';
+import '../../../friend/data/friendship_request_status_response.dart';
 
 enum FriendStatus {
   none,        // Add Friend
@@ -170,12 +172,15 @@ class ClickerController extends GetxController {
     }
   }
 
-
-
   var friendStatus = FriendStatus.none.obs;
 
+
+
+
+
+
   Future<void> onTapAddFriendButton(String userId) async {
-    // ১. যদি অলরেডি রিকোয়েস্ট পাঠানো থাকে, তবে ফাংশনটি এখানেই থামিয়ে দিন
+
     if (friendStatus.value == FriendStatus.requested) {
       Get.defaultDialog(
         title: "Notice",
@@ -210,6 +215,48 @@ class ClickerController extends GetxController {
       isLoading.value = false;
     }
   }
+
+  bool isFriend = false;
+
+  Future<FriendshipStatusResponse> fetchFriendshipStatus(String userId) async {
+    final dio = Dio();
+    final url="${ApiEndPoint.checkFriendStatus}${userId}";
+
+    final response = await dio.get(url,
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer ${LocalStorage.token}',
+        },
+      ),
+    );
+
+    return FriendshipStatusResponse.fromJson(response.data);
+  }
+
+
+
+
+  Future<void> checkFriendship(String userId) async {
+    try {
+      final result = await fetchFriendshipStatus(userId);
+      final data = result.data;
+
+      if (data.isAlreadyFriend == true) {
+        friendStatus.value = FriendStatus.friends;
+      }
+      else if (data.pendingFriendRequest != null) {
+        friendStatus.value = FriendStatus.requested;
+      }
+      else {
+        friendStatus.value = FriendStatus.none;
+      }
+
+    } catch (e) {
+      print('Friendship check error: $e');
+    }
+  }
+
+
 
 
 

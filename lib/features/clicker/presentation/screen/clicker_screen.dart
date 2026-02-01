@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:giolee78/component/image/common_image.dart';
 import 'package:giolee78/component/text/common_text.dart';
 import 'package:giolee78/component/text_field/common_text_field.dart';
+import 'package:giolee78/config/api/api_end_point.dart';
 import 'package:giolee78/features/clicker/presentation/controller/clicker_controller.dart';
 import 'package:giolee78/features/clicker/presentation/widget/app_bar.dart';
 import 'package:giolee78/features/clicker/presentation/widget/my_post_card.dart';
@@ -14,6 +15,7 @@ import 'package:giolee78/utils/constants/app_colors.dart';
 import 'package:giolee78/utils/constants/app_icons.dart';
 import 'package:giolee78/utils/extensions/extension.dart';
 import 'package:intl/intl.dart';
+import '../../../addpost/presentation/widgets/full_screen_view_image.dart';
 import '../../../friend/presentation/screen/view_friend_screen.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
@@ -26,19 +28,18 @@ class ClickerScreen extends StatefulWidget {
 
 class _ClickerScreenState extends State<ClickerScreen> {
   final ClickerController controller = Get.put(ClickerController());
-  final NotificationsController notificationsController =
-  Get.put(NotificationsController());
+  final NotificationsController notificationsController = Get.put(
+    NotificationsController(),
+  );
 
   // Helper method - build এর বাইরে লিখুন
   String _formatPostTime(DateTime postTime) {
     final now = DateTime.now();
     final difference = now.difference(postTime);
 
-    if (difference.inDays >= 7) {
-      // ৭ দিনের বেশি হলে date দেখাবে
+    if (difference.inDays >= 1) {
       return DateFormat('MMM dd, yyyy').format(postTime);
     } else {
-      // ৭ দিনের মধ্যে হলে শুধু time দেখাবে
       return DateFormat('hh:mm a').format(postTime);
     }
   }
@@ -46,8 +47,9 @@ class _ClickerScreenState extends State<ClickerScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar:
-      CustomAppBar(notificationCount: notificationsController.unreadCount),
+      appBar: CustomAppBar(
+        notificationCount: notificationsController.unreadCount,
+      ),
       body: Obx(() {
         // Loading indicator while fetching all posts
         if (controller.isLoading.value) {
@@ -93,7 +95,8 @@ class _ClickerScreenState extends State<ClickerScreen> {
                     size: const Size.square(8.0),
                     activeSize: const Size.square(8.0),
                     activeShape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(4)),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
                   ),
                 );
               }),
@@ -115,46 +118,66 @@ class _ClickerScreenState extends State<ClickerScreen> {
               // Posts list or empty state
               controller.filteredPosts.isEmpty
                   ? const Padding(
-                padding: EdgeInsets.symmetric(vertical: 50),
-                child: Center(
-                  child: Text(
-                    "No posts available",
-                    style: TextStyle(fontSize: 16),
-                  ),
-                ),
-              )
+                      padding: EdgeInsets.symmetric(vertical: 50),
+                      child: Center(
+                        child: Text(
+                          "No posts available",
+                          style: TextStyle(fontSize: 16),
+                        ),
+                      ),
+                    )
                   : ListView.separated(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: controller.filteredPosts.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 16),
-                itemBuilder: (context, index) {
-                  final data = controller.filteredPosts[index];
-                  return GestureDetector(
-                    onTap: () {
-                      Get.to(() => ViewFriendScreen(
-                        userId: data.user.id,
-                        isFriend: index % 2 == 0,
-                      ));
-                    },
-                    child: MyPostCards(
-
-                      userName: data.user.name,
-                      userAvatar: "http://10.10.7.7:5006${data.user.image}",
-                      timeAgo: _formatPostTime(DateTime.parse(data.createdAt.toString())),
-                      location: data.address,
-                      postImage: data.photos.isNotEmpty
-                          ? "http://10.10.7.7:5006${data.photos[0]}"
-                          : "",
-                      description: data.description,
-                      isFriend: index % 2 == 0,
-                      privacyImage: data.privacy == "public"
-                          ? AppIcons.public
-                          : AppIcons.public,
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: controller.filteredPosts.length,
+                      separatorBuilder: (_, __) => const SizedBox(height: 16),
+                      itemBuilder: (context, index) {
+                        final data = controller.filteredPosts[index];
+                        return GestureDetector(
+                          onTap: () {
+                            Get.to(
+                              () => ViewFriendScreen(
+                                userId: data.user.id,
+                                isFriend: index % 2 == 0,
+                              ),
+                            );
+                          },
+                          child: MyPostCards(
+                            onTapPhoto: (){
+                              if (data.photos.isNotEmpty) {
+                                Get.to(() => FullScreenImageView(
+                                  imageUrl: "${ApiEndPoint.imageUrl+data.photos[0]}",
+                                ));
+                              }
+                            },
+                            onTapProfile: () {
+                              Get.to(
+                                () => ViewFriendScreen(
+                                  userId: data.user.id,
+                                  isFriend: index % 2 == 0,
+                                ),
+                              );
+                            },
+                            clickerType: data.clickerType,
+                            userName: data.user.name,
+                            userAvatar:
+                                "${ApiEndPoint.imageUrl+data.user.image}",
+                            timeAgo: _formatPostTime(
+                              DateTime.parse(data.createdAt.toString()),
+                            ),
+                            location: data.address,
+                            postImage: data.photos.isNotEmpty
+                                ? "${ApiEndPoint.imageUrl+data.photos[0]}"
+                                : "",
+                            description: data.description,
+                            isFriend: index % 2 == 0,
+                            privacyImage: data.privacy == "public"
+                                ? AppIcons.public
+                                : AppIcons.onlyMe,
+                          ),
+                        );
+                      },
                     ),
-                  );
-                },
-              ),
             ],
           ),
         );
@@ -177,16 +200,18 @@ class _ClickerScreenState extends State<ClickerScreen> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Obx(() => Text(
-              controller.selectedFilter,
-              style: const TextStyle(color: Colors.black, fontSize: 16),
-            )),
+            Obx(
+              () => Text(
+                controller.selectedFilter,
+                style: const TextStyle(color: Colors.black, fontSize: 16),
+              ),
+            ),
             const SizedBox(width: 8),
             SizedBox(
               width: 20,
               height: 20,
               child: CommonImage(imageSrc: AppIcons.filter),
-            )
+            ),
           ],
         ),
       ),
@@ -214,25 +239,30 @@ class _ClickerScreenState extends State<ClickerScreen> {
                 },
                 child: Container(
                   width: double.infinity,
-                  padding:
-                  const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 16,
+                  ),
                   child: Row(
                     children: [
                       Icon(
                         isSelected
                             ? Icons.radio_button_checked
                             : Icons.radio_button_off,
-                        color: isSelected ? AppColors.primaryColor : Colors.grey,
+                        color: isSelected
+                            ? AppColors.primaryColor
+                            : Colors.grey,
                       ),
                       const SizedBox(width: 16),
                       Text(
                         option,
                         style: TextStyle(
-                            color: isSelected
-                                ? AppColors.primaryColor
-                                : Colors.black,
-                            fontSize: 16),
-                      )
+                          color: isSelected
+                              ? AppColors.primaryColor
+                              : Colors.black,
+                          fontSize: 16,
+                        ),
+                      ),
                     ],
                   ),
                 ),

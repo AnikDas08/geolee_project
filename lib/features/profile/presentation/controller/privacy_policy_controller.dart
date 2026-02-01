@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:giolee78/features/profile/data/model/html_model.dart';
 
@@ -7,17 +8,15 @@ import '../../../../utils/app_utils.dart';
 import '../../../../utils/enum/enum.dart';
 
 class PrivacyPolicyController extends GetxController {
-  /// Api status check here
+
   Status status = Status.completed;
 
-  ///  HTML model initialize here
+
   HtmlModel data = HtmlModel.fromJson({});
 
-  /// Privacy Policy Controller instance create here
   static PrivacyPolicyController get instance =>
       Get.put(PrivacyPolicyController());
 
-  /// Privacy Policy Api call here
   getPrivacyPolicyRepo() async {
     status = Status.loading;
     update();
@@ -26,6 +25,7 @@ class PrivacyPolicyController extends GetxController {
 
     if (response.statusCode == 200) {
       data = HtmlModel.fromJson(response.data['data']);
+      debugPrint(data.toString());
 
       status = Status.completed;
       update();
@@ -36,10 +36,9 @@ class PrivacyPolicyController extends GetxController {
     }
   }
 
-  /// Controller on Init here
   @override
   void onInit() {
-    //getPrivacyPolicyRepo();
+    getPrivacyPolicyRepo();
     super.onInit();
   }
 }

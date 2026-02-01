@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:giolee78/component/button/common_button.dart';
 import 'package:giolee78/component/image/common_image.dart';
 import 'package:giolee78/component/text/common_text.dart';
+import 'package:giolee78/config/api/api_end_point.dart';
 import 'package:giolee78/config/route/app_routes.dart';
 import 'package:giolee78/features/addpost/presentation/widgets/my_post_card.dart';
 import 'package:giolee78/features/clicker/presentation/controller/clicker_controller.dart';
@@ -12,6 +13,9 @@ import 'package:giolee78/utils/constants/app_icons.dart';
 import 'package:giolee78/utils/constants/app_images.dart';
 import 'package:giolee78/utils/extensions/extension.dart';
 import 'package:intl/intl.dart';
+
+import '../../../../utils/app_utils.dart';
+import '../../../addpost/presentation/widgets/full_screen_view_image.dart';
 
 class ViewFriendScreen extends StatefulWidget {
   final bool isFriend;
@@ -38,6 +42,7 @@ class _ViewFriendScreenState extends State<ViewFriendScreen> {
     // Fetch posts by user ID
     controller.getPostsByUser(widget.userId);
     controller.getUserById(widget.userId);
+    controller.checkFriendship(widget.userId);
   }
 
 
@@ -46,11 +51,11 @@ class _ViewFriendScreenState extends State<ViewFriendScreen> {
     final now = DateTime.now();
     final difference = now.difference(postTime);
 
-    if (difference.inDays >= 7) {
-      // ৭ দিনের বেশি হলে date দেখাবে
+    if (difference.inDays >= 1) {
+
       return DateFormat('MMM dd, yyyy').format(postTime);
     } else {
-      // ৭ দিনের মধ্যে হলে শুধু time দেখাবে
+
       return DateFormat('hh:mm a').format(postTime);
     }
   }
@@ -87,12 +92,11 @@ class _ViewFriendScreenState extends State<ViewFriendScreen> {
       body: SafeArea(
         child: Obx(() {
           if (controller.isUserLoading.value) {
-            // Loading effect while fetching posts
+
             return const Center(child: CircularProgressIndicator());
           }
 
           if (controller.userPosts.isEmpty) {
-            // Empty state if no posts
             return const Center(child: Text("No posts available"));
           }
 
@@ -116,6 +120,21 @@ class _ViewFriendScreenState extends State<ViewFriendScreen> {
                   itemBuilder: (context, index) {
                     final data = controller.userPosts[index];
                     return MyPostCard(
+                      onTapProfile: (){
+                        Utils.successSnackBar('Already Profile', 'Your Are Already Profile');
+                      },
+                      isProfile: true,
+                      onTapPhoto: (){
+                        if (data.photos.isNotEmpty) {
+                          Get.to(() => FullScreenImageView(
+                            imageUrl: "http://10.10.7.7:5006${data.photos[0]}",
+                          ));
+                        }
+                      },
+                      privacyImage: data.privacy == "public"
+                          ? AppIcons.public
+                          : AppIcons.onlyMe,
+                      clickerType: data.clickerType,
                       isMyPost: false,
                       userName: data.user.name,
                       userAvatar: "http://10.10.7.7:5006${data.user.image}",
@@ -153,7 +172,7 @@ class _ViewFriendScreenState extends State<ViewFriendScreen> {
             child: CircleAvatar(
               radius: 50,
               backgroundImage: (user != null && user.image!.isNotEmpty)
-                  ? NetworkImage("http://10.10.7.7:5006${user.image}")
+                  ? NetworkImage("${ApiEndPoint.imageUrl}${user.image}")
                   : const AssetImage("assets/images/profile.png") as ImageProvider,
             ),
           ),
@@ -174,12 +193,13 @@ class _ViewFriendScreenState extends State<ViewFriendScreen> {
             fontSize: 13,
             fontWeight: FontWeight.w400,
             bottom: 4,
-            maxLines: 2,
             left: 40,
             right: 40,
+            maxLines: 2,
             color: AppColors.secondaryText,
           ),
 
+          /// DIVIDER
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 50),
             child: Divider(height: 2.h),
@@ -204,30 +224,29 @@ class _ViewFriendScreenState extends State<ViewFriendScreen> {
 
           SizedBox(height: 16.h),
 
-          /// FRIEND BUTTON
-          /// FRIEND BUTTON
+
           Obx(() {
-            // যদি ফ্রেন্ড হয়
             if (controller.friendStatus.value == FriendStatus.friends) {
               return _buildButton(
-                title: 'Message',
+                title: 'Friends',
                 image: AppIcons.chat2,
                 onTap: () => Get.toNamed(AppRoutes.message),
                 color: AppColors.primaryColor,
               );
             }
 
-            // যদি রিকোয়েস্ট পাঠানো হয়ে থাকে (বাটনটি ধূসর হয়ে থাকবে এবং ক্লিক কাজ করবে না)
             if (controller.friendStatus.value == FriendStatus.requested) {
               return _buildButton(
-                title: 'Request Sent',
+                title: 'Cancel Request',
                 image: AppIcons.friendRequest,
-                onTap: () {}, // এখানে ফাংশন খালি রাখলে বাটনটি ডিজেবল হিসেবে কাজ করবে
-                color: Colors.grey, // কালার গ্রে করে দেওয়া হলো
+                onTap: () async {
+
+
+                },
+                color: Colors.grey,
               );
             }
 
-            // ডিফল্ট: অ্যাড ফ্রেন্ড
             return _buildButton(
               title: controller.isLoading.value ? 'Sending...' : 'Add Friend',
               image: AppIcons.friendRequest,
@@ -241,6 +260,7 @@ class _ViewFriendScreenState extends State<ViewFriendScreen> {
       );
     });
   }
+
 
 
 

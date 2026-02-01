@@ -4,19 +4,21 @@ import 'package:get/get.dart';
 
 import 'package:giolee78/component/text/common_text.dart';
 import 'package:giolee78/component/text_field/common_text_field.dart';
+import 'package:giolee78/config/api/api_end_point.dart';
 import 'package:giolee78/config/route/app_routes.dart';
+import 'package:giolee78/features/friend/data/my_friends_model.dart';
 import 'package:giolee78/features/friend/presentation/screen/view_friend_screen.dart';
 import 'package:giolee78/utils/constants/app_colors.dart';
 import 'package:giolee78/utils/constants/app_images.dart';
 
-import '../controller/friend_controller.dart';
+import '../../data/friend_model.dart';
+import '../controller/my_friend_controller.dart';
 
 class MyFriendScreen extends StatelessWidget {
   const MyFriendScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // Initialize controller
     final controller = Get.put(MyFriendController());
 
     return Scaffold(
@@ -25,7 +27,7 @@ class MyFriendScreen extends StatelessWidget {
         elevation: 0,
         backgroundColor: AppColors.background,
         leading: IconButton(
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () => Get.back(),
           icon: Icon(
             Icons.arrow_back_ios_new,
             size: 18.sp,
@@ -41,76 +43,98 @@ class MyFriendScreen extends StatelessWidget {
         ),
       ),
       body: SafeArea(
-        child: Obx(() => ListView(
-          physics: const BouncingScrollPhysics(),
-          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
-          children: [
-            _SearchField(),
-            SizedBox(height: 16.h),
+        child: Obx(
+          () => ListView(
+            physics: const BouncingScrollPhysics(),
+            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
+            children: [
+              const _SearchField(),
+              SizedBox(height: 16.h),
 
-            // Suggested friends section
-            if (controller.suggestedFriends.isNotEmpty) ...[
-              const CommonText(
-                text: 'Suggested Friends',
+              /// ================= Suggested Friends =================
+              if (controller.suggestedFriends.isNotEmpty) ...[
+                const CommonText(
+                  text: 'Suggested Friends',
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.black,
+                ),
+                SizedBox(height: 12.h),
+
+                ListView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: controller.suggestedFriends.length,
+                  itemBuilder: (context, index) {
+                    final friend = controller.suggestedFriends[index];
+
+                    return Padding(
+                      padding: EdgeInsets.only(bottom: 10.h),
+                      child: _SuggestedFriendCard(
+                        userId: friend['id'],
+                        userName: friend['name'],
+                        avatar: friend['avatar'],
+                        controller: controller,
+                      ),
+                    );
+                  },
+                ),
+
+                SizedBox(height: 20.h),
+              ],
+
+              /// ================= My Friends =================
+              CommonText(
+                text: 'Total Friend (${controller.myFriendsList.length})',
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
                 color: AppColors.black,
-                textAlign: TextAlign.start,
               ),
               SizedBox(height: 12.h),
-              ...controller.suggestedFriends.map((friend) => Padding(
-                padding: EdgeInsets.only(bottom: 10.h),
-                child: _SuggestedFriendCard(
-                  userId: friend['id'],
-                  userName: friend['name'],
-                  avatar: friend['avatar'],
-                  controller: controller,
-                ),
-              )),
-              SizedBox(height: 20.h),
-            ],
 
-            // Friends list section
-            CommonText(
-              text: 'Total Friend (${controller.friendsList.length})',
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: AppColors.black,
-              textAlign: TextAlign.start,
-            ),
-            SizedBox(height: 12.h),
-
-            // Friend list
-            if (controller.friendsList.isEmpty)
-              Center(
-                child: Padding(
+              if (controller.myFriendsList.isEmpty)
+                Padding(
                   padding: EdgeInsets.symmetric(vertical: 40.h),
-                  child: const CommonText(
-                    text: 'No friends yet',
-                    fontSize: 14,
-                    fontWeight: FontWeight.w400,
-                    color: AppColors.secondaryText,
+                  child: const Center(
+                    child: CommonText(
+                      text: 'No friends yet',
+                      fontSize: 14,
+                      fontWeight: FontWeight.w400,
+                      color: AppColors.secondaryText,
+                    ),
                   ),
+                )
+              else
+                ListView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: controller.myFriendsList.length,
+                  itemBuilder: (context, index) {
+                   var data = controller.myFriendsList[index];
+                    final friend = data.friend;
+                    return Padding(
+                      padding: EdgeInsets.only(bottom: 10.h),
+                      child: _FriendListItem(
+                        userId: friend?.sId ?? "",
+                        userName: friend?.name ?? "Unknown",
+                        avatar: "${ApiEndPoint.imageUrl}${friend!.image}",
+                        controller: controller,
+                      ),
+                    );
+                  },
                 ),
-              )
-            else
-              ...controller.friendsList.map((friend) => Padding(
-                padding: EdgeInsets.only(bottom: 10.h),
-                child: _FriendListItem(
-                  userId: friend['id'],
-                  userName: friend['name'],
-                  avatar: friend['avatar'],
-                  controller: controller,
-                ),
-              )),
-          ],
-        )),
+            ],
+          ),
+        ),
       ),
     );
   }
 }
 
+/// ================= Search =================
 class _SearchField extends StatelessWidget {
+  const _SearchField();
+
   @override
   Widget build(BuildContext context) {
     return CommonTextField(
@@ -126,6 +150,7 @@ class _SearchField extends StatelessWidget {
   }
 }
 
+/// ================= Suggested Friend Card =================
 class _SuggestedFriendCard extends StatelessWidget {
   const _SuggestedFriendCard({
     required this.userId,
@@ -145,22 +170,14 @@ class _SuggestedFriendCard extends StatelessWidget {
       final isRequestSent = controller.isRequestSent(userId);
 
       return GestureDetector(
-        onTap: (){
-          Get.to(()=>ViewFriendScreen(isFriend: false, userId: '',));
-        },
+        onTap: () =>
+            Get.to(() => ViewFriendScreen(isFriend: false, userId: userId)),
         child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
           decoration: BoxDecoration(
             color: AppColors.white,
             borderRadius: BorderRadius.circular(14.r),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.04),
-                blurRadius: 10.r,
-                offset: const Offset(0, 4),
-              ),
-            ],
           ),
-          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
           child: Row(
             children: [
               CircleAvatar(
@@ -174,47 +191,30 @@ class _SuggestedFriendCard extends StatelessWidget {
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
                   color: AppColors.black,
-                  textAlign: TextAlign.start,
                   maxLines: 1,
                 ),
               ),
-              SizedBox(width: 12.w),
-
-              // Show checkmark if request sent, otherwise show Add button
-              if (isRequestSent)
-                Container(
-                  height: 32.h,
-                  width: 32.h,
-                  decoration: BoxDecoration(
-                    color: Colors.green.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8.r),
-                  ),
-                  alignment: Alignment.center,
-                  child: Icon(
-                    Icons.check_circle,
-                    size: 20.sp,
-                    color: Colors.green,
-                  ),
-                )
-              else
-                GestureDetector(
-                  onTap: () => controller.sendFriendRequest(userId),
-                  child: Container(
-                    height: 32.h,
-                    padding: EdgeInsets.symmetric(horizontal: 16.w),
-                    decoration: BoxDecoration(
-                      color: AppColors.red,
-                      borderRadius: BorderRadius.circular(8.r),
+              isRequestSent
+                  ? Icon(Icons.check_circle, color: Colors.green, size: 20.sp)
+                  : GestureDetector(
+                      onTap: () => controller.sendFriendRequest(userId),
+                      child: Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 16.w,
+                          vertical: 6.h,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.red,
+                          borderRadius: BorderRadius.circular(8.r),
+                        ),
+                        child: const CommonText(
+                          text: 'Add',
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.white,
+                        ),
+                      ),
                     ),
-                    alignment: Alignment.center,
-                    child: const CommonText(
-                      text: 'Add',
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.white,
-                    ),
-                  ),
-                ),
             ],
           ),
         ),
@@ -223,6 +223,7 @@ class _SuggestedFriendCard extends StatelessWidget {
   }
 }
 
+/// ================= Friend List Item =================
 class _FriendListItem extends StatelessWidget {
   const _FriendListItem({
     required this.userId,
@@ -239,25 +240,21 @@ class _FriendListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => Get.to(()=>ViewFriendScreen(isFriend: true, userId: '',)),
+      onTap: () =>
+          Get.to(() => ViewFriendScreen(isFriend: true, userId: userId)),
       child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
         decoration: BoxDecoration(
           color: AppColors.white,
           borderRadius: BorderRadius.circular(14.r),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.02),
-              blurRadius: 6.r,
-              offset: const Offset(0, 2),
-            ),
-          ],
         ),
-        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
         child: Row(
           children: [
             CircleAvatar(
               radius: 22.r,
-              backgroundImage: AssetImage(avatar ?? AppImages.profileImage),
+              backgroundImage: (avatar != null && avatar!.startsWith('http'))
+                  ? NetworkImage(avatar!) as ImageProvider
+                  : AssetImage(AppImages.profileImage),
             ),
             SizedBox(width: 12.w),
             Expanded(
@@ -266,66 +263,20 @@ class _FriendListItem extends StatelessWidget {
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
                 color: AppColors.black,
-                textAlign: TextAlign.start,
                 maxLines: 1,
               ),
             ),
-            SizedBox(width: 12.w),
             GestureDetector(
-              onTap: () {
-                Get.toNamed(AppRoutes.message);
-              },
+              onTap: () => Get.toNamed(AppRoutes.message),
               child: Icon(
                 Icons.chat_bubble_outline,
                 size: 20.sp,
                 color: AppColors.secondaryText,
               ),
             ),
-            SizedBox(width: 16.w),
+            SizedBox(width: 12.w),
             GestureDetector(
-              onTap: () {
-                // Show confirmation dialog before removing
-                Get.dialog(
-                  AlertDialog(
-                    title: const CommonText(
-                      text: 'Remove Friend',
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.black,
-                    ),
-                    content: CommonText(
-                      text: 'Are you sure you want to remove $userName from your friends?',
-                      fontSize: 14,
-                      fontWeight: FontWeight.w400,
-                      color: AppColors.secondaryText,
-                      maxLines: 4,
-                    ),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Get.back(),
-                        child: const CommonText(
-                          text: 'Cancel',
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.secondaryText,
-                        ),
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          Get.back();
-                          controller.removeFriend(userId);
-                        },
-                        child: const CommonText(
-                          text: 'Remove',
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.red,
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              },
+              onTap: () => controller.removeFriend(userId),
               child: Icon(
                 Icons.close,
                 size: 20.sp,

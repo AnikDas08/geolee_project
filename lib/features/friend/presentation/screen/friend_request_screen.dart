@@ -1,119 +1,132 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:giolee78/component/button/common_button.dart';
 import 'package:giolee78/component/text/common_text.dart';
-import 'package:giolee78/features/friend/presentation/screen/view_friend_screen.dart';
-import 'package:giolee78/features/friend/presentation/widgets/friend_request_card.dart';
-import 'package:giolee78/utils/constants/app_colors.dart';
+import 'package:giolee78/config/api/api_end_point.dart';
+import 'package:giolee78/utils/extensions/extension.dart';
+import '../../../../utils/constants/app_images.dart';
+import '../controller/my_friend_controller.dart';
 
-class FriendRequestScreen extends StatefulWidget {
-  const FriendRequestScreen({super.key});
+class FriendRequestScreen extends StatelessWidget {
+  FriendRequestScreen({super.key});
 
-  @override
-  State<FriendRequestScreen> createState() => _FriendRequestScreenState();
-}
-
-class _FriendRequestScreenState extends State<FriendRequestScreen> {
-  // --- UPDATED DATA STRUCTURE ---
-  final List<Map<String, String>> _requests = [
-    {'name': 'Arlene McCoy', 'time': '2 Days Ago', 'status': 'pending'},
-    {'name': 'Esther Howard', 'time': '1 Day Ago', 'status': 'pending'},
-    {'name': 'Cameron Williamson', 'time': '5 Hours Ago', 'status': 'pending'},
-    {'name': 'Brooklyn Simmons', 'time': '1 Hour Ago', 'status': 'pending'},
-    {'name': 'Ralph Edwards', 'time': '40 Minutes Ago', 'status': 'pending'},
-    {'name': 'Leslie Alexander', 'time': '10 Minutes Ago', 'status': 'pending'},
-  ];
-
-  // --- MODIFIED ACCEPT FUNCTION ---
-  void _acceptRequest(int index, String name) {
-    // In a real app, you would make an API call here.
-    setState(() {
-      // 1. Change the status instead of removing the item
-      _requests[index]['status'] = 'accepted';
-    });
-
-    Get.snackbar(
-      'Request Accepted',
-      '$name is now your friend!',
-      backgroundColor: AppColors.primaryColor.withOpacity(0.8),
-      colorText: Colors.white,
-      snackPosition: SnackPosition.BOTTOM,
-    );
-  }
-
-  // --- REJECT FUNCTION REMAINS REMOVAL ---
-  void _rejectRequest(int index, String name) {
-    // In a real app, you would make an API call here.
-    setState(() {
-      // 2. Remove the item
-      _requests.removeAt(index);
-    });
-
-    Get.snackbar(
-      'Request Rejected',
-      'You rejected the friend request from $name.',
-      backgroundColor: Colors.red.withOpacity(0.8),
-      colorText: Colors.white,
-      snackPosition: SnackPosition.BOTTOM,
-    );
-  }
+  final controller = Get.put(MyFriendController());
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
       appBar: AppBar(
-        elevation: 0,
-        backgroundColor: AppColors.background,
-        leading: IconButton(
-          onPressed: () => Navigator.of(context).pop(),
-          icon: Icon(
-            Icons.arrow_back_ios_new,
-            size: 18.sp,
-            color: AppColors.black,
-          ),
-        ),
-        centerTitle: true,
-        title: CommonText(
-          // Only count pending requests for the title
-          text: 'Friend Request (${_requests.where((r) => r['status'] == 'pending').length})',
-          fontSize: 18,
-          fontWeight: FontWeight.w600,
-          color: AppColors.black,
-        ),
+        title: const Text("Friend Requests"),
       ),
-      body: SafeArea(
-        child: _requests.isEmpty
-            ? Center(
-          child: CommonText(
-            text: 'No pending friend requests.',
-            fontSize: 16,
-            color: AppColors.black.withOpacity(0.6),
-          ),
-        )
-            : ListView.separated(
-          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+      body: Obx(() {
+        if (controller.isLoading.value) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        // ✅ Filter only pending requests
+        final pendingRequests = controller.requests
+            .where((r) => r.status == "pending")
+            .toList();
+
+
+        if (pendingRequests.isEmpty) {
+          return const Center(child: Text("No friend requests"));
+        }
+
+        return ListView.builder(
+          itemCount: pendingRequests.length,
           physics: const BouncingScrollPhysics(),
           itemBuilder: (context, index) {
-            final request = _requests[index];
-            return FriendRequestCard(
-              userName: request['name']!,
-              timeAgo: request['time']!,
-              requestStatus: request['status']!, // <--- PASS THE STATUS
-              onTap: () {
-                Get.to(
-                      () => const ViewFriendScreen(
-                      isFriend: false, isRequest: true, userId: '',),
-                );
-              },
-              onAccept: request['status'] == 'pending' ? () => _acceptRequest(index, request['name']!) : () {},
-              onReject: request['status'] == 'pending' ? () => _rejectRequest(index, request['name']!) : () {},
+            final data = pendingRequests[index];
+            final friendInfo = data.sender;
+
+            return Container(
+              margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+              padding: EdgeInsets.all(12.w),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12.r),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Profile Image with fallback
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(50.r),
+                    child: CachedNetworkImage( // Recommended over NetworkImage for better UX
+                      imageUrl: "${ApiEndPoint.imageUrl}${friendInfo.image}",
+                      height: 50.h,
+                      width: 50.w,
+                      fit: BoxFit.cover,
+                      placeholder: (context, url) => const CircularProgressIndicator(),
+                      errorWidget: (context, url, error) => Image.asset(AppImages.profileImage),
+                    ),
+                  ),
+                  SizedBox(width: 12.w),
+
+                  // Details Column
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          friendInfo.name ?? "Unknown",
+                          style: TextStyle(
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black,
+                          ),
+                        ),
+                        SizedBox(height: 2.h),
+                        const CommonText(
+                          text: '2 Days Ago',
+                          fontSize: 12,
+                          fontWeight: FontWeight.w400,
+                          color: Color(0xFF737373),
+                        ),
+                        SizedBox(height: 12.h),
+
+                        // Action Buttons
+                        Row(
+                          children: [
+                            Expanded(
+                              child: CommonButton(
+                                buttonHeight: 36.h,
+                                titleText: 'Accept',
+                                onTap: () => controller.acceptFriendRequest(data.id, index),
+                              ),
+                            ),
+                            SizedBox(width: 10.w),
+                            Expanded(
+                              child: CommonButton(
+                                borderColor: Colors.transparent,
+                                buttonHeight: 36.h,
+                                titleText: 'Reject',
+                                buttonColor: Color(0xFFDEE2E3), // Make Reject less prominent
+                                titleColor:Color(0xFF737373),
+                                onTap: () => controller.rejectFriendRequest(data.id, index),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             );
           },
-          separatorBuilder: (_, __) => SizedBox(height: 12.h),
-          itemCount: _requests.length,
-        ),
-      ),
+        );
+      }),
     );
   }
 }

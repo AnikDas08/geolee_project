@@ -144,7 +144,7 @@ class MyProfileScreen extends StatelessWidget {
         8.height,
         // Content (bio)
         CommonText(
-          text: controller.about,
+          text: controller.bio,
           fontSize: 14.sp,
           fontWeight: FontWeight.w400,
           color: AppColors.secondaryText,

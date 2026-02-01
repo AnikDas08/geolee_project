@@ -1,16 +1,22 @@
 import 'dart:io';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:get/get.dart' hide MultipartFile, FormData, Response;
+import 'package:giolee78/config/api/api_end_point.dart';
+import 'package:giolee78/services/api/api_response_model.dart';
+import 'package:giolee78/services/api/api_service.dart';
 import 'package:image_picker/image_picker.dart';
 
-class PostController extends GetxController {
+import '../../../../services/storage/storage_services.dart';
 
+class PostController extends GetxController {
   @override
   void onInit() {
     // TODO: implement onInit
     super.onInit();
     print(selectedPriorityLevel);
   }
+
   final isLoading = false.obs;
 
   // Image handling
@@ -18,7 +24,7 @@ class PostController extends GetxController {
   final int maxImages = 4; // Define max image limit
 
   // Form controllers
-  final discriptions = TextEditingController();
+  final description = TextEditingController();
 
   // ✅ FIXED: Empty initial value - no button selected by default
   final selectedPricingOption = ''.obs;
@@ -28,7 +34,7 @@ class PostController extends GetxController {
   final serviceTimeController = TextEditingController();
   final selectedGender = ''.obs;
 
-  final List<String> priorityLevels = ['Friend', 'Public', 'Only Me'];
+  final List<String> priorityLevels = ['friends', 'public', 'only me'];
   final ImagePicker _picker = ImagePicker();
 
   // ✅ This method now works for all 4 options
@@ -41,9 +47,8 @@ class PostController extends GetxController {
     selectedGender.value = gender;
   }
 
-  void createPost() {
-    // Validation
-
+  //==================================================== Create Post=========================
+  Future<void> createPost() async {
     if (selectedPricingOption.value.isEmpty) {
       Get.snackbar(
         'Error',
@@ -57,28 +62,73 @@ class PostController extends GetxController {
 
     isLoading.value = true;
 
-    // TODO: Implement your API call here
-    // Example data structure:
-    Map<String, dynamic> postData = {
-      'description': discriptions.text.trim(),
-      'clicker_type': selectedPricingOption.value,
-      'privacy': selectedPriorityLevel.value,
-      'images': selectedImages.map((file) => file.path).toList(),
-    };
+    try {
+      // MultipartFile for each image
+      List<MultipartFile> imageFiles = [];
+      for (var file in selectedImages) {
+        imageFiles.add(
+          await MultipartFile.fromFile(
+            file.path,
+            filename: file.path.split('/').last,
+          ),
+        );
+      }
 
-    //print('Post Data: $postData');
+      FormData formData = FormData.fromMap({
+        'description': description.text.trim(),
+        'clickerType': selectedPricingOption.value,
+        'privacy': selectedPriorityLevel.value.toLowerCase(),
+        'image': imageFiles,
+      });
 
-    // Simulate API call
-    Future.delayed(const Duration(seconds: 2), () {
-      isLoading.value = false;
+      // Response response = await Dio().post(
+      //   'https://yourapi.com/posts', // এখানে তোমার API URL
+      //   data: formData,
+      // );
+
+      final url = "${ApiEndPoint.createPost}";
+
+      var response = await ApiService.post(
+        url,
+        header: {'Authorization': 'Bearer ${LocalStorage.token}'},
+        body: formData
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        Get.snackbar(
+          'Success',
+          'Post created successfully!',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+        );
+
+        // Clear after successful post
+        description.clear();
+        selectedImages.clear();
+        selectedPricingOption.value = '';
+        selectedPriorityLevel.value = '';
+      } else {
+        debugPrint('Response  is =>>>>>>>>>>>>>>>>>>>>>>$response',);
+        Get.snackbar(
+          'Error',
+          'Failed to create post',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+      }
+    } catch (e) {
       Get.snackbar(
-        'Success',
-        'Post created successfully!',
+        'Error',
+        'Something went wrong: $e',
         snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.green,
+        backgroundColor: Colors.red,
         colorText: Colors.white,
       );
-    });
+    } finally {
+      isLoading.value = false;
+    }
   }
 
   // Image management methods

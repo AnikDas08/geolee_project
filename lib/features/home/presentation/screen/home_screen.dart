@@ -159,7 +159,7 @@ class HomeScreen extends StatelessWidget {
                               Get.to(() => ClickerScreen());
                             },
                           ),
-                          //dfdf
+
                           Item(
                             imageSrc: AppIcons.bubbleChat,
                             title: 'Chat Nearby',
@@ -178,14 +178,14 @@ class HomeScreen extends StatelessWidget {
                             imageSrc: AppIcons.myFriend,
                             title: 'My Friend',
                             onTap: () {
-                              Get.to(() => const MyFriendScreen());
+                              Get.to(() =>  MyFriendScreen());
                             },
                           ),
                           Item(
                             imageSrc: AppIcons.friend,
                             title: 'Friend Request',
                             onTap: () {
-                              Get.to(() => const FriendRequestScreen());
+                              Get.to(() =>  FriendRequestScreen());
                             },
                           ),
                         ],

@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:get/get.dart';
 import 'package:giolee78/config/api/api_end_point.dart';
 import 'package:giolee78/config/route/app_routes.dart';
@@ -15,21 +13,20 @@ class MyProfileController extends GetxController {
   String _dateOfBirth = "";
   String _gender = "";
 
-  /// User profile data
+  // ================= USER DATA GETTERS =================
+
   String get userName =>
-      LocalStorage.myName.isNotEmpty ? LocalStorage.myName : "Shakir Ahmed";
+      LocalStorage.myName.isNotEmpty ? LocalStorage.myName : "User Name";
 
   String get userImage => LocalStorage.myImage;
 
-  String get userEmail => LocalStorage.myEmail.isNotEmpty
-      ? LocalStorage.myEmail
-      : "Example@gmail.com";
+  String get userEmail =>
+      LocalStorage.myEmail.isNotEmpty ? LocalStorage.myEmail : "example@mail.com";
 
   String get mobile => LocalStorage.mobile;
 
   String get dateOfBirth {
     if (LocalStorage.dateOfBirth.isEmpty) return "Not Selected";
-    // Extract only the date part (YYYY-MM-DD) from ISO timestamp
     return LocalStorage.dateOfBirth.split('T').first;
   }
 
@@ -38,7 +35,6 @@ class MyProfileController extends GetxController {
 
   String get experience => LocalStorage.experience;
 
-  // Fixed: Corrected the condition logic
   String get bio =>
       LocalStorage.bio.isNotEmpty ? LocalStorage.bio : "Bio Not Set Yet";
 
@@ -54,8 +50,9 @@ class MyProfileController extends GetxController {
 
   String get address => "Dhaka, Bangladesh";
 
-  // Fixed: Using the bio getter for consistency
   String get about => bio;
+
+  // ================= LIFE CYCLE =================
 
   @override
   void onInit() {
@@ -63,22 +60,29 @@ class MyProfileController extends GetxController {
     getUserData();
   }
 
-  /// Navigate to edit profile screen
+  // ================= NAVIGATION =================
+
   void navigateToEditProfile() {
     Get.toNamed(AppRoutes.editProfile);
   }
+
+  void goBack() {
+    Get.back();
+  }
+
+  // ================= API CALL =================
 
   Future<void> getUserData() async {
     isLoading = true;
     update();
 
     try {
-      var response = await ApiService.get(
+      final response = await ApiService.get(
+        ApiEndPoint.profile,
         header: {
           "Authorization": "Bearer ${LocalStorage.token}",
           "Content-Type": "application/json",
         },
-        ApiEndPoint.profile,
       ).timeout(const Duration(seconds: 30));
 
       if (response.statusCode == 200) {
@@ -86,101 +90,84 @@ class MyProfileController extends GetxController {
           response.data as Map<String, dynamic>,
         );
 
-        if (profileModel?.data != null) {
-          final data = profileModel!.data!;
+        final data = profileModel?.data;
+        if (data == null) return;
 
-          _dateOfBirth = data.dob ?? "";
-          _gender = data.gender ?? "";
+        // ---------- SAFE DATE HANDLING ----------
+        _dateOfBirth =
+        data.dob != null ? data.dob!.toIso8601String() : "";
 
-          // Update LocalStorage variables
-          LocalStorage.userId = data.sId ?? "";
-          LocalStorage.myName = data.name ?? "";
-          LocalStorage.myEmail = data.email ?? "";
-          LocalStorage.myRole = data.role ?? "";
-          LocalStorage.myImage = data.image ?? "";
-          LocalStorage.bio = data.bio ?? "Bio Not Set Yet";
-          LocalStorage.gender = data.gender ?? "Not Selected";
-          LocalStorage.dateOfBirth = data.dob ?? "";
-          LocalStorage.createdAt = data.createdAt ?? "";
-          LocalStorage.updatedAt = data.updatedAt ?? "";
-          LocalStorage.verified = data.isVerified ?? false;
+        _gender = data.gender;
 
-          // Save all to SharedPreferences in one place (removed duplicates)
-          await Future.wait([
-            LocalStorage.setBool(
-              LocalStorageKeys.isLogIn,
-              LocalStorage.isLogIn,
-            ),
-            LocalStorage.setString(
-              LocalStorageKeys.userId,
-              LocalStorage.userId,
-            ),
-            LocalStorage.setString(
-              LocalStorageKeys.myName,
-              LocalStorage.myName,
-            ),
-            LocalStorage.setString(
-              LocalStorageKeys.myEmail,
-              LocalStorage.myEmail,
-            ),
-            LocalStorage.setString(
-              LocalStorageKeys.myRole,
-              LocalStorage.myRole,
-            ),
-            LocalStorage.setString(
-              LocalStorageKeys.myImage,
-              LocalStorage.myImage,
-            ),
-            LocalStorage.setString(LocalStorageKeys.bio, LocalStorage.bio),
-            LocalStorage.setString(
-              LocalStorageKeys.gender,
-              LocalStorage.gender,
-            ),
-            LocalStorage.setString(
+        // ---------- LOCAL MEMORY ----------
+        LocalStorage.userId = data.id;
+        LocalStorage.myName = data.name;
+        LocalStorage.myEmail = data.email;
+        LocalStorage.myRole = data.role;
+        LocalStorage.myImage = data.image;
+        LocalStorage.bio =
+        data.bio.isNotEmpty ? data.bio : "Bio Not Set Yet";
+        LocalStorage.gender = data.gender;
+        LocalStorage.dateOfBirth = _dateOfBirth;
+        LocalStorage.createdAt =
+            data.createdAt?.toIso8601String() ?? "";
+        LocalStorage.updatedAt =
+            data.updatedAt?.toIso8601String() ?? "";
+        LocalStorage.verified = data.isVerified;
+
+        // ---------- SAVE TO SHARED PREF ----------
+        await Future.wait([
+          LocalStorage.setBool(
+              LocalStorageKeys.isLogIn, LocalStorage.isLogIn),
+          LocalStorage.setString(
+              LocalStorageKeys.userId, LocalStorage.userId),
+          LocalStorage.setString(
+              LocalStorageKeys.myName, LocalStorage.myName),
+          LocalStorage.setString(
+              LocalStorageKeys.myEmail, LocalStorage.myEmail),
+          LocalStorage.setString(
+              LocalStorageKeys.myRole, LocalStorage.myRole),
+          LocalStorage.setString(
+              LocalStorageKeys.myImage, LocalStorage.myImage),
+          LocalStorage.setString(
+              LocalStorageKeys.bio, LocalStorage.bio),
+          LocalStorage.setString(
+              LocalStorageKeys.gender, LocalStorage.gender),
+          LocalStorage.setString(
               LocalStorageKeys.dateOfBirth,
-              LocalStorage.dateOfBirth,
-            ),
-            LocalStorage.setString(
+              LocalStorage.dateOfBirth),
+          LocalStorage.setString(
               LocalStorageKeys.experience,
-              LocalStorage.experience,
-            ),
-            LocalStorage.setDouble(
-              LocalStorageKeys.balance,
-              LocalStorage.balance,
-            ),
-            LocalStorage.setBool(
-              LocalStorageKeys.verified,
-              LocalStorage.verified,
-            ),
-            LocalStorage.setDouble(LocalStorageKeys.lat, LocalStorage.lat),
-            LocalStorage.setDouble(LocalStorageKeys.log, LocalStorage.log),
-            LocalStorage.setBool(
+              LocalStorage.experience),
+          LocalStorage.setDouble(
+              LocalStorageKeys.balance, LocalStorage.balance),
+          LocalStorage.setBool(
+              LocalStorageKeys.verified, LocalStorage.verified),
+          LocalStorage.setDouble(
+              LocalStorageKeys.lat, LocalStorage.lat),
+          LocalStorage.setDouble(
+              LocalStorageKeys.log, LocalStorage.log),
+          LocalStorage.setBool(
               LocalStorageKeys.accountInfoStatus,
-              LocalStorage.accountInfoStatus,
-            ),
-            LocalStorage.setString(
+              LocalStorage.accountInfoStatus),
+          LocalStorage.setString(
               LocalStorageKeys.createdAt,
-              LocalStorage.createdAt,
-            ),
-            LocalStorage.setString(
+              LocalStorage.createdAt),
+          LocalStorage.setString(
               LocalStorageKeys.updatedAt,
-              LocalStorage.updatedAt,
-            ),
-          ]);
-        }
+              LocalStorage.updatedAt),
+        ]);
       } else {
-        Get.snackbar(response.statusCode.toString(), response.message);
+        Get.snackbar(
+          response.statusCode.toString(),
+          response.message ?? "Something went wrong",
+        );
       }
     } catch (e) {
-      Get.snackbar('Error', 'Failed to load profile: $e');
+      Get.snackbar("Error", "Failed to load profile");
     }
 
     isLoading = false;
     update();
-  }
-
-  /// Navigate back
-  void goBack() {
-    Get.back();
   }
 }

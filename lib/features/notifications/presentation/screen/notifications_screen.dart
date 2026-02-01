@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../../utils/constants/app_images.dart';
 import '../controller/notifications_controller.dart';
 import '../widgets/notification_item.dart';
 
@@ -27,11 +28,8 @@ class NotificationScreen extends StatelessWidget {
 
           /// No notifications
           if (controller.notifications.isEmpty) {
-            return const Center(
-              child: Text(
-                "No notifications found",
-                style: TextStyle(fontSize: 14),
-              ),
+            return Center(
+              child: Image.asset(AppImages.emptyNotification),
             );
           }
 

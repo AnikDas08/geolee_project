@@ -232,9 +232,9 @@ class ProfileController extends GetxController {
         LocalStorage.myName = data['data']?["name"] ?? LocalStorage.myName;
         LocalStorage.myEmail = data['data']?["email"] ?? LocalStorage.myEmail;
         LocalStorage.myImage = data['data']?["image"] ?? LocalStorage.myImage;
-        LocalStorage.dateOfBirth = data['data']?['dob'] ?? "Not Selected";
-        LocalStorage.bio = data['data']?['bio'] ?? "Not Selected";
-        LocalStorage.gender = data['data']?['gender'] ?? "Not Selected";
+        LocalStorage.dateOfBirth = data['data']?['dob'] ?? LocalStorage.dateOfBirth;
+        LocalStorage.bio = data['data']?['bio'] ?? LocalStorage.bio;
+        LocalStorage.gender = data['data']?['gender'] ??LocalStorage.gender;
 
         await Future.wait([
           LocalStorage.setString(LocalStorageKeys.userId, LocalStorage.userId),

@@ -30,7 +30,11 @@ class ApiEndPoint {
 
   // Friend =========================================
   static const String createFriendRequest = "${baseUrl}friend-requests/create/";
+  static const String friendStatusUpdate = "${baseUrl}friend-requests/update/";
+  static const String rejectedFriendRequest = "${baseUrl}friendships/";
   static const String getMyFriendRequest = "${baseUrl}friend-requests/my-requests";
+  static const String getMyAllFriend = "${baseUrl}friendships/my-friends";
+  static const String checkFriendStatus = "${baseUrl}/friendships/check/";
 
   // Chat ===========================================
   static const String createOneToOneChat = "${baseUrl}chats/create-1-to-1";
@@ -46,8 +50,8 @@ class ApiEndPoint {
   static const String profile = "${baseUrl}users/profile";
   static const String notifications = "${baseUrl}notification/all";
   static const String category = "${baseUrl}category/service";
-  static const String privacyPolicies = "${baseUrl}app/rule/privacy";
-  static const String termsOfServices = "${baseUrl}app/rule/terms";
+  static const String privacyPolicies = "${baseUrl}disclaimer/privacy-policy";
+  static const String termsOfServices = "${baseUrl}disclaimer/terms-and-conditions";
   static const String helpSupport = "${baseUrl}help/support";
   static const String chats = "${baseUrl}chats";
   static const String chatRoom = "${baseUrl}chat/room";
