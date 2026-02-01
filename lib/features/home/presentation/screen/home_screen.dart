@@ -48,14 +48,13 @@ class HomeScreen extends StatelessWidget {
                         init: NotificationsController(),
                         builder: (controller) {
                           return HomeDetails(
-
                             notificationCount: controller.unreadCount,
                           );
                         }
                       ),
                       SizedBox(height: 20.h),
                       Container(
-                        height: 350.h, // fixed height
+                        height: 350.h,
                         width: double.infinity,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(10.r),

@@ -14,7 +14,8 @@ import '../../../../utils/constants/app_colors.dart';
 import '../../../../utils/constants/app_images.dart';
 
 class HomeDetails extends StatefulWidget {
-  const HomeDetails({super.key, required this.notificationCount});
+  const HomeDetails({super.key,
+    required this.notificationCount});
 
   final int notificationCount;
 

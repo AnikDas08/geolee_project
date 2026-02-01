@@ -7,8 +7,8 @@ import 'package:giolee78/component/other_widgets/item.dart';
 import 'package:giolee78/component/pop_up/common_pop_menu.dart';
 import 'package:giolee78/component/text/common_text.dart';
 import 'package:giolee78/config/route/app_routes.dart';
-import 'package:giolee78/features/ads/presentation/screen/history_ads_screen.dart';
 import 'package:giolee78/features/auth/change_password/presentation/screen/change_password_screen.dart';
+import 'package:giolee78/features/profile/presentation/controller/my_profile_controller.dart';
 import 'package:giolee78/features/profile/presentation/controller/profile_controller.dart';
 import 'package:giolee78/features/profile/presentation/screen/help_support_screen.dart';
 import 'package:giolee78/features/profile/presentation/screen/my_profile_screen.dart';
@@ -100,16 +100,24 @@ class ProfileScreen extends StatelessWidget {
                       child: CircleAvatar(
                         radius: 50.sp,
                         backgroundColor: Colors.transparent,
-                        child: ClipOval(
-                          child: CommonImage(
-                            fill: BoxFit.fill,
-                            imageSrc: LocalStorage.myImage != null &&
-                                LocalStorage.myImage!.isNotEmpty
-                                ? ApiEndPoint.imageUrl + LocalStorage.myImage!
-                                : "",
-                            size: 100,
-                            defaultImage: AppImages.profileImage,
-                          ),
+                        child: GetBuilder<MyProfileController>(
+                          builder: (myProfileController) {
+                            return ClipOval(
+                              child: myProfileController.userImage.isNotEmpty
+                                  ? CommonImage(
+                                imageSrc: ApiEndPoint.imageUrl + myProfileController.userImage,
+                                width: 120.w,
+                                height: 120.h,
+                                fill: BoxFit.cover,
+                              )
+                                  : CommonImage(
+                                imageSrc: AppImages.profile,
+                                width: 120.w,
+                                height: 120.h,
+                                fill: BoxFit.cover,
+                              ),
+                            );
+                          }
                         ),
                       ),
                     ),

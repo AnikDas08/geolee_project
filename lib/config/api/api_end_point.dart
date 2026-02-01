@@ -27,6 +27,7 @@ class ApiEndPoint {
   static const String getUserById = "${baseUrl}posts/user/";
   static const String getMyPost = "${baseUrl}posts/my-posts";
   static const String getAllPost = "${baseUrl}posts";
+  static const String deletePost = "${baseUrl}posts/delete/";
 
   // Friend =========================================
   static const String createFriendRequest = "${baseUrl}friend-requests/create/";
@@ -43,6 +44,8 @@ class ApiEndPoint {
   static const String leaveChat = "${baseUrl}chats/leave/696b6da6a27367444bc2403a";
   static const String joinChat = "${baseUrl}chats/join/696b6da6a27367444bc2403a";
 
+  // Misc ===========================================
+  static const String support = "${baseUrl}supports/create";
   // Misc ===========================================
   static const String user = "${baseUrl}users";
   static const String post = "${baseUrl}posts";

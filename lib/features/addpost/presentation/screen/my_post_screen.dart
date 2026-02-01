@@ -76,6 +76,7 @@ class _MyPostScreenState extends State<MyPostScreen> {
                     itemBuilder: (context, index) {
                       final data = controller.myPost[index];
                       return MyPostCard(
+                        postId: data.id,
                         onTapProfile: (){
                           debugPrint('Profile Tab');
                         },
@@ -83,7 +84,7 @@ class _MyPostScreenState extends State<MyPostScreen> {
                         onTapPhoto:   (){
                           if (data.photos.isNotEmpty) {
                             Get.to(() => FullScreenImageView(
-                              imageUrl: "http://10.10.7.7:5006${data.photos[0]}",
+                              imageUrl: "${ApiEndPoint.imageUrl+data.photos[0]}",
                             ));
                           }
                         },

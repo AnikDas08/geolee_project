@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 
 class EditPostControllers extends GetxController {
   final isLoading = false.obs;
+  late String postId;
 
   // Image handling
   final selectedImages = <File>[].obs;
@@ -20,10 +21,18 @@ class EditPostControllers extends GetxController {
   final serviceTimeController = TextEditingController();
   final selectedGender = ''.obs;
 
-  final List<String> priorityLevels = ['Friend', 'Public', 'Only Me'];
+  final List<String> priorityLevels = ['friend', 'public', 'only me'];
   final ImagePicker _picker = ImagePicker();
 
-  // ✅ This method now works for all 4 options
+  @override
+  void onInit() {
+    super.onInit();
+    final args = Get.arguments;
+    postId = args['postId'];
+    debugPrint("🆔 Received Post ID: $postId");
+  }
+
+
   void selectPricingOption(String option) {
     selectedPricingOption.value = option;
     print('Selected: $option'); // Debug print
@@ -106,7 +115,32 @@ class EditPostControllers extends GetxController {
     });
   }
 
-  // Image management methods
+  //===========================================================post update
+  void updatePost(String postId) {
+    isLoading.value = true;
+
+    Map<String, dynamic> postData = {
+      'description': descriptionController.text.trim(),
+      'clicker_type': selectedPricingOption.value,
+      'privacy': selectedPriorityLevel.value,
+      'images': selectedImages.map((file) => file.path).toList(),
+    };
+
+    print('====================================>>>>>>>>>>>>Post Data: $postData');
+
+    Future.delayed(const Duration(seconds: 2), () {
+      isLoading.value = false;
+      Get.back();
+      Get.snackbar(
+        'Success',
+        'Post Updated successfully!',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+      );
+    });
+  }
+
   void removeImageAtIndex(int index) {
     if (index >= 0 && index < selectedImages.length) {
       selectedImages.removeAt(index);
@@ -120,7 +154,6 @@ class EditPostControllers extends GetxController {
       );
     }
   }
-
   Future<void> _pickImage(ImageSource source) async {
     try {
       final XFile? image = await _picker.pickImage(
@@ -151,15 +184,12 @@ class EditPostControllers extends GetxController {
       );
     }
   }
-
   Future<void> pickImageFromGallery() async {
     await _pickImage(ImageSource.gallery);
   }
-
   Future<void> pickImageFromCamera() async {
     await _pickImage(ImageSource.camera);
   }
-
   @override
   void onClose() {
     descriptionController.dispose();
@@ -167,4 +197,5 @@ class EditPostControllers extends GetxController {
     serviceTimeController.dispose();
     super.onClose();
   }
+
 }

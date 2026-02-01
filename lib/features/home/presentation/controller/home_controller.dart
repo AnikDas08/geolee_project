@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:giolee78/config/api/api_end_point.dart';
 import 'package:giolee78/features/home/presentation/controller/home_nav_controller.dart';
+import 'package:giolee78/features/profile/presentation/controller/my_profile_controller.dart';
 import 'package:giolee78/utils/enum/enum.dart';
 
 import '../../../../services/api/api_service.dart';
@@ -30,6 +31,7 @@ class HomeController extends GetxController {
 
   List<String> clickerOptions = ["All", "Great Vibes", "Off Vibes", "Charming Gentleman","Lovely Leady"];
   List<String> filterOptions = ["Option 1", "Option 2", "Option 3"];
+  final MyProfileController myProfileController=Get.put(MyProfileController());
 
   @override
   void onInit() {
@@ -42,6 +44,9 @@ class HomeController extends GetxController {
     );
     Get.find<HomeNavController>().refresh();
     fetchPosts();
+    myProfileController.getUserData();
+
+
   }
 
   void applyFilter(String period, DateTime start, DateTime end) {

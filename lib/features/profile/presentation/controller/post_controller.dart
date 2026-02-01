@@ -65,16 +65,16 @@ class MyPostController extends GetxController {
   Future<void> deletePost(String postId) async {
     try {
       ApiResponseModel response = await ApiService.delete(
-        'posts/$postId',
+        "${ApiEndPoint.deletePost}$postId",
         header: {
-          'Authorization':
-              'Bearer ${LocalStorage.token}', // Add your token here
+          'Authorization': 'Bearer ${LocalStorage.token}',
         },
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        // Remove post from list
-        posts.removeWhere((post) => post.id == postId);
+
+        myPost.removeWhere((post) => post.id == postId);
+
         Get.snackbar(
           'Success',
           'Post deleted successfully',
@@ -82,7 +82,12 @@ class MyPostController extends GetxController {
           backgroundColor: Colors.green,
           colorText: Colors.white,
         );
+
+
         Get.find<HomeController>().fetchPosts();
+        fetchMyPosts();
+        update();
+
       } else {
         Get.snackbar(
           'Error',
@@ -103,6 +108,7 @@ class MyPostController extends GetxController {
       );
     }
   }
+
 
   // Helper method to get pagination info
   Pagination? get pagination => myPostsModel.value?.pagination;

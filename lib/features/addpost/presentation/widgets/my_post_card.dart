@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:giolee78/component/image/common_image.dart';
 import 'package:giolee78/component/text/common_text.dart';
 import 'package:giolee78/features/addpost/presentation/screen/edit_post.dart';
+import 'package:giolee78/features/profile/presentation/controller/post_controller.dart';
 import 'package:giolee78/utils/constants/app_colors.dart';
 
 import 'confirm_delete_dialog.dart';
@@ -26,6 +27,7 @@ class MyPostCard extends StatelessWidget {
     required this.onTapProfile,
     required this.onTapPhoto,
     required this.isProfile,
+    this.postId,
   });
 
   final String userName;
@@ -40,6 +42,7 @@ class MyPostCard extends StatelessWidget {
   final VoidCallback onTapProfile;
   final VoidCallback onTapPhoto;
   final bool isProfile;
+  final String? postId;
 
   @override
   Widget build(BuildContext context) {
@@ -201,7 +204,9 @@ class MyPostCard extends StatelessWidget {
   }
 
   // 🌟 Helper method to build the PopupMenuButton
-  Widget _buildPopupMenuButton(BuildContext context) {
+  Widget _buildPopupMenuButton(BuildContext context ) {
+    final MyPostController myPostController=Get.put(MyPostController());
+
     return PopupMenuButton<PostAction>(
       color: Colors.white,
       icon: Icon(
@@ -223,7 +228,11 @@ class MyPostCard extends StatelessWidget {
           Icons.delete_outline,
           "Delete Post",
           () {
-            showDeletePostDialog(context, onConfirmDelete: () {});
+            showDeletePostDialog(context, onConfirmDelete: () {
+              myPostController.deletePost(postId.toString());
+
+
+            });
           },
         ),
         _buildPopupMenuItem(

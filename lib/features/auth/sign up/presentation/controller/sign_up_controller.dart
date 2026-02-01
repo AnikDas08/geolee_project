@@ -72,9 +72,11 @@ class SignUpController extends GetxController {
   final TextEditingController dateController = TextEditingController();
   final TextEditingController addressController = TextEditingController();
   final TextEditingController ageController = TextEditingController();
+  final TextEditingController bioController = TextEditingController();
 
   String? selectedGender;
-  final List<String> genderOptions = ['Male', 'Female', 'Other'];
+  final List<String> genderOptions = ['male', 'female', 'other'];
+
 
   Future<void> selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
@@ -207,13 +209,28 @@ class SignUpController extends GetxController {
 
     debugPrint("token is ==============================${LocalStorage.token}");
 
+
+    String formattedDob = "";
+
+    if (dateController.text.isNotEmpty) {
+      try {
+        DateTime parsedDate =
+        DateFormat('dd MMMM yyyy').parse(dateController.text.trim());
+
+        // ✅ Zod compatible ISO datetime
+        formattedDob = parsedDate.toUtc().toIso8601String();
+      } catch (e) {
+        debugPrint("❌ Invalid DOB format: ${dateController.text}");
+        formattedDob = "";
+      }
+    }
+
+
     Map<String, String> body = {
-      // "birthDate": dateController.text,
-      // "lat": currentPosition?.latitude.toString() ?? "",
-      // "log": currentPosition?.longitude.toString() ?? "",
-      // "gender": selectedGender!,
-      // "dob": '2000-11-24T12:44:23.000Z',
+      "gender": selectedGender!.toLowerCase(),
+      "dob": "2000-11-24T12:44:23.000Z",
       'address': "Dhaka",
+      "bio":bioController.text.toString(),
     };
 
     try {
@@ -254,8 +271,10 @@ class SignUpController extends GetxController {
         Get.offAllNamed(AppRoutes.signIn);
       } else {
         Utils.errorSnackBar("Error ${response.statusCode}", response.message);
+        debugPrint("error is =>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>${response.message}");
       }
     } catch (e) {
+      debugPrint("error is =>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>${e.toString()}");
       Utils.errorSnackBar("Error", e.toString());
     } finally {
       isLoading = false;

@@ -5,7 +5,7 @@ import '../../data/model/notification_model.dart';
 import '../../repository/notification_repository.dart';
 class NotificationsController extends GetxController {
   List<NotificationModel> notifications = [];
-  int unreadCount = 1;
+  int unreadCount = 0;
 
   bool isLoading = false;
   bool isLoadingMore = false;
@@ -35,9 +35,11 @@ class NotificationsController extends GetxController {
     final response = await repository.getNotifications(page);
 
     if (response.notifications.isEmpty) {
-      hasNoData = true;
+      hasNoData = false;
+      update();
     } else {
       notifications.addAll(response.notifications);
+      update();
     }
 
     unreadCount = response.unreadCount;
