@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -14,11 +15,13 @@ import '../data/single_post_mode.dart';
 
 class EditPostControllers extends GetxController {
   final isLoading = false.obs;
-  String postId = ''; // ✅ Initialize as empty string
+  String postId = '';
 
   // Image handling
   final selectedImages = <File>[].obs;
   final existingImageUrls = <String>[].obs;
+  final removedImages = <String>[].obs; // ✅ Track removed images to send to API
+
   final descriptionController = TextEditingController();
   final selectedPricingOption = ''.obs;
   final selectedPriorityLevel = ''.obs;
@@ -31,7 +34,6 @@ class EditPostControllers extends GetxController {
 
   Rxn<SinglePostData> mySinglePost = Rxn<SinglePostData>();
 
-  // ✅ NEW: Initialize method to be called from screen
   void initialize(String id) {
     postId = id;
     debugPrint("🆔 Received Post ID in controller: $postId");
@@ -42,7 +44,6 @@ class EditPostControllers extends GetxController {
 
   void selectPricingOption(String option) {
     selectedPricingOption.value = option;
-    print('Selected: $option');
   }
 
   void selectGender(String gender) {
@@ -52,7 +53,6 @@ class EditPostControllers extends GetxController {
   Future<void> fetchMyPostsById(String? postId) async {
     try {
       isLoading.value = true;
-
       final url = "${ApiEndPoint.getSinglePost}$postId";
 
       ApiResponseModel response = await ApiService.get(
@@ -64,25 +64,15 @@ class EditPostControllers extends GetxController {
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        print("===============================${response.data}");
-
         final myPostModel = SinglePostModel.fromJson(
           response.data as Map<String, dynamic>,
         );
 
         mySinglePost.value = myPostModel.data;
-
         _populateFieldsWithPostData();
       }
     } catch (e) {
       debugPrint('Error fetching posts: $e');
-      Get.snackbar(
-        'Error',
-        'Failed to load posts',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
     } finally {
       isLoading.value = false;
     }
@@ -91,104 +81,100 @@ class EditPostControllers extends GetxController {
   void _populateFieldsWithPostData() {
     if (mySinglePost.value != null) {
       final post = mySinglePost.value!;
-
-      // Set description
       descriptionController.text = post.description ?? '';
-
-      // Set clicker type
       selectedPricingOption.value = post.clickerType ?? '';
-
-      // Set privacy
       selectedPriorityLevel.value = post.privacy ?? '';
 
-      // Set existing image URLs
       if (post.photos != null && post.photos!.isNotEmpty) {
         existingImageUrls.assignAll(post.photos!);
       }
 
-      // Update postId if needed
       if (post.id != null) {
         postId = post.id.toString();
       }
-
-      debugPrint('✅ Fields populated with post data');
-      debugPrint('Description: ${descriptionController.text}');
-      debugPrint('Clicker Type: ${selectedPricingOption.value}');
-      debugPrint('Privacy: ${selectedPriorityLevel.value}');
-      debugPrint('Existing Images: ${existingImageUrls.length}');
-      debugPrint('Post ID: $postId');
-
       update();
     }
   }
 
-  final MyPostController _myPostController = Get.put(MyPostController());
-
+  // ✅ Updated editPost using the multipartImage function
   Future<void> editPost() async {
     isLoading.value = true;
 
     try {
       final url = "${ApiEndPoint.updatePost}$postId";
 
+      // 1. Prepare text fields
       Map<String, String> body = {
         'description': descriptionController.text.trim(),
         'clickerType': selectedPricingOption.value,
         'privacy': selectedPriorityLevel.value.toLowerCase(),
+        // ✅ Format as JSON string: ["url1", "url2"]
+        'removedImages': jsonEncode(removedImages),
       };
 
-      var response = await ApiService.multipartUpdate(
+      // 2. Prepare files to upload
+      List<Map<String, dynamic>> files = [];
+      for (var file in selectedImages) {
+        files.add({
+          'name': 'image', // ✅ Matches "image" key in your screenshot
+          'image': file.path,
+        });
+      }
+
+      // 3. Request using multipartImage
+      var response = await ApiService.multipartImage(
         url,
+        method: "PATCH",
         body: body,
-        imagePath: selectedImages.isNotEmpty ? selectedImages.first.path : null,
-        imageName: "image",
+        files: files,
+        header: {
+          'Authorization': 'Bearer ${LocalStorage.token}',
+        },
       );
 
-      if (response.statusCode == 200) {
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        Utils.successSnackBar("Post Updated", "Successfully saved changes");
 
-        update();
+        // Use a generic refresh if PostController is available
+        try {
+         // Get.find<PostController>().fetchMyPosts();
+        } catch (_) {}
 
-        Utils.successSnackBar(
-          "Post Updated",
-          response.message,
-        );
-        selectedImages.clear();
+        removedImages.clear();
+        //selectedImages.clear();
         Get.back();
       } else {
-        Utils.errorSnackBar(response.statusCode, response.message);
+        Utils.errorSnackBar("Update Failed", response.message ?? "Error");
       }
     } catch (e) {
       Utils.errorSnackBar("Error", e.toString());
     } finally {
       isLoading.value = false;
+      update();
     }
-
-    update();
   }
 
   void removeImageAtIndex(int index) {
     if (index >= 0 && index < selectedImages.length) {
       selectedImages.removeAt(index);
-      Get.snackbar(
-        'Removed',
-        'Image removed successfully',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red.shade400,
-        colorText: Colors.white,
-        duration: const Duration(seconds: 2),
-      );
+      update();
     }
   }
 
   void removeExistingImageAtIndex(int index) {
     if (index >= 0 && index < existingImageUrls.length) {
+      // ✅ Add the URL to the removed list before removing from UI
+      removedImages.add(existingImageUrls[index]);
       existingImageUrls.removeAt(index);
+      update();
+
       Get.snackbar(
         'Removed',
-        'Existing image removed',
+        'Image marked for removal',
         snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red.shade400,
+        backgroundColor: Colors.orange,
         colorText: Colors.white,
-        duration: const Duration(seconds: 2),
+        duration: const Duration(seconds: 1),
       );
     }
   }
@@ -201,36 +187,16 @@ class EditPostControllers extends GetxController {
       );
 
       if (image != null) {
-        File file = File(image.path);
-        selectedImages.add(file);
-
-        Get.snackbar(
-          'Success',
-          'Image selected (${selectedImages.length})',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.green,
-          colorText: Colors.white,
-          duration: const Duration(seconds: 2),
-        );
+        selectedImages.add(File(image.path));
+        update();
       }
     } catch (e) {
-      Get.snackbar(
-        'Error',
-        'Failed to pick image: $e',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      debugPrint("Image Selection Error: $e");
     }
   }
 
-  Future<void> pickImageFromGallery() async {
-    await _pickImage(ImageSource.gallery);
-  }
-
-  Future<void> pickImageFromCamera() async {
-    await _pickImage(ImageSource.camera);
-  }
+  Future<void> pickImageFromGallery() async => await _pickImage(ImageSource.gallery);
+  Future<void> pickImageFromCamera() async => await _pickImage(ImageSource.camera);
 
   @override
   void onClose() {

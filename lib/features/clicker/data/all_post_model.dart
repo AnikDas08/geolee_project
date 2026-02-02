@@ -12,7 +12,7 @@ class AllPostModel {
     required this.data,
   });
 
-  factory AllPostModel.fromJson(Map<String, dynamic> json) => AllPostModel(
+  factory AllPostModel.fromJson(Map<dynamic, dynamic> json) => AllPostModel(
     success: json["success"],
     message: json["message"],
     pagination: Pagination.fromJson(json["pagination"]),

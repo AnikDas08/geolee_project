@@ -59,6 +59,8 @@ class ClickerController extends GetxController {
   var isLoading = false.obs;
 
   /// User posts
+  Rxn<SingleUserByIdData> userData = Rxn<SingleUserByIdData>();
+
   var userPosts = <PostData>[].obs;
   var isUserLoading = false.obs;
   var isSendFriendRequest = false.obs;
@@ -68,10 +70,10 @@ class ClickerController extends GetxController {
     super.onInit();
     getAllPosts();
 
-    // Add search listener
     searchController.addListener(_onSearchChanged);
   }
 
+  //================================onClose
   @override
   void onClose() {
     searchController.removeListener(_onSearchChanged);
@@ -79,13 +81,13 @@ class ClickerController extends GetxController {
     super.onClose();
   }
 
-  // Search method
+  // ================================Search method
   void _onSearchChanged() {
     searchText.value = searchController.text;
     _filterPosts();
   }
 
-  // Combined filter method (search + clicker type)
+  // =================================Combined filter method (search + clicker type)
   void _filterPosts() {
     List<PostData> filtered = posts;
 
@@ -131,10 +133,10 @@ class ClickerController extends GetxController {
       );
 
       if (response.statusCode == 200) {
-        final model =
-        AllPostModel.fromJson(response.data as Map<String, dynamic>);
-        posts.assignAll(model.data);
-        _filterPosts(); // Apply current filters
+        final responseData =
+        AllPostModel.fromJson(response.data);
+        posts.assignAll(responseData.data);
+        _filterPosts();
       } else {
         Utils.errorSnackBar("Error", response.message ?? "Something went wrong");
       }
@@ -150,7 +152,7 @@ class ClickerController extends GetxController {
     try {
       isUserLoading.value = true;
 
-      final url = "${ApiEndPoint.getUserById}$userId"; // e.g. /posts/user/:id
+      final url = "${ApiEndPoint.getUserById}$userId";
       var response = await ApiService.get(
         header: {
           "Authorization": "Bearer ${LocalStorage.token}",
@@ -161,8 +163,8 @@ class ClickerController extends GetxController {
 
       if (response.statusCode == 200) {
         final allPosts =
-        AllPostModel.fromJson(response.data as Map<String, dynamic>);
-        userPosts.assignAll(allPosts.data);
+        AllPostModel.fromJson(response.data);
+        userPosts.addAll(allPosts.data);
       } else {
         Utils.errorSnackBar("Error", response.message ?? "Something went wrong");
       }
@@ -173,7 +175,7 @@ class ClickerController extends GetxController {
     }
   }
 
-  Rxn<SingleUserByIdData> userData = Rxn<SingleUserByIdData>();
+
 
   Future<void> getUserById(String userId) async {
     try {
@@ -190,11 +192,11 @@ class ClickerController extends GetxController {
       );
 
       if (response.statusCode == 200) {
-        final model = SingleUserByIdModel.fromJson(
+        final responseData = SingleUserByIdModel.fromJson(
           response.data as Map<String, dynamic>,
         );
 
-        userData.value = model.data; // ✅ CORRECT
+        userData.value = responseData.data; // ✅ CORRECT
       } else {
         Utils.errorSnackBar(
           "Error",

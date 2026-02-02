@@ -88,7 +88,6 @@ class _HomeScreenState extends State<HomeScreen> {
                                 child: Stack(
                                   children: [
                                     GoogleMap(
-
                                       compassEnabled: true,
                                       mapType: MapType.satellite,
                                       initialCameraPosition: _kGooglePlex,
@@ -239,16 +238,14 @@ class _HomeScreenState extends State<HomeScreen> {
                                     Get.to(() => MyFriendScreen());
                                   },
                                 ),
-                                GetBuilder<MyFriendController>(
-                                  builder: (controller) {
-                                    return Item(
+
+                                   Item(
                                       imageSrc: AppIcons.friend,
-                                      title: 'Friend Request${controller.friendRequestCount}',
+                                      title: 'Friend Request',
                                       onTap: () {
                                         Get.to(() => FriendRequestScreen());
                                       },
-                                    );
-                                  }
+
                                 ),
                               ],
                             )

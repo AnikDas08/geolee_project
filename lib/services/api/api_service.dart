@@ -165,7 +165,6 @@ class ApiService {
         String? imagePath,
         bool skipAuth = false,
       }) async {
-
     final Map<String, String> safeHeader =
     header != null ? Map<String, String>.from(header) : {};
 
@@ -174,6 +173,7 @@ class ApiService {
 
     FormData formData = FormData();
 
+    // image
     if (imagePath != null && imagePath.isNotEmpty) {
       File file = File(imagePath);
       String extension = file.path.split('.').last.toLowerCase();
@@ -193,20 +193,20 @@ class ApiService {
       );
     }
 
+    // text fields
     safeBody.forEach((key, value) {
       formData.fields.add(MapEntry(key, value));
     });
 
-    safeHeader['Content-Type'] = "multipart/form-data";
 
     return _request(
       url,
       method,
       body: formData,
       header: safeHeader,
-
     );
   }
+
 
   static ApiResponseModel _handleDioException(DioException error) {
     switch (error.type) {

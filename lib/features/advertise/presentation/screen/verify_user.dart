@@ -4,6 +4,8 @@ import 'package:get/get.dart';
 import 'package:giolee78/component/image/common_image.dart';
 import 'package:giolee78/component/pop_up/common_pop_menu.dart';
 import 'package:giolee78/config/route/app_routes.dart';
+import 'package:giolee78/features/dashboard/presentation/screen/dashboard_screen.dart';
+import 'package:giolee78/features/home/presentation/screen/home_nav_screen.dart';
 import 'package:giolee78/services/storage/storage_keys.dart';
 import 'package:giolee78/services/storage/storage_services.dart';
 import 'package:giolee78/utils/constants/app_icons.dart';
@@ -165,7 +167,7 @@ class _VerifyUserState extends State<VerifyUser> {
                               LocalStorageKeys.myRole,
                               LocalStorage.myRole,
                             );
-                            Get.offAllNamed(AppRoutes.homeNav);
+                            Get.off(HomeNav());
                           },
                           buttonTitle: 'Go to Dashboard',
                         );

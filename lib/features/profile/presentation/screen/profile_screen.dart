@@ -170,7 +170,7 @@ class ProfileScreen extends StatelessWidget {
                     SizedBox(height: 20.h,),
                     if (LocalStorage.myRole != UserType.advertise.name)
                     CommonButton(
-                        titleText: "Adverise with Us",
+                        titleText: "Advertise with Us",
                       onTap: (){
                           Get.toNamed(
                               AppRoutes.serviceProviderInfo
@@ -188,7 +188,8 @@ class ProfileScreen extends StatelessWidget {
   }
 }
 
-// Logout Dialog
+
+
 void _showLogoutDialog() {
   Get.dialog(
     AlertDialog(

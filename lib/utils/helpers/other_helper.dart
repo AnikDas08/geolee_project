@@ -31,13 +31,14 @@ class OtherHelper {
   static String? passwordValidator(value) {
     if (value == null || value.isEmpty) {
       return AppString.thisFieldIsRequired;
-    } else if (value.friendRequestCount < 8) {
+    } else if (value.length < 8) {
       return AppString.passwordMustBeeEightCharacters;
     } else if (!passRegExp.hasMatch(value)) {
       return AppString.passwordMustBeeEightCharacters;
     }
     return null;
   }
+
 
   static String? confirmPasswordValidator(
     value,

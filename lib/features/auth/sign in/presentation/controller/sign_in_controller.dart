@@ -72,6 +72,7 @@ class SignInController extends GetxController {
         emailController.clear();
         passwordController.clear();
       } else {
+        Utils.successSnackBar('Error', "${response.message}");
         Get.snackbar(response.statusCode.toString(), response.message);
       }
     } catch (e) {

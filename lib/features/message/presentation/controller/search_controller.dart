@@ -39,7 +39,6 @@ class SearchFriendController extends GetxController {
 
   /// Send friend request
   void sendFriendRequest(String userId) {
-    // Find the user and update their friend status
     final index = users.indexWhere((user) => user.id == userId);
     if (index != -1) {
       users[index] = UserModel(
