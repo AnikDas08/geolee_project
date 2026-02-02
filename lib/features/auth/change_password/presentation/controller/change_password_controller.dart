@@ -39,6 +39,7 @@ class ChangePasswordController extends GetxController {
         currentPasswordController.clear();
         newPasswordController.clear();
         confirmPasswordController.clear();
+        Get.back();
       } else {
         Get.snackbar(response.statusCode.toString(), response.message);
       }

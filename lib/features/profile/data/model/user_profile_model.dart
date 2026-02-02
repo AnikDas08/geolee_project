@@ -1,162 +1,137 @@
+// To parse this JSON data, do
+//
+//     final userProfileModel = userProfileModelFromJson(jsonString);
+
+import 'dart:convert';
+
+UserProfileModel userProfileModelFromJson(String str) => UserProfileModel.fromJson(json.decode(str));
+
+String userProfileModelToJson(UserProfileModel data) => json.encode(data.toJson());
+
 class UserProfileModel {
-  final bool? success;
-  final String? message;
-  final UserProfileData? data;
+  bool success;
+  String message;
+  Data data;
 
   UserProfileModel({
-    this.success,
-    this.message,
-    this.data,
+    required this.success,
+    required this.message,
+    required this.data,
   });
 
-  factory UserProfileModel.fromJson(Map<String, dynamic> json) {
-    return UserProfileModel(
-      success: json['success'] as bool?,
-      message: json['message'] as String?,
-      data: json['data'] != null
-          ? UserProfileData.fromJson(json['data'] as Map<String, dynamic>)
-          : null,
-    );
-  }
+  factory UserProfileModel.fromJson(Map<String, dynamic> json) => UserProfileModel(
+    success: json["success"],
+    message: json["message"],
+    data: Data.fromJson(json["data"]),
+  );
 
-  Map<String, dynamic> toJson() {
-    return {
-      'success': success,
-      'message': message,
-      'data': data?.toJson(),
-    };
-  }
+  Map<String, dynamic> toJson() => {
+    "success": success,
+    "message": message,
+    "data": data.toJson(),
+  };
 }
 
-class UserProfileData {
-  final AccountInformation? accountInformation;
-  final double? balance;
-  final String? id;
-  final String? name;
-  final String? role;
-  final String? email;
-  final String? image;
-  final bool? verified;
-  final String? birthDate;
-  final String? gender;
-  final List<String>? skill;
-  final double? lat;
-  final double? log;
-  final String? experience;
-  final String? bio;
-  final bool? isDelete;
-  final bool? isBan;
-  final String? createdAt;
-  final String? updatedAt;
-  final int? v;
+class Data {
+  Location location;
+  String id;
+  String name;
+  String role;
+  String email;
+  String image;
+  String gender;
+  DateTime dob;
+  String bio;
+  String privacy;
+  String address;
+  String status;
+  bool isOnline;
+  bool isVerified;
+  bool isDeleted;
+  DateTime createdAt;
+  DateTime updatedAt;
+  int v;
 
-  UserProfileData({
-    this.accountInformation,
-    this.balance,
-    this.id,
-    this.name,
-    this.role,
-    this.email,
-    this.image,
-    this.verified,
-    this.birthDate,
-    this.gender,
-    this.skill,
-    this.lat,
-    this.log,
-    this.experience,
-    this.bio,
-    this.isDelete,
-    this.isBan,
-    this.createdAt,
-    this.updatedAt,
-    this.v,
+  Data({
+    required this.location,
+    required this.id,
+    required this.name,
+    required this.role,
+    required this.email,
+    required this.image,
+    required this.gender,
+    required this.dob,
+    required this.bio,
+    required this.privacy,
+    required this.address,
+    required this.status,
+    required this.isOnline,
+    required this.isVerified,
+    required this.isDeleted,
+    required this.createdAt,
+    required this.updatedAt,
+    required this.v,
   });
 
-  factory UserProfileData.fromJson(Map<String, dynamic> json) {
-    return UserProfileData(
-      accountInformation: json['accountInformation'] != null
-          ? AccountInformation.fromJson(
-              json['accountInformation'] as Map<String, dynamic>)
-          : null,
-      balance: json['balance'] != null
-          ? (json['balance'] is int
-              ? (json['balance'] as int).toDouble()
-              : json['balance'] as double?)
-          : null,
-      id: json['_id'] as String?,
-      name: json['name'] as String?,
-      role: json['role'] as String?,
-      email: json['email'] as String?,
-      image: json['image'] as String?,
-      verified: json['verified'] as bool?,
-      birthDate: json['birthDate'] as String?,
-      gender: json['gender'] as String?,
-      skill: json['skill'] != null
-          ? List<String>.from(json['skill'] as List)
-          : null,
-      lat: json['lat'] != null
-          ? (json['lat'] is int
-              ? (json['lat'] as int).toDouble()
-              : json['lat'] as double?)
-          : null,
-      log: json['log'] != null
-          ? (json['log'] is int
-              ? (json['log'] as int).toDouble()
-              : json['log'] as double?)
-          : null,
-      experience: json['experience'] as String?,
-      bio: json['bio'] as String?,
-      isDelete: json['isDelete'] as bool?,
-      isBan: json['isBan'] as bool?,
-      createdAt: json['createdAt'] as String?,
-      updatedAt: json['updatedAt'] as String?,
-      v: json['__v'] as int?,
-    );
-  }
+  factory Data.fromJson(Map<String, dynamic> json) => Data(
+    location: Location.fromJson(json["location"]),
+    id: json["_id"],
+    name: json["name"],
+    role: json["role"],
+    email: json["email"],
+    image: json["image"],
+    gender: json["gender"],
+    dob: DateTime.parse(json["dob"]),
+    bio: json["bio"],
+    privacy: json["privacy"],
+    address: json["address"],
+    status: json["status"],
+    isOnline: json["isOnline"],
+    isVerified: json["isVerified"],
+    isDeleted: json["isDeleted"],
+    createdAt: DateTime.parse(json["createdAt"]),
+    updatedAt: DateTime.parse(json["updatedAt"]),
+    v: json["__v"],
+  );
 
-  Map<String, dynamic> toJson() {
-    return {
-      'accountInformation': accountInformation?.toJson(),
-      'balance': balance,
-      '_id': id,
-      'name': name,
-      'role': role,
-      'email': email,
-      'image': image,
-      'verified': verified,
-      'birthDate': birthDate,
-      'gender': gender,
-      'skill': skill,
-      'lat': lat,
-      'log': log,
-      'experience': experience,
-      'bio': bio,
-      'isDelete': isDelete,
-      'isBan': isBan,
-      'createdAt': createdAt,
-      'updatedAt': updatedAt,
-      '__v': v,
-    };
-  }
+  Map<String, dynamic> toJson() => {
+    "location": location.toJson(),
+    "_id": id,
+    "name": name,
+    "role": role,
+    "email": email,
+    "image": image,
+    "gender": gender,
+    "dob": dob.toIso8601String(),
+    "bio": bio,
+    "privacy": privacy,
+    "address": address,
+    "status": status,
+    "isOnline": isOnline,
+    "isVerified": isVerified,
+    "isDeleted": isDeleted,
+    "createdAt": createdAt.toIso8601String(),
+    "updatedAt": updatedAt.toIso8601String(),
+    "__v": v,
+  };
 }
 
-class AccountInformation {
-  final bool? status;
+class Location {
+  String type;
+  List<int> coordinates;
 
-  AccountInformation({
-    this.status,
+  Location({
+    required this.type,
+    required this.coordinates,
   });
 
-  factory AccountInformation.fromJson(Map<String, dynamic> json) {
-    return AccountInformation(
-      status: json['status'] as bool?,
-    );
-  }
+  factory Location.fromJson(Map<String, dynamic> json) => Location(
+    type: json["type"],
+    coordinates: List<int>.from(json["coordinates"].map((x) => x)),
+  );
 
-  Map<String, dynamic> toJson() {
-    return {
-      'status': status,
-    };
-  }
+  Map<String, dynamic> toJson() => {
+    "type": type,
+    "coordinates": List<dynamic>.from(coordinates.map((x) => x)),
+  };
 }

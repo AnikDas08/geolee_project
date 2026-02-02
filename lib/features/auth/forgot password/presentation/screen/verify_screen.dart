@@ -102,22 +102,22 @@ class _VerifyScreenState extends State<VerifyScreen> {
                     ),
                   ),
 
-                  /*GestureDetector(
-                    onTap: controller.time == '00:00'
-                        ? () {
-                            controller.startTimer();
-                            controller.forgotPasswordRepo();
-                          }
-                        : () {},
-                    child: CommonText(
-                      text: controller.time == '00:00'
-                          ? AppString.resendCode
-                          : "${AppString.resendCodeIn} ${controller.time} ${AppString.minute}",
-                      top: 10,
-                      bottom: 20,
-                      fontSize: 16,
-                    ),
-                  ),*/
+                  // GestureDetector(
+                  //   onTap: controller.time == '00:00'
+                  //       ? () {
+                  //           controller.startTimer();
+                  //           controller.forgotPasswordRepo();
+                  //         }
+                  //       : () {},
+                  //   child: CommonText(
+                  //     text: controller.time == '00:00'
+                  //         ? AppString.resendCode
+                  //         : "${AppString.resendCodeIn} ${controller.time} ${AppString.minute}",
+                  //     top: 10,
+                  //     bottom: 20,
+                  //     fontSize: 16,
+                  //   ),
+                  // ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [

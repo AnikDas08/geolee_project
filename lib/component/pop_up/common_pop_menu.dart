@@ -158,6 +158,13 @@ deletePopUp({
   bool isLoading = false,
 }) {
   final formKey = GlobalKey<FormState>();
+  final RxBool isDeleteEnabled = false.obs; // Observable for button state
+
+  // Add listener to check text in real-time
+  controller.addListener(() {
+    isDeleteEnabled.value = controller.text == "deleteAccount";
+  });
+
   showDialog(
     context: Get.context!,
     builder: (context) {
@@ -184,7 +191,9 @@ deletePopUp({
                   ),
                 ),
                 CommonText(
+
                   text: AppString.deleteDetails,
+
                   fontSize: 16.sp,
                   fontWeight: FontWeight.w500,
                   color: AppColors.black,
@@ -192,13 +201,6 @@ deletePopUp({
                   bottom: 20.h,
                 ),
                 const SizedBox(height: 16),
-                CommonText(
-                  text: AppString.password,
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.black,
-                  bottom: 10.h,
-                ),
                 CommonTextField(
                   controller: controller,
                   labelText: AppString.enterYouPassword,
@@ -218,11 +220,15 @@ deletePopUp({
                     buttonColor: AppColors.transparent,
                     buttonRadius: 4.r,
                     buttonHeight: 48.h,
-                    onTap: AnimationPopUpState.closeDialog,
+                    onTap: () {
+                      controller.clear(); // Clear controller on cancel
+                      AnimationPopUpState.closeDialog();
+                    },
                   ),
                 ),
                 SizedBox(width: 16.w),
-                Expanded(
+                Obx(() => isDeleteEnabled.value
+                    ? Expanded(
                   child: CommonButton(
                     titleText: AppString.delete,
                     titleColor: AppColors.white,
@@ -231,18 +237,34 @@ deletePopUp({
                     onTap: () async {
                       if (formKey.currentState!.validate()) {
                         await AnimationPopUpState.closeDialog();
+                        controller.clear(); // Clear controller after delete
                         onTap();
                       }
                     },
                   ),
-                ),
+                )
+                    : Expanded(
+                  child: Opacity(
+                    opacity: 0.5, // Make it look disabled
+                    child: CommonButton(
+                      titleText: AppString.delete,
+                      titleColor: AppColors.white,
+                      buttonRadius: 4.r,
+                      buttonHeight: 48.h,
+                      onTap: () {}, // No action when disabled
+                    ),
+                  ),
+                )),
               ],
             ),
           ],
         ),
       );
     },
-  );
+  ).then((_) {
+    // Clean up listener when dialog closes
+    controller.clear();
+  });
 }
 
 logOutPopUps() {

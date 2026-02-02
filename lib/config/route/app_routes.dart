@@ -97,10 +97,7 @@ class AppRoutes {
     GetPage(name: serviceProviderInfo, page: () => ServiceProviderInfoScreen()),
     GetPage(name: editProfileScreen, page: () => EditProfileScreen()),
     GetPage(name: editPost, page: () => EditPostScreen()),
-    GetPage(
-      name: stripeWebViewScreen,
-      page: () => StripeWebViewPage(checkoutUrl: Get.arguments),
-    ),
+    GetPage(name: stripeWebViewScreen, page: () => StripeWebViewPage(checkoutUrl: Get.arguments),),
     GetPage(name: searchScreen, page: () => SearchFriendScreen()),
     GetPage(name: groupSetting, page: () => GroupSettingsScreen()),
     GetPage(name: addMemberScreen, page: () => AddMemberScreen()),

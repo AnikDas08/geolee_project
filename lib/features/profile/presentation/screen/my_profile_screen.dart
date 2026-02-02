@@ -25,7 +25,7 @@ class MyProfileScreen extends StatelessWidget {
             backgroundColor: AppColors.background,
             elevation: 0,
             leading: GestureDetector(
-              onTap: (){
+              onTap: () {
                 Navigator.pop(context);
               },
               child: Container(
@@ -41,7 +41,13 @@ class MyProfileScreen extends StatelessWidget {
             leadingWidth: 50.w,
           ),
           body: SafeArea(
-            child: SingleChildScrollView(
+            child: controller.isLoading
+                ? Center(
+              child: CircularProgressIndicator(
+                color: AppColors.primaryColor,
+              ),
+            )
+                : SingleChildScrollView(
               child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: 20.w),
                 child: Column(
@@ -107,36 +113,38 @@ class MyProfileScreen extends StatelessWidget {
       child: ClipOval(
         child: controller.userImage.isNotEmpty
             ? CommonImage(
-                imageSrc: ApiEndPoint.imageUrl + LocalStorage.myImage,
-                width: 120.w,
-                height: 120.h,
-                fill: BoxFit.cover,
-              )
+          imageSrc: ApiEndPoint.imageUrl + controller.userImage,
+          width: 120.w,
+          height: 120.h,
+          fill: BoxFit.cover,
+        )
             : CommonImage(
-                imageSrc: AppImages.profile,
-                width: 120.w,
-                height: 120.h,
-                fill: BoxFit.cover,
-              ),
+          imageSrc: AppImages.profile,
+          width: 120.w,
+          height: 120.h,
+          fill: BoxFit.cover,
+        ),
       ),
     );
   }
 
-  /// About Section Widget
+  /// About Section Widget - Fixed to show label and content separately
   Widget _buildAboutSection(MyProfileController controller) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // Label
         CommonText(
-          text: 'Bio',
+          text: 'About',
           fontSize: 16.sp,
           fontWeight: FontWeight.w600,
           color: AppColors.black,
           textAlign: TextAlign.start,
         ),
         8.height,
+        // Content (bio)
         CommonText(
-          text: controller.about,
+          text: controller.bio,
           fontSize: 14.sp,
           fontWeight: FontWeight.w400,
           color: AppColors.secondaryText,
@@ -151,13 +159,14 @@ class MyProfileScreen extends StatelessWidget {
   Widget _buildProfileDetails(MyProfileController controller) {
     return Column(
       children: [
+        // Uncomment if mobile is available in the API
         // _buildDetailRow('Mobile', controller.mobile),
-        16.height,
+        // 16.height,
         _buildDetailRow('E-mail', controller.userEmail),
         16.height,
-        _buildDetailRow('Date o\' Birth', '25 Years'),
+        _buildDetailRow('Date of Birth', controller.dateOfBirth),
         16.height,
-        _buildDetailRow('Gender', 'Male'),
+        _buildDetailRow('Gender', controller.gender),
       ],
     );
   }
@@ -176,7 +185,7 @@ class MyProfileScreen extends StatelessWidget {
         ),
         Flexible(
           child: CommonText(
-            text: value,
+            text: value.isNotEmpty ? value : 'Not Set',
             fontSize: 14.sp,
             fontWeight: FontWeight.w400,
             color: AppColors.secondaryText,

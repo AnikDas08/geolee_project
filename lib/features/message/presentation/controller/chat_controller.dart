@@ -283,8 +283,8 @@ class ChatController extends GetxController {
 
   @override
   void onClose() {
-    searchController.dispose();
-    scrollController.dispose();
+    // searchController.dispose();
+    // scrollController.dispose();
     super.onClose();
   }
 }

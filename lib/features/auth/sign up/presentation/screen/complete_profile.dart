@@ -123,7 +123,7 @@ class _CompleteProfileState extends State<CompleteProfile> {
                 bottom: 8,
               ),
               CommonTextField(
-                controller: controller.dateController,
+                controller: controller.bioController,
                 hintText:
                     'Type...',
                 fillColor: AppColors.white,

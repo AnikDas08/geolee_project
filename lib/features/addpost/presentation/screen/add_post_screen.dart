@@ -55,7 +55,7 @@ class AddPostScreen extends StatelessWidget {
                   ),
                   SizedBox(height: 5.h),
                   _buildTextField(
-                    controller: controller.discriptions,
+                    controller: controller.description,
                     hintText: "About The Role...",
                     maxLines: 5,
                   ),
@@ -448,6 +448,9 @@ class AddPostScreen extends StatelessWidget {
           Expanded(
             child: DropdownButtonHideUnderline(
               child: DropdownButton<String>(
+                dropdownColor: Colors.white,
+                borderRadius: BorderRadius.circular(4.r),
+
                 value: value,
                 hint: Text(
                   hint,

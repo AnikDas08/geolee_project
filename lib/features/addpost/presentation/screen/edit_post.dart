@@ -6,160 +6,222 @@ import 'package:giolee78/component/app_bar/custom_appbar.dart';
 import 'package:giolee78/component/button/common_button.dart';
 import 'package:giolee78/component/image/common_image.dart';
 import 'package:giolee78/component/text/common_text.dart';
+import 'package:giolee78/config/api/api_end_point.dart';
 import 'package:giolee78/features/addpost/presentation/controller/edit_post_controller.dart';
 import 'package:giolee78/utils/constants/app_colors.dart';
 import 'package:giolee78/utils/constants/app_icons.dart';
 import 'dart:io';
 
-class EditPost extends StatelessWidget {
-  EditPost({super.key});
-  final EditPostControllers controller = Get.put(EditPostControllers());
+class EditPost extends StatefulWidget {
+  final String? postId;
+  const EditPost({super.key, this.postId});
+
+  @override
+  State<EditPost> createState() => _EditPostState();
+}
+
+class _EditPostState extends State<EditPost> {
+  final EditPostControllers editPostControllers = Get.put(
+    EditPostControllers(),
+  );
+
+  @override
+  void initState() {
+    super.initState();
+    debugPrint("📌 Post ID from widget: ${widget.postId}");
+
+    // ✅ Initialize controller with postId after widget is ready
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (widget.postId != null && widget.postId!.isNotEmpty) {
+        editPostControllers.initialize(widget.postId!);
+      } else {
+        Get.snackbar(
+          'Error',
+          'Post ID is missing',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: SingleChildScrollView(
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                CustomAppBar(title: "Edit Post"),
-                SizedBox(height: 20.h),
+    return GetBuilder<EditPostControllers>(
+      builder: (controller) {
+        return Scaffold(
+          backgroundColor: AppColors.background,
+          body: Obx(() {
+            // Show loading while fetching post data
+            if (controller.isLoading.value && controller.mySinglePost.value == null) {
+              return const Center(child: CircularProgressIndicator());
+            }
 
-                // Upload Image Section
-                CommonText(
-                  text: "Upload Images",
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.w400,
-                ),
-                SizedBox(height: 10.h),
-                Obx(() => _buildImageUploadSection(context)),
-                SizedBox(height: 20.h),
-
-                // Description
-                CommonText(
-                  text: "Description",
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.w400,
-                ),
-                SizedBox(height: 5.h),
-                _buildTextField(
-                  controller: controller.descriptionController,
-                  hintText: "About The Role...",
-                  maxLines: 5,
-                ),
-                SizedBox(height: 16.h),
-
-                // ✅ FIXED: Pricing / Fee Options with proper layout
-                CommonText(
-                  text: "Select Clicker",
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.w400,
-                ),
-                SizedBox(height: 6.h),
-                Obx(
-                      () => Column(
+            return SingleChildScrollView(
+              child: SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // First Row
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _buildPricingOption(
-                              title: "Great Vibes",
-                              isSelected: controller.selectedPricingOption.value == 'Great Vibes',
-                              onTap: () => controller.selectPricingOption('Great Vibes'),
+                      CustomAppBar(title: "Edit Post"),
+                      SizedBox(height: 20.h),
+
+                      // Upload Image Section
+                      CommonText(
+                        text: "Upload Images",
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w400,
+                      ),
+                      SizedBox(height: 10.h),
+                      Obx(() => _buildImageUploadSection(context)),
+                      SizedBox(height: 20.h),
+
+                      // Description
+                      CommonText(
+                        text: "Description",
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w400,
+                      ),
+                      SizedBox(height: 5.h),
+                      _buildTextField(
+                        controller: controller.descriptionController,
+                        hintText: "About The Role...",
+                        maxLines: 5,
+                      ),
+                      SizedBox(height: 16.h),
+
+                      // Select Clicker
+                      CommonText(
+                        text: "Select Clicker",
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w400,
+                      ),
+                      SizedBox(height: 6.h),
+                      Obx(
+                            () => Column(
+                          children: [
+                            // First Row
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: _buildPricingOption(
+                                    title: "Great Vibes",
+                                    isSelected: controller
+                                        .selectedPricingOption.value ==
+                                        'Great Vibes',
+                                    onTap: () => controller.selectPricingOption(
+                                      'Great Vibes',
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(width: 8.w),
+                                Expanded(
+                                  child: _buildPricingOption(
+                                    title: "Off Vibes",
+                                    isSelected: controller
+                                        .selectedPricingOption.value ==
+                                        'Off Vibes',
+                                    onTap: () => controller.selectPricingOption(
+                                      'Off Vibes',
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
-                          ),
-                          SizedBox(width: 8.w),
-                          Expanded(
-                            child: _buildPricingOption(
-                              title: "Off Vibes",
-                              isSelected: controller.selectedPricingOption.value == 'Off Vibes',
-                              onTap: () => controller.selectPricingOption('Off Vibes'),
+                            SizedBox(height: 8.h),
+                            // Second Row
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: _buildPricingOption(
+                                    title: "Charming Gentleman",
+                                    isSelected: controller
+                                        .selectedPricingOption.value ==
+                                        'Charming Gentleman',
+                                    onTap: () => controller.selectPricingOption(
+                                      'Charming Gentleman',
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(width: 8.w),
+                                Expanded(
+                                  child: _buildPricingOption(
+                                    title: "Lovely Lady",
+                                    isSelected: controller
+                                        .selectedPricingOption.value ==
+                                        'Lovely Lady',
+                                    onTap: () => controller.selectPricingOption(
+                                      'Lovely Lady',
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: 16.h),
+
+                      // Privacy
+                      CommonText(
+                        text: "Privacy",
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w600,
                       ),
                       SizedBox(height: 8.h),
-                      // Second Row
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _buildPricingOption(
-                              title: "Charming Gentleman",
-                              isSelected: controller.selectedPricingOption.value == 'Charming Gentleman',
-                              onTap: () => controller.selectPricingOption('Charming Gentleman'),
-                            ),
-                          ),
-                          SizedBox(width: 8.w),
-                          Expanded(
-                            child: _buildPricingOption(
-                              title: "Lovely Lady",
-                              isSelected: controller.selectedPricingOption.value == 'Lovely Lady',
-                              onTap: () => controller.selectPricingOption('Lovely Lady'),
-                            ),
-                          ),
-                        ],
+                      Obx(
+                            () => _buildDropdown(
+                          value: controller.selectedPriorityLevel.value.isEmpty
+                              ? null
+                              : controller.selectedPriorityLevel.value,
+                          hint: "Select Privacy",
+                          items: controller.priorityLevels,
+                          onChanged: (value) {
+                            controller.selectedPriorityLevel.value = value!;
+                          },
+                        ),
                       ),
+                      SizedBox(height: 32.h),
+
+                      // Update Button
+                      Obx(() {
+                        return CommonButton(
+                          titleText: controller.isLoading.value
+                              ? "Updating..."
+                              : "Update Post",
+                          buttonColor: AppColors.primaryColor,
+                          buttonRadius: 8,
+                          onTap: () {
+                            controller.editPost();
+                          },
+                        );
+                      }),
+                      SizedBox(height: 40.h),
                     ],
                   ),
                 ),
-//
-                SizedBox(height: 16.h),
-
-                // Priority Level
-                CommonText(
-                  text: "Privacy",
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.w600,
-                ),
-                SizedBox(height: 8.h),
-                Obx(
-                      () => _buildDropdown(
-                    value: controller.selectedPriorityLevel.value.isEmpty
-                        ? null
-                        : controller.selectedPriorityLevel.value,
-                    hint: "Select Privacy",
-                    items: controller.priorityLevels,
-                    onChanged: (value) {
-                      controller.selectedPriorityLevel.value = value!;
-                    },
-                  ),
-                ),
-                SizedBox(height: 32.h),
-
-                // Post Button
-                Obx(() {
-                  return CommonButton(
-                    titleText: controller.isLoading.value ? "Posting..." : "Post",
-                    buttonColor: AppColors.primaryColor,
-                    buttonRadius: 8,
-                    onTap: () => controller.createPost(),
-                  );
-                }),
-                SizedBox(height: 40.h),
-              ],
-            ),
-          ),
-        ),
-      ),
+              ),
+            );
+          }),
+        );
+      },
     );
   }
 
-  // Image Upload Section
   Widget _buildImageUploadSection(BuildContext context) {
-    final images = controller.selectedImages;
+    final newImages = editPostControllers.selectedImages;
+    final existingImages = editPostControllers.existingImageUrls;
+    final totalImages = existingImages.length + newImages.length;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Grid of Selected Images
-        if (images.isNotEmpty) _buildSelectedImagesGrid(context, images),
+        // Grid of Images (Existing + New)
+        if (totalImages > 0) _buildAllImagesGrid(context),
 
-        SizedBox(height: images.isNotEmpty ? 16.h : 0),
+        SizedBox(height: totalImages > 0 ? 16.h : 0),
 
         // Add Image Buttons
         Row(
@@ -168,7 +230,7 @@ class EditPost extends StatelessWidget {
               child: _buildImageOptionButton(
                 title: "Gallery",
                 imageSrc: AppIcons.upload2,
-                onTap: () => controller.pickImageFromGallery(),
+                onTap: () => editPostControllers.pickImageFromGallery(),
               ),
             ),
             SizedBox(width: 16.w),
@@ -176,7 +238,7 @@ class EditPost extends StatelessWidget {
               child: _buildImageOptionButton(
                 title: "Camera",
                 imageSrc: AppIcons.camera,
-                onTap: () => controller.pickImageFromCamera(),
+                onTap: () => editPostControllers.pickImageFromCamera(),
               ),
             ),
           ],
@@ -185,15 +247,16 @@ class EditPost extends StatelessWidget {
     );
   }
 
-  // Grid View for Selected Images
-  Widget _buildSelectedImagesGrid(BuildContext context, List<File> images) {
-    int itemCount = images.length;
+  Widget _buildAllImagesGrid(BuildContext context) {
+    final existingImages = editPostControllers.existingImageUrls;
+    final newImages = editPostControllers.selectedImages;
+    final totalImages = existingImages.length + newImages.length;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         CommonText(
-          text: "Selected: (${images.length})",
+          text: "Images: ($totalImages)",
           fontSize: 12.sp,
           fontWeight: FontWeight.w400,
           color: AppColors.textSecond,
@@ -202,7 +265,7 @@ class EditPost extends StatelessWidget {
         GridView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          itemCount: itemCount,
+          itemCount: totalImages,
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 4,
             crossAxisSpacing: 10.w,
@@ -210,13 +273,18 @@ class EditPost extends StatelessWidget {
             childAspectRatio: 1.0,
           ),
           itemBuilder: (context, index) {
-            if (index < images.length) {
-              return _buildImageThumbnail(
-                file: images[index],
-                onRemove: () => controller.removeImageAtIndex(index),
+            if (index < existingImages.length) {
+              return _buildExistingImageThumbnail(
+                imageUrl: existingImages[index],
+                onRemove: () =>
+                    editPostControllers.removeExistingImageAtIndex(index),
               );
             } else {
-              return _buildAddMoreSlot(context);
+              final newIndex = index - existingImages.length;
+              return _buildNewImageThumbnail(
+                file: newImages[newIndex],
+                onRemove: () => editPostControllers.removeImageAtIndex(newIndex),
+              );
             }
           },
         ),
@@ -224,73 +292,66 @@ class EditPost extends StatelessWidget {
     );
   }
 
-  // Add More slot
-  Widget _buildAddMoreSlot(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        Get.bottomSheet(
-          Container(
-            padding: EdgeInsets.all(20.w),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(20.r),
-                topRight: Radius.circular(20.r),
+  Widget _buildExistingImageThumbnail({
+    required String imageUrl,
+    required VoidCallback onRemove,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(8.r),
+        border: Border.all(color: Colors.grey[300]!, width: 1),
+      ),
+      child: Stack(
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8.r),
+            child: CommonImage(
+              imageSrc: "${ApiEndPoint.imageUrl}$imageUrl",
+              width: double.infinity,
+              height: double.infinity,
+              fill: BoxFit.cover,
+            ),
+          ),
+          Positioned(
+            top: 4.h,
+            right: 4.w,
+            child: GestureDetector(
+              onTap: onRemove,
+              child: Container(
+                padding: EdgeInsets.all(2.w),
+                decoration: BoxDecoration(
+                  color: Colors.red.withOpacity(0.8),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(Icons.close, color: Colors.white, size: 16.sp),
               ),
             ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                CommonText(
-                  text: "Add Image",
-                  fontSize: 18.sp,
+          ),
+          Positioned(
+            bottom: 4.h,
+            left: 4.w,
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
+              decoration: BoxDecoration(
+                color: Colors.blue.withOpacity(0.8),
+                borderRadius: BorderRadius.circular(4.r),
+              ),
+              child: Text(
+                'Old',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 8.sp,
                   fontWeight: FontWeight.bold,
                 ),
-                SizedBox(height: 20.h),
-                _buildImageOptionButton(
-                  title: "Upload from Gallery",
-                  imageSrc: AppIcons.upload2,
-                  onTap: () {
-                    controller.pickImageFromGallery();
-                    Get.back();
-                  },
-                ),
-                SizedBox(height: 10.h),
-                _buildImageOptionButton(
-                  title: "Take a Photo",
-                  imageSrc: AppIcons.camera,
-                  onTap: () {
-                    controller.pickImageFromCamera();
-                    Get.back();
-                  },
-                ),
-              ],
+              ),
             ),
           ),
-        );
-      },
-      child: DottedBorder(
-        borderType: BorderType.RRect,
-        radius: Radius.circular(8.r),
-        dashPattern: const [6, 3],
-        color: AppColors.textSecond,
-        strokeWidth: 1,
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.grey.shade100,
-            borderRadius: BorderRadius.circular(8.r),
-          ),
-          child: Center(
-            child: Icon(Icons.add_a_photo_outlined,
-                size: 28.sp, color: AppColors.textSecond),
-          ),
-        ),
+        ],
       ),
     );
   }
 
-  // Individual Image Thumbnail with Remove Button
-  Widget _buildImageThumbnail({
+  Widget _buildNewImageThumbnail({
     required File file,
     required VoidCallback onRemove,
   }) {
@@ -325,12 +386,30 @@ class EditPost extends StatelessWidget {
               ),
             ),
           ),
+          Positioned(
+            bottom: 4.h,
+            left: 4.w,
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
+              decoration: BoxDecoration(
+                color: Colors.green.withOpacity(0.8),
+                borderRadius: BorderRadius.circular(4.r),
+              ),
+              child: Text(
+                'New',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 8.sp,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );
   }
 
-  // Image Option Button
   Widget _buildImageOptionButton({
     required String title,
     required String imageSrc,
@@ -365,7 +444,6 @@ class EditPost extends StatelessWidget {
     );
   }
 
-  // Text Field
   Widget _buildTextField({
     required TextEditingController controller,
     required String hintText,
@@ -404,7 +482,6 @@ class EditPost extends StatelessWidget {
     );
   }
 
-  // Dropdown
   Widget _buildDropdown({
     required String? value,
     required String hint,
@@ -458,7 +535,6 @@ class EditPost extends StatelessWidget {
     );
   }
 
-  // Pricing Option Button
   Widget _buildPricingOption({
     required String title,
     required bool isSelected,

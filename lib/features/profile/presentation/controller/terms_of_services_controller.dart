@@ -1,44 +1,70 @@
+import 'package:dio/dio.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
-import 'package:giolee78/features/profile/data/model/html_model.dart';
-import '../../../../services/api/api_service.dart';
+import 'package:giolee78/features/profile/data/declaimer_response.dart';
+import 'package:giolee78/services/storage/storage_services.dart';
+
 import '../../../../config/api/api_end_point.dart';
 import '../../../../utils/app_utils.dart';
-import '../../../../utils/enum/enum.dart';
 
 class TermsOfServicesController extends GetxController {
-  /// Api status check here
-  Status status = Status.completed;
+  RxBool isLoading = true.obs;
+  RxString termsAndConditionHtmlContent = ''.obs;
+  RxString privacyPolicyHtmlContent = ''.obs;
 
-  ///  HTML model initialize here
-  HtmlModel data = HtmlModel.fromJson({});
-
-  /// Terms of services Controller instance create here
   static TermsOfServicesController get instance =>
       Get.put(TermsOfServicesController());
 
-  /// Controller on Init here
   @override
   void onInit() {
-    //geTermsOfServicesRepo();
     super.onInit();
+    loadTerms();
+    loadPrivacy();
   }
 
-  ///  Terms of services Api call here
-  geTermsOfServicesRepo() async {
-    status = Status.loading;
-    update();
+  Future<void> loadTerms() async {
+    try {
+      isLoading.value = true;
 
-    var response = await ApiService.get(ApiEndPoint.termsOfServices);
+      final response = await Dio().get(
+        ApiEndPoint.termsOfServices,
+        options: Options(
+          headers: {'Authorization': 'Bearer ${LocalStorage.token}'},
+        ),
+      );
 
-    if (response.statusCode == 200) {
-      data = HtmlModel.fromJson(response.data['data']);
-
-      status = Status.completed;
-      update();
-    } else {
-      Utils.errorSnackBar(response.statusCode, response.message);
-      status = Status.error;
-      update();
+      if (response.statusCode == 200) {
+        final model = DisclaimerResponse.fromJson(response.data);
+        termsAndConditionHtmlContent.value = model.content;
+      }
+    } catch (e) {
+      Utils.errorSnackBar("Error", e.toString());
+    } finally {
+      isLoading.value = false;
     }
   }
+
+
+  Future<void>loadPrivacy()async{
+    try{
+      isLoading.value=true;
+      final response=await Dio().get(
+        ApiEndPoint.privacyPolicies,
+        options: Options(
+          headers: {
+            "Authorization":"Bearer ${LocalStorage.token}"
+          }
+        )
+      );
+
+      if (response.statusCode == 200) {
+        final model = DisclaimerResponse.fromJson(response.data);
+        privacyPolicyHtmlContent.value = model.content;
+      }
+
+    }catch(e){
+      debugPrint(e.toString());
+    }
+  }
+
 }

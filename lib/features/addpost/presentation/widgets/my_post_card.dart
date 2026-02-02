@@ -3,7 +3,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:giolee78/component/image/common_image.dart';
 import 'package:giolee78/component/text/common_text.dart';
+import 'package:giolee78/config/route/app_routes.dart';
 import 'package:giolee78/features/addpost/presentation/screen/edit_post.dart';
+import 'package:giolee78/features/profile/presentation/controller/post_controller.dart';
 import 'package:giolee78/utils/constants/app_colors.dart';
 
 import 'confirm_delete_dialog.dart';
@@ -20,6 +22,13 @@ class MyPostCard extends StatelessWidget {
     required this.location,
     required this.postImage,
     required this.description,
+    this.isMyPost = false,
+    required this.clickerType,
+    required this.privacyImage,
+    required this.onTapProfile,
+    required this.onTapPhoto,
+    required this.isProfile,
+    required this.postId,
   });
 
   final String userName;
@@ -28,10 +37,16 @@ class MyPostCard extends StatelessWidget {
   final String location;
   final String postImage;
   final String description;
+  final bool isMyPost;
+  final String clickerType;
+  final String privacyImage;
+  final VoidCallback onTapProfile;
+  final VoidCallback onTapPhoto;
+  final bool isProfile;
+  final String postId;
 
   @override
   Widget build(BuildContext context) {
-    // NOTE: Assuming AppColors has necessary properties like 'white', 'black', 'secondaryText', 'textColorFirst'
     return Container(
       decoration: BoxDecoration(
         color: AppColors.white,
@@ -56,14 +71,20 @@ class MyPostCard extends StatelessWidget {
                 Expanded(
                   child: Row(
                     children: [
-                      CircleAvatar(
-                        radius: 18.r,
-                        backgroundColor: Colors.transparent,
-                        child: ClipOval(
-                          child: CommonImage(
-                            imageSrc: "assets/images/profile_image.png",
-                            size: 36.r,
-                            fill: BoxFit.cover,
+
+                      InkWell(
+                        onTap: isProfile ? onTapProfile : () {
+                          debugPrint('Already Profile');
+                        },
+                        child: CircleAvatar(
+                          radius: 18.r,
+                          backgroundColor: Colors.transparent,
+                          child: ClipOval(
+                            child: CommonImage(
+                              imageSrc: userAvatar,
+                              size: 36.r,
+                              fill: BoxFit.cover,
+                            ),
                           ),
                         ),
                       ),
@@ -111,16 +132,18 @@ class MyPostCard extends StatelessWidget {
                                   color: AppColors.secondaryText,
                                 ),
                                 SizedBox(width: 4.w),
-                                Expanded(
-                                  child: CommonText(
-                                    text: location,
-                                    fontSize: 11,
-                                    color: AppColors.secondaryText,
-                                    textAlign: TextAlign.start,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
+                                CommonText(
+                                  text: location,
+                                  fontSize: 11,
+                                  color: AppColors.secondaryText,
+                                  textAlign: TextAlign.start,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
                                 ),
+
+                                SizedBox(width: 8.w),
+
+                                CommonImage(imageSrc: privacyImage),
                               ],
                             ),
                           ],
@@ -131,8 +154,7 @@ class MyPostCard extends StatelessWidget {
                   ),
                 ),
 
-                // 🌟 REPLACED: Use PopupMenuButton instead of a static Icon
-                _buildPopupMenuButton(context),
+                if (isMyPost) _buildPopupMenuButton(context),
               ],
             ),
           ),
@@ -142,20 +164,23 @@ class MyPostCard extends StatelessWidget {
             padding: EdgeInsets.symmetric(horizontal: 12.w),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(10.r),
-              child: CommonImage(
-                imageSrc: postImage,
-                width: double.infinity,
-                height: 190.h,
-                fill: BoxFit.cover,
-                borderRadius: 10.r,
+              child: InkWell(
+                onTap: onTapPhoto,
+                child: CommonImage(
+                  imageSrc: postImage,
+                  width: double.infinity,
+                  height: 190.h,
+                  fill: BoxFit.cover,
+                  borderRadius: 10.r,
+                ),
               ),
             ),
           ),
-          
+
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12),
             child: CommonText(
-              text: "Great Vibes",
+              text: clickerType,
               fontSize: 12,
               textAlign: TextAlign.start,
               fontWeight: FontWeight.w800,
@@ -165,7 +190,6 @@ class MyPostCard extends StatelessWidget {
           /// Description
           Padding(
             padding: EdgeInsets.fromLTRB(12.w, 12.h, 12.w, 12.h),
-
             child: CommonText(
               text: description,
               fontSize: 12,
@@ -181,38 +205,43 @@ class MyPostCard extends StatelessWidget {
     );
   }
 
-  // 🌟 NEW: Helper method to build the PopupMenuButton
+  // 🌟 Helper method to build the PopupMenuButton
   Widget _buildPopupMenuButton(BuildContext context) {
+    final MyPostController myPostController = Get.put(MyPostController());
+
     return PopupMenuButton<PostAction>(
-      // Customize the icon that triggers the menu
+      color: Colors.white,
       icon: Icon(
         Icons.more_vert_rounded,
         size: 24.sp,
-        color: AppColors.secondaryText, // Use a consistent color
+        color: AppColors.secondaryText,
       ),
-      // Define the menu items
       itemBuilder: (context) => [
         _buildPopupMenuItem(
           PostAction.edit,
           Icons.edit_outlined,
           "Edit Post",
-          () {
-            Get.to(EditPost());
+              () {
+            Navigator.pop(context);
+            Get.to(EditPost(postId: postId.toString(),));
           },
         ),
         _buildPopupMenuItem(
           PostAction.delete,
           Icons.delete_outline,
           "Delete Post",
-          () {
-            showDeletePostDialog(context, onConfirmDelete: () {});
+              () {
+            Navigator.pop(context);
+            showDeletePostDialog(context, onConfirmDelete: () {
+              myPostController.deletePost(postId.toString());
+            });
           },
         ),
         _buildPopupMenuItem(
           PostAction.privacy,
           Icons.lock_outline,
           "Change Privacy",
-          () {
+              () {
             Navigator.pop(context);
           },
         ),
@@ -223,13 +252,13 @@ class MyPostCard extends StatelessWidget {
     );
   }
 
-  // 🌟 NEW: Helper method for a consistent MenuItem look
+
   PopupMenuItem<PostAction> _buildPopupMenuItem(
-      PostAction value,
-      IconData icon,
-      String title,
-      VoidCallback onTap,
-      ) {
+    PostAction value,
+    IconData icon,
+    String title,
+    VoidCallback onTap,
+  ) {
     return PopupMenuItem<PostAction>(
       value: value,
       child: GestureDetector(
@@ -248,12 +277,11 @@ class MyPostCard extends StatelessWidget {
     );
   }
 
-  // ignore: unused_element
+
   Widget _buildCircleIcon({
     required IconData icon,
     required VoidCallback onTap,
   }) {
-    // ... (unchanged)
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(16.r),

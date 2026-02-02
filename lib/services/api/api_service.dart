@@ -61,10 +61,9 @@ class ApiService {
           await MultipartFile.fromFile(
             imagePath,
             filename: "$imageName.$extension",
-            contentType:
-                mimeType != null
-                    ? DioMediaType.parse(mimeType)
-                    : DioMediaType.parse("image/jpeg"),
+            contentType: mimeType != null
+                ? DioMediaType.parse(mimeType)
+                : DioMediaType.parse("image/jpeg"),
           ),
         ),
       );
@@ -81,12 +80,12 @@ class ApiService {
   }
 
   static Future<ApiResponseModel> multipartImage(
-      String url, {
-        Map<String, String> header = const {},
-        Map<String, String> body = const {},
-        String method = "POST",
-        List files = const [],
-      }) async {
+    String url, {
+    Map<String, String> header = const {},
+    Map<String, String> body = const {},
+    String method = "POST",
+    List files = const [],
+  }) async {
     FormData formData = FormData();
 
     for (var item in files) {
@@ -155,6 +154,60 @@ class ApiService {
     }
   }
 
+
+
+  static Future<ApiResponseModel> multipartUpdate(
+      String url, {
+        Map<String, String>? header,
+        Map<String, String>? body,
+        String method = "PATCH",
+        String imageName = 'image',
+        String? imagePath,
+        bool skipAuth = false,
+      }) async {
+
+    final Map<String, String> safeHeader =
+    header != null ? Map<String, String>.from(header) : {};
+
+    final Map<String, String> safeBody =
+    body != null ? Map<String, String>.from(body) : {};
+
+    FormData formData = FormData();
+
+    if (imagePath != null && imagePath.isNotEmpty) {
+      File file = File(imagePath);
+      String extension = file.path.split('.').last.toLowerCase();
+      String? mimeType = lookupMimeType(imagePath);
+
+      formData.files.add(
+        MapEntry(
+          imageName,
+          await MultipartFile.fromFile(
+            imagePath,
+            filename: "$imageName.$extension",
+            contentType: mimeType != null
+                ? DioMediaType.parse(mimeType)
+                : DioMediaType.parse("image/jpeg"),
+          ),
+        ),
+      );
+    }
+
+    safeBody.forEach((key, value) {
+      formData.fields.add(MapEntry(key, value));
+    });
+
+    safeHeader['Content-Type'] = "multipart/form-data";
+
+    return _request(
+      url,
+      method,
+      body: formData,
+      header: safeHeader,
+
+    );
+  }
+
   static ApiResponseModel _handleDioException(DioException error) {
     switch (error.type) {
       case DioExceptionType.connectionTimeout:
@@ -196,8 +249,9 @@ Dio _getMyDio() {
           ..receiveDataWhenStatusError = true
           ..responseType = ResponseType.json
           ..receiveTimeout = const Duration(seconds: 30)
-          ..baseUrl =
-              options.baseUrl.startsWith("http") ? "" : ApiEndPoint.baseUrl;
+          ..baseUrl = options.baseUrl.startsWith("http")
+              ? ""
+              : ApiEndPoint.baseUrl;
         handler.next(options);
       },
       onResponse: (response, handler) {

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:geolocator/geolocator.dart';
+
 import 'package:giolee78/config/route/app_routes.dart';
 import 'package:giolee78/services/storage/storage_services.dart';
 import 'package:giolee78/utils/constants/app_icons.dart';
@@ -7,13 +9,62 @@ import 'package:giolee78/utils/extensions/extension.dart';
 
 import '../../../../component/image/common_image.dart';
 import '../../../../component/text/common_text.dart';
+import '../../../../config/api/api_end_point.dart';
 import '../../../../utils/constants/app_colors.dart';
 import '../../../../utils/constants/app_images.dart';
 
-class HomeDetails extends StatelessWidget {
-  const HomeDetails({super.key, required this.notificationCount});
+class HomeDetails extends StatefulWidget {
+  const HomeDetails({super.key,
+    required this.notificationCount});
 
   final int notificationCount;
+
+  @override
+  State<HomeDetails> createState() => _HomeDetailsState();
+}
+
+class _HomeDetailsState extends State<HomeDetails> {
+  double? lat;
+  double? lng;
+  bool loadingLocation = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _getCurrentLocation();
+  }
+
+  Future<void> _getCurrentLocation() async {
+    try {
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        setState(() => loadingLocation = false);
+        return;
+      }
+
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        setState(() => loadingLocation = false);
+        return;
+      }
+
+      Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+
+      setState(() {
+        lat = position.latitude;
+        lng = position.longitude;
+        loadingLocation = false;
+      });
+    } catch (e) {
+      loadingLocation = false;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +79,11 @@ class HomeDetails extends StatelessWidget {
                 radius: 20,
                 child: ClipOval(
                   child: CommonImage(
-                    imageSrc: LocalStorage.myImage,
+                    fill: BoxFit.fill,
+                    imageSrc: LocalStorage.myImage != null &&
+                        LocalStorage.myImage!.isNotEmpty
+                        ? ApiEndPoint.imageUrl + LocalStorage.myImage!
+                        : "",
                     size: 40,
                     defaultImage: AppImages.profileImage,
                   ),
@@ -40,7 +95,7 @@ class HomeDetails extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 CommonText(
-                  text: "Hi Shakir Ahmed",
+                  text: LocalStorage.myName,
                   fontSize: 16,
                   color: AppColors.textColorFirst,
                   fontWeight: FontWeight.w600,
@@ -48,9 +103,13 @@ class HomeDetails extends StatelessWidget {
                 Row(
                   children: [
                     CommonImage(imageSrc: AppIcons.location),
-                    10.width,
+                    8.width,
                     CommonText(
-                      text: "Thornridge Cir. Shiloh, Hawaii",
+                      text: loadingLocation
+                          ? "Fetching location..."
+                          : lat != null && lng != null
+                          ? "${lat!.toStringAsFixed(4)}, ${lng!.toStringAsFixed(4)}"
+                          : "Location unavailable",
                       fontSize: 12,
                       fontWeight: FontWeight.w400,
                       color: AppColors.secondaryText,
@@ -61,7 +120,8 @@ class HomeDetails extends StatelessWidget {
             ),
           ],
         ),
-        // Notification icon with badge
+
+        /// 🔔 Notification
         Stack(
           clipBehavior: Clip.none,
           children: [
@@ -69,16 +129,19 @@ class HomeDetails extends StatelessWidget {
               padding: const EdgeInsets.only(right: 10),
               child: GestureDetector(
                 onTap: () => Get.toNamed(AppRoutes.notifications),
-                child: CommonImage(imageSrc: AppIcons.notification, size: 28),
+                child: CommonImage(
+                  imageSrc: AppIcons.notification,
+                  size: 28,
+                ),
               ),
             ),
-            if (notificationCount == 0)
+            if (widget.notificationCount > 0)
               Positioned(
                 right: 4,
                 top: -4,
                 child: Container(
                   padding: const EdgeInsets.all(4),
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                     color: Colors.red,
                     shape: BoxShape.circle,
                   ),
@@ -88,7 +151,7 @@ class HomeDetails extends StatelessWidget {
                   ),
                   child: Center(
                     child: Text(
-                      "$notificationCount",
+                      "${widget.notificationCount}",
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 10,

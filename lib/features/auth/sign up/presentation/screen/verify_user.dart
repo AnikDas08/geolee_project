@@ -137,13 +137,18 @@ class _VerifyUserState extends State<VerifyUser> {
                           fontWeight: FontWeight.w400,
                           color: AppColors.textPrimary,
                         ),
-                        CommonText(
-                          text: "Resend",
-                          fontSize: 16,
-                          bottom: 40,
-                          fontWeight: FontWeight.w700,
-                          maxLines: 3,
-                          color: AppColors.primaryColor,
+                        InkWell(
+                          onTap: (){
+                            // controller.resendOtp();
+                          },
+                          child: CommonText(
+                            text: "Resend",
+                            fontSize: 16,
+                            bottom: 40,
+                            fontWeight: FontWeight.w700,
+                            maxLines: 3,
+                            color: AppColors.primaryColor,
+                          ),
                         ),
                       ],
                     ),

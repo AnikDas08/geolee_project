@@ -6,9 +6,12 @@ import 'app.dart';
 import 'config/dependency/dependency_injection.dart';
 import 'services/notification/notification_service.dart';
 import 'services/storage/storage_services.dart';
+import 'main.dart' as GetStorage;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  GetStorage.init();
+  LocalStorage.getAllPrefData();
   await init.tryCatch();
   runApp(const MyApp());
 }

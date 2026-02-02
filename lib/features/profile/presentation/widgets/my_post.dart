@@ -11,7 +11,7 @@ import '../../data/post_model.dart';
 
 class PostCard extends StatelessWidget {
   final VoidCallback? onTap;
-  final PostData postData;
+  final PostDataOne postData;
   final Function(String)? onDelete;
   final Function(String)? onEdit;
 
@@ -29,7 +29,6 @@ class PostCard extends StatelessWidget {
       onTap: onTap,
       child: Stack(
         children: [
-          /// মূল কার্ড
           Container(
             width: 170.w,
             padding: EdgeInsets.all(10),

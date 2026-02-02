@@ -186,7 +186,7 @@ class HomePost extends StatelessWidget {
           Icons.edit_outlined,
           "Edit Post",
           () {
-            Get.to(EditPost());
+            Get.to(EditPost(postId: 0.toString(),));
           },
         ),
         _buildPopupMenuItem(

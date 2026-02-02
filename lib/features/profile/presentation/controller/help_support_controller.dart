@@ -36,9 +36,9 @@ class HelpSupportController extends GetxController {
 
   /// Support Admin Api call here
   supportAdminRepo() async {
-    Get.toNamed(AppRoutes.homeNav);
-    return;
-    // Validate inputs
+    // Get.toNamed(AppRoutes.homeNav);
+    // return;
+    // // Validate inputs
     if (titleController.text.trim().isEmpty) {
       Utils.errorSnackBar(400, "Please enter issue title");
       return;
@@ -58,10 +58,10 @@ class HelpSupportController extends GetxController {
     update();
 
     var response = await ApiService.multipart(
-      ApiEndPoint.helpSupport,
+      ApiEndPoint.support,
       body: {
         "title": titleController.text.trim(),
-        "description": messageController.text.trim(),
+        "message": messageController.text.trim(),
       },
       imagePath: image?.path,
       imageName: 'image',
@@ -86,6 +86,7 @@ class HelpSupportController extends GetxController {
     } else {
       Utils.errorSnackBar(response.statusCode, response.message);
       status = Status.error;
+      debugPrint("Response Is : >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>${response.message}");
       update();
     }
   }

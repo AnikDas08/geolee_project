@@ -17,6 +17,9 @@ class MyPostCards extends StatelessWidget {
     required this.description,
     required this.isFriend,
     required this.privacyImage,
+    required this.clickerType,
+    required this.onTapProfile,
+    required this.onTapPhoto,
   });
 
   final String userName;
@@ -27,6 +30,9 @@ class MyPostCards extends StatelessWidget {
   final String description;
   final bool isFriend;
   final String privacyImage;
+  final String clickerType;
+  final VoidCallback onTapProfile;
+  final VoidCallback onTapPhoto;
 
   @override
   Widget build(BuildContext context) {
@@ -50,19 +56,20 @@ class MyPostCards extends StatelessWidget {
             padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
             child: Row(
               children: [
-                GestureDetector(
-                  onTap: () {
-                    Get.to(() => ViewFriendScreen(isFriend: isFriend));
-                  },
+                InkWell(
+                  onTap:onTapProfile,
                   child: CircleAvatar(
-                    radius: 18.r,
-                    backgroundColor: Colors.transparent,
-                    child: ClipOval(
-                      child: Image.asset(
-                        "assets/images/profile_image.png"
-                      )
+                      radius: 18.r,
+                      backgroundColor: Colors.transparent,
+                      child: ClipOval(
+                        child: Image.network(
+                          userAvatar,
+                          width: 36.r,
+                          height: 36.r,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
                     ),
-                  ),
                 ),
                 SizedBox(width: 10.w),
                 Expanded(
@@ -70,7 +77,7 @@ class MyPostCards extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       CommonText(
-                        text: "John Doe",
+                        text: userName,
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
                         color: AppColors.black,
@@ -147,19 +154,37 @@ class MyPostCards extends StatelessWidget {
             padding: EdgeInsets.symmetric(horizontal: 12.w),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(10.r),
-              child: CommonImage(
-                imageSrc: postImage,
-                width: double.infinity,
-                height: 190.h,
-                fill: BoxFit.cover,
-                borderRadius: 10.r,
+              child: InkWell(
+                onTap: onTapPhoto,
+                child: CommonImage(
+                  imageSrc: postImage,
+                  width: double.infinity,
+                  height: 190.h,
+                  fill: BoxFit.cover,
+                  borderRadius: 10.r,
+                ),
               ),
             ),
           ),
 
           /// Description
+          ///
           Padding(
             padding: EdgeInsets.fromLTRB(12.w, 12.h, 12.w, 12.h),
+            child: CommonText(
+              text: clickerType,
+              fontSize: 12,
+              fontWeight: FontWeight.w400,
+              color: AppColors.textColorFirst,
+              textAlign: TextAlign.start,
+              maxLines: 6,
+              overflow: TextOverflow.visible,
+            ),
+          ),
+
+
+          Padding(
+            padding: EdgeInsets.fromLTRB(12.w, 12.h, 12.w, 5.h),
             child: CommonText(
               text: description,
               fontSize: 12,

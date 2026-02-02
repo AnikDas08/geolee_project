@@ -1,16 +1,43 @@
+import 'package:dio/dio.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:giolee78/component/image/common_image.dart';
+import 'package:giolee78/features/clicker/data/all_post_model.dart';
+import 'package:giolee78/features/clicker/data/single_user_model.dart';
+
+import 'package:giolee78/services/api/api_service.dart';
+import 'package:giolee78/services/storage/storage_services.dart';
+import 'package:giolee78/utils/app_utils.dart';
 import 'package:giolee78/utils/constants/app_images.dart';
+import '../../../../config/api/api_end_point.dart';
+import '../../../friend/data/friendship_request_status_response.dart';
+
+enum FriendStatus {
+  none,        // Add Friend
+  requested,   // Request Sent
+  friends      // Message
+}
 
 class ClickerController extends GetxController {
+
+  final searchText = ''.obs;
+  final TextEditingController searchController = TextEditingController();
+
+  /// Carousel
   final _currentPosition = 0.obs;
-  // State for the currently selected filter
-  final _selectedFilter = 'All'.obs;
-
   int get currentPosition => _currentPosition.value;
-  String get selectedFilter => _selectedFilter.value; // Getter for the selected filter
+  void changePosition(int position) => _currentPosition.value = position;
 
-  // Filter options list for the bottom sheet
+  /// Filter
+  final _selectedFilter = 'All'.obs;
+  String get selectedFilter => _selectedFilter.value;
+
+  void changeFilter(String newFilter) {
+    _selectedFilter.value = newFilter;
+    _filterPosts(); // Use combined filter
+  }
+
   final List<String> filterOptions = [
     'All',
     'Great Vibes',
@@ -19,24 +46,241 @@ class ClickerController extends GetxController {
     'Lovely Lady',
   ];
 
+  /// Banners
   final banners = [
     CommonImage(imageSrc: AppImages.banner1),
     CommonImage(imageSrc: AppImages.banner2),
     CommonImage(imageSrc: AppImages.banner3),
   ].obs;
 
+  /// All posts
+  var posts = <PostData>[].obs;
+  var filteredPosts = <PostData>[].obs; // Filtered list
+  var isLoading = false.obs;
+
+  /// User posts
+  var userPosts = <PostData>[].obs;
+  var isUserLoading = false.obs;
+  var isSendFriendRequest = false.obs;
+
   @override
   void onInit() {
     super.onInit();
-    _currentPosition.value = 0;
+    getAllPosts();
+
+    // Add search listener
+    searchController.addListener(_onSearchChanged);
   }
 
-  void changePosition(int position) {
-    _currentPosition.value = position;
+  @override
+  void onClose() {
+    searchController.removeListener(_onSearchChanged);
+    searchController.dispose();
+    super.onClose();
   }
 
-  // Method to update the selected filter state
-  void changeFilter(String newFilter) {
-    _selectedFilter.value = newFilter;
+  // Search method
+  void _onSearchChanged() {
+    searchText.value = searchController.text;
+    _filterPosts();
+  }
+
+  // Combined filter method (search + clicker type)
+  void _filterPosts() {
+    List<PostData> filtered = posts;
+
+    // Filter by clicker type
+    if (selectedFilter != 'All') {
+      filtered = filtered.where((post) => post.clickerType == selectedFilter).toList();
+    }
+
+    // Filter by search text
+    if (searchText.value.isNotEmpty) {
+      final query = searchText.value.toLowerCase();
+      filtered = filtered.where((post) {
+        final userName = post.user.name.toLowerCase();
+        final description = post.description.toLowerCase();
+        final location = post.address.toLowerCase();
+
+        return userName.contains(query) ||
+            description.contains(query) ||
+            location.contains(query);
+      }).toList();
+    }
+
+    filteredPosts.assignAll(filtered);
+  }
+
+  /// Fetch all posts from API (with optional filter param)
+  Future<void> getAllPosts({String? clickerType}) async {
+    try {
+      isLoading.value = true;
+
+      String url = ApiEndPoint.getAllPost;
+
+      if (clickerType != null && clickerType.isNotEmpty && clickerType != 'All') {
+        url += "?clickerType=$clickerType";
+      }
+
+      var response = await ApiService.get(
+        url,
+        header: {
+          "Authorization": "Bearer ${LocalStorage.token}",
+          "Content-Type": "application/json",
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final model =
+        AllPostModel.fromJson(response.data as Map<String, dynamic>);
+        posts.assignAll(model.data);
+        _filterPosts(); // Apply current filters
+      } else {
+        Utils.errorSnackBar("Error", response.message ?? "Something went wrong");
+      }
+    } catch (e) {
+      Utils.errorSnackBar("Error", e.toString());
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  /// Fetch posts by user ID
+  Future<void> getPostsByUser(String userId) async {
+    try {
+      isUserLoading.value = true;
+
+      final url = "${ApiEndPoint.getUserById}$userId"; // e.g. /posts/user/:id
+      var response = await ApiService.get(
+        header: {
+          "Authorization": "Bearer ${LocalStorage.token}",
+          "Content-Type": "application/json",
+        },
+        url,
+      );
+
+      if (response.statusCode == 200) {
+        final allPosts =
+        AllPostModel.fromJson(response.data as Map<String, dynamic>);
+        userPosts.assignAll(allPosts.data);
+      } else {
+        Utils.errorSnackBar("Error", response.message ?? "Something went wrong");
+      }
+    } catch (e) {
+      Utils.errorSnackBar("Error", e.toString());
+    } finally {
+      isUserLoading.value = false;
+    }
+  }
+
+  Rxn<SingleUserByIdData> userData = Rxn<SingleUserByIdData>();
+
+  Future<void> getUserById(String userId) async {
+    try {
+      isUserLoading.value = true;
+
+      final url = "${ApiEndPoint.getUserSingleProfileById}$userId";
+
+      var response = await ApiService.get(
+        url,
+        header: {
+          "Authorization": "Bearer ${LocalStorage.token}",
+          "Content-Type": "application/json",
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final model = SingleUserByIdModel.fromJson(
+          response.data as Map<String, dynamic>,
+        );
+
+        userData.value = model.data; // ✅ CORRECT
+      } else {
+        Utils.errorSnackBar(
+          "Error",
+          response.message ?? "Something went wrong",
+        );
+      }
+    } catch (e) {
+      Utils.errorSnackBar("Error", e.toString());
+    } finally {
+      isUserLoading.value = false;
+    }
+  }
+
+  var friendStatus = FriendStatus.none.obs;
+
+  Future<void> onTapAddFriendButton(String userId) async {
+
+    if (friendStatus.value == FriendStatus.requested) {
+      Get.defaultDialog(
+        title: "Notice",
+        middleText: "You have already sent a friend request to this user.",
+        textConfirm: "OK",
+        confirmTextColor: Colors.white,
+        onConfirm: () => Get.back(),
+      );
+      return;
+    }
+
+    try {
+      isLoading.value = true;
+      final response = await ApiService.post(
+        "${ApiEndPoint.createFriendRequest}",
+        body: {"receiver": userId},
+        header: {
+          "Authorization": "Bearer ${LocalStorage.token}",
+          "Content-Type": "application/json",
+        },
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        friendStatus.value = FriendStatus.requested;
+        Get.snackbar("Success", "Friend request sent successfully!");
+      } else {
+        Get.snackbar("Failed", response.message ?? "Something went wrong");
+      }
+    } catch (e) {
+      Get.snackbar("Error", e.toString());
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  bool isFriend = false;
+
+  Future<FriendshipStatusResponse> fetchFriendshipStatus(String userId) async {
+    final dio = Dio();
+    final url="${ApiEndPoint.checkFriendStatus}${userId}";
+
+    final response = await dio.get(url,
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer ${LocalStorage.token}',
+        },
+      ),
+    );
+
+    return FriendshipStatusResponse.fromJson(response.data);
+  }
+
+  Future<void> checkFriendship(String userId) async {
+    try {
+      final result = await fetchFriendshipStatus(userId);
+      final data = result.data;
+
+      if (data.isAlreadyFriend == true) {
+        friendStatus.value = FriendStatus.friends;
+      }
+      else if (data.pendingFriendRequest != null) {
+        friendStatus.value = FriendStatus.requested;
+      }
+      else {
+        friendStatus.value = FriendStatus.none;
+      }
+
+    } catch (e) {
+      print('Friendship check error: $e');
+    }
   }
 }

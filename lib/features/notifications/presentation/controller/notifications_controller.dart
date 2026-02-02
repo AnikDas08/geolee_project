@@ -1,234 +1,99 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:giolee78/config/route/app_routes.dart';
-import 'package:giolee78/utils/app_utils.dart';
+
 import '../../data/model/notification_model.dart';
 import '../../repository/notification_repository.dart';
-
 class NotificationsController extends GetxController {
-  /// Notification List
-  List notifications = [
-    NotificationModel(
-      id: "1",
-      title: "Notification",
-      text:
-          "our post has been successfully uploaded under the “Great Vibes” category.",
-      receiver: "Notification",
-      createdAt: DateTime.now(),
-      updatedAt: DateTime.now(),
-      read: false,
-      v: 0,
-    ),
-    NotificationModel(
-      id: "2",
-      title: "Notification",
-      text:
-          "our post has been successfully uploaded under the “Great Vibes” category.",
-      receiver: "Notification",
-      createdAt: DateTime.now(),
-      updatedAt: DateTime.now(),
-      read: false,
-      v: 0,
-    ),
-  ];
+  List<NotificationModel> notifications = [];
+  int unreadCount = 0;
 
-  /// Notification Loading Bar
   bool isLoading = false;
-
-  /// Notification more Data Loading Bar
   bool isLoadingMore = false;
-
-  /// No more notification data
   bool hasNoData = false;
 
-  /// page no here
   int page = 0;
 
-  /// Notification Repository Instance
-  NotificationRepository notificationRepository = NotificationRepository();
+  final ScrollController scrollController = ScrollController();
+  final NotificationRepository repository = NotificationRepository();
 
-  /// Notification Scroll Controller
-  ScrollController scrollController = ScrollController();
-
-  /// Notification More data Loading function
-
-  // Initialize and fetch notifications
   @override
   void onInit() {
     super.onInit();
-    //getNotificationsRepo();
-    //moreNotification();
+    getNotifications();
+    moreNotification();
   }
 
+  /// First Load
+  Future<void> getNotifications() async {
+    if (isLoading || hasNoData) return;
+
+    isLoading = true;
+    update();
+
+    page++;
+
+    final response = await repository.getNotifications(page);
+
+    if (response.notifications.isEmpty) {
+      hasNoData = false;
+      update();
+    } else {
+      notifications.addAll(response.notifications);
+      update();
+    }
+
+    unreadCount = response.unreadCount;
+
+    isLoading = false;
+    update();
+  }
+
+  /// Pagination
   void moreNotification() {
     scrollController.addListener(() async {
       if (scrollController.position.pixels ==
           scrollController.position.maxScrollExtent) {
         if (isLoadingMore || hasNoData) return;
+
         isLoadingMore = true;
         update();
+
         page++;
-        List<NotificationModel> list = await notificationRepository
-            .notificationRepository(page);
-        if (list.isEmpty) {
+
+        final response = await repository.getNotifications(page);
+
+        if (response.notifications.isEmpty) {
           hasNoData = true;
         } else {
-          notifications.addAll(list);
+          notifications.addAll(response.notifications);
         }
+
+        unreadCount = response.unreadCount;
+
         isLoadingMore = false;
         update();
       }
     });
   }
 
-  /// Notification data Loading function
-  getNotificationsRepo() async {
-    if (isLoading || hasNoData) return;
-    isLoading = true;
-    update();
-
-    page++;
-    List<NotificationModel> list = await notificationRepository
-        .notificationRepository(page);
-    if (list.isEmpty) {
-      hasNoData = true;
-    } else {
-      notifications.addAll(list);
-    }
-    isLoading = false;
-    update();
-  }
-
-  /// Notification Read function
-  readNotification(NotificationModel item) async {
-    isLoading = true;
-    update();
-
-    var result = await notificationRepository.getCustomOffer(
-      item.referenceId ?? "",
-    );
-    result.fold(
-      ifLeft: (error) {
-        // Handle error - could show a snackbar or dialog
-        debugPrint('Error fetching custom offer: $error');
-      },
-      ifRight: (customOffer) {
-        if (customOffer.data != null) {}
-      },
-    );
-    isLoading = false;
-    update();
-  }
-
-  /// Notification Accept function
-  acceptCustomOffer(String id) async {
-    isLoading = true;
-    update();
-
-    var result = await notificationRepository.acceptCustomOffer(id);
-    result.fold(
-      ifLeft: (error) {
-        Get.back();
-        debugPrint('Error fetching custom offer: $error');
-        Get.snackbar(
-          "Error",
-          "Error fetching custom offer $error",
-          snackPosition: SnackPosition.TOP,
+  /// Mark as Read (local)
+  void markAsRead(int index) {
+    notifications[index] =
+        NotificationModel(
+          id: notifications[index].id,
+          title: notifications[index].title,
+          message: notifications[index].message,
+          read: true,
+          createdAt: notifications[index].createdAt,
         );
-      },
-      ifRight: (offerAccept) {
-        Get.back();
-        debugPrint('Custom offer accepted: ${offerAccept.data}');
-        Get.snackbar(
-          "Success",
-          "Custom offer accepted successfully",
-          snackPosition: SnackPosition.TOP,
-        );
-      },
-    );
-    isLoading = false;
+
+    if (unreadCount > 0) unreadCount--;
     update();
-  }
-
-  /// Notification Reject function
-  rejectCustomOffer(String id) async {
-    isLoading = true;
-    update();
-
-    var result = await notificationRepository.rejectCustomOffer(id);
-    result.fold(
-      ifLeft: (error) {
-        Get.back();
-        debugPrint('Error fetching custom offer: $error');
-        Get.snackbar(
-          "Error",
-          "Error fetching custom offer $error",
-          snackPosition: SnackPosition.TOP,
-        );
-      },
-      ifRight: (offerAccept) {
-        Get.back();
-        debugPrint('Custom offer rejected: ${offerAccept.data}');
-        Get.snackbar(
-          "Success",
-          "Custom offer rejected successfully",
-          snackPosition: SnackPosition.TOP,
-        );
-      },
-    );
-    isLoading = false;
-    update();
-  }
-
-  // payment
-  Future<void> getPaymentSession(String serviceId) async {
-    try {
-      isLoading = true;
-      update();
-
-      var result = await notificationRepository.getCheckoutSession(serviceId);
-
-      result.fold(
-        ifLeft: (error) {
-          Utils.errorSnackBar("Error", error);
-        },
-        ifRight: (checkoutSession) async {
-          final result = await Get.toNamed(
-            AppRoutes.stripeWebViewScreen,
-            arguments: checkoutSession.data.checkoutUrl,
-          );
-          if (result == 'success') {
-            Get.offAllNamed(AppRoutes.homeNav);
-          }
-          if (result == 'failed') {
-            Utils.errorSnackBar("Error", "Payment failed. Please try again.");
-          }
-          if (result == 'cancelled') {
-            Utils.errorSnackBar(
-              "Error",
-              "Payment cancelled. Please try again.",
-            );
-          }
-        },
-      );
-    } catch (e) {
-      Utils.errorSnackBar(
-        "Error",
-        "An error occurred while creating the checkout session. Please try again.",
-      );
-    } finally {
-      isLoading = false;
-      update();
-    }
   }
 
   @override
-  void dispose() {
+  void onClose() {
     scrollController.dispose();
-    super.dispose();
+    super.onClose();
   }
-
-  /// Notification Controller Instance create here
-  static NotificationsController get instance =>
-      Get.put(NotificationsController());
 }

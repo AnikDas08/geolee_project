@@ -33,14 +33,12 @@ class EditPostController extends GetxController {
   var isLoading = false.obs;
   var isFetchingData = true.obs;
 
-  // Dynamic lists that will be populated from API
   var categories = <String>[].obs;
-  var categoryMap = <String, String>{}.obs; // categoryName -> categoryId
+  var categoryMap = <String, String>{}.obs;
   var subCategories = <String>[].obs;
-  var subCategoryMap =
-      <String, String>{}.obs; // subCategoryName -> subCategoryId
+  var subCategoryMap = <String, String>{}.obs;
 
-  // Fallback hardcoded lists
+
   final List<String> fallbackCategories = [
     'Home & Property',
     'Automotive Help',
@@ -58,6 +56,7 @@ class EditPostController extends GetxController {
     'Cleaning',
   ];
 
+
   final List<String> priorityLevels = ['Emergency', 'High', 'Medium', 'Low'];
 
   final ImagePicker _picker = ImagePicker();
@@ -71,6 +70,7 @@ class EditPostController extends GetxController {
     }
   }
 
+
   @override
   void onClose() {
     titleController.dispose();
@@ -82,6 +82,7 @@ class EditPostController extends GetxController {
     priceController.dispose();
     super.onClose();
   }
+
 
   Future<void> fetchPostDetails() async {
     try {

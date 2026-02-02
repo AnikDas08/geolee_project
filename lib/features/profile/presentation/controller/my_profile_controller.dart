@@ -10,35 +10,49 @@ class MyProfileController extends GetxController {
   bool isLoading = false;
   UserProfileModel? profileModel;
 
-  /// User profile data
+  String _dateOfBirth = "";
+  String _gender = "";
+
+  // ================= USER DATA GETTERS =================
+
   String get userName =>
-      LocalStorage.myName.isNotEmpty ? LocalStorage.myName : "Shakir Ahmed";
+      LocalStorage.myName.isNotEmpty ? LocalStorage.myName : "User Name";
 
   String get userImage => LocalStorage.myImage;
 
-  String get userEmail => LocalStorage.myEmail.isNotEmpty
-      ? LocalStorage.myEmail
-      : "Example@gmail.com";
+  String get userEmail =>
+      LocalStorage.myEmail.isNotEmpty ? LocalStorage.myEmail : "example@mail.com";
 
   String get mobile => LocalStorage.mobile;
+
   String get dateOfBirth {
-    if (LocalStorage.dateOfBirth.isEmpty) return "";
-    // Extract only the date part (YYYY-MM-DD) from ISO timestamp
+    if (LocalStorage.dateOfBirth.isEmpty) return "Not Selected";
     return LocalStorage.dateOfBirth.split('T').first;
   }
 
-  String get gender => LocalStorage.gender;
+  String get gender =>
+      LocalStorage.gender.isNotEmpty ? LocalStorage.gender : "Not Selected";
+
   String get experience => LocalStorage.experience;
-  String get bio => LocalStorage.bio;
+
+  String get bio =>
+      LocalStorage.bio.isNotEmpty ? LocalStorage.bio : "Bio Not Set Yet";
+
   double get balance => LocalStorage.balance;
+
   bool get verified => LocalStorage.verified;
+
   double get lat => LocalStorage.lat;
+
   double get log => LocalStorage.log;
+
   bool get accountInfoStatus => LocalStorage.accountInfoStatus;
+
   String get address => "Dhaka, Bangladesh";
-  String get about => LocalStorage.bio.isNotEmpty
-      ? LocalStorage.bio
-      : "Skilled professionals offering reliable, on-demand services to meet your everyday needs quickly and efficiently.";
+
+  String get about => bio;
+
+  // ================= LIFE CYCLE =================
 
   @override
   void onInit() {
@@ -46,122 +60,114 @@ class MyProfileController extends GetxController {
     getUserData();
   }
 
-  /// Navigate to edit profile screen
+  // ================= NAVIGATION =================
+
   void navigateToEditProfile() {
     Get.toNamed(AppRoutes.editProfile);
   }
+
+  void goBack() {
+    Get.back();
+  }
+
+  // ================= API CALL =================
 
   Future<void> getUserData() async {
     isLoading = true;
     update();
 
     try {
-      var response = await ApiService.get(
+      final response = await ApiService.get(
         ApiEndPoint.profile,
+        header: {
+          "Authorization": "Bearer ${LocalStorage.token}",
+          "Content-Type": "application/json",
+        },
       ).timeout(const Duration(seconds: 30));
 
       if (response.statusCode == 200) {
-        // Parse response to model
         profileModel = UserProfileModel.fromJson(
           response.data as Map<String, dynamic>,
         );
 
-        if (profileModel?.data != null) {
-          final data = profileModel!.data!;
+        final data = profileModel?.data;
+        if (data == null) return;
 
-          // Update LocalStorage variables
-          LocalStorage.userId = data.id ?? "";
-          LocalStorage.myImage = data.image ?? "";
-          LocalStorage.myName = data.name ?? "";
-          LocalStorage.myEmail = data.email ?? "";
-          LocalStorage.myRole = data.role ?? "";
-          LocalStorage.dateOfBirth = data.birthDate ?? "";
-          LocalStorage.gender = data.gender ?? "";
-          LocalStorage.experience = data.experience ?? "";
-          LocalStorage.balance = data.balance ?? 0.0;
-          LocalStorage.verified = data.verified ?? false;
-          LocalStorage.bio = data.bio ?? "";
-          LocalStorage.lat = data.lat ?? 0.0;
-          LocalStorage.log = data.log ?? 0.0;
-          LocalStorage.accountInfoStatus =
-              data.accountInformation?.status ?? false;
-          LocalStorage.createdAt = data.createdAt ?? "";
-          LocalStorage.updatedAt = data.updatedAt ?? "";
+        // ---------- SAFE DATE HANDLING ----------
+        _dateOfBirth =
+        data.dob != null ? data.dob!.toIso8601String() : "";
 
-          // Save to SharedPreferences
-          await LocalStorage.setBool(
-            LocalStorageKeys.isLogIn,
-            LocalStorage.isLogIn,
-          );
-          await LocalStorage.setString(
-            LocalStorageKeys.userId,
-            LocalStorage.userId,
-          );
-          await LocalStorage.setString(
-            LocalStorageKeys.myImage,
-            LocalStorage.myImage,
-          );
-          await LocalStorage.setString(
-            LocalStorageKeys.myName,
-            LocalStorage.myName,
-          );
-          await LocalStorage.setString(
-            LocalStorageKeys.myEmail,
-            LocalStorage.myEmail,
-          );
-          await LocalStorage.setString(
-            LocalStorageKeys.myRole,
-            LocalStorage.myRole,
-          );
-          await LocalStorage.setString(
-            LocalStorageKeys.dateOfBirth,
-            LocalStorage.dateOfBirth,
-          );
-          await LocalStorage.setString(
-            LocalStorageKeys.gender,
-            LocalStorage.gender,
-          );
-          await LocalStorage.setString(
-            LocalStorageKeys.experience,
-            LocalStorage.experience,
-          );
-          await LocalStorage.setDouble(
-            LocalStorageKeys.balance,
-            LocalStorage.balance,
-          );
-          await LocalStorage.setBool(
-            LocalStorageKeys.verified,
-            LocalStorage.verified,
-          );
-          await LocalStorage.setString(LocalStorageKeys.bio, LocalStorage.bio);
-          await LocalStorage.setDouble(LocalStorageKeys.lat, LocalStorage.lat);
-          await LocalStorage.setDouble(LocalStorageKeys.log, LocalStorage.log);
-          await LocalStorage.setBool(
-            LocalStorageKeys.accountInfoStatus,
-            LocalStorage.accountInfoStatus,
-          );
-          await LocalStorage.setString(
-            LocalStorageKeys.createdAt,
-            LocalStorage.createdAt,
-          );
-          await LocalStorage.setString(
-            LocalStorageKeys.updatedAt,
-            LocalStorage.updatedAt,
-          );
-        }
+        _gender = data.gender;
+
+        // ---------- LOCAL MEMORY ----------
+        LocalStorage.userId = data.id;
+        LocalStorage.myName = data.name;
+        LocalStorage.myEmail = data.email;
+        LocalStorage.myRole = data.role;
+        LocalStorage.myImage = data.image;
+        LocalStorage.bio =
+        data.bio.isNotEmpty ? data.bio : "Bio Not Set Yet";
+        LocalStorage.gender = data.gender;
+        LocalStorage.dateOfBirth = _dateOfBirth;
+        LocalStorage.createdAt =
+            data.createdAt?.toIso8601String() ?? "";
+        LocalStorage.updatedAt =
+            data.updatedAt?.toIso8601String() ?? "";
+        LocalStorage.verified = data.isVerified;
+
+        // ---------- SAVE TO SHARED PREF ----------
+        await Future.wait([
+          LocalStorage.setBool(
+              LocalStorageKeys.isLogIn, LocalStorage.isLogIn),
+          LocalStorage.setString(
+              LocalStorageKeys.userId, LocalStorage.userId),
+          LocalStorage.setString(
+              LocalStorageKeys.myName, LocalStorage.myName),
+          LocalStorage.setString(
+              LocalStorageKeys.myEmail, LocalStorage.myEmail),
+          LocalStorage.setString(
+              LocalStorageKeys.myRole, LocalStorage.myRole),
+          LocalStorage.setString(
+              LocalStorageKeys.myImage, LocalStorage.myImage),
+          LocalStorage.setString(
+              LocalStorageKeys.bio, LocalStorage.bio),
+          LocalStorage.setString(
+              LocalStorageKeys.gender, LocalStorage.gender),
+          LocalStorage.setString(
+              LocalStorageKeys.dateOfBirth,
+              LocalStorage.dateOfBirth),
+          LocalStorage.setString(
+              LocalStorageKeys.experience,
+              LocalStorage.experience),
+          LocalStorage.setDouble(
+              LocalStorageKeys.balance, LocalStorage.balance),
+          LocalStorage.setBool(
+              LocalStorageKeys.verified, LocalStorage.verified),
+          LocalStorage.setDouble(
+              LocalStorageKeys.lat, LocalStorage.lat),
+          LocalStorage.setDouble(
+              LocalStorageKeys.log, LocalStorage.log),
+          LocalStorage.setBool(
+              LocalStorageKeys.accountInfoStatus,
+              LocalStorage.accountInfoStatus),
+          LocalStorage.setString(
+              LocalStorageKeys.createdAt,
+              LocalStorage.createdAt),
+          LocalStorage.setString(
+              LocalStorageKeys.updatedAt,
+              LocalStorage.updatedAt),
+        ]);
       } else {
-        Get.snackbar(response.statusCode.toString(), response.message);
+        Get.snackbar(
+          response.statusCode.toString(),
+          response.message ?? "Something went wrong",
+        );
       }
     } catch (e) {
-      Get.snackbar('Error', 'Failed to load profile: $e');
+      Get.snackbar("Error", "Failed to load profile");
     }
 
     isLoading = false;
     update();
-  }
-
-  /// Navigate back
-  void goBack() {
-    Get.back();
   }
 }

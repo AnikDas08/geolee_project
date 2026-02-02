@@ -45,5 +45,6 @@ class DependencyInjection extends Bindings {
     Get.lazyPut(() => PostController(), fenix: true);
     Get.lazyPut(() => ClickerController(), fenix: true);
     Get.lazyPut(() => HomeNavController(), fenix: true);
+    Get.lazyPut(() => MyPostController(), fenix: true);
   }
 }
