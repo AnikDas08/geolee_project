@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="NONE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="bfaf5573-c330-40b0-a877-9f6fce0e988f" name="Changes" comment="ibrahim api terms,privacy,myFriend,add friend Reques">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/android/app/src/main/AndroidManifest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/android/app/src/main/AndroidManifest.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ios/Runner/AppDelegate.swift" beforeDir="false" afterPath="$PROJECT_DIR$/ios/Runner/AppDelegate.swift" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/component/pop_up/common_pop_menu.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/component/pop_up/common_pop_menu.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/config/api/api_end_point.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/config/api/api_end_point.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/features/addpost/presentation/controller/edit_post_controller.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/addpost/presentation/controller/edit_post_controller.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/features/addpost/presentation/controller/my_post_controller.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/addpost/presentation/data/single_post_mode.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/features/addpost/presentation/controller/post_controller.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/addpost/presentation/controller/post_controller.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/features/addpost/presentation/screen/edit_post.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/addpost/presentation/screen/edit_post.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/features/addpost/presentation/screen/my_post_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/addpost/presentation/screen/my_post_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/features/addpost/presentation/widgets/home_post.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/addpost/presentation/widgets/home_post.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/features/addpost/presentation/widgets/my_post_card.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/addpost/presentation/widgets/my_post_card.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/features/clicker/presentation/controller/clicker_controller.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/clicker/presentation/controller/clicker_controller.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/features/clicker/presentation/screen/clicker_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/clicker/presentation/screen/clicker_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/features/friend/presentation/controller/my_friend_controller.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/friend/presentation/controller/my_friend_controller.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/features/friend/presentation/screen/view_friend_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/friend/presentation/screen/view_friend_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/features/home/presentation/screen/home_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/home/presentation/screen/home_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/features/message/presentation/controller/chat_controller.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/message/presentation/controller/chat_controller.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/features/profile/presentation/controller/edit_post_controller.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/profile/presentation/controller/edit_post_controller.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/features/profile/presentation/controller/profile_controller.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/profile/presentation/controller/profile_controller.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/services/api/api_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/services/api/api_service.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/services/repo/test_repo.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/services/repo/get_my_all_friend_repo.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/utils/constants/app_string.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/utils/constants/app_string.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/utils/helpers/other_helper.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/utils/helpers/other_helper.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pubspec.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/pubspec.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/web/index.html" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ClangdSettings">
+    <option name="formatViaClangd" value="false" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Dart File" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="file://$PROJECT_DIR$/lib/features/profile/presentation/controller/my_profile_controller.dart" root0="FORCE_HIGHLIGHTING" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 8
+}</component>
+  <component name="ProjectId" id="38uyK3lwezYugnOFOIq05qdJRfJ" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ASKED_MARK_IGNORED_FILES_AS_EXCLUDED&quot;: &quot;true&quot;,
+    &quot;Flutter.main.dart.executor&quot;: &quot;Run&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.readMode.enableVisualFormatting&quot;: &quot;true&quot;,
+    &quot;cf.first.check.clang-format&quot;: &quot;false&quot;,
+    &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;dart.analysis.tool.window.visible&quot;: &quot;false&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;ibrahim__dev&quot;,
+    &quot;io.flutter.project.isFirstOpen&quot;: &quot;true&quot;,
+    &quot;io.flutter.reload.alreadyRun&quot;: &quot;true&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;D:/geolee/geolee_project/assets/animation&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;flutter.settings&quot;,
+    &quot;settings.editor.splitter.proportion&quot;: &quot;0.3058104&quot;,
+    &quot;show.migrate.to.gradle.popup&quot;: &quot;false&quot;
+  }
+}</component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\geolee\geolee_project\assets\animation" />
+      <recent name="D:\geolee\geolee_project\assets\icons" />
+      <recent name="D:\geolee\geolee_project\assets\images" />
+    </key>
+  </component>
+  <component name="RunManager">
+    <configuration name="main.dart" type="FlutterRunConfigurationType" factoryName="Flutter">
+      <option name="filePath" value="$PROJECT_DIR$/lib/main.dart" />
+      <method v="2" />
+    </configuration>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="bfaf5573-c330-40b0-a877-9f6fce0e988f" name="Changes" comment="" />
+      <created>1769663682398</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1769663682398</updated>
+    </task>
+    <task id="LOCAL-00001" summary="ibrahim api integration">
+      <option name="closed" value="true" />
+      <created>1769689028133</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1769689028133</updated>
+    </task>
+    <task id="LOCAL-00002" summary="ibrahim api terms,privacy,myFriend,add friend Reques">
+      <option name="closed" value="true" />
+      <created>1769934786669</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1769934786669</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
+    <servers />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="ibrahim api integration" />
+    <MESSAGE value="ibrahim api terms,privacy,myFriend,add friend Reques" />
+    <option name="LAST_COMMIT_MESSAGE" value="ibrahim api terms,privacy,myFriend,add friend Reques" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="Dart">
+          <url>file://$PROJECT_DIR$/lib/features/friend/data/my_friends_model.dart</url>
+          <line>36</line>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+  </component>
+</project>
