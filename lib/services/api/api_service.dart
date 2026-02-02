@@ -154,6 +154,60 @@ class ApiService {
     }
   }
 
+
+
+  static Future<ApiResponseModel> multipartUpdate(
+      String url, {
+        Map<String, String>? header,
+        Map<String, String>? body,
+        String method = "PATCH",
+        String imageName = 'image',
+        String? imagePath,
+        bool skipAuth = false,
+      }) async {
+
+    final Map<String, String> safeHeader =
+    header != null ? Map<String, String>.from(header) : {};
+
+    final Map<String, String> safeBody =
+    body != null ? Map<String, String>.from(body) : {};
+
+    FormData formData = FormData();
+
+    if (imagePath != null && imagePath.isNotEmpty) {
+      File file = File(imagePath);
+      String extension = file.path.split('.').last.toLowerCase();
+      String? mimeType = lookupMimeType(imagePath);
+
+      formData.files.add(
+        MapEntry(
+          imageName,
+          await MultipartFile.fromFile(
+            imagePath,
+            filename: "$imageName.$extension",
+            contentType: mimeType != null
+                ? DioMediaType.parse(mimeType)
+                : DioMediaType.parse("image/jpeg"),
+          ),
+        ),
+      );
+    }
+
+    safeBody.forEach((key, value) {
+      formData.fields.add(MapEntry(key, value));
+    });
+
+    safeHeader['Content-Type'] = "multipart/form-data";
+
+    return _request(
+      url,
+      method,
+      body: formData,
+      header: safeHeader,
+
+    );
+  }
+
   static ApiResponseModel _handleDioException(DioException error) {
     switch (error.type) {
       case DioExceptionType.connectionTimeout:

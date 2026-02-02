@@ -40,7 +40,7 @@ class ProfileController extends GetxController {
   TextEditingController nameController = TextEditingController()..text = LocalStorage.myName;
   TextEditingController numberController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
-  TextEditingController aboutController = TextEditingController();
+  TextEditingController aboutController = TextEditingController()..text=LocalStorage.bio;
   TextEditingController dateOfBirthController = TextEditingController()
     ..text = LocalStorage.dateOfBirth.isNotEmpty
         ? LocalStorage.dateOfBirth.split('T').first

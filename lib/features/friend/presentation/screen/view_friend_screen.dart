@@ -143,7 +143,7 @@ class _ViewFriendScreenState extends State<ViewFriendScreen> {
                       postImage: data.photos.isNotEmpty
                           ? "http://10.10.7.7:5006${data.photos[0]}"
                           : "",
-                      description: data.description,
+                      description: data.description, postId: '',
                     );
                   },
                   separatorBuilder: (_, __) => SizedBox(height: 12.h),

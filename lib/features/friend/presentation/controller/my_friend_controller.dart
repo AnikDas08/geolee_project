@@ -8,7 +8,7 @@ import 'package:giolee78/config/api/api_end_point.dart';
 import 'package:giolee78/features/friend/data/friend_request_model.dart';
 import 'package:giolee78/services/api/api_response_model.dart';
 import 'package:giolee78/services/api/api_service.dart';
-import 'package:giolee78/services/repo/test_repo.dart';
+import 'package:giolee78/services/repo/get_my_all_friend_repo.dart';
 import 'package:giolee78/utils/constants/app_images.dart';
 
 import '../../../../services/storage/storage_services.dart';
@@ -35,6 +35,8 @@ class MyFriendController extends GetxController {
   var requests = <FriendData>[].obs;
   var isLoading = true.obs;
   final dio = Dio();
+
+  int friendRequestCount=0;
 
 
 
@@ -131,6 +133,8 @@ class MyFriendController extends GetxController {
 
         final model = FriendModel.fromJson(response.data);
         requests.value = model.data;
+        friendRequestCount=model.data.length.toInt();
+
       } else {
         debugPrint(
           "response is =>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>${response.data} ",

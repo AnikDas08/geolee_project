@@ -8,12 +8,12 @@ class AppString {
   static const String yes = "Yes";
   static const String areYouSure = "Are you sure";
   static const String deleteAccountConfirmation = "Delete Account Confirmation";
-  static const String enterYouPassword = "Enter you password";
+  static const String enterYouPassword = "Type here";
   static const String cancel = "Cancel";
   static const String done = "Done";
   static const String delete = "Delete";
   static const String deleteDetails =
-      "enter your account password to continue to Delete Account.";
+      "Type /deleteAccount/ to Delete your Account.";
 
   static const String someThingWrong = "Some Thing Wrong";
   static const String tryAgain = "Try Again";

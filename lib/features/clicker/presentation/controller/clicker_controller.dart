@@ -20,6 +20,10 @@ enum FriendStatus {
 }
 
 class ClickerController extends GetxController {
+
+  final searchText = ''.obs;
+  final TextEditingController searchController = TextEditingController();
+
   /// Carousel
   final _currentPosition = 0.obs;
   int get currentPosition => _currentPosition.value;
@@ -28,9 +32,10 @@ class ClickerController extends GetxController {
   /// Filter
   final _selectedFilter = 'All'.obs;
   String get selectedFilter => _selectedFilter.value;
+
   void changeFilter(String newFilter) {
     _selectedFilter.value = newFilter;
-    applyFilter(); // Filter automatically applied when changed
+    _filterPosts(); // Use combined filter
   }
 
   final List<String> filterOptions = [
@@ -56,49 +61,80 @@ class ClickerController extends GetxController {
   /// User posts
   var userPosts = <PostData>[].obs;
   var isUserLoading = false.obs;
-  var isSendFriendRequest=false.obs;
+  var isSendFriendRequest = false.obs;
 
   @override
   void onInit() {
     super.onInit();
     getAllPosts();
 
+    // Add search listener
+    searchController.addListener(_onSearchChanged);
   }
 
-  /// Apply filter locally
-  void applyFilter() {
-    if (selectedFilter == 'All') {
-      filteredPosts.assignAll(posts);
-    } else {
-      filteredPosts.assignAll(
-        posts.where((post) => post.clickerType == selectedFilter).toList(),
-      );
+  @override
+  void onClose() {
+    searchController.removeListener(_onSearchChanged);
+    searchController.dispose();
+    super.onClose();
+  }
+
+  // Search method
+  void _onSearchChanged() {
+    searchText.value = searchController.text;
+    _filterPosts();
+  }
+
+  // Combined filter method (search + clicker type)
+  void _filterPosts() {
+    List<PostData> filtered = posts;
+
+    // Filter by clicker type
+    if (selectedFilter != 'All') {
+      filtered = filtered.where((post) => post.clickerType == selectedFilter).toList();
     }
+
+    // Filter by search text
+    if (searchText.value.isNotEmpty) {
+      final query = searchText.value.toLowerCase();
+      filtered = filtered.where((post) {
+        final userName = post.user.name.toLowerCase();
+        final description = post.description.toLowerCase();
+        final location = post.address.toLowerCase();
+
+        return userName.contains(query) ||
+            description.contains(query) ||
+            location.contains(query);
+      }).toList();
+    }
+
+    filteredPosts.assignAll(filtered);
   }
 
   /// Fetch all posts from API (with optional filter param)
-  Future<void> getAllPosts({String? filter}) async {
+  Future<void> getAllPosts({String? clickerType}) async {
     try {
       isLoading.value = true;
 
-      var url = ApiEndPoint.getAllPost; // e.g. "/posts"
-      if (filter != null && filter != 'All') {
-        url += "?category=$filter"; // pass filter param to API if exists
+      String url = ApiEndPoint.getAllPost;
+
+      if (clickerType != null && clickerType.isNotEmpty && clickerType != 'All') {
+        url += "?clickerType=$clickerType";
       }
 
       var response = await ApiService.get(
+        url,
         header: {
           "Authorization": "Bearer ${LocalStorage.token}",
           "Content-Type": "application/json",
         },
-        url,
       );
 
       if (response.statusCode == 200) {
-        final allPosts =
+        final model =
         AllPostModel.fromJson(response.data as Map<String, dynamic>);
-        posts.assignAll(allPosts.data);
-        applyFilter(); // Apply filter after fetching
+        posts.assignAll(model.data);
+        _filterPosts(); // Apply current filters
       } else {
         Utils.errorSnackBar("Error", response.message ?? "Something went wrong");
       }
@@ -174,11 +210,6 @@ class ClickerController extends GetxController {
 
   var friendStatus = FriendStatus.none.obs;
 
-
-
-
-
-
   Future<void> onTapAddFriendButton(String userId) async {
 
     if (friendStatus.value == FriendStatus.requested) {
@@ -233,9 +264,6 @@ class ClickerController extends GetxController {
     return FriendshipStatusResponse.fromJson(response.data);
   }
 
-
-
-
   Future<void> checkFriendship(String userId) async {
     try {
       final result = await fetchFriendshipStatus(userId);
@@ -255,11 +283,4 @@ class ClickerController extends GetxController {
       print('Friendship check error: $e');
     }
   }
-
-
-
-
-
-
-
 }

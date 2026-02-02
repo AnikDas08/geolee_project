@@ -22,7 +22,7 @@ class ApiEndPoint {
 
   // Post ===========================================
   static const String createPost = "${baseUrl}posts/create";
-  static const String updatePost = "${baseUrl}posts/update/6968735eb38f9e7d204de36d";
+  static const String updatePost = "${baseUrl}posts/update/";
   static const String getSinglePost = "${baseUrl}posts/single/";
   static const String getUserById = "${baseUrl}posts/user/";
   static const String getMyPost = "${baseUrl}posts/my-posts";

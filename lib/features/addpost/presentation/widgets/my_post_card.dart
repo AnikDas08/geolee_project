@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:giolee78/component/image/common_image.dart';
 import 'package:giolee78/component/text/common_text.dart';
+import 'package:giolee78/config/route/app_routes.dart';
 import 'package:giolee78/features/addpost/presentation/screen/edit_post.dart';
 import 'package:giolee78/features/profile/presentation/controller/post_controller.dart';
 import 'package:giolee78/utils/constants/app_colors.dart';
@@ -27,7 +28,7 @@ class MyPostCard extends StatelessWidget {
     required this.onTapProfile,
     required this.onTapPhoto,
     required this.isProfile,
-    this.postId,
+    required this.postId,
   });
 
   final String userName;
@@ -42,7 +43,7 @@ class MyPostCard extends StatelessWidget {
   final VoidCallback onTapProfile;
   final VoidCallback onTapPhoto;
   final bool isProfile;
-  final String? postId;
+  final String postId;
 
   @override
   Widget build(BuildContext context) {
@@ -70,6 +71,7 @@ class MyPostCard extends StatelessWidget {
                 Expanded(
                   child: Row(
                     children: [
+
                       InkWell(
                         onTap: isProfile ? onTapProfile : () {
                           debugPrint('Already Profile');
@@ -204,8 +206,8 @@ class MyPostCard extends StatelessWidget {
   }
 
   // 🌟 Helper method to build the PopupMenuButton
-  Widget _buildPopupMenuButton(BuildContext context ) {
-    final MyPostController myPostController=Get.put(MyPostController());
+  Widget _buildPopupMenuButton(BuildContext context) {
+    final MyPostController myPostController = Get.put(MyPostController());
 
     return PopupMenuButton<PostAction>(
       color: Colors.white,
@@ -219,19 +221,19 @@ class MyPostCard extends StatelessWidget {
           PostAction.edit,
           Icons.edit_outlined,
           "Edit Post",
-          () {
-            Get.to(EditPost());
+              () {
+            Navigator.pop(context);
+            Get.to(EditPost(postId: postId.toString(),));
           },
         ),
         _buildPopupMenuItem(
           PostAction.delete,
           Icons.delete_outline,
           "Delete Post",
-          () {
+              () {
+            Navigator.pop(context);
             showDeletePostDialog(context, onConfirmDelete: () {
               myPostController.deletePost(postId.toString());
-
-
             });
           },
         ),
@@ -239,7 +241,7 @@ class MyPostCard extends StatelessWidget {
           PostAction.privacy,
           Icons.lock_outline,
           "Change Privacy",
-          () {
+              () {
             Navigator.pop(context);
           },
         ),
@@ -250,7 +252,7 @@ class MyPostCard extends StatelessWidget {
     );
   }
 
-  // 🌟 Helper method for a consistent MenuItem look
+
   PopupMenuItem<PostAction> _buildPopupMenuItem(
     PostAction value,
     IconData icon,
@@ -274,6 +276,7 @@ class MyPostCard extends StatelessWidget {
       ),
     );
   }
+
 
   Widget _buildCircleIcon({
     required IconData icon,

@@ -76,7 +76,7 @@ class _MyPostScreenState extends State<MyPostScreen> {
                     itemBuilder: (context, index) {
                       final data = controller.myPost[index];
                       return MyPostCard(
-                        postId: data.id,
+
                         onTapProfile: (){
                           debugPrint('Profile Tab');
                         },
@@ -101,6 +101,7 @@ class _MyPostScreenState extends State<MyPostScreen> {
                         privacyImage: data.privacy == "public"
                           ? AppIcons.public
                           : AppIcons.onlyMe,
+                        postId: data.id,
 
                       );
                     },

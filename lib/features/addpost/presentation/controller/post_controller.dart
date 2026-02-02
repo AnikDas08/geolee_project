@@ -131,7 +131,7 @@ class PostController extends GetxController {
     }
   }
 
-  // Image management methods
+
   void removeImageAtIndex(int index) {
     if (index >= 0 && index < selectedImages.length) {
       selectedImages.removeAt(index);

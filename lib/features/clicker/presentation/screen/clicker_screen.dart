@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:giolee78/component/image/common_image.dart';
-import 'package:giolee78/component/text/common_text.dart';
 import 'package:giolee78/component/text_field/common_text_field.dart';
 import 'package:giolee78/config/api/api_end_point.dart';
 import 'package:giolee78/features/clicker/presentation/controller/clicker_controller.dart';
@@ -13,11 +12,9 @@ import 'package:giolee78/features/clicker/presentation/widget/my_post_card.dart'
 import 'package:giolee78/features/notifications/presentation/controller/notifications_controller.dart';
 import 'package:giolee78/utils/constants/app_colors.dart';
 import 'package:giolee78/utils/constants/app_icons.dart';
-import 'package:giolee78/utils/extensions/extension.dart';
 import 'package:intl/intl.dart';
 import '../../../addpost/presentation/widgets/full_screen_view_image.dart';
 import '../../../friend/presentation/screen/view_friend_screen.dart';
-import 'package:timeago/timeago.dart' as timeago;
 
 class ClickerScreen extends StatefulWidget {
   const ClickerScreen({super.key});
@@ -60,15 +57,23 @@ class _ClickerScreenState extends State<ClickerScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Column(
             children: [
-              // Search bar
+              // Search bar with clear button
               CommonTextField(
+                controller: controller.searchController,
                 prefixIcon: const Icon(Icons.search),
                 hintText: "Search",
                 borderRadius: 20.r,
+                suffixIcon: Obx(() => controller.searchText.value.isNotEmpty
+                    ? IconButton(
+                  icon: const Icon(Icons.clear),
+                  onPressed: () {
+                    controller.searchController.clear();
+                  },
+                )
+                    : const SizedBox.shrink()),
               ),
               const SizedBox(height: 16),
 
-              // Carousel Slider
               CarouselSlider(
                 items: controller.banners,
                 options: CarouselOptions(
@@ -117,67 +122,69 @@ class _ClickerScreenState extends State<ClickerScreen> {
 
               // Posts list or empty state
               controller.filteredPosts.isEmpty
-                  ? const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 50),
-                      child: Center(
-                        child: Text(
-                          "No posts available",
-                          style: TextStyle(fontSize: 16),
-                        ),
-                      ),
-                    )
+                  ? Padding(
+                padding: const EdgeInsets.symmetric(vertical: 50),
+                child: Center(
+                  child: Text(
+                    controller.searchText.value.isNotEmpty
+                        ? "No posts found for '${controller.searchText.value}'"
+                        : "No posts available",
+                    style: const TextStyle(fontSize: 16),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              )
                   : ListView.separated(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: controller.filteredPosts.length,
-                      separatorBuilder: (_, __) => const SizedBox(height: 16),
-                      itemBuilder: (context, index) {
-                        final data = controller.filteredPosts[index];
-                        return GestureDetector(
-                          onTap: () {
-                            Get.to(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: controller.filteredPosts.length,
+                separatorBuilder: (_, __) => const SizedBox(height: 16),
+                itemBuilder: (context, index) {
+                  final data = controller.filteredPosts[index];
+                  return GestureDetector(
+                    onTap: () {
+                      Get.to(
+                            () => ViewFriendScreen(
+                          userId: data.user.id,
+                          isFriend: index % 2 == 0,
+                        ),
+                      );
+                    },
+                    child: MyPostCards(
+                      onTapPhoto: () {
+                        if (data.photos.isNotEmpty) {
+                          Get.to(() => FullScreenImageView(
+                            imageUrl: "${ApiEndPoint.imageUrl}${data.photos[0]}",
+                          ));
+                        }
+                      },
+                      onTapProfile: () {
+                        Get.to(
                               () => ViewFriendScreen(
-                                userId: data.user.id,
-                                isFriend: index % 2 == 0,
-                              ),
-                            );
-                          },
-                          child: MyPostCards(
-                            onTapPhoto: (){
-                              if (data.photos.isNotEmpty) {
-                                Get.to(() => FullScreenImageView(
-                                  imageUrl: "${ApiEndPoint.imageUrl+data.photos[0]}",
-                                ));
-                              }
-                            },
-                            onTapProfile: () {
-                              Get.to(
-                                () => ViewFriendScreen(
-                                  userId: data.user.id,
-                                  isFriend: index % 2 == 0,
-                                ),
-                              );
-                            },
-                            clickerType: data.clickerType,
-                            userName: data.user.name,
-                            userAvatar:
-                                "${ApiEndPoint.imageUrl+data.user.image}",
-                            timeAgo: _formatPostTime(
-                              DateTime.parse(data.createdAt.toString()),
-                            ),
-                            location: data.address,
-                            postImage: data.photos.isNotEmpty
-                                ? "${ApiEndPoint.imageUrl+data.photos[0]}"
-                                : "",
-                            description: data.description,
+                            userId: data.user.id,
                             isFriend: index % 2 == 0,
-                            privacyImage: data.privacy == "public"
-                                ? AppIcons.public
-                                : AppIcons.onlyMe,
                           ),
                         );
                       },
+                      clickerType: data.clickerType,
+                      userName: data.user.name,
+                      userAvatar: "${ApiEndPoint.imageUrl}${data.user.image}",
+                      timeAgo: _formatPostTime(
+                        DateTime.parse(data.createdAt.toString()),
+                      ),
+                      location: data.address,
+                      postImage: data.photos.isNotEmpty
+                          ? "${ApiEndPoint.imageUrl}${data.photos[0]}"
+                          : "",
+                      description: data.description,
+                      isFriend: index % 2 == 0,
+                      privacyImage: data.privacy == "public"
+                          ? AppIcons.public
+                          : AppIcons.onlyMe,
                     ),
+                  );
+                },
+              ),
             ],
           ),
         );
@@ -201,7 +208,7 @@ class _ClickerScreenState extends State<ClickerScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Obx(
-              () => Text(
+                  () => Text(
                 controller.selectedFilter,
                 style: const TextStyle(color: Colors.black, fontSize: 16),
               ),
