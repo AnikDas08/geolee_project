@@ -36,7 +36,6 @@ class MyFriendController extends GetxController {
   var isLoading = true.obs;
   final dio = Dio();
 
-  int friendRequestCount=0;
 
 
 
@@ -133,7 +132,6 @@ class MyFriendController extends GetxController {
 
         final model = FriendModel.fromJson(response.data);
         requests.value = model.data;
-        friendRequestCount=model.data.length.toInt();
 
       } else {
         debugPrint(

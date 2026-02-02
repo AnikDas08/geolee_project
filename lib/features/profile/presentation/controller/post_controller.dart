@@ -17,6 +17,7 @@ class MyPostController extends GetxController {
 
   RxList<PostData>myPost=<PostData>[].obs;
 
+
   @override
   void onInit() {
     super.onInit();
@@ -41,11 +42,11 @@ class MyPostController extends GetxController {
 
       if (response.statusCode == 200 || response.statusCode == 201) {
 
-
         print("===============================${response.data}");
 
-        final myPostModel = MyPostModel.fromJson(response.data as Map<String, dynamic>);
-        myPost.assignAll(myPostModel.data ?? []);
+
+        final myPostModel = MyPostModel.fromJson(response.data );
+        myPost.addAll(myPostModel.data ?? []);
       }
     } catch (e) {
       debugPrint('Error fetching posts: $e');
