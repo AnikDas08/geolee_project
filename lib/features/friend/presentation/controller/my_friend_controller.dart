@@ -1,18 +1,12 @@
-import 'dart:convert';
-
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
 import 'package:giolee78/config/api/api_end_point.dart';
 import 'package:giolee78/features/friend/data/friend_request_model.dart';
-import 'package:giolee78/services/api/api_response_model.dart';
 import 'package:giolee78/services/api/api_service.dart';
 import 'package:giolee78/services/repo/get_my_all_friend_repo.dart';
 import 'package:giolee78/utils/constants/app_images.dart';
 
-import '../../../../services/storage/storage_services.dart';
-import '../../data/friendship_request_status_response.dart';
 import '../../data/my_friends_model.dart';
 
 class MyFriendController extends GetxController {
@@ -34,10 +28,6 @@ class MyFriendController extends GetxController {
 
   var requests = <FriendData>[].obs;
   var isLoading = true.obs;
-  final dio = Dio();
-
-
-
 
   // Send friend request
   void sendFriendRequest(String userId) {
@@ -78,15 +68,7 @@ class MyFriendController extends GetxController {
     try {
       final url = "${ApiEndPoint.friendStatusUpdate + senderUserId}";
 
-      Map<String, String> header = {
-        'Authorization': 'Bearer ${LocalStorage.token}',
-      };
-
-      var response = await ApiService.patch(
-        url,
-        header: header,
-        body: {"status": 'accepted'},
-      );
+      var response = await ApiService.patch(url, body: {"status": 'accepted'});
 
       if (response.statusCode == 200) {
         requests.removeAt(index);
@@ -119,20 +101,16 @@ class MyFriendController extends GetxController {
     try {
       final url = "${ApiEndPoint.getMyFriendRequest}";
       isLoading.value = true;
-      final response = await dio.get(
-        url,
-        options: Options(
-          headers: {'Authorization': 'Bearer ${LocalStorage.token}'},
-        ),
-      );
+      final response = await ApiService.get(url);
       if (response.statusCode == 200) {
         debugPrint(
           "response is =>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>${response.data}",
         );
 
-        final model = FriendModel.fromJson(response.data);
+        final model = FriendModel.fromJson(
+          response.data as Map<String, dynamic>,
+        );
         requests.value = model.data;
-
       } else {
         debugPrint(
           "response is =>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>${response.data} ",
@@ -147,14 +125,9 @@ class MyFriendController extends GetxController {
 
   Future<void> rejectFriendRequest(String senderUserId, int index) async {
     try {
-      Map<String, String> header = {
-        'Authorization': 'Bearer ${LocalStorage.token}',
-      };
-
       final url = "${ApiEndPoint.friendStatusUpdate + senderUserId}";
       final response = await ApiService.patch(
         url,
-        header: header,
         body: {"status": 'rejected'},
       );
 
@@ -177,8 +150,4 @@ class MyFriendController extends GetxController {
       Get.snackbar("Error", "Network error");
     }
   }
-
-
-
-
 }

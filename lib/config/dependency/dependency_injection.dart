@@ -8,7 +8,9 @@ import 'package:giolee78/features/home/presentation/controller/home_nav_controll
 import 'package:giolee78/features/profile/presentation/controller/edit_post_controller.dart';
 import 'package:giolee78/features/profile/presentation/controller/edit_service_provider_controller.dart';
 import 'package:giolee78/features/profile/presentation/controller/post_controller.dart';
-import 'package:giolee78/features/advertise/presentation/controller/provider_info_controller.dart';
+import 'package:giolee78/features/advertise/presentation/controller/provider_complete_profile_controller.dart';
+import '../../features/advertise/presentation/controller/advertiser_edit_profile_controller.dart';
+import '../../features/advertise/presentation/controller/provider_profile_view_controller.dart';
 import '../../features/auth/change_password/presentation/controller/change_password_controller.dart';
 import '../../features/auth/forgot password/presentation/controller/forget_password_controller.dart';
 import '../../features/auth/sign in/presentation/controller/sign_in_controller.dart';
@@ -46,5 +48,7 @@ class DependencyInjection extends Bindings {
     Get.lazyPut(() => ClickerController(), fenix: true);
     Get.lazyPut(() => HomeNavController(), fenix: true);
     Get.lazyPut(() => MyPostController(), fenix: true);
+    Get.lazyPut(() => AdvertiserEditProfileController(), fenix: true);
+    Get.lazyPut(() => ProviderProfileViewController(), fenix: true);
   }
 }

@@ -74,15 +74,18 @@ class _HomeDetailsState extends State<HomeDetails> {
         Row(
           children: [
             GestureDetector(
-              onTap: () => Get.toNamed(AppRoutes.profile),
+              onTap: () {
+
+                Get.toNamed(AppRoutes.profile);
+                print("My Role Is :===========================${LocalStorage.myRole.toString()}");
+              },
               child: CircleAvatar(
                 radius: 20,
                 child: ClipOval(
                   child: CommonImage(
                     fill: BoxFit.fill,
-                    imageSrc: LocalStorage.myImage != null &&
-                        LocalStorage.myImage!.isNotEmpty
-                        ? ApiEndPoint.imageUrl + LocalStorage.myImage!
+                    imageSrc: LocalStorage.myImage.isNotEmpty
+                        ? ApiEndPoint.imageUrl + LocalStorage.myImage
                         : "",
                     size: 40,
                     defaultImage: AppImages.profileImage,

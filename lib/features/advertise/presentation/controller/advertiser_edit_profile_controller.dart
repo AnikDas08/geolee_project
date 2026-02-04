@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:giolee78/features/profile/presentation/controller/my_profile_controller.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:giolee78/features/profile/data/model/user_profile_model.dart';
 import 'package:giolee78/services/storage/storage_keys.dart';
@@ -12,44 +11,31 @@ import '../../../../config/api/api_end_point.dart';
 import '../../../../config/route/app_routes.dart';
 import '../../../../services/api/api_service.dart';
 import '../../../../utils/app_utils.dart';
-import '../../../../utils/log/app_log.dart';
 
-class ProfileController extends GetxController {
+class AdvertiserEditProfileController extends GetxController {
 
-  final MyProfileController _myProfileController=MyProfileController();
-  /// Language List here
+  // final MyProfileController _myProfileController=MyProfileController();
+
   List<String> languages = ["English", "French", "Arabic"];
 
-  /// Form key
   final formKey = GlobalKey<FormState>();
-
-  /// Selected language
   String selectedLanguage = "English";
-
-  /// Selected image
   File? selectedImage;
-
-  /// Loading state
   bool isLoading = false;
-
   UserProfileModel? profileModel;
 
-  /// Image picker instance
   final ImagePicker _picker = ImagePicker();
 
-  /// Controllers
-  TextEditingController nameController = TextEditingController()..text = LocalStorage.myName;
+  TextEditingController businessNameController = TextEditingController();
+  TextEditingController businessLicenceController = TextEditingController();
+  TextEditingController businessTypeController = TextEditingController();
   TextEditingController numberController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
-  TextEditingController aboutController = TextEditingController()..text=LocalStorage.bio;
-  TextEditingController dateOfBirthController = TextEditingController()
-    ..text = LocalStorage.dateOfBirth.isNotEmpty
-        ? LocalStorage.dateOfBirth.split('T').first
-        : "";
-  TextEditingController genderController = TextEditingController()..text = LocalStorage.gender;
-  TextEditingController addressController = TextEditingController();
+  TextEditingController phoneNumberController = TextEditingController();
+  TextEditingController bioController = TextEditingController();
 
-  /// Request permission
+
+
   Future<bool> _requestImagePermission(ImageSource source) async {
     if (source == ImageSource.camera) {
       final status = await Permission.camera.request();
@@ -155,23 +141,6 @@ class ProfileController extends GetxController {
     }
   }
 
-  /// Pick date of birth
-  Future<void> pickDateOfBirth() async {
-    DateTime? pickedDate = await showDatePicker(
-      context: Get.context!,
-      initialDate: dateOfBirthController.text.isNotEmpty
-          ? DateTime.tryParse(dateOfBirthController.text) ?? DateTime(2000, 1, 1)
-          : DateTime(2000, 1, 1),
-      firstDate: DateTime(1950),
-      lastDate: DateTime.now(),
-    );
-
-    if (pickedDate != null) {
-      dateOfBirthController.text =
-      "${pickedDate.year}-${pickedDate.month.toString().padLeft(2, '0')}-${pickedDate.day.toString().padLeft(2, '0')}";
-      update();
-    }
-  }
 
   /// Select language
   void selectLanguage(int index) {
@@ -180,13 +149,9 @@ class ProfileController extends GetxController {
     Get.back();
   }
 
-  /// Select gender
-  void selectGender(String gender) {
-    genderController.text = gender;
-    update();
-  }
 
-  /// Edit profile API
+
+
   Future<void> editProfileRepo() async {
     if (!formKey.currentState!.validate()) return;
     if (!LocalStorage.isLogIn) return;
@@ -195,26 +160,10 @@ class ProfileController extends GetxController {
     update();
 
     try {
-      // Parse DOB to ISO8601
-      // ... inside your try block
-      DateTime? dobDate = DateTime.tryParse(dateOfBirthController.text.trim());
-
-      if (dobDate == null) {
-        Utils.errorSnackBar("Error", "Invalid Date of Birth");
-        isLoading = false;
-        update();
-        return;
-      }
-
-// ✅ Convert to UTC to ensure the "Z" suffix is added
-      String formattedDob = dobDate.toUtc().toIso8601String();
-
 
       Map<String, String> body = {
-        "name": nameController.text.trim(),
-        "bio": aboutController.text.trim(),
-        "dob": formattedDob, // Use the UTC version
-        "gender": genderController.text.trim(),
+        "name": businessNameController.text.trim(),
+        "bio": bioController.text.trim(),
 
       };
 
@@ -232,9 +181,6 @@ class ProfileController extends GetxController {
         LocalStorage.myName = data['data']?["name"] ?? LocalStorage.myName;
         LocalStorage.myEmail = data['data']?["email"] ?? LocalStorage.myEmail;
         LocalStorage.myImage = data['data']?["image"] ?? LocalStorage.myImage;
-        LocalStorage.dateOfBirth = data['data']?['dob'] ?? LocalStorage.dateOfBirth;
-        LocalStorage.bio = data['data']?['bio'] ?? LocalStorage.bio;
-        LocalStorage.gender = data['data']?['gender'] ??LocalStorage.gender;
 
         await Future.wait([
           LocalStorage.setString(LocalStorageKeys.userId, LocalStorage.userId),
@@ -246,7 +192,7 @@ class ProfileController extends GetxController {
           LocalStorage.setString(LocalStorageKeys.gender, LocalStorage.gender),
         ]);
 
-        _myProfileController.getUserData();
+        // _myProfileController.getUserData();
 
 
         Utils.successSnackBar("Success", data['message'] ?? "Profile Updated Successfully");
@@ -265,71 +211,12 @@ class ProfileController extends GetxController {
     }
   }
 
-
-  // Future<String?> getUserDataForRole() async {
-  //   isLoading = true;
-  //   update();
-  //
-  //   try {
-  //     var response = await ApiService.get(
-  //       ApiEndPoint.profile,
-  //     ).timeout(const Duration(seconds: 30));
-  //
-  //     if (response.statusCode == 200) {
-  //       var data = response.data;
-  //
-  //
-  //       String? advertiserToken = data['data']?['advertiser'];
-  //
-  //       return advertiserToken;
-  //
-  //     } else {
-  //       Get.snackbar(response.statusCode.toString(), response.message);
-  //       return null;
-  //     }
-  //   } catch (e) {
-  //     Get.snackbar("Error", e.toString());
-  //     return null;
-  //   } finally {
-  //     isLoading = false;
-  //     update();
-  //   }
-  // }
-
-
-  Future<void> changeRole(String newRole) async {
-    isLoading = true;
-    update();
-
-    try {
-      // 1. Update local variables
-      LocalStorage.myRole = newRole;
-
-      // 2. Persist to storage
-      await LocalStorage.setString(LocalStorageKeys.myRole, newRole);
-
-      // 3. Optional: Sync with Server here if you have an API for this
-      // await ApiService.post(ApiEndPoint.updateRole, body: {"role": newRole});
-
-      appLog("Role switched to: ${LocalStorage.myRole}");
-    } catch (e) {
-      appLog("Error switching role: $e");
-    } finally {
-      isLoading = false;
-      update(); // This refreshes the DashBoardProfile UI
-    }
-  }
-
-
   @override
   void onClose() {
-    nameController.dispose();
+    businessNameController.dispose();
     numberController.dispose();
     passwordController.dispose();
-    aboutController.dispose();
-    dateOfBirthController.dispose();
-    genderController.dispose();
-    addressController.dispose();
+    bioController.dispose();
     super.onClose();
   }
 

@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_rx/src/rx_types/rx_types.dart';
 import 'package:giolee78/config/api/api_end_point.dart';
 import 'package:giolee78/features/addpost/my_post_model.dart' hide Pagination;
 import 'package:giolee78/features/home/presentation/controller/home_controller.dart';
-import 'package:giolee78/services/storage/storage_services.dart';
 
 import '../../../../services/api/api_response_model.dart';
 import '../../../../services/api/api_service.dart';
@@ -32,10 +30,7 @@ class MyPostController extends GetxController {
 
       ApiResponseModel response = await ApiService.get(
         url,
-        header: {
-          'Authorization': 'Bearer ${LocalStorage.token}',
-          'Content-Type': 'application/json',
-        },
+
       );
 
 
@@ -67,9 +62,7 @@ class MyPostController extends GetxController {
     try {
       ApiResponseModel response = await ApiService.delete(
         "${ApiEndPoint.deletePost}$postId",
-        header: {
-          'Authorization': 'Bearer ${LocalStorage.token}',
-        },
+
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {

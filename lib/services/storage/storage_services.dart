@@ -5,9 +5,7 @@ import '../../utils/log/app_log.dart';
 import 'storage_keys.dart';
 
 class LocalStorage {
-  static String token = "";
   static String forgotPasswordToken="";
-  static String refreshToken = "";
   static bool isLogIn = false;
   static String userId = "";
   static String myImage = "";
@@ -27,7 +25,9 @@ class LocalStorage {
   static String createdAt = "";
   static String updatedAt = "";
 
-  // Create Local Storage Instance
+
+
+
   static SharedPreferences? preferences;
 
   /// Get SharedPreferences Instance
@@ -40,8 +40,7 @@ class LocalStorage {
   static Future<void> getAllPrefData() async {
     final localStorage = await _getStorage();
 
-    token = localStorage.getString(LocalStorageKeys.token) ?? "";
-    refreshToken = localStorage.getString(LocalStorageKeys.refreshToken) ?? "";
+
     isLogIn = localStorage.getBool(LocalStorageKeys.isLogIn) ?? false;
     userId = localStorage.getString(LocalStorageKeys.userId) ?? "";
     myImage = localStorage.getString(LocalStorageKeys.myImage) ?? "";

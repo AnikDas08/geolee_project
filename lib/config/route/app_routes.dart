@@ -10,7 +10,7 @@ import 'package:giolee78/features/notifications/presentation/screen/stripe_web_v
 import 'package:giolee78/features/profile/presentation/screen/edit_post_screen.dart';
 import 'package:giolee78/features/profile/presentation/screen/edit_service_provider_profile.dart';
 import 'package:giolee78/features/profile/presentation/screen/privacy_policy_screen.dart';
-import 'package:giolee78/features/advertise/presentation/screen/provider_info_screen.dart';
+import 'package:giolee78/features/advertise/presentation/screen/provider_complete_profile_screen.dart';
 import 'package:giolee78/features/profile/presentation/screen/terms_of_services_screen.dart';
 import '../../features/auth/change_password/presentation/screen/change_password_screen.dart';
 import '../../features/auth/forgot password/presentation/screen/create_password.dart';

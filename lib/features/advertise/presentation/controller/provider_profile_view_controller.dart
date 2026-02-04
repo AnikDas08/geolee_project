@@ -1,12 +1,12 @@
 import 'package:get/get.dart';
 import 'package:giolee78/config/api/api_end_point.dart';
-import 'package:giolee78/config/route/app_routes.dart';
+import 'package:giolee78/features/advertise/presentation/screen/advertiser_edit_profile_screen.dart';
 import 'package:giolee78/features/profile/data/model/user_profile_model.dart';
 import 'package:giolee78/services/api/api_service.dart';
 import 'package:giolee78/services/storage/storage_keys.dart';
 import 'package:giolee78/services/storage/storage_services.dart';
 
-class MyProfileController extends GetxController {
+class ProviderProfileViewController extends GetxController {
   bool isLoading = false;
   UserProfileModel? profileModel;
 
@@ -64,7 +64,7 @@ class MyProfileController extends GetxController {
   // ================= NAVIGATION =================
 
   void navigateToEditProfile() {
-    Get.toNamed(AppRoutes.editProfile);
+    Get.to(AdvertiserEditProfileScreen());
   }
 
   void goBack() {
@@ -80,7 +80,6 @@ class MyProfileController extends GetxController {
     try {
       final response = await ApiService.get(
         ApiEndPoint.profile,
-
       ).timeout(const Duration(seconds: 30));
 
       if (response.statusCode == 200) {

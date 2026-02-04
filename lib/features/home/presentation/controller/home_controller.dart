@@ -89,7 +89,6 @@ class HomeController extends GetxController {
     try {
       final response = await ApiService.get(
         ApiEndPoint.post,
-        header: {"Authorization": "Bearer ${LocalStorage.token}"},
       );
 
       if (response.statusCode == 200) {
@@ -109,7 +108,6 @@ class HomeController extends GetxController {
     try {
       final response = await ApiService.get(
         "user/profile",
-        header: {"Authorization": "Bearer ${LocalStorage.token}"},
       );
 
       if (response.statusCode == 200) {

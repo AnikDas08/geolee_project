@@ -4,11 +4,10 @@ import 'package:get/get.dart';
 import 'package:giolee78/component/button/common_button.dart';
 import 'package:giolee78/component/image/common_image.dart';
 import 'package:giolee78/component/text_field/common_text_field.dart';
-import 'package:giolee78/features/advertise/presentation/screen/verify_user.dart';
 import 'package:giolee78/utils/constants/app_colors.dart';
 import 'package:giolee78/utils/constants/app_images.dart';
 import 'dart:io'; // Import for File
-import '../controller/provider_info_controller.dart';
+import '../controller/provider_complete_profile_controller.dart';
 
 class ServiceProviderInfoScreen extends StatelessWidget {
   ServiceProviderInfoScreen({super.key});
@@ -88,7 +87,6 @@ class ServiceProviderInfoScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 20),
-              // Category Dropdown
               const Text(
                 'Business Name',
                 style: TextStyle(
@@ -177,7 +175,7 @@ class ServiceProviderInfoScreen extends StatelessWidget {
                 titleText: "Confirm",
                 buttonHeight: 40,
                 onTap: () {
-                  Get.to(() => const VerifyUser());
+                  controller.completeAdvertiserInfo();
                 },
               ),
             ],

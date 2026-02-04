@@ -167,14 +167,22 @@ class ProfileScreen extends StatelessWidget {
                         );
                       },
                     ),
+
                     SizedBox(height: 20.h,),
-                    if (LocalStorage.myRole != UserType.advertise.name)
+
+                    if (LocalStorage.myRole != UserType.advertiser.name)
                     CommonButton(
                         titleText: "Advertise with Us",
                       onTap: (){
-                          Get.toNamed(
-                              AppRoutes.serviceProviderInfo
-                          );
+
+                          print("My Role Is :===========================${LocalStorage.myRole.toString()}");
+
+                        if (LocalStorage.myRole == UserType.advertiser.name) {
+                          Get.offAllNamed(AppRoutes.homeNav);
+                        } else {
+                          /// Normal user → go to advertiser create/info screen
+                          Get.toNamed(AppRoutes.serviceProviderInfo);
+                        }
                       },
                     ),
                   ],

@@ -54,6 +54,8 @@ dependencies:
   timeago: ^3.7.1
   photo_view: ^0.15.0
   google_maps_flutter: ^2.14.0
+  dio_cookie_manager: ^3.3.0
+  cookie_jar: ^4.0.8
 
 
 

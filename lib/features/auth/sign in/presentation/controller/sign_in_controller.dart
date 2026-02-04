@@ -43,12 +43,8 @@ class SignInController extends GetxController {
       };
 
 
-      Map<String, String> header = {
-        'Authorization': 'Bearer ${LocalStorage.token}',
-      };
-
       var response = await ApiService.post(
-        header: header,
+
         ApiEndPoint.signIn,
         body: body,
       ).timeout(const Duration(seconds: 30));
@@ -59,11 +55,9 @@ class SignInController extends GetxController {
 
        Utils.successSnackBar('Login', "Successfully Login To Your Account");
 
-        LocalStorage.token = data['data']["accessToken"];
         LocalStorage.isLogIn = true;
 
         LocalStorage.setBool(LocalStorageKeys.isLogIn, LocalStorage.isLogIn);
-        LocalStorage.setString(LocalStorageKeys.token, LocalStorage.token);
 
         getUserData();
 
@@ -93,7 +87,6 @@ class SignInController extends GetxController {
 
       if (response.statusCode == 200) {
         var data = response.data;
-
         LocalStorage.userId = data['data']?["_id"];
         LocalStorage.myImage = data['data']?["image"];
         LocalStorage.myName = data['data']?["name"];
@@ -106,6 +99,8 @@ class SignInController extends GetxController {
         LocalStorage.setString(LocalStorageKeys.myName, LocalStorage.myName);
         LocalStorage.setString(LocalStorageKeys.myEmail, LocalStorage.myEmail);
         LocalStorage.setString(LocalStorageKeys.myRole, LocalStorage.myRole);
+        print("====================================================${data['data']['advertiser']}");
+
       } else {
         Get.snackbar(response.statusCode.toString(), response.message);
       }

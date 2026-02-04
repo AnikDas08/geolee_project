@@ -3,7 +3,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:giolee78/component/image/common_image.dart';
 import 'package:giolee78/component/text/common_text.dart';
-import 'package:giolee78/config/route/app_routes.dart';
 import 'package:giolee78/features/addpost/presentation/screen/edit_post.dart';
 import 'package:giolee78/features/profile/presentation/controller/post_controller.dart';
 import 'package:giolee78/utils/constants/app_colors.dart';

@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
-import 'package:giolee78/component/pop_up/common_pop_menu.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:intl_phone_field/countries.dart';
@@ -15,9 +14,7 @@ import 'package:giolee78/utils/constants/app_colors.dart';
 import 'package:giolee78/utils/helpers/other_helper.dart';
 import '../../../../../config/route/app_routes.dart';
 import '../../../../../services/api/api_service.dart';
-import '../../../../../services/storage/storage_keys.dart';
 import '../../../../../config/api/api_end_point.dart';
-import '../../../../../services/storage/storage_services.dart';
 import '../../../../../utils/app_utils.dart';
 
 class SignUpController extends GetxController {
@@ -181,7 +178,6 @@ class SignUpController extends GetxController {
 
           String bearerToken = data['data']['accessToken'];
 
-          LocalStorage.setString(LocalStorageKeys.token,LocalStorage.token=bearerToken);
 
           Get.toNamed(AppRoutes.completeProfile);
         } else {
@@ -207,7 +203,6 @@ class SignUpController extends GetxController {
     isLoading = true;
     update();
 
-    debugPrint("token is ==============================${LocalStorage.token}");
 
 
     String formattedDob = "";
@@ -236,9 +231,7 @@ class SignUpController extends GetxController {
     try {
       ApiResponseModel response;
 
-      Map<String, String> header = {
-        'Authorization': 'Bearer ${LocalStorage.token}',
-      };
+
 
       if (image != null && image!.isNotEmpty) {
         debugPrint("📸 Uploading profile image: $image");
@@ -248,7 +241,6 @@ class SignUpController extends GetxController {
           imagePath: image!,
           imageName: "image",
           method: "PATCH",
-          header: header,
         );
       } else {
 
@@ -257,7 +249,6 @@ class SignUpController extends GetxController {
         response = await ApiService.patch(
           ApiEndPoint.updateProfile,
           body: body,
-          header: header,
         );
       }
 

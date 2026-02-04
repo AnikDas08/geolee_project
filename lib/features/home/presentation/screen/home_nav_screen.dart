@@ -73,9 +73,10 @@ class HomeNav extends StatelessWidget {
 
       /// Bottom Navigation
       bottomNavigationBar: Obx(() {
-        if (!controller.showNavBar.value) return SizedBox.shrink();
 
+        if (!controller.showNavBar.value) return SizedBox.shrink();
         final isUser = controller.userType == UserType.user;
+
 
         return BottomAppBar(
           shape: const CircularNotchedRectangle(),

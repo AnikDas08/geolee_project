@@ -6,14 +6,12 @@ import 'package:get/get.dart';
 import 'package:giolee78/component/other_widgets/item.dart';
 import 'package:giolee78/features/chat_nearby/presentation/screen/chat_nearby_screen.dart';
 import 'package:giolee78/features/clicker/presentation/screen/clicker_screen.dart';
-import 'package:giolee78/features/friend/presentation/controller/my_friend_controller.dart';
 import 'package:giolee78/features/friend/presentation/screen/friend_request_screen.dart';
 import 'package:giolee78/features/friend/presentation/screen/my_friend_screen.dart';
 import 'package:giolee78/features/addpost/presentation/screen/my_post_screen.dart';
 import 'package:giolee78/features/home/presentation/controller/home_nav_controller.dart';
 import 'package:giolee78/features/notifications/presentation/controller/notifications_controller.dart';
 import 'package:giolee78/utils/constants/app_icons.dart';
-import 'package:giolee78/utils/constants/app_images.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import '../../../../utils/constants/app_colors.dart';

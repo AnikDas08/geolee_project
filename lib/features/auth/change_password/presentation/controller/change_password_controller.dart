@@ -1,6 +1,5 @@
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
-import 'package:giolee78/services/storage/storage_services.dart';
 
 import '../../../../../services/api/api_service.dart';
 import '../../../../../config/api/api_end_point.dart';
@@ -25,13 +24,10 @@ class ChangePasswordController extends GetxController {
         "newPassword": newPasswordController.text,
         "confirmPassword": confirmPasswordController.text,
       };
-      Map<String, String> header = {
-        "Authorization": "Bearer ${LocalStorage.token}",
-      };
+
       var response = await ApiService.post(
         ApiEndPoint.changePassword,
         body: body,
-        header: header,
       );
 
       if (response.statusCode == 200) {

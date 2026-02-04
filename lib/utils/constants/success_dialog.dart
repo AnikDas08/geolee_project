@@ -52,7 +52,7 @@ class SuccessDialog {
                 buttonRadius: 10,
                 buttonColor: AppColors.primaryColor,
                 onTap: () {
-                  Navigator.pop(context); // Close current dialog
+                  Navigator.pop(context);
                 },
               ),
             ],

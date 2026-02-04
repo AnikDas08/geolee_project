@@ -44,6 +44,14 @@ class ApiEndPoint {
   static const String leaveChat = "${baseUrl}chats/leave/696b6da6a27367444bc2403a";
   static const String joinChat = "${baseUrl}chats/join/696b6da6a27367444bc2403a";
 
+
+
+
+  //Advertiser========================================================
+  static const String advertiserCompleteProfile="${baseUrl}advertisers/create";
+  static const String advertiserVerify="${baseUrl}/advertisers/verify";
+  static const String resendOtp="${baseUrl}/auth/request-otp";
+
   // Misc ===========================================
   static const String support = "${baseUrl}supports/create";
   // Misc ===========================================
@@ -62,5 +70,8 @@ class ApiEndPoint {
   static const String servicePay = "${baseUrl}pay/booked-service";
   static const String myServiceHistory = "${baseUrl}pay/my-service-history";
   static const String updateRequest = "${baseUrl}pay/my-service-history/";
+
+
+
 
 }

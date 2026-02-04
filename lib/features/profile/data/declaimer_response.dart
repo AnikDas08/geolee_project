@@ -4,6 +4,6 @@ class DisclaimerResponse {
   DisclaimerResponse({required this.content});
 
   factory DisclaimerResponse.fromJson(Map<String, dynamic> json) {
-    return DisclaimerResponse(content: json['data']['content']);
+    return DisclaimerResponse(content: json['content']);
   }
 }

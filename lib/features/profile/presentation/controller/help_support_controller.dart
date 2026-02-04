@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
-import 'package:giolee78/config/route/app_routes.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:giolee78/features/profile/data/model/html_model.dart';
 

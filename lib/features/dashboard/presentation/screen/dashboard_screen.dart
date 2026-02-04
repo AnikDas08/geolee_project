@@ -2,16 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
-import 'package:giolee78/config/route/app_routes.dart';
 import 'package:giolee78/features/ads/presentation/screen/view_ads_screen.dart';
-import 'package:giolee78/features/clicker/presentation/widget/app_bar.dart';
-import 'package:giolee78/features/profile/presentation/screen/dashboard_profile.dart';
 
 import '../../../../component/image/common_image.dart';
 import '../../../../component/text/common_text.dart';
+import '../../../../services/storage/storage_services.dart';
 import '../../../../utils/constants/app_colors.dart';
 import '../../../../utils/constants/app_icons.dart';
 import '../../../../utils/constants/app_images.dart';
+import '../../../advertise/presentation/screen/provider_profile_view_screen.dart';
+import '../../../profile/presentation/screen/dashboard_profile.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -71,6 +71,7 @@ class DashboardScreen extends StatelessWidget {
       children: [
         GestureDetector(
           onTap: (){
+            print("My Role Is :===========================${LocalStorage.myRole.toString()}");
             Get.to(() => const DashBoardProfile());
           },
           child: Row(

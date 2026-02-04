@@ -10,7 +10,6 @@ import 'package:giolee78/features/addpost/presentation/widgets/my_post_card.dart
 import 'package:giolee78/features/clicker/presentation/controller/clicker_controller.dart';
 import 'package:giolee78/utils/constants/app_colors.dart';
 import 'package:giolee78/utils/constants/app_icons.dart';
-import 'package:giolee78/utils/constants/app_images.dart';
 import 'package:giolee78/utils/extensions/extension.dart';
 import 'package:intl/intl.dart';
 
