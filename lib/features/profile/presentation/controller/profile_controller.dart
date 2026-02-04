@@ -37,6 +37,23 @@ class ProfileController extends GetxController {
   /// Image picker instance
   final ImagePicker _picker = ImagePicker();
 
+  @override
+  void onInit() {
+    // TODO: implement onInit
+    super.onInit();
+    getUserDataForRole();
+    _loadAdvertiserStatus();
+  }
+
+  String? advertiserToken;
+  bool isLoadingRole = true;
+
+  Future<void> _loadAdvertiserStatus() async {
+    advertiserToken = await getUserDataForRole();
+    isLoadingRole = false;
+    update(); // 🔥 MUST
+  }
+
   /// Controllers
   TextEditingController nameController = TextEditingController()..text = LocalStorage.myName;
   TextEditingController numberController = TextEditingController();
@@ -265,36 +282,39 @@ class ProfileController extends GetxController {
     }
   }
 
+  String advToken="";
 
-  // Future<String?> getUserDataForRole() async {
-  //   isLoading = true;
-  //   update();
-  //
-  //   try {
-  //     var response = await ApiService.get(
-  //       ApiEndPoint.profile,
-  //     ).timeout(const Duration(seconds: 30));
-  //
-  //     if (response.statusCode == 200) {
-  //       var data = response.data;
-  //
-  //
-  //       String? advertiserToken = data['data']?['advertiser'];
-  //
-  //       return advertiserToken;
-  //
-  //     } else {
-  //       Get.snackbar(response.statusCode.toString(), response.message);
-  //       return null;
-  //     }
-  //   } catch (e) {
-  //     Get.snackbar("Error", e.toString());
-  //     return null;
-  //   } finally {
-  //     isLoading = false;
-  //     update();
-  //   }
-  // }
+  Future<String?> getUserDataForRole() async {
+    isLoading = true;
+    update();
+
+    try {
+      var response = await ApiService.get(
+        ApiEndPoint.profile,
+      ).timeout(const Duration(seconds: 30));
+
+      if (response.statusCode == 200) {
+        var data = response.data;
+
+
+        String? advertiserToken = data['data']?['advertiser']?.toString();
+        advToken=advertiserToken??"";
+
+
+        return advertiserToken;
+
+      } else {
+        Get.snackbar(response.statusCode.toString(), response.message);
+        return null;
+      }
+    } catch (e) {
+      Get.snackbar("Error", e.toString());
+      return null;
+    } finally {
+      isLoading = false;
+      update();
+    }
+  }
 
 
   Future<void> changeRole(String newRole) async {

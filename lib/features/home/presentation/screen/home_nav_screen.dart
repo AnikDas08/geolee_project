@@ -19,19 +19,26 @@ class HomeNav extends StatelessWidget {
 
   final HomeNavController controller = Get.put(HomeNavController());
 
+  /// User screens
   final List<Widget> userScreens = [
     HomeScreen(),
     AddPostScreen(),
     ChatListScreen(),
   ];
 
+  /// Advertiser screens
   final List<Widget> advertiseScreens = [
     HomeScreen(),
     CreateAdsScreen(),
     DashboardScreen(),
   ];
 
-  final List<String> icons = [
+  final List<String> userIcons = [
+    AppIcons.homeIcon,
+    AppIcons.chatIcon,
+  ];
+
+  final List<String> advertiserIcons = [
     AppIcons.homeIcon,
     AppIcons.chatIcon,
   ];
@@ -48,11 +55,12 @@ class HomeNav extends StatelessWidget {
       }),
 
       /// FAB
-      floatingActionButtonLocation:
-      FloatingActionButtonLocation.centerDocked,
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: Obx(() {
-        return controller.showNavBar.value
-            ? SizedBox(
+        if (!controller.showNavBar.value) return SizedBox.shrink();
+
+        final isUser = controller.currentMode.value == UserType.user;
+        return SizedBox(
           height: 70.w,
           width: 70.w,
           child: FloatingActionButton(
@@ -66,15 +74,15 @@ class HomeNav extends StatelessWidget {
               child: CommonImage(imageSrc: AppIcons.add),
             ),
           ),
-        )
-            : SizedBox.shrink();
+        );
       }),
 
       /// Bottom Navigation
       bottomNavigationBar: Obx(() {
         if (!controller.showNavBar.value) return SizedBox.shrink();
-        
+
         final isUser = controller.currentMode.value == UserType.user;
+        final icons = isUser ? userIcons : advertiserIcons;
 
         return BottomAppBar(
           shape: const CircularNotchedRectangle(),
@@ -104,14 +112,14 @@ class HomeNav extends StatelessWidget {
     );
   }
 
+  /// Navigation Item Builder
   Widget _buildNavItem({
     required int index,
     required String iconPath,
     required String label,
   }) {
     return Obx(() {
-      final bool isSelected =
-          controller.currentIndex.value == index;
+      final bool isSelected = controller.currentIndex.value == index;
 
       return GestureDetector(
         onTap: () => controller.changeIndex(index),
@@ -123,9 +131,7 @@ class HomeNav extends StatelessWidget {
               height: 24.w,
               width: 24.w,
               colorFilter: ColorFilter.mode(
-                isSelected
-                    ? AppColors.primaryColor
-                    : Colors.black,
+                isSelected ? AppColors.primaryColor : Colors.black,
                 BlendMode.srcIn,
               ),
             ),
@@ -134,9 +140,7 @@ class HomeNav extends StatelessWidget {
               label,
               style: TextStyle(
                 fontSize: 12.sp,
-                color: isSelected
-                    ? AppColors.primaryColor
-                    : Colors.black,
+                color: isSelected ? AppColors.primaryColor : Colors.black,
                 fontWeight: FontWeight.w600,
               ),
             ),

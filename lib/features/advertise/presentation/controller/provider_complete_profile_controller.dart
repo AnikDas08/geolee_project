@@ -131,8 +131,9 @@ class ServiceProviderController extends GetxController {
       if (response.statusCode == 200) {
         Get.snackbar("Success", "Advertiser info updated successfully");
 
-        // Temporary role update to persist through verification steps if needed
-        await LocalStorage.setString(LocalStorageKeys.myRole, UserType.advertiser.name);
+        LocalStorage.myRole = UserType.advertiser.name;
+        LocalStorage.setString(LocalStorageKeys.myRole, LocalStorage.myRole);
+
 
         Get.offAll(ProviderVerifyUser());
         startTimer();
@@ -208,16 +209,14 @@ class ServiceProviderController extends GetxController {
       if (response.statusCode == 200 || response.statusCode == 201) {
         Get.snackbar('Verify', "OTP Verify SuccessFull");
 
+        final data=response.data;
 
-        // 1. Permanently update the role
-        await LocalStorage.setString(LocalStorageKeys.myRole, UserType.advertiser.name);
-        
-        // 2. Refresh static variables in LocalStorage
-        await LocalStorage.getAllPrefData();
+        LocalStorage.myRole = UserType.advertiser.name;
+        LocalStorage.setString(LocalStorageKeys.myRole, LocalStorage.myRole);
+
 
         successPopUps(message: 'Verify Success', onTap: (){
-          // 3. Re-initialize navigation with the new role
-          Get.offAll(() => HomeNav());
+          Get.offAll(HomeNav());
 
         }, buttonTitle: "Go To Dashboard");
 

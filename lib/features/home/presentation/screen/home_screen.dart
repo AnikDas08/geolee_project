@@ -14,6 +14,7 @@ import 'package:giolee78/features/notifications/presentation/controller/notifica
 import 'package:giolee78/utils/constants/app_icons.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
+import '../../../../services/storage/storage_services.dart';
 import '../../../../utils/constants/app_colors.dart';
 import '../controller/home_controller.dart';
 import '../widgets/clicker_main.dart';
@@ -45,6 +46,13 @@ class _HomeScreenState extends State<HomeScreen> {
     zoom: 14.151926040649414,
   );
 
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    print("My Role Is :=========================== ${LocalStorage.myRole.toString()}");
+  }
   @override
   Widget build(BuildContext context) {
     return WillPopScope(

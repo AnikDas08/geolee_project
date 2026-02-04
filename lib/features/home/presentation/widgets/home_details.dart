@@ -10,6 +10,7 @@ import 'package:giolee78/utils/extensions/extension.dart';
 import '../../../../component/image/common_image.dart';
 import '../../../../component/text/common_text.dart';
 import '../../../../config/api/api_end_point.dart';
+import '../../../../services/storage/storage_keys.dart';
 import '../../../../utils/constants/app_colors.dart';
 import '../../../../utils/constants/app_images.dart';
 
@@ -76,8 +77,11 @@ class _HomeDetailsState extends State<HomeDetails> {
             GestureDetector(
               onTap: () {
 
+                LocalStorage.setRole(LocalStorageKeys.myRole, "user");
+                LocalStorage.myRole='user';
+
                 Get.toNamed(AppRoutes.profile);
-                print("My Role Is :===========================${LocalStorage.myRole.toString()}");
+                print("My Role Is :===========================${LocalStorage.myRole}");
               },
               child: CircleAvatar(
                 radius: 20,

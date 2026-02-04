@@ -4,6 +4,7 @@ import 'package:cookie_jar/cookie_jar.dart';
 import 'package:dio/dio.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:mime/mime.dart';
+import 'package:path_provider/path_provider.dart';
 import '../../config/api/api_end_point.dart';
 import '../../utils/constants/app_string.dart';
 import '../../utils/log/api_log.dart';
@@ -155,22 +156,22 @@ class ApiService {
     }
   }
 
-
-
   static Future<ApiResponseModel> multipartUpdate(
-      String url, {
-        Map<String, String>? header,
-        Map<String, String>? body,
-        String method = "PATCH",
-        String imageName = 'image',
-        String? imagePath,
-        bool skipAuth = false,
-      }) async {
-    final Map<String, String> safeHeader =
-    header != null ? Map<String, String>.from(header) : {};
+    String url, {
+    Map<String, String>? header,
+    Map<String, String>? body,
+    String method = "PATCH",
+    String imageName = 'image',
+    String? imagePath,
+    bool skipAuth = false,
+  }) async {
+    final Map<String, String> safeHeader = header != null
+        ? Map<String, String>.from(header)
+        : {};
 
-    final Map<String, String> safeBody =
-    body != null ? Map<String, String>.from(body) : {};
+    final Map<String, String> safeBody = body != null
+        ? Map<String, String>.from(body)
+        : {};
 
     FormData formData = FormData();
 
@@ -199,15 +200,8 @@ class ApiService {
       formData.fields.add(MapEntry(key, value));
     });
 
-
-    return _request(
-      url,
-      method,
-      body: formData,
-      header: safeHeader,
-    );
+    return _request(url, method, body: formData, header: safeHeader);
   }
-
 
   static ApiResponseModel _handleDioException(DioException error) {
     switch (error.type) {
@@ -234,10 +228,21 @@ class ApiService {
 }
 
 /// ========== [ DIO INSTANCE WITH INTERCEPTORS ] ========== ///
+///
+
+CookieJar cookieJar = CookieJar();
+
+Future<CookieJar> cookieJarInit() async {
+  final dir = await getApplicationDocumentsDirectory();
+  cookieJar = PersistCookieJar(
+    ignoreExpires: true,
+    storage: FileStorage("${dir.path}/.cookies/"),
+  );
+  return cookieJar;
+}
 
 Dio _getMyDio() {
-  final  Dio dio = Dio();
-  final cookieJar = CookieJar();
+  final Dio dio = Dio();
 
   dio.interceptors.addAll([
     InterceptorsWrapper(
@@ -249,8 +254,9 @@ Dio _getMyDio() {
           ..receiveDataWhenStatusError = true
           ..responseType = ResponseType.json
           ..receiveTimeout = const Duration(seconds: 30)
-          ..baseUrl =
-          options.baseUrl.startsWith('http') ? '' : ApiEndPoint.baseUrl;
+          ..baseUrl = options.baseUrl.startsWith('http')
+              ? ''
+              : ApiEndPoint.baseUrl;
         handler.next(options);
       },
       onResponse: (response, handler) {
