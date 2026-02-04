@@ -12,6 +12,7 @@ class LocalStorage {
   static String myName = "";
   static String myEmail = "";
   static String myRole = "";
+  static String activeRole = ""; // Added to track current mode
   static String mobile = "";
   static String dateOfBirth = "";
   static String gender = "";
@@ -25,9 +26,6 @@ class LocalStorage {
   static String createdAt = "";
   static String updatedAt = "";
 
-
-
-
   static SharedPreferences? preferences;
 
   /// Get SharedPreferences Instance
@@ -40,13 +38,13 @@ class LocalStorage {
   static Future<void> getAllPrefData() async {
     final localStorage = await _getStorage();
 
-
     isLogIn = localStorage.getBool(LocalStorageKeys.isLogIn) ?? false;
     userId = localStorage.getString(LocalStorageKeys.userId) ?? "";
     myImage = localStorage.getString(LocalStorageKeys.myImage) ?? "";
     myName = localStorage.getString(LocalStorageKeys.myName) ?? "";
     myEmail = localStorage.getString(LocalStorageKeys.myEmail) ?? "";
     myRole = localStorage.getString(LocalStorageKeys.myRole) ?? "";
+    activeRole = localStorage.getString(LocalStorageKeys.activeRole) ?? ""; // Read activeRole
     mobile = localStorage.getString(LocalStorageKeys.mobile) ?? "";
     dateOfBirth = localStorage.getString(LocalStorageKeys.dateOfBirth) ?? "";
     gender = localStorage.getString(LocalStorageKeys.gender) ?? "";
@@ -81,6 +79,7 @@ class LocalStorage {
     localStorage.setString(LocalStorageKeys.myName, "");
     localStorage.setString(LocalStorageKeys.myEmail, "");
     localStorage.setString(LocalStorageKeys.myRole, "");
+    localStorage.setString(LocalStorageKeys.activeRole, ""); // Reset activeRole
     localStorage.setString(LocalStorageKeys.mobile, "");
     localStorage.setString(LocalStorageKeys.dateOfBirth, "");
     localStorage.setString(LocalStorageKeys.gender, "");
@@ -116,5 +115,4 @@ class LocalStorage {
     final localStorage = await _getStorage();
     await localStorage.setDouble(key, value);
   }
-
 }

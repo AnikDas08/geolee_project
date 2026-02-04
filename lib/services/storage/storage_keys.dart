@@ -7,6 +7,7 @@ class LocalStorageKeys {
   static const String myName = "myName";
   static const String myEmail = "myEmail";
   static const String myRole = "myRole";
+  static const String activeRole = "activeRole"; // Used to track current viewing mode
   static const String mobile = "mobile";
   static const String dateOfBirth = "dateOfBirth";
   static const String gender = "gender";
@@ -20,5 +21,4 @@ class LocalStorageKeys {
   static const String createdAt = "createdAt";
   static const String updatedAt = "updatedAt";
   static const String forgotPasswordToken="forgotPasswordToken";
-
 }

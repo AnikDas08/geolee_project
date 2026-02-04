@@ -6,9 +6,10 @@
   <component name="ChangeListManager">
     <list default="true" id="bfaf5573-c330-40b0-a877-9f6fce0e988f" name="Changes" comment="Search Filter D">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/features/advertise/presentation/controller/provider_complete_profile_controller.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/advertise/presentation/controller/provider_complete_profile_controller.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/features/home/presentation/controller/home_nav_controller.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/home/presentation/controller/home_nav_controller.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/features/profile/presentation/screen/dashboard_profile.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/profile/presentation/screen/dashboard_profile.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/features/home/presentation/screen/home_nav_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/home/presentation/screen/home_nav_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/services/storage/storage_keys.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/services/storage/storage_keys.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/services/storage/storage_services.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/services/storage/storage_services.dart" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

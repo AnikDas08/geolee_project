@@ -40,11 +40,10 @@ class HomeNav extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Obx(() {
+        final isUser = controller.currentMode.value == UserType.user;
         return IndexedStack(
           index: controller.currentIndex.value,
-          children: controller.isUserScreenActive.value
-              ? userScreens
-              : advertiseScreens,
+          children: isUser ? userScreens : advertiseScreens,
         );
       }),
 
@@ -73,10 +72,9 @@ class HomeNav extends StatelessWidget {
 
       /// Bottom Navigation
       bottomNavigationBar: Obx(() {
-
         if (!controller.showNavBar.value) return SizedBox.shrink();
-        final isUser = controller.userType == UserType.user;
-
+        
+        final isUser = controller.currentMode.value == UserType.user;
 
         return BottomAppBar(
           shape: const CircularNotchedRectangle(),
