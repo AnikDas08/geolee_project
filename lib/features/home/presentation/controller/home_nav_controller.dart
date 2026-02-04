@@ -4,73 +4,43 @@ import 'package:giolee78/utils/enum/enum.dart';
 import 'package:giolee78/utils/log/app_log.dart';
 
 class HomeNavController extends GetxController {
-  /// Current selected index
   final RxInt currentIndex = 0.obs;
-
-  /// true  -> userScreens
-  /// false -> advertiseScreens
-  late final RxBool isUserScreenActive;
-
-  /// BottomNav + FAB visibility
-  /// ONLY visible when index == 0 (Home)
+  final RxBool isUserScreenActive = true.obs;
   final RxBool showNavBar = true.obs;
 
   @override
   void onInit() {
     super.onInit();
-
-    final bool isUser = userType == UserType.user;
-    isUserScreenActive = isUser.obs;
-
-    if (isUser) {
-      // User starts from Home
-      currentIndex.value = 0;
-      showNavBar.value = true;
-    }
-    else if (isUser==false&&userType==UserType.advertiser) {
-      showNavBar.value = true;
-    }
-    else {
-      // Advertiser starts from Dashboard
-      currentIndex.value = 0;
-      showNavBar.value = true;
-    }
+    refreshState();
   }
 
-  /// Central navigation handler
+  /// Refreshes state based on LocalStorage
+  void refreshState() {
+    final bool isUser = userType == UserType.user;
+    isUserScreenActive.value = isUser;
+
+    // Set default starting point if it's the first initialization
+    if (isUser) {
+      if (currentIndex.value == 1 || (currentIndex.value == 2 && !isUser)) {
+         // Optionally reset if coming from a different role state
+      }
+    }
+    
+    appLog('HomeNavController Initialized. Role: ${LocalStorage.myRole}, isUser: $isUser');
+  }
+
   void changeIndex(int index) {
     currentIndex.value = index;
-
-    final bool isAdvertiser = userType == UserType.advertiser;
-
-    /// ✅ Show navbar rules
-    /// Home (0) -> always show
-    /// Dashboard (2) -> only for advertiser
-    showNavBar.value =
-        index == 0 || (isAdvertiser && index == 2);
-
-    /// Screen list switching
-    if (isAdvertiser) {
-      // Advertiser:
-      // Home -> userScreens
-      // Others -> advertiseScreens
-      isUserScreenActive.value = index == 0;
-    } else {
-      // Normal user always userScreens
-      isUserScreenActive.value = true;
-    }
+    showNavBar.value = (index == 0 || index == 2);
+    
+    // Always sync with storage to be safe
+    isUserScreenActive.value = (userType == UserType.user);
   }
 
-
-  /// Resolve user role
   UserType get userType {
     final roleString = LocalStorage.myRole;
-
-    final roleEnum = roleString == UserType.advertiser.name
+    return roleString == UserType.advertiser.name
         ? UserType.advertiser
         : UserType.user;
-
-    appLog('UserType: $roleEnum');
-    return roleEnum;
   }
 }

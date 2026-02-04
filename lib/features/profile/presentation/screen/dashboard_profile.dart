@@ -32,6 +32,10 @@ class DashBoardProfile extends StatelessWidget {
       appBar: AppBar(),
       body: GetBuilder<ProfileController>(
         builder: (controller) {
+          final String currentRole = LocalStorage.myRole;
+          final bool isUser = currentRole == UserType.user.name;
+          final bool isAdvertiser = currentRole == UserType.advertiser.name;
+
           final List<ProfileItemData> profileItems = [
             ProfileItemData(
               imageSrc: AppIcons.profile,
@@ -47,7 +51,7 @@ class DashBoardProfile extends StatelessWidget {
                 Get.to(() => const ChangePasswordScreen());
               },
             ),
-            if (LocalStorage.myRole == UserType.advertiser.name)
+            if (isAdvertiser)
               ProfileItemData(
                 imageSrc: AppIcons.edit,
                 title: 'Ads History',
@@ -138,7 +142,7 @@ class DashBoardProfile extends StatelessWidget {
                       right: 25,
                       color: AppColors.secondaryText,
                     ),
-                    if(LocalStorage.myRole==UserType.user.name)
+                    if(isUser)
                       CommonButton(
                         titleText: 'Public',
                         buttonWidth: 80.w,
@@ -167,8 +171,8 @@ class DashBoardProfile extends StatelessWidget {
                     ),
                     SizedBox(height: 20.h,),
 
-                    if (LocalStorage.myRole != UserType.advertiser.name)
-
+                    // Only show "Advertise with Us" if current role is USER
+                    if (isUser)
                       CommonButton(
                         titleText: "Advertise with Us",
                         onTap: (){
@@ -178,23 +182,21 @@ class DashBoardProfile extends StatelessWidget {
                         },
                       ),
 
-                    if (LocalStorage.myRole != UserType.user.name)
-
+                    // Only show "Become a User" if current role is ADVERTISER
+                    if (isAdvertiser)
                       CommonButton(
                         titleText: "Become a User",
                         onTap: () {
-                          print("My Role Is :===========================${LocalStorage.myRole.toString()}");
-
                           successPopUps(
-                            message:
-                            'Your Role now User.',
-                            onTap: () {
-                              LocalStorage.myRole = UserType.user.name;
-                              LocalStorage.setString(
-                                LocalStorageKeys.myRole, LocalStorage.myRole=UserType.user.name,
-                              );
-                              //appLog(LocalStorage.myRole.toString());
-
+                            message: 'Your Role is now User.',
+                            onTap: () async {
+                              // 1. Update Persistent Storage
+                              await LocalStorage.setString(LocalStorageKeys.myRole, UserType.user.name);
+                              
+                              // 2. Refresh static variables in LocalStorage from SharedPreferences
+                              await LocalStorage.getAllPrefData();
+                              
+                              // 3. Reset the entire app navigation to load the correct role's UI
                               Get.offAllNamed(AppRoutes.homeNav);
                             },
                             buttonTitle: 'Go to HomeScreen',
