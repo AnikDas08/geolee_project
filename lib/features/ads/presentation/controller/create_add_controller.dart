@@ -178,7 +178,6 @@ class CreateAdsController extends GetxController {
 
   @override
   void onClose() {
-    // Dispose all text controllers properly
     titleController.dispose();
     descriptionController.dispose();
     focusAreaController.dispose();

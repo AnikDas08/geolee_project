@@ -67,7 +67,6 @@ class ClickerController extends GetxController {
   void onInit() {
     super.onInit();
     getAllPosts();
-
     searchController.addListener(_onSearchChanged);
   }
 
@@ -190,7 +189,7 @@ class ClickerController extends GetxController {
           response.data as Map<String, dynamic>,
         );
 
-        userData.value = responseData.data; // ✅ CORRECT
+        userData.value = responseData.data;
       } else {
         Utils.errorSnackBar(
           "Error",

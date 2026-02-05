@@ -44,21 +44,17 @@ class _ViewFriendScreenState extends State<ViewFriendScreen> {
     controller.checkFriendship(widget.userId);
   }
 
-
   // Helper method - build এর বাইরে লিখুন
   String _formatPostTime(DateTime postTime) {
     final now = DateTime.now();
     final difference = now.difference(postTime);
 
     if (difference.inDays >= 1) {
-
       return DateFormat('MMM dd, yyyy').format(postTime);
     } else {
-
       return DateFormat('hh:mm a').format(postTime);
     }
   }
-
 
   String get friendImage {
     final user = controller.userData.value;
@@ -69,7 +65,6 @@ class _ViewFriendScreenState extends State<ViewFriendScreen> {
 
     return "http://10.10.7.7:5006${user.image}";
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -91,12 +86,7 @@ class _ViewFriendScreenState extends State<ViewFriendScreen> {
       body: SafeArea(
         child: Obx(() {
           if (controller.isUserLoading.value) {
-
             return const Center(child: CircularProgressIndicator());
-          }
-
-          if (controller.userPosts.isEmpty) {
-            return const Center(child: Text("No posts available"));
           }
 
           return SingleChildScrollView(
@@ -113,21 +103,30 @@ class _ViewFriendScreenState extends State<ViewFriendScreen> {
                   textAlign: TextAlign.start,
                 ).start,
                 ListView.separated(
-                  padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 16.w,
+                    vertical: 12.h,
+                  ),
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   itemBuilder: (context, index) {
                     final data = controller.userPosts[index];
                     return MyPostCard(
-                      onTapProfile: (){
-                        Utils.successSnackBar('Already Profile', 'Your Are Already Profile');
+                      onTapProfile: () {
+                        Utils.successSnackBar(
+                          'Already Profile',
+                          'Your Are Already Profile',
+                        );
                       },
                       isProfile: true,
-                      onTapPhoto: (){
+                      onTapPhoto: () {
                         if (data.photos.isNotEmpty) {
-                          Get.to(() => FullScreenImageView(
-                            imageUrl: "http://10.10.7.7:5006${data.photos[0]}",
-                          ));
+                          Get.to(
+                            () => FullScreenImageView(
+                              imageUrl:
+                                  "${ApiEndPoint.imageUrl}${data.photos[0]}",
+                            ),
+                          );
                         }
                       },
                       privacyImage: data.privacy == "public"
@@ -136,13 +135,16 @@ class _ViewFriendScreenState extends State<ViewFriendScreen> {
                       clickerType: data.clickerType,
                       isMyPost: false,
                       userName: data.user.name,
-                      userAvatar: "http://10.10.7.7:5006${data.user.image}",
-                      timeAgo: _formatPostTime(DateTime.parse(data.createdAt.toString())),
+                      userAvatar: "${ApiEndPoint.imageUrl}${data.user.image}",
+                      timeAgo: _formatPostTime(
+                        DateTime.parse(data.createdAt.toString()),
+                      ),
                       location: data.address,
                       postImage: data.photos.isNotEmpty
-                          ? "http://10.10.7.7:5006${data.photos[0]}"
+                          ? "${ApiEndPoint.imageUrl}${data.photos[0]}"
                           : "",
-                      description: data.description, postId: '',
+                      description: data.description,
+                      postId: '',
                     );
                   },
                   separatorBuilder: (_, __) => SizedBox(height: 12.h),
@@ -172,7 +174,8 @@ class _ViewFriendScreenState extends State<ViewFriendScreen> {
               radius: 50,
               backgroundImage: (user != null && user.image!.isNotEmpty)
                   ? NetworkImage("${ApiEndPoint.imageUrl}${user.image}")
-                  : const AssetImage("assets/images/profile.png") as ImageProvider,
+                  : const AssetImage("assets/images/profile.png")
+                        as ImageProvider,
             ),
           ),
 
@@ -223,7 +226,6 @@ class _ViewFriendScreenState extends State<ViewFriendScreen> {
 
           SizedBox(height: 16.h),
 
-
           Obx(() {
             if (controller.friendStatus.value == FriendStatus.friends) {
               return _buildButton(
@@ -238,10 +240,7 @@ class _ViewFriendScreenState extends State<ViewFriendScreen> {
               return _buildButton(
                 title: 'Cancel Request',
                 image: AppIcons.friendRequest,
-                onTap: () async {
-
-
-                },
+                onTap: () async {},
                 color: Colors.grey,
               );
             }
@@ -259,9 +258,6 @@ class _ViewFriendScreenState extends State<ViewFriendScreen> {
       );
     });
   }
-
-
-
 
   Widget _buildButton({
     required String title,

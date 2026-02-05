@@ -21,7 +21,7 @@ class _SplashScreenState extends State<SplashScreen> {
       if (LocalStorage.isLogIn) {
 
         print("My Role Is  Splash : =================================${LocalStorage.myRole}");
-        Get.offAll(DashboardScreen());
+        Get.offAllNamed(AppRoutes.homeNav);();
       } else {
         Get.offAllNamed(AppRoutes.onboarding);
       }
