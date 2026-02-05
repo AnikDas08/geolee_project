@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:giolee78/features/home/presentation/controller/home_nav_controller.dart';
 
 import '../../../../component/image/common_image.dart';
+import '../../../../services/storage/storage_services.dart';
 import '../../../../utils/constants/app_colors.dart';
 import '../../../../utils/constants/app_icons.dart';
 import '../../../../utils/enum/enum.dart';
@@ -19,26 +20,19 @@ class HomeNav extends StatelessWidget {
 
   final HomeNavController controller = Get.put(HomeNavController());
 
-  /// User screens
   final List<Widget> userScreens = [
     HomeScreen(),
     AddPostScreen(),
     ChatListScreen(),
   ];
 
-  /// Advertiser screens
   final List<Widget> advertiseScreens = [
     HomeScreen(),
     CreateAdsScreen(),
     DashboardScreen(),
   ];
 
-  final List<String> userIcons = [
-    AppIcons.homeIcon,
-    AppIcons.chatIcon,
-  ];
-
-  final List<String> advertiserIcons = [
+  final List<String> icons = [
     AppIcons.homeIcon,
     AppIcons.chatIcon,
   ];
@@ -47,20 +41,20 @@ class HomeNav extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Obx(() {
-        final isUser = controller.currentMode.value == UserType.user;
         return IndexedStack(
           index: controller.currentIndex.value,
-          children: isUser ? userScreens : advertiseScreens,
+          children: controller.isUserScreenActive.value
+              ? userScreens
+              : advertiseScreens,
         );
       }),
 
       /// FAB
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      floatingActionButtonLocation:
+      FloatingActionButtonLocation.centerDocked,
       floatingActionButton: Obx(() {
-        if (!controller.showNavBar.value) return SizedBox.shrink();
-
-        final isUser = controller.currentMode.value == UserType.user;
-        return SizedBox(
+        return controller.showNavBar.value
+            ? SizedBox(
           height: 70.w,
           width: 70.w,
           child: FloatingActionButton(
@@ -74,15 +68,15 @@ class HomeNav extends StatelessWidget {
               child: CommonImage(imageSrc: AppIcons.add),
             ),
           ),
-        );
+        )
+            : SizedBox.shrink();
       }),
 
       /// Bottom Navigation
       bottomNavigationBar: Obx(() {
         if (!controller.showNavBar.value) return SizedBox.shrink();
 
-        final isUser = controller.currentMode.value == UserType.user;
-        final icons = isUser ? userIcons : advertiserIcons;
+        final isUser = controller.userType == UserType.user;
 
         return BottomAppBar(
           shape: const CircularNotchedRectangle(),
@@ -112,14 +106,16 @@ class HomeNav extends StatelessWidget {
     );
   }
 
-  /// Navigation Item Builder
+
+
   Widget _buildNavItem({
     required int index,
     required String iconPath,
     required String label,
   }) {
     return Obx(() {
-      final bool isSelected = controller.currentIndex.value == index;
+      final bool isSelected =
+          controller.currentIndex.value == index;
 
       return GestureDetector(
         onTap: () => controller.changeIndex(index),
@@ -131,7 +127,9 @@ class HomeNav extends StatelessWidget {
               height: 24.w,
               width: 24.w,
               colorFilter: ColorFilter.mode(
-                isSelected ? AppColors.primaryColor : Colors.black,
+                isSelected
+                    ? AppColors.primaryColor
+                    : Colors.black,
                 BlendMode.srcIn,
               ),
             ),
@@ -140,7 +138,9 @@ class HomeNav extends StatelessWidget {
               label,
               style: TextStyle(
                 fontSize: 12.sp,
-                color: isSelected ? AppColors.primaryColor : Colors.black,
+                color: isSelected
+                    ? AppColors.primaryColor
+                    : Colors.black,
                 fontWeight: FontWeight.w600,
               ),
             ),

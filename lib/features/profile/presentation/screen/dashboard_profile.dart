@@ -178,7 +178,7 @@ class DashBoardProfile extends StatelessWidget {
                         },
                       ),
 
-                    if (LocalStorage.myRole != UserType.user.name)
+                    if (LocalStorage.myRole != "user")
 
                       CommonButton(
                         titleText: "Become a User",
@@ -190,9 +190,13 @@ class DashBoardProfile extends StatelessWidget {
                             'Your Role now User.',
                             onTap: () {
                               LocalStorage.myRole = UserType.user.name;
-                              LocalStorage.setString(
-                                LocalStorageKeys.myRole, LocalStorage.myRole=UserType.user.name,
-                              );
+                              // LocalStorage.setString(
+                              //   LocalStorageKeys.myRole, LocalStorage.myRole=UserType.user.name,
+                              //
+                              // );
+
+                              LocalStorage.setRole(LocalStorageKeys.myRole, LocalStorage.myRole='user');
+                              print("My Role Is :===========================${LocalStorage.myRole.toString()}");
                               //appLog(LocalStorage.myRole.toString());
 
                               Get.offAllNamed(AppRoutes.homeNav);

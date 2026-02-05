@@ -4,10 +4,18 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="bfaf5573-c330-40b0-a877-9f6fce0e988f" name="Changes" comment="done">
+    <list default="true" id="bfaf5573-c330-40b0-a877-9f6fce0e988f" name="Changes" comment="done........">
+      <change afterPath="$PROJECT_DIR$/lib/features/dashboard/data/advertiserment_overview_model.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/features/dashboard/presentation/controller/dash_board_screen_controller.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/features/advertise/presentation/controller/provider_complete_profile_controller.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/advertise/presentation/controller/provider_complete_profile_controller.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/features/auth/sign in/presentation/controller/sign_in_controller.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/auth/sign in/presentation/controller/sign_in_controller.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/config/api/api_end_point.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/config/api/api_end_point.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/config/dependency/dependency_injection.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/config/dependency/dependency_injection.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/features/advertise/presentation/controller/advertiser_edit_profile_controller.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/advertise/presentation/controller/advertiser_edit_profile_controller.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/features/advertise/presentation/controller/provider_profile_view_controller.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/advertise/presentation/controller/provider_profile_view_controller.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/features/advertise/presentation/screen/advertiser_edit_profile_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/advertise/presentation/screen/advertiser_edit_profile_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/features/advertise/presentation/screen/provider_profile_view_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/advertise/presentation/screen/provider_profile_view_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/features/dashboard/presentation/screen/dashboard_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/dashboard/presentation/screen/dashboard_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/features/home/presentation/controller/home_nav_controller.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/home/presentation/controller/home_nav_controller.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/features/home/presentation/screen/home_nav_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/home/presentation/screen/home_nav_screen.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/features/home/presentation/screen/home_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/home/presentation/screen/home_screen.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/features/home/presentation/widgets/home_details.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/home/presentation/widgets/home_details.dart" afterDir="false" />
@@ -16,10 +24,8 @@
       <change beforePath="$PROJECT_DIR$/lib/features/profile/presentation/screen/profile_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/profile/presentation/screen/profile_screen.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/features/splash/splash_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/splash/splash_screen.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/main.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/main.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/services/api/api_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/services/api/api_service.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/services/storage/storage_keys.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/services/storage/storage_keys.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/services/storage/storage_services.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/services/storage/storage_services.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pubspec.lock" beforeDir="false" afterPath="$PROJECT_DIR$/pubspec.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pubspec.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/pubspec.yaml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -39,18 +45,18 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
-  "lastFilter": {
-    "state": "OPEN",
-    "assignee": "parentroots"
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;parentroots&quot;
   }
-}]]></component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/AnikDas08/geolee_project.git",
-    "accountId": "a2a08f8a-294c-4f08-8030-bc46d4f33c65"
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/AnikDas08/geolee_project.git&quot;,
+    &quot;accountId&quot;: &quot;a2a08f8a-294c-4f08-8030-bc46d4f33c65&quot;
   }
-}]]></component>
+}</component>
   <component name="HighlightingSettingsPerFile">
     <setting file="file://$PROJECT_DIR$/lib/features/profile/presentation/controller/my_profile_controller.dart" root0="FORCE_HIGHLIGHTING" />
   </component>
@@ -130,14 +136,23 @@
       <option name="project" value="LOCAL" />
       <updated>1770172555515</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="done........">
+      <option name="closed" value="true" />
+      <created>1770199132045</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1770199132046</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="ibrahim api integration" />
     <MESSAGE value="ibrahim api terms,privacy,myFriend,add friend Reques" />
     <MESSAGE value="Search Filter D" />
-    <option name="LAST_COMMIT_MESSAGE" value="Search Filter D" />
+    <MESSAGE value="done........" />
+    <option name="LAST_COMMIT_MESSAGE" value="done........" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

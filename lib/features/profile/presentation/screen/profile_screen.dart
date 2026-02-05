@@ -195,7 +195,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                     SizedBox(height: 20.h),
 
-                    if (LocalStorage.myRole == "user")
+                    if (LocalStorage.myRole == UserType.user.name)
                       CommonButton(
                         titleText: "Advertise with Us",
                         onTap: () async{
@@ -204,6 +204,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           );
 
                           if(controller.advToken.isEmpty){
+
+                            print("Token is Empty I Have no token");
                             await Get.to(()=>ServiceProviderInfoScreen());
                           }else{
                             // Update LocalStorage properly

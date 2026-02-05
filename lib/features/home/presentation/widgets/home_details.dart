@@ -76,10 +76,7 @@ class _HomeDetailsState extends State<HomeDetails> {
           children: [
             GestureDetector(
               onTap: () {
-
-                LocalStorage.setRole(LocalStorageKeys.myRole, "user");
-                LocalStorage.myRole='user';
-
+                print("My Role Is :===========================${LocalStorage.myRole}");
                 Get.toNamed(AppRoutes.profile);
                 print("My Role Is :===========================${LocalStorage.myRole}");
               },
@@ -135,7 +132,10 @@ class _HomeDetailsState extends State<HomeDetails> {
             Padding(
               padding: const EdgeInsets.only(right: 10),
               child: GestureDetector(
-                onTap: () => Get.toNamed(AppRoutes.notifications),
+                onTap: () {
+                  print("======================Hamba Role======================${LocalStorage.myRole}");
+                  Get.toNamed(AppRoutes.notifications);
+                },
                 child: CommonImage(
                   imageSrc: AppIcons.notification,
                   size: 28,

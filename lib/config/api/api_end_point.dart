@@ -51,6 +51,9 @@ class ApiEndPoint {
   static const String advertiserCompleteProfile="${baseUrl}advertisers/create";
   static const String advertiserVerify="${baseUrl}/advertisers/verify";
   static const String resendOtp="${baseUrl}/auth/request-otp";
+  static const String advertisementsOverviewMe="${baseUrl}advertisements/overview/me";
+  static const String getsMyAdsByStatus="${baseUrl}advertisements/me";
+  static const String advertiserUpdate="${baseUrl}advertisers/update/me";
 
   // Misc ===========================================
   static const String support = "${baseUrl}supports/create";
@@ -59,6 +62,7 @@ class ApiEndPoint {
   static const String post = "${baseUrl}posts";
   static const String customOffer = "${baseUrl}custom/offer";
   static const String profile = "${baseUrl}users/profile";
+  static const String advertiserProfile = "${baseUrl}advertisers/me";
   static const String notifications = "${baseUrl}notification/all";
   static const String category = "${baseUrl}category/service";
   static const String privacyPolicies = "${baseUrl}disclaimer/privacy-policy";

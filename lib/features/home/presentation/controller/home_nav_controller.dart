@@ -2,52 +2,75 @@ import 'package:get/get.dart';
 import 'package:giolee78/services/storage/storage_services.dart';
 import 'package:giolee78/utils/enum/enum.dart';
 import 'package:giolee78/utils/log/app_log.dart';
-import '../../../../services/storage/storage_keys.dart';
 
 class HomeNavController extends GetxController {
+  /// Current selected index
   final RxInt currentIndex = 0.obs;
+
+  /// true  -> userScreens
+  /// false -> advertiseScreens
+  late final RxBool isUserScreenActive;
+
+  /// BottomNav + FAB visibility
+  /// ONLY visible when index == 0 (Home)
   final RxBool showNavBar = true.obs;
-  
-  // Observable mode to track if we are viewing as User or Advertiser
-  final Rx<UserType> currentMode = UserType.user.obs;
 
   @override
   void onInit() {
     super.onInit();
-    refreshMode();
-  }
 
-  /// Refreshes the mode based on the user's explicit preference stored in activeRole
-  void refreshMode() {
-    // We use activeRole to track the current UI state independently of the account role
-    final activeRole = LocalStorage.activeRole;
-    
-    if (activeRole == UserType.advertiser.name) {
-       currentMode.value = UserType.advertiser;
-       currentIndex.value = 2; // Dashboard for Advertisers
-    } else {
-       currentMode.value = UserType.user;
-       currentIndex.value = 0;
+    final bool isUser = userType == UserType.user;
+    isUserScreenActive = isUser.obs;
+
+    if (isUser) {
+      // User starts from Home
+      currentIndex.value = 0;
+      showNavBar.value = true;
     }
-    
-    appLog('UI Mode refreshed to: ${currentMode.value}');
+    else if (isUser==false&&userType==UserType.advertiser) {
+      showNavBar.value = true;
+    }
+    else {
+      // Advertiser starts from Dashboard
+      currentIndex.value = 0;
+      showNavBar.value = true;
+    }
   }
 
+  /// Central navigation handler
   void changeIndex(int index) {
     currentIndex.value = index;
-    showNavBar.value = (index == 0 || index == 2);
+
+    final bool isAdvertiser = userType == UserType.advertiser;
+
+    /// ✅ Show navbar rules
+    /// Home (0) -> always show
+    /// Dashboard (2) -> only for advertiser
+    showNavBar.value =
+        index == 0 || (isAdvertiser && index == 2);
+
+    /// Screen list switching
+    if (isAdvertiser) {
+      // Advertiser:
+      // Home -> userScreens
+      // Others -> advertiseScreens
+      isUserScreenActive.value = index == 0;
+    } else {
+      // Normal user always userScreens
+      isUserScreenActive.value = true;
+    }
   }
 
-  /// Explicitly switch the viewing mode
-  Future<void> switchMode(UserType mode) async {
-    currentMode.value = mode;
-    await LocalStorage.setString(LocalStorageKeys.activeRole, mode.name);
-    await LocalStorage.getAllPrefData();
-    
-    if (mode == UserType.user) {
-      currentIndex.value = 0;
-    } else {
-      currentIndex.value = 2;
-    }
+
+  /// Resolve user role
+  UserType get userType {
+    final roleString = LocalStorage.myRole;
+
+    final roleEnum = roleString == UserType.advertiser.name
+        ? UserType.advertiser
+        : UserType.user;
+
+    appLog('UserType: $roleEnum');
+    return roleEnum;
   }
 }

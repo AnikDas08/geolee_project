@@ -11,10 +11,17 @@ import 'storage_keys.dart';
 import 'dart:io';
 
 class LocalStorage {
+
   static String token = "";
+  static String businessLicenceNumber = "";
   static String forgotPasswordToken = "";
   static bool isLogIn = false;
   static String userId = "";
+  static String businessName= "";
+  static String businessType= "";
+  static String businessLogo= "";
+  static String phone= "";
+  static String address = "";
   static String myImage = "";
   static String myName = "";
   static String myEmail = "";
@@ -27,6 +34,7 @@ class LocalStorage {
   static double balance = 0.0;
   static bool verified = false;
   static String bio = "";
+  static String advertiserBio='';
   static double lat = 0.0;
   static double log = 0.0;
   static bool accountInfoStatus = false;

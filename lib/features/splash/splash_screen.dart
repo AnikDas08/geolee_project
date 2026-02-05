@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:giolee78/features/dashboard/presentation/screen/dashboard_screen.dart';
 import 'package:giolee78/services/storage/storage_services.dart';
 import 'package:giolee78/utils/extensions/extension.dart';
 import '../../../../config/route/app_routes.dart';
@@ -20,7 +21,7 @@ class _SplashScreenState extends State<SplashScreen> {
       if (LocalStorage.isLogIn) {
 
         print("My Role Is  Splash : =================================${LocalStorage.myRole}");
-        Get.offAllNamed(AppRoutes.homeNav);
+        Get.offAll(DashboardScreen());
       } else {
         Get.offAllNamed(AppRoutes.onboarding);
       }

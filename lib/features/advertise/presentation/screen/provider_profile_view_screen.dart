@@ -62,7 +62,7 @@ class ProviderProfileViewScreen extends StatelessWidget {
 
                     /// Name
                     CommonText(
-                      text: "The Grill Restaurant",
+                      text:controller.businessName,
                       fontSize: 18.sp,
                       fontWeight: FontWeight.w600,
                       color: AppColors.black,
@@ -145,7 +145,7 @@ class ProviderProfileViewScreen extends StatelessWidget {
         8.height,
         // Content (bio)
         CommonText(
-          text: "Skilled professionals offering reliable, on-demand services to meet your everyday needs quickly and efficiently.",
+          text: controller.about,
           fontSize: 14.sp,
           fontWeight: FontWeight.w400,
           color: AppColors.secondaryText,
@@ -170,13 +170,15 @@ class ProviderProfileViewScreen extends StatelessWidget {
           // Uncomment if mobile is available in the API
           // _buildDetailRow('Mobile', controller.mobile),
           // 16.height,
-          _buildDetailRow('E-mail', "Example@gmail.com"),
+          _buildDetailRow('E-mail', controller.userEmail),
           16.height,
-          _buildDetailRow('Phone Number', "+123456789"),
+          _buildDetailRow('Phone Number', controller.phone),
           16.height,
-          _buildDetailRow('Business License Number', "1234567"),
+          _buildDetailRow('Business License Number', controller.businessLicenceNumber),
           16.height,
-          _buildDetailRow('Business Type', "Restaurant"),
+          _buildDetailRow('Business Type', controller.businessType),
+          16.height,
+          _buildDetailRow('Address', controller.address),
         ],
       ),
     );

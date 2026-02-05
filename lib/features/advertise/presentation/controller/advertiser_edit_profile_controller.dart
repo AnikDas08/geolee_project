@@ -1,51 +1,65 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:giolee78/features/profile/data/model/user_profile_model.dart';
-import 'package:giolee78/services/storage/storage_keys.dart';
-import 'package:giolee78/services/storage/storage_services.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'dart:io';
 
 import '../../../../config/api/api_end_point.dart';
 import '../../../../config/route/app_routes.dart';
 import '../../../../services/api/api_service.dart';
+import '../../../../services/storage/storage_keys.dart';
+import '../../../../services/storage/storage_services.dart';
 import '../../../../utils/app_utils.dart';
 
 class AdvertiserEditProfileController extends GetxController {
-
-  // final MyProfileController _myProfileController=MyProfileController();
-
+  // ================= VARIABLES =================
   List<String> languages = ["English", "French", "Arabic"];
-
   final formKey = GlobalKey<FormState>();
   String selectedLanguage = "English";
   File? selectedImage;
   bool isLoading = false;
-  UserProfileModel? profileModel;
 
   final ImagePicker _picker = ImagePicker();
 
-  TextEditingController businessNameController = TextEditingController();
-  TextEditingController businessLicenceController = TextEditingController();
-  TextEditingController businessTypeController = TextEditingController();
-  TextEditingController numberController = TextEditingController();
-  TextEditingController passwordController = TextEditingController();
-  TextEditingController phoneNumberController = TextEditingController();
-  TextEditingController bioController = TextEditingController();
+  // TextControllers
+  late TextEditingController businessNameController;
+  late TextEditingController businessLicenceController;
+  late TextEditingController businessTypeController;
+  late TextEditingController phoneNumberController;
+  late TextEditingController bioController;
 
+  // ================= ON INIT =================
+  @override
+  void onInit() {
+    super.onInit();
+    _loadLocalStorageData();
+  }
 
+  // ================= LOAD FROM LOCAL STORAGE =================
+  void _loadLocalStorageData() {
+    businessNameController =
+        TextEditingController(text: LocalStorage.businessName);
+    businessLicenceController =
+        TextEditingController(text: LocalStorage.businessLicenceNumber);
+    businessTypeController =
+        TextEditingController(text: LocalStorage.businessType);
+    phoneNumberController =
+        TextEditingController(text: LocalStorage.phone);
+    bioController = TextEditingController(text: LocalStorage.advertiserBio);
 
+    // Optional: language load if saved before
+
+  }
+
+  // ================= IMAGE PICKER =================
   Future<bool> _requestImagePermission(ImageSource source) async {
     if (source == ImageSource.camera) {
       final status = await Permission.camera.request();
       return status.isGranted;
     } else {
-      // For gallery/photos
       if (Platform.isAndroid) {
         final photosStatus = await Permission.photos.request();
         if (photosStatus.isGranted) return true;
-
         final storageStatus = await Permission.storage.request();
         return storageStatus.isGranted;
       } else if (Platform.isIOS) {
@@ -56,7 +70,6 @@ class AdvertiserEditProfileController extends GetxController {
     }
   }
 
-  /// Pick profile image
   Future<void> getProfileImage() async {
     try {
       final ImageSource? source = await showModalBottomSheet<ImageSource>(
@@ -69,7 +82,10 @@ class AdvertiserEditProfileController extends GetxController {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text('Choose Image Source', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+              Text(
+                'Choose Image Source',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+              ),
               SizedBox(height: 20),
               ListTile(
                 leading: Icon(Icons.camera_alt, color: Colors.blue),
@@ -141,17 +157,15 @@ class AdvertiserEditProfileController extends GetxController {
     }
   }
 
-
-  /// Select language
+  // ================= LANGUAGE SELECT =================
   void selectLanguage(int index) {
     selectedLanguage = languages[index];
+
     update();
     Get.back();
   }
 
-
-
-
+  // ================= EDIT PROFILE API =================
   Future<void> editProfileRepo() async {
     if (!formKey.currentState!.validate()) return;
     if (!LocalStorage.isLogIn) return;
@@ -160,15 +174,16 @@ class AdvertiserEditProfileController extends GetxController {
     update();
 
     try {
-
       Map<String, String> body = {
-        "name": businessNameController.text.trim(),
+        "businessName": businessNameController.text.trim(),
         "bio": bioController.text.trim(),
-
+        "businessType": businessTypeController.text.trim(),
+        "licenseNumber": businessLicenceController.text.trim(),
+        "phone": phoneNumberController.text.trim(),
       };
 
       var response = await ApiService.multipart(
-        ApiEndPoint.updateProfile,
+        ApiEndPoint.advertiserUpdate,
         method: "PATCH",
         body: body,
         imageName: 'image',
@@ -176,26 +191,36 @@ class AdvertiserEditProfileController extends GetxController {
       );
 
       if (response.statusCode == 200) {
-        var data = response.data;
-        LocalStorage.userId = data['data']?["_id"] ?? LocalStorage.userId;
-        LocalStorage.myName = data['data']?["name"] ?? LocalStorage.myName;
-        LocalStorage.myEmail = data['data']?["email"] ?? LocalStorage.myEmail;
-        LocalStorage.myImage = data['data']?["image"] ?? LocalStorage.myImage;
+        var advertiserData = response.data['data'] ?? {};
 
+        // ========== LOCAL STORAGE UPDATE ==========
+        LocalStorage.userId = advertiserData["_id"] ?? LocalStorage.userId;
+        LocalStorage.businessName =
+            advertiserData["businessName"] ?? LocalStorage.businessName;
+        LocalStorage.businessType =
+            advertiserData["businessType"] ?? LocalStorage.businessType;
+        LocalStorage.phone = advertiserData["phone"] ?? LocalStorage.phone;
+        LocalStorage.advertiserBio = advertiserData["bio"] ?? LocalStorage.advertiserBio;
+        LocalStorage.businessLogo =
+            advertiserData["logo"] ?? LocalStorage.businessLogo;
+        LocalStorage.myImage = selectedImage?.path ?? LocalStorage.myImage;
+
+        // ========== SAVE TO SHARED PREFERENCES ==========
         await Future.wait([
-          LocalStorage.setString(LocalStorageKeys.userId, LocalStorage.userId),
+          LocalStorage.setString(
+              LocalStorageKeys.businessName, LocalStorage.businessName),
+          LocalStorage.setString(
+              LocalStorageKeys.businessType, LocalStorage.businessType),
+          LocalStorage.setString(LocalStorageKeys.phone, LocalStorage.phone),
+          LocalStorage.setString(
+              LocalStorageKeys.businessLogo, LocalStorage.businessLogo),
+          LocalStorage.setString(LocalStorageKeys.advertiserBio, LocalStorage.advertiserBio),
           LocalStorage.setString(LocalStorageKeys.myImage, LocalStorage.myImage),
-          LocalStorage.setString(LocalStorageKeys.myName, LocalStorage.myName),
-          LocalStorage.setString(LocalStorageKeys.myEmail, LocalStorage.myEmail),
-          LocalStorage.setString(LocalStorageKeys.bio, LocalStorage.bio),
-          LocalStorage.setString(LocalStorageKeys.dateOfBirth, LocalStorage.dateOfBirth),
-          LocalStorage.setString(LocalStorageKeys.gender, LocalStorage.gender),
         ]);
 
-        // _myProfileController.getUserData();
+        Utils.successSnackBar(
+            "Success", response.data['message'] ?? "Profile Updated Successfully");
 
-
-        Utils.successSnackBar("Success", data['message'] ?? "Profile Updated Successfully");
         Get.toNamed(AppRoutes.profile);
       } else {
         Utils.errorSnackBar(
@@ -211,13 +236,14 @@ class AdvertiserEditProfileController extends GetxController {
     }
   }
 
+  // ================= LIFE CYCLE =================
   @override
   void onClose() {
     businessNameController.dispose();
-    numberController.dispose();
-    passwordController.dispose();
+    businessLicenceController.dispose();
+    businessTypeController.dispose();
+    phoneNumberController.dispose();
     bioController.dispose();
     super.onClose();
   }
-
 }

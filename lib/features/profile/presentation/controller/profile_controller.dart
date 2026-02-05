@@ -41,7 +41,6 @@ class ProfileController extends GetxController {
   void onInit() {
     // TODO: implement onInit
     super.onInit();
-    getUserDataForRole();
     _loadAdvertiserStatus();
   }
 
@@ -299,6 +298,9 @@ class ProfileController extends GetxController {
 
         String? advertiserToken = data['data']?['advertiser']?.toString();
         advToken=advertiserToken??"";
+
+
+        print("afkd;ajdfa;sdjfk=================${advertiserToken}");
 
 
         return advertiserToken;

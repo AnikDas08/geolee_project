@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:giolee78/services/api/api_service.dart';
 import 'package:giolee78/services/socket/socket_service.dart';
+import 'package:giolee78/services/storage/storage_keys.dart';
+import 'package:giolee78/utils/enum/enum.dart';
 import 'package:giolee78/utils/extensions/extension.dart';
 import 'app.dart';
 import 'config/dependency/dependency_injection.dart';
@@ -14,6 +16,7 @@ Future<void> main() async {
   GetStorage.init();
   await LocalStorage.getAllPrefData();
   await init.tryCatch();
+  initRole();
   runApp(const MyApp());
 }
 
@@ -31,4 +34,19 @@ init() async {
       return null;
     }),
   ]);
+}
+
+
+Future<void> initRole() async {
+  String role = LocalStorage.myRole;
+
+  if (role.isEmpty) {
+    await LocalStorage.setRole(
+      LocalStorageKeys.myRole,
+      UserType.user.name,
+    );
+    LocalStorage.myRole = UserType.user.name;
+  } else {
+    LocalStorage.myRole = role;
+  }
 }

@@ -58,7 +58,7 @@ class AdvertiserEditProfileScreen extends StatelessWidget {
                       6.height,
 
                       CommonTextField(
-                        controller: controller.phoneNumberController,
+                        controller: controller.businessNameController,
                         validator: OtherHelper.validator,
                         hintText: 'Shakir Ahmed',
                         keyboardType: TextInputType.text,

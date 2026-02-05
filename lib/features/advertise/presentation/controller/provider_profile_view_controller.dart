@@ -13,10 +13,10 @@ class ProviderProfileViewController extends GetxController {
   String _dateOfBirth = "";
   String _gender = "";
 
+
   // ================= USER DATA GETTERS =================
 
-  String get userName =>
-      LocalStorage.myName.isNotEmpty ? LocalStorage.myName : "User Name";
+  String get userName => LocalStorage.myName.isNotEmpty ? LocalStorage.myName : "User Name";
 
   String get userImage => LocalStorage.myImage;
 
@@ -26,18 +26,13 @@ class ProviderProfileViewController extends GetxController {
 
   String get mobile => LocalStorage.mobile;
 
-  String get dateOfBirth {
-    if (LocalStorage.dateOfBirth.isEmpty) return "Not Selected";
-    return LocalStorage.dateOfBirth.split('T').first;
-  }
+  String get dateOfBirth {if (LocalStorage.dateOfBirth.isEmpty) return "Not Selected";return LocalStorage.dateOfBirth.split('T').first;}
 
-  String get gender =>
-      LocalStorage.gender.isNotEmpty ? LocalStorage.gender : "Not Selected";
+  String get gender => LocalStorage.gender.isNotEmpty ? LocalStorage.gender : "Not Selected";
 
   String get experience => LocalStorage.experience;
 
-  String get bio =>
-      LocalStorage.bio.isNotEmpty ? LocalStorage.bio : "Bio Not Set Yet";
+  String get bio => LocalStorage.bio.isNotEmpty ? LocalStorage.bio : "Bio Not Set Yet";
 
   double get balance => LocalStorage.balance;
 
@@ -49,16 +44,28 @@ class ProviderProfileViewController extends GetxController {
 
   bool get accountInfoStatus => LocalStorage.accountInfoStatus;
 
-  String get address => "Dhaka, Bangladesh";
+  String get address => LocalStorage.address.isNotEmpty ? LocalStorage.address : "Not Set";
+
 
   String get about => bio;
+
+  String get userId => LocalStorage.userId;
+
+  String get businessName => LocalStorage.businessName;
+
+  String get businessType => LocalStorage.businessType;
+  String get phone => LocalStorage.phone;
+  String get businessLicenceNumber => LocalStorage.businessLicenceNumber;
+  String get advertiserBion => LocalStorage.advertiserBio?.isNotEmpty ?? false ? LocalStorage.advertiserBio! : "Bio Not Set Yet";
+
+
 
   // ================= LIFE CYCLE =================
 
   @override
   void onInit() {
     super.onInit();
-    getUserData();
+    getAdvertiserData();
   }
 
   // ================= NAVIGATION =================
@@ -73,93 +80,86 @@ class ProviderProfileViewController extends GetxController {
 
   // ================= API CALL =================
 
-  Future<void> getUserData() async {
+  Future<void> getAdvertiserData() async {
     isLoading = true;
     update();
 
     try {
-      final response = await ApiService.get(
-        ApiEndPoint.profile,
-      ).timeout(const Duration(seconds: 30));
+      final response = await ApiService.get(ApiEndPoint.advertiserProfile);
 
       if (response.statusCode == 200) {
-        profileModel = UserProfileModel.fromJson(
-          response.data as Map<String, dynamic>,
-        );
+        final Map<String, dynamic> res =
+        response.data as Map<String, dynamic>;
 
-        final data = profileModel?.data;
-        if (data == null) return;
+        final advertiser = res['data'];
+        if (advertiser == null) return;
 
-        // ---------- SAFE DATE HANDLING ----------
-        _dateOfBirth = data.dob.toIso8601String();
+        final user = advertiser['user'];
 
-        _gender = data.gender;
+        // ---------- LOCATION ----------
 
-        // ---------- LOCAL MEMORY ----------
-        LocalStorage.userId = data.id;
-        LocalStorage.myName = data.name;
-        LocalStorage.myEmail = data.email;
-        LocalStorage.myRole = data.role;
-        LocalStorage.myImage = data.image;
-        LocalStorage.bio = data.bio.isNotEmpty ? data.bio : "Bio Not Set Yet";
-        LocalStorage.gender = data.gender;
-        LocalStorage.dateOfBirth = _dateOfBirth;
-        LocalStorage.createdAt = data.createdAt.toIso8601String() ?? "";
-        LocalStorage.updatedAt = data.updatedAt.toIso8601String() ?? "";
-        LocalStorage.verified = data.isVerified;
+        final coordinates =
+            user?['location']?['coordinates'] ?? [0, 0];
 
-        // ---------- SAVE TO SHARED PREF ----------
+        final double lat =
+        coordinates.length > 1 ? coordinates[1].toDouble() : 0.0;
+        final double log =
+        coordinates.length > 0 ? coordinates[0].toDouble() : 0.0;
+
+        // ---------- DATE ----------
+        final String dob = user?['dob'] ?? "";
+        final String createdAt = advertiser['createdAt'] ?? "";
+        final String updatedAt = advertiser['updatedAt'] ?? "";
+
+        // ---------- LOCAL STORAGE ----------
+        LocalStorage.userId = user?['_id'] ?? "";
+        LocalStorage.myName = user?['name'] ?? "";
+        LocalStorage.myEmail = user?['email'] ?? "";
+        LocalStorage.myImage = user?['image'] ?? "";
+        LocalStorage.gender = user?['gender'] ?? "";
+        LocalStorage.dateOfBirth = dob;
+        LocalStorage.address = user?['address'] ?? "";
+
+        LocalStorage.advertiserBio =
+        (advertiser['bio'] != null && advertiser['bio'].toString().isNotEmpty)
+            ? advertiser['bio']
+            : "Bio Not Set Yet";
+
+        LocalStorage.lat = lat;
+        LocalStorage.log = log;
+
+        LocalStorage.createdAt = createdAt;
+        LocalStorage.updatedAt = updatedAt;
+
+        // advertiser specific
+
+        LocalStorage.businessName = advertiser['businessName'] ?? "";
+        LocalStorage.businessType = advertiser['businessType'] ?? "";
+        LocalStorage.businessLogo = advertiser['logo'] ?? "";
+        LocalStorage.phone = advertiser['phone'] ?? "";
+        LocalStorage.businessLicenceNumber = advertiser['licenseNumber'] ?? "";
+
+        // ---------- SAVE PREF ----------
+
         await Future.wait([
-          LocalStorage.setBool(LocalStorageKeys.isLogIn, LocalStorage.isLogIn),
           LocalStorage.setString(LocalStorageKeys.userId, LocalStorage.userId),
           LocalStorage.setString(LocalStorageKeys.myName, LocalStorage.myName),
-          LocalStorage.setString(
-            LocalStorageKeys.myEmail,
-            LocalStorage.myEmail,
-          ),
-          LocalStorage.setString(LocalStorageKeys.myRole, LocalStorage.myRole),
-          LocalStorage.setString(
-            LocalStorageKeys.myImage,
-            LocalStorage.myImage,
-          ),
-          LocalStorage.setString(LocalStorageKeys.bio, LocalStorage.bio),
+          LocalStorage.setString(LocalStorageKeys.myEmail, LocalStorage.myEmail),
+          LocalStorage.setString(LocalStorageKeys.myImage, LocalStorage.myImage),
           LocalStorage.setString(LocalStorageKeys.gender, LocalStorage.gender),
-          LocalStorage.setString(
-            LocalStorageKeys.dateOfBirth,
-            LocalStorage.dateOfBirth,
-          ),
-          LocalStorage.setString(
-            LocalStorageKeys.experience,
-            LocalStorage.experience,
-          ),
-          LocalStorage.setDouble(
-            LocalStorageKeys.balance,
-            LocalStorage.balance,
-          ),
-          LocalStorage.setBool(
-            LocalStorageKeys.verified,
-            LocalStorage.verified,
-          ),
+          LocalStorage.setString(LocalStorageKeys.dateOfBirth, LocalStorage.dateOfBirth),
+          LocalStorage.setString(LocalStorageKeys.address, LocalStorage.address),
           LocalStorage.setDouble(LocalStorageKeys.lat, LocalStorage.lat),
           LocalStorage.setDouble(LocalStorageKeys.log, LocalStorage.log),
-          LocalStorage.setBool(
-            LocalStorageKeys.accountInfoStatus,
-            LocalStorage.accountInfoStatus,
-          ),
-          LocalStorage.setString(
-            LocalStorageKeys.createdAt,
-            LocalStorage.createdAt,
-          ),
-          LocalStorage.setString(
-            LocalStorageKeys.updatedAt,
-            LocalStorage.updatedAt,
-          ),
+          LocalStorage.setString(LocalStorageKeys.createdAt, LocalStorage.createdAt),
+          LocalStorage.setString(LocalStorageKeys.updatedAt, LocalStorage.updatedAt),
+          LocalStorage.setString(LocalStorageKeys.businessName, LocalStorage.businessName),
+          LocalStorage.setString(LocalStorageKeys.businessType, LocalStorage.businessType),
+          LocalStorage.setString(LocalStorageKeys.businessLogo, LocalStorage.businessLogo),
+          LocalStorage.setString(LocalStorageKeys.phone, LocalStorage.phone),
+          LocalStorage.setString(LocalStorageKeys.advertiserBio, LocalStorage.advertiserBio),
         ]);
-      } else {
-        Get.snackbar(
-          response.statusCode.toString(),
-          response.message ?? "Something went wrong",
-        );
+
       }
     } catch (e) {
       Get.snackbar("Error", "Failed to load profile");
@@ -168,4 +168,6 @@ class ProviderProfileViewController extends GetxController {
     isLoading = false;
     update();
   }
+
+
 }
