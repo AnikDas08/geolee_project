@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:giolee78/component/text/common_text.dart';
+import 'package:giolee78/config/api/api_end_point.dart';
 import 'package:giolee78/features/ads/presentation/controller/history_ads_controller.dart';
 import 'package:giolee78/features/ads/presentation/screen/view_ads_screen.dart';
 import 'package:giolee78/utils/constants/app_colors.dart';
@@ -47,23 +48,40 @@ class HistoryAdsScreen extends StatelessWidget {
                   _buildTabs(controller),
                   SizedBox(height: 16.h),
                   Expanded(
-                    child: ListView.separated(
-                      physics: const BouncingScrollPhysics(),
-                      itemCount: ads.length,
-                      separatorBuilder: (context, index) =>
-                          SizedBox(height: 12.h),
-                      itemBuilder: (context, index) {
-                        final ad = ads[index];
-                        return _HistoryAdCard(
-                          imageSrc: ad.imageSrc,
-                          title: ad.title,
-                          description: ad.description,
-                          onTap: () {
-                            Get.to(() => ViewAdsScreen());
-                          },
-                        );
-                      },
-                    ),
+                    child: controller.isLoading
+                        ? const Center(
+                            child: CircularProgressIndicator(
+                              color: Colors.blue,
+                            ),
+                          )
+                        : ads.isEmpty
+                        ? const Center(
+                            child: CommonText(
+                              text: "No Ads Found",
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          )
+                        : ListView.separated(
+                            physics: const BouncingScrollPhysics(),
+                            itemCount: ads.length,
+                            separatorBuilder: (context, index) =>
+                                SizedBox(height: 12.h),
+                            itemBuilder: (context, index) {
+                              final ad = ads[index];
+                              return _HistoryAdCard(
+                                imageSrc: "${ApiEndPoint.imageUrl + ad.image}",
+                                title: ad.title,
+                                description: ad.description,
+                                onTap: () {
+                                  Get.to(
+                                    () => ViewAdsScreen(),
+                                    arguments: ad.id,
+                                  );
+                                },
+                              );
+                            },
+                          ),
                   ),
                 ],
               ),
@@ -131,8 +149,6 @@ class HistoryAdsScreen extends StatelessWidget {
       ],
     );
   }
-
-  
 }
 
 class _HistoryAdCard extends StatelessWidget {
@@ -172,11 +188,16 @@ class _HistoryAdCard extends StatelessWidget {
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(10.r),
-                child: Image.asset(
+                child: Image.network(
                   imageSrc,
                   height: 140.h,
-                  width: double.infinity,
+                  width: double.maxFinite,
                   fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) => Container(
+                    color: Colors.grey[200],
+                    height: 140.h,
+                    child: Icon(Icons.image, size: 50),
+                  ),
                 ),
               ),
               SizedBox(height: 12.h),
