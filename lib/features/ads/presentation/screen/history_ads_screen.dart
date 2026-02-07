@@ -55,7 +55,7 @@ class HistoryAdsScreen extends StatelessWidget {
                       itemBuilder: (context, index) {
                         final ad = ads[index];
                         return _HistoryAdCard(
-                          imageSrc: ad.imageSrc,
+                          imageSrc: ad.image,
                           title: ad.title,
                           description: ad.description,
                           onTap: () {
