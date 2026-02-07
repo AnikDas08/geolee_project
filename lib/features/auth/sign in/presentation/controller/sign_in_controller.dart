@@ -9,6 +9,7 @@ import '../../../../../services/api/api_service.dart';
 import '../../../../../config/api/api_end_point.dart';
 import '../../../../../services/storage/storage_keys.dart';
 import '../../../../../services/storage/storage_services.dart';
+import '../../../../ads/presentation/screen/history_ads_screen.dart';
 
 class SignInController extends GetxController {
   /// Sign in Button Loading variable
@@ -61,6 +62,7 @@ class SignInController extends GetxController {
         getUserData();
 
         Get.toNamed(AppRoutes.homeNav);
+        // Get.to(() => const HistoryAdsScreen());
 
         emailController.clear();
         passwordController.clear();

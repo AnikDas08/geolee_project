@@ -1,23 +1,23 @@
-class AdvertisementResponse {
+class MyActiveAdsModel {
   final bool success;
   final String message;
   final Pagination pagination;
-  final List<Advertisement> data;
+  final List<MyActiveAdvertisement> data;
 
-  AdvertisementResponse({
+  MyActiveAdsModel({
     required this.success,
     required this.message,
     required this.pagination,
     required this.data,
   });
 
-  factory AdvertisementResponse.fromJson(Map<String, dynamic> json) {
-    return AdvertisementResponse(
-      success: json['success'] ?? false,
-      message: json['message'] ?? '',
-      pagination: Pagination.fromJson(json['pagination'] ?? {}),
-      data: List<Advertisement>.from(
-        (json['data'] ?? []).map((x) => Advertisement.fromJson(x)),
+  factory MyActiveAdsModel.fromJson(Map<String, dynamic> json) {
+    return MyActiveAdsModel(
+      success: json['success'],
+      message: json['message'],
+      pagination: Pagination.fromJson(json['pagination']),
+      data: List<MyActiveAdvertisement>.from(
+        json['data'].map((x) => MyActiveAdvertisement.fromJson(x)),
       ),
     );
   }
@@ -38,15 +38,15 @@ class Pagination {
 
   factory Pagination.fromJson(Map<String, dynamic> json) {
     return Pagination(
-      total: json['total'] ?? 0,
-      limit: json['limit'] ?? 0,
-      page: json['page'] ?? 0,
-      totalPage: json['totalPage'] ?? 0,
+      total: json['total'],
+      limit: json['limit'],
+      page: json['page'],
+      totalPage: json['totalPage'],
     );
   }
 }
 
-class Advertisement {
+class MyActiveAdvertisement {
   final String id;
   final String user;
   final String advertiser;
@@ -61,7 +61,7 @@ class Advertisement {
   final String plan;
   final int price;
   final String paymentStatus;
-  final dynamic paidAt;
+  final String? paidAt;
   final int reachCount;
   final int clickCount;
   final String status;
@@ -70,7 +70,7 @@ class Advertisement {
   final DateTime createdAt;
   final DateTime updatedAt;
 
-  Advertisement({
+  MyActiveAdvertisement({
     required this.id,
     required this.user,
     required this.advertiser,
@@ -95,30 +95,30 @@ class Advertisement {
     required this.updatedAt,
   });
 
-  factory Advertisement.fromJson(Map<String, dynamic> json) {
-    return Advertisement(
-      id: json['_id'] ?? '',
-      user: json['user'] ?? '',
-      advertiser: json['advertiser'] ?? '',
-      title: json['title'] ?? '',
-      description: json['description'] ?? '',
-      image: json['image'] ?? '',
-      focusArea: json['focusArea'] ?? '',
-      focusAreaLocation: Location.fromJson(json['focusAreaLocation'] ?? {}),
-      websiteUrl: json['websiteUrl'] ?? '',
-      startAt: DateTime.parse(json['startAt'] ?? DateTime.now().toString()),
-      endAt: DateTime.parse(json['endAt'] ?? DateTime.now().toString()),
-      plan: json['plan'] ?? '',
-      price: json['price'] ?? 0,
-      paymentStatus: json['paymentStatus'] ?? '',
+  factory MyActiveAdvertisement.fromJson(Map<String, dynamic> json) {
+    return MyActiveAdvertisement(
+      id: json['_id'],
+      user: json['user'],
+      advertiser: json['advertiser'],
+      title: json['title'],
+      description: json['description'],
+      image: json['image'],
+      focusArea: json['focusArea'],
+      focusAreaLocation: Location.fromJson(json['focusAreaLocation']),
+      websiteUrl: json['websiteUrl'],
+      startAt: DateTime.parse(json['startAt']),
+      endAt: DateTime.parse(json['endAt']),
+      plan: json['plan'],
+      price: json['price'],
+      paymentStatus: json['paymentStatus'],
       paidAt: json['paidAt'],
-      reachCount: json['reachCount'] ?? 0,
-      clickCount: json['clickCount'] ?? 0,
-      status: json['status'] ?? '',
-      approvalStatus: json['approvalStatus'] ?? '',
-      isDeleted: json['isDeleted'] ?? false,
-      createdAt: DateTime.parse(json['createdAt'] ?? DateTime.now().toString()),
-      updatedAt: DateTime.parse(json['updatedAt'] ?? DateTime.now().toString()),
+      reachCount: json['reachCount'],
+      clickCount: json['clickCount'],
+      status: json['status'],
+      approvalStatus: json['approvalStatus'],
+      isDeleted: json['isDeleted'],
+      createdAt: DateTime.parse(json['createdAt']),
+      updatedAt: DateTime.parse(json['updatedAt']),
     );
   }
 }
@@ -134,9 +134,9 @@ class Location {
 
   factory Location.fromJson(Map<String, dynamic> json) {
     return Location(
-      type: json['type'] ?? '',
+      type: json['type'],
       coordinates: List<double>.from(
-        (json['coordinates'] ?? []).map((x) => x.toDouble()),
+        json['coordinates'].map((x) => x.toDouble()),
       ),
     );
   }

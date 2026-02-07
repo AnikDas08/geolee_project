@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:giolee78/features/ads/presentation/screen/create_ads_screen.dart';
+import 'package:giolee78/features/auth/sign%20in/presentation/screen/sign_in_screen.dart';
 import 'package:giolee78/features/dashboard/presentation/screen/dashboard_screen.dart';
 import 'package:giolee78/services/storage/storage_services.dart';
 import 'package:giolee78/utils/extensions/extension.dart';
@@ -24,8 +25,9 @@ class _SplashScreenState extends State<SplashScreen> {
 
         print("My Role Is  Splash : =================================${LocalStorage.myRole}");
        // Get.offAllNamed(AppRoutes.homeNav);
-        // Get.to(() => const DashboardScreen());
-         Get.to(() => const HistoryAdsScreen());
+       //  Get.to(() => const DashboardScreen());
+          Get.to(() => const HistoryAdsScreen());
+        // Get.to(() => const SignInScreen());
       } else {
         Get.offAllNamed(AppRoutes.onboarding);
       }
