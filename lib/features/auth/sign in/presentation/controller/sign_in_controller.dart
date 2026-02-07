@@ -52,13 +52,10 @@ class SignInController extends GetxController {
           LocalStorageKeys.isLogIn,
           LocalStorage.isLogIn,
         );
-        await LocalStorage.setRole(LocalStorageKeys.myRole, "user");
+        await LocalStorage.setString(LocalStorageKeys.role, "user");
 
-        print(
-          "====================================================${LocalStorage.myRole}",
-        );
-
-        getUserData();
+        print("My Role Is :===========================💕💕💕💕💕💕 ${LocalStorage.role.toString()}");
+        //getUserData();
 
         Get.toNamed(AppRoutes.homeNav);
 

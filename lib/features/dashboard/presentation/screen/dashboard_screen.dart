@@ -60,7 +60,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   description:
                       'Satisfy Your Cravings With Delicious Fast Food, Where Every Bite Is Packed With Flavour From Juicy Burgers And Crispy Fries To Cheesy Pizzas And Spicy Wraps.',
                   onTap: () {
-                    Get.to(() => ViewAdsScreen());
+                    Get.to(() => ViewAdsScreen(
+
+                    ));
                   },
                 ),
                 SizedBox(height: 16.h),

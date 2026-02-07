@@ -35,13 +35,9 @@ class HomeController extends GetxController {
 
   @override
   void onInit() {
+    print("My Role Is :===========================💕💕💕💕💕💕 ${LocalStorage.role.toString()}");
     super.onInit();
     argument=Get.arguments;
-    LocalStorage.myRole==UserType.user.name;
-    LocalStorage.setString(
-      LocalStorageKeys.myRole,
-      LocalStorage.myRole,
-    );
     Get.find<HomeNavController>().refresh();
     fetchPosts();
     myProfileController.getUserData();

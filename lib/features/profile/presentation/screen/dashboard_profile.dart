@@ -168,7 +168,7 @@ class DashBoardProfile extends StatelessWidget {
                     ),
                     SizedBox(height: 20.h,),
 
-                    if (LocalStorage.myRole != "advertiser")
+                    /*if (LocalStorage.myRole != "advertiser")
                       CommonButton(
                         titleText: "Advertise with Us",
                         onTap: (){
@@ -188,7 +188,7 @@ class DashBoardProfile extends StatelessWidget {
 
 
                         },
-                      ),
+                      ),*/
 
                     if (LocalStorage.myRole != "user")
 
@@ -200,15 +200,15 @@ class DashBoardProfile extends StatelessWidget {
                           successPopUps(
                             message:
                             'Your Role now User.',
-                            onTap: () {
-                              LocalStorage.myRole = UserType.user.name;
+                            onTap: () async{
+                              await LocalStorage.setString(LocalStorageKeys.role, "user");
                               // LocalStorage.setString(
-                              //   LocalStorageKeys.myRole, LocalStorage.myRole=UserType.user.name,
+                              //LocalStorageKeys.myRole, LocalStorage.myRole=UserType.user.name,
                               //
                               // );
 
-                              LocalStorage.setRole(LocalStorageKeys.myRole, LocalStorage.myRole='user');
-                              print("My Role Is :===========================${LocalStorage.myRole.toString()}");
+                              //LocalStorage.setRoles(LocalStorageKeys.myRole, LocalStorage.myRole='user');
+                              print("My Role Is :===========================${LocalStorage.role.toString()}");
                               //appLog(LocalStorage.myRole.toString());
 
                               Get.offAllNamed(AppRoutes.homeNav);

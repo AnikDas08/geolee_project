@@ -51,7 +51,6 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    print("My Role Is :==============gggggggggggg============= ${LocalStorage.myRole.toString()}");
   }
   @override
   Widget build(BuildContext context) {

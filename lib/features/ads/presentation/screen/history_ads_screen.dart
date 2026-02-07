@@ -6,6 +6,8 @@ import 'package:giolee78/features/ads/presentation/controller/history_ads_contro
 import 'package:giolee78/features/ads/presentation/screen/view_ads_screen.dart';
 import 'package:giolee78/utils/constants/app_colors.dart';
 
+import '../../../../config/api/api_end_point.dart';
+
 class HistoryAdsScreen extends StatelessWidget {
   const HistoryAdsScreen({super.key});
 
@@ -47,23 +49,40 @@ class HistoryAdsScreen extends StatelessWidget {
                   _buildTabs(controller),
                   SizedBox(height: 16.h),
                   Expanded(
-                    child: ListView.separated(
-                      physics: const BouncingScrollPhysics(),
-                      itemCount: ads.length,
-                      separatorBuilder: (context, index) =>
-                          SizedBox(height: 12.h),
-                      itemBuilder: (context, index) {
-                        final ad = ads[index];
-                        return _HistoryAdCard(
-                          imageSrc: ad.image,
-                          title: ad.title,
-                          description: ad.description,
-                          onTap: () {
-                            Get.to(() => ViewAdsScreen());
-                          },
-                        );
-                      },
-                    ),
+                    child: controller.isLoading
+                        ? const Center(
+                            child: CircularProgressIndicator(
+                              color: Colors.blue,
+                            ),
+                          )
+                        : ads.isEmpty
+                        ? const Center(
+                            child: CommonText(
+                              text: "No Ads Found",
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          )
+                        : ListView.separated(
+                            physics: const BouncingScrollPhysics(),
+                            itemCount: ads.length,
+                            separatorBuilder: (context, index) =>
+                                SizedBox(height: 12.h),
+                            itemBuilder: (context, index) {
+                              final ad = ads[index];
+                              return _HistoryAdCard(
+                                imageSrc: "${ApiEndPoint.imageUrl + ad.image}",
+                                title: ad.title,
+                                description: ad.description,
+                                onTap: () {
+                                  Get.to(
+                                    () => ViewAdsScreen(),
+                                    arguments: ad.id,
+                                  );
+                                },
+                              );
+                            },
+                          ),
                   ),
                 ],
               ),

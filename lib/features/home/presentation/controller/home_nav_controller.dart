@@ -4,73 +4,40 @@ import 'package:giolee78/utils/enum/enum.dart';
 import 'package:giolee78/utils/log/app_log.dart';
 
 class HomeNavController extends GetxController {
-  /// Current selected index
   final RxInt currentIndex = 0.obs;
-
-  /// true  -> userScreens
-  /// false -> advertiseScreens
-  late final RxBool isUserScreenActive;
-
-  /// BottomNav + FAB visibility
-  /// ONLY visible when index == 0 (Home)
+  final RxBool isUserScreenActive = true.obs;
   final RxBool showNavBar = true.obs;
 
   @override
   void onInit() {
     super.onInit();
-
-    final bool isUser = userType == UserType.user;
-    isUserScreenActive = isUser.obs;
-
-    if (isUser) {
-      // User starts from Home
-      currentIndex.value = 0;
-      showNavBar.value = true;
-    }
-    else if (isUser==false&&userType==UserType.advertiser) {
-      showNavBar.value = true;
-    }
-    else {
-      // Advertiser starts from Dashboard
-      currentIndex.value = 0;
-      showNavBar.value = true;
-    }
+    // Initialize based on saved role
+    refreshRoleState();
   }
 
-  /// Central navigation handler
+  void refreshRoleState() {
+    // Check if the role is 'user'
+    bool isUser = LocalStorage.role == "user";
+    isUserScreenActive.value = true; // Both roles start with HomeScreen (index 0)
+    currentIndex.value = 0;
+  }
+
   void changeIndex(int index) {
     currentIndex.value = index;
 
-    final bool isAdvertiser = userType == UserType.advertiser;
+    bool isUser = LocalStorage.role == "user";
 
-    /// ✅ Show navbar rules
-    /// Home (0) -> always show
-    /// Dashboard (2) -> only for advertiser
-    showNavBar.value =
-        index == 0 || (isAdvertiser && index == 2);
-
-    /// Screen list switching
-    if (isAdvertiser) {
-      // Advertiser:
-      // Home -> userScreens
-      // Others -> advertiseScreens
-      isUserScreenActive.value = index == 0;
-    } else {
-      // Normal user always userScreens
+    if (isUser) {
+      // Users always stay on userScreens
       isUserScreenActive.value = true;
+    } else {
+      // Advertisers:
+      // index 0 -> Home (User Screen List)
+      // index 1 & 2 -> Advertise Screen List
+      isUserScreenActive.value = (index == 0);
     }
-  }
 
-
-  /// Resolve user role
-  UserType get userType {
-    final roleString = LocalStorage.myRole;
-
-    final roleEnum = roleString == UserType.advertiser.name
-        ? UserType.advertiser
-        : UserType.user;
-
-    appLog('UserType: $roleEnum');
-    return roleEnum;
+    // Navbar visibility logic (show for Home, Add/Ads, and Message/Dashboard)
+    showNavBar.value = true;
   }
 }

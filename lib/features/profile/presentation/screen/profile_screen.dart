@@ -195,7 +195,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                     SizedBox(height: 20.h),
 
-                    if (LocalStorage.myRole == UserType.user.name)
+                      if(LocalStorage.role=="user")
                       CommonButton(
                         titleText: "Advertise with Us",
                         onTap: () async{
@@ -203,14 +203,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             "My Role Is :=========================== ${LocalStorage.myRole.toString()}",
                           );
 
-                          if(controller.advToken.isEmpty){
+                          if(controller.advToken.isEmpty||controller.advToken==""){
 
                             print("Token is Empty I Have no token");
                             await Get.to(()=>ServiceProviderInfoScreen());
                           }else{
                             // Update LocalStorage properly
-                            LocalStorage.myRole = UserType.advertiser.name;
-                            await LocalStorage.setString(LocalStorageKeys.myRole, LocalStorage.myRole);
+                            LocalStorage.setString(LocalStorageKeys.role, "advertise");
 
                             // Navigate to HomeNav after updating role
                             Get.offAll(()=>HomeNav());

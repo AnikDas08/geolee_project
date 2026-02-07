@@ -55,6 +55,7 @@ class MyFriendScreen extends StatelessWidget {
                   text: 'Suggested Friends',
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
+                  textAlign: TextAlign.start,
                   color: AppColors.black,
                 ),
                 SizedBox(height: 12.h),
@@ -86,6 +87,7 @@ class MyFriendScreen extends StatelessWidget {
                 text: 'Total Friend (${controller.myFriendsList.length})',
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
+                textAlign: TextAlign.start,
                 color: AppColors.black,
               ),
               SizedBox(height: 12.h),
@@ -177,20 +179,24 @@ class _SuggestedFriendCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(14.r),
           ),
           child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              CircleAvatar(
-                radius: 22.r,
-                backgroundImage: AssetImage(avatar ?? AppImages.profileImage),
-              ),
-              SizedBox(width: 12.w),
-              Expanded(
-                child: CommonText(
-                  text: userName,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.black,
-                  maxLines: 1,
-                ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  CircleAvatar(
+                    radius: 22.r,
+                    backgroundImage: AssetImage(avatar ?? AppImages.profileImage),
+                  ),
+                  SizedBox(width: 12.w),
+                  CommonText(
+                    text: userName,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.black,
+                    maxLines: 1,
+                  ),
+                ],
               ),
               isRequestSent
                   ? Icon(Icons.check_circle, color: Colors.green, size: 20.sp)
@@ -247,39 +253,48 @@ class _FriendListItem extends StatelessWidget {
           borderRadius: BorderRadius.circular(14.r),
         ),
         child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            CircleAvatar(
-              radius: 22.r,
-              backgroundImage: (avatar != null && avatar!.startsWith('http'))
-                  ? NetworkImage(avatar!) as ImageProvider
-                  : AssetImage(AppImages.profileImage),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                CircleAvatar(
+                  radius: 22.r,
+                  backgroundImage: (avatar != null && avatar!.startsWith('http'))
+                      ? NetworkImage(avatar!) as ImageProvider
+                      : AssetImage(AppImages.profileImage),
+                ),
+                SizedBox(width: 12.w),
+                CommonText(
+                  text: userName,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.black,
+                  maxLines: 1,
+                ),
+              ],
             ),
-            SizedBox(width: 12.w),
-            Expanded(
-              child: CommonText(
-                text: userName,
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: AppColors.black,
-                maxLines: 1,
-              ),
-            ),
-            GestureDetector(
-              onTap: () => Get.toNamed(AppRoutes.message),
-              child: Icon(
-                Icons.chat_bubble_outline,
-                size: 20.sp,
-                color: AppColors.secondaryText,
-              ),
-            ),
-            SizedBox(width: 12.w),
-            GestureDetector(
-              onTap: () => controller.removeFriend(userId),
-              child: Icon(
-                Icons.close,
-                size: 20.sp,
-                color: AppColors.secondaryText,
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                GestureDetector(
+                  onTap: () => Get.toNamed(AppRoutes.message),
+                  child: Icon(
+                    Icons.chat_bubble_outline,
+                    size: 20.sp,
+                    color: AppColors.secondaryText,
+                  ),
+                ),
+                SizedBox(width: 12.w),
+                GestureDetector(
+                  onTap: () => controller.removeFriend(userId),
+                  child: Icon(
+                    Icons.close,
+                    size: 20.sp,
+                    color: AppColors.secondaryText,
+                  ),
+                ),
+              ],
             ),
           ],
         ),
