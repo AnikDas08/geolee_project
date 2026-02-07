@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:cookie_jar/cookie_jar.dart';
 import 'package:dio/dio.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:mime/mime.dart';
 import 'package:path_provider/path_provider.dart';
 import '../../config/api/api_end_point.dart';
@@ -233,12 +234,18 @@ class ApiService {
 CookieJar cookieJar = CookieJar();
 
 Future<CookieJar> cookieJarInit() async {
-  final dir = await getApplicationDocumentsDirectory();
-  cookieJar = PersistCookieJar(
-    ignoreExpires: true,
-    storage: FileStorage("${dir.path}/.cookies/"),
-  );
-  return cookieJar;
+  try{
+    final dir = await getApplicationDocumentsDirectory();
+    cookieJar = PersistCookieJar(
+      ignoreExpires: true,
+      storage: FileStorage("${dir.path}/.cookies/"),
+    );
+    return cookieJar;
+  }catch(e){
+    debugPrint("cookieJarInit Error: $e");
+    return cookieJar;
+  }
+
 }
 
 Dio _getMyDio() {

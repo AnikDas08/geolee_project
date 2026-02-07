@@ -5,8 +5,20 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="bfaf5573-c330-40b0-a877-9f6fce0e988f" name="Changes" comment="advertiser role profile update,overview working">
+<<<<<<< HEAD
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/features/ads/presentation/screen/history_ads_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/ads/presentation/screen/history_ads_screen.dart" afterDir="false" />
+=======
+      <change afterPath="$PROJECT_DIR$/lib/features/ads/data/single_ads_model.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/features/ads/presentation/controller/view_ads_screen_controller.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/config/api/api_end_point.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/config/api/api_end_point.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/config/dependency/dependency_injection.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/config/dependency/dependency_injection.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/features/ads/presentation/controller/history_ads_controller.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/ads/presentation/controller/history_ads_controller.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/features/ads/presentation/screen/history_ads_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/ads/presentation/screen/history_ads_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/features/ads/presentation/screen/view_ads_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/ads/presentation/screen/view_ads_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/features/dashboard/presentation/screen/dashboard_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/dashboard/presentation/screen/dashboard_screen.dart" afterDir="false" />
+>>>>>>> a1f849592a28b7c78c0bd8d7957c3da7d1608797
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

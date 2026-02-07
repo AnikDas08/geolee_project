@@ -14,19 +14,17 @@ import 'main.dart' as GetStorage;
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   GetStorage.init();
-  await LocalStorage.getAllPrefData();
   await init.tryCatch();
-  initRole();
   runApp(const MyApp());
 }
 
 init() async {
   DependencyInjection dI = DependencyInjection();
   dI.dependencies();
+  await LocalStorage.getAllPrefData();
   SocketServices.connectToSocket();
 
   await Future.wait([
-    LocalStorage.getAllPrefData(),
     cookieJarInit(),
     NotificationService.initLocalNotification(),
     dotenv.load(fileName: ".env").catchError((error) {
@@ -34,19 +32,4 @@ init() async {
       return null;
     }),
   ]);
-}
-
-
-Future<void> initRole() async {
-  String role = LocalStorage.myRole;
-
-  if (role.isEmpty) {
-    await LocalStorage.setRole(
-      LocalStorageKeys.myRole,
-      UserType.user.name,
-    );
-    LocalStorage.myRole = UserType.user.name;
-  } else {
-    LocalStorage.myRole = role;
-  }
 }

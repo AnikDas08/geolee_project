@@ -3,9 +3,9 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:giolee78/features/home/presentation/controller/home_nav_controller.dart';
+import 'package:giolee78/services/storage/storage_keys.dart';
 
 import '../../../../component/image/common_image.dart';
-import '../../../../services/storage/storage_services.dart';
 import '../../../../utils/constants/app_colors.dart';
 import '../../../../utils/constants/app_icons.dart';
 import '../../../../utils/enum/enum.dart';
@@ -76,7 +76,7 @@ class HomeNav extends StatelessWidget {
       bottomNavigationBar: Obx(() {
         if (!controller.showNavBar.value) return SizedBox.shrink();
 
-        final isUser = controller.userType == UserType.user;
+        final isUser = LocalStorageKeys.role=="user";
 
         return BottomAppBar(
           shape: const CircularNotchedRectangle(),
@@ -105,8 +105,6 @@ class HomeNav extends StatelessWidget {
       }),
     );
   }
-
-
 
   Widget _buildNavItem({
     required int index,

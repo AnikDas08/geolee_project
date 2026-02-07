@@ -18,8 +18,7 @@ class HistoryAdsController extends GetxController {
   List<Advertisement> allAds = [];
   List<Advertisement> activeAds = [];
 
-  List<Advertisement> get currentAds =>
-      selectedTabIndex == 0 ? allAds : activeAds;
+  List<Advertisement> get currentAds =>selectedTabIndex == 0 ? allAds : activeAds;
 
   bool isLoading = false;
 
@@ -35,26 +34,20 @@ class HistoryAdsController extends GetxController {
 
     try {
       // All Ads
-      ApiResponseModel responseAll = await ApiService.get(
-        ApiEndPoint.getAdvertisement,
-      );
-
+      ApiResponseModel responseAll = await ApiService.get(ApiEndPoint.getAdvertisement);
       if (responseAll.statusCode == 200 && responseAll.data != null) {
         final List<dynamic> jsonList = responseAll.data['data'];
         allAds = jsonList.map((e) => Advertisement.fromJson(e)).toList();
       }
 
       // Active Ads
-      ApiResponseModel responseActive = await ApiService.get(
-      "${ApiEndPoint.getAdvertisement}${'status'}"
-
-      );
-
-
+      final activeEndpoint = "${ApiEndPoint.getAdvertisement}?status=active&approvalStatus=approved";
+      ApiResponseModel responseActive = await ApiService.get(activeEndpoint);
       if (responseActive.statusCode == 200 && responseActive.data != null) {
         final List<dynamic> jsonList = responseActive.data['data'];
         activeAds = jsonList.map((e) => Advertisement.fromJson(e)).toList();
       }
+
     } catch (e) {
       print('Error fetching ads: $e');
     }
@@ -62,4 +55,5 @@ class HistoryAdsController extends GetxController {
     isLoading = false;
     update();
   }
+
 }

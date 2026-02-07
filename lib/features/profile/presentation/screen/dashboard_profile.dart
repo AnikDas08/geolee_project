@@ -168,7 +168,7 @@ class DashBoardProfile extends StatelessWidget {
                     ),
                     SizedBox(height: 20.h,),
 
-                    if (LocalStorage.myRole != "advertiser")
+                    /*if (LocalStorage.myRole != "advertiser")
                       CommonButton(
                         titleText: "Advertise with Us",
                         onTap: (){
@@ -188,7 +188,7 @@ class DashBoardProfile extends StatelessWidget {
 
 
                         },
-                      ),
+                      ),*/
 
                     if (LocalStorage.myRole != "user")
 
@@ -207,7 +207,7 @@ class DashBoardProfile extends StatelessWidget {
                               //
                               // );
 
-                              LocalStorage.setRole(LocalStorageKeys.myRole, LocalStorage.myRole='user');
+                              //LocalStorage.setRoles(LocalStorageKeys.myRole, LocalStorage.myRole='user');
                               print("My Role Is :===========================${LocalStorage.myRole.toString()}");
                               //appLog(LocalStorage.myRole.toString());
 

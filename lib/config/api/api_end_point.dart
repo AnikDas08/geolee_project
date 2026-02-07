@@ -47,6 +47,7 @@ class ApiEndPoint {
 
   static const String createAds = "${baseUrl}advertisements/create";
   static const String getAdvertisement = "${baseUrl}advertisements/all";
+  static const String getAdvertisementById = "${baseUrl}advertisements/single/";
 
 
 

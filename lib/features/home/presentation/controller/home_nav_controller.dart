@@ -19,7 +19,7 @@ class HomeNavController extends GetxController {
   void onInit() {
     super.onInit();
 
-    final bool isUser = userType == UserType.user;
+    final bool isUser = LocalStorage.role=="user";
     isUserScreenActive = isUser.obs;
 
     if (isUser) {
@@ -27,7 +27,7 @@ class HomeNavController extends GetxController {
       currentIndex.value = 0;
       showNavBar.value = true;
     }
-    else if (isUser==false&&userType==UserType.advertiser) {
+    else if (isUser==false&&LocalStorage.role=="advertise") {
       showNavBar.value = true;
     }
     else {
@@ -41,7 +41,7 @@ class HomeNavController extends GetxController {
   void changeIndex(int index) {
     currentIndex.value = index;
 
-    final bool isAdvertiser = userType == UserType.advertiser;
+    final bool isAdvertiser = LocalStorage.role=="advertise";
 
     /// ✅ Show navbar rules
     /// Home (0) -> always show
@@ -59,18 +59,5 @@ class HomeNavController extends GetxController {
       // Normal user always userScreens
       isUserScreenActive.value = true;
     }
-  }
-
-
-  /// Resolve user role
-  UserType get userType {
-    final roleString = LocalStorage.myRole;
-
-    final roleEnum = roleString == UserType.advertiser.name
-        ? UserType.advertiser
-        : UserType.user;
-
-    appLog('UserType: $roleEnum');
-    return roleEnum;
   }
 }
