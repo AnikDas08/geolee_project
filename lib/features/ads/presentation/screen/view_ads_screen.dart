@@ -16,6 +16,7 @@ import '../../data/single_ads_model.dart';
 
 class ViewAdsScreen extends StatelessWidget {
   final bool? isFromHistory;
+
   const ViewAdsScreen({super.key, this.isFromHistory = false});
 
   @override
@@ -25,20 +26,14 @@ class ViewAdsScreen extends StatelessWidget {
       builder: (controller) {
         if (controller.isLoading) {
           return const Scaffold(
-            body: Center(
-              child: CircularProgressIndicator(),
-            ),
+            body: Center(child: CircularProgressIndicator()),
           );
         }
 
         final SingleAdvertisement? ad = controller.ad;
 
         if (ad == null) {
-          return const Scaffold(
-            body: Center(
-              child: Text("No Ad Found"),
-            ),
-          );
+          return const Scaffold(body: Center(child: Text("No Ad Found")));
         }
 
         return Scaffold(
@@ -67,30 +62,53 @@ class ViewAdsScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    
                     SizedBox(
-                      height: 78.h,
+                      height: 85.h,
                       width: 170.w,
                       child: Card(
+                        color: Colors.white,
+                        elevation: 0,
                         child: Center(
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-
                               CommonText(text: "Adc Click"),
-                              CommonText(text: "5210"),
+                              CommonText(
+                                text: ad.clickCount.toString(),
+                                fontSize: 36,
+                                fontWeight: FontWeight.w700,
+                                color: Color(0xFF373838),
+                              ),
                             ],
                           ),
                         ),
                       ),
-                    )
-                    
-                    
-                    
-                    
+                    ),
+                    SizedBox(
+                      height: 78.h,
+                      width: 170.w,
+                      child: Card(
+                        color: Colors.white,
+                        elevation: 0,
+                        child: Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              CommonText(text: "Ads Reach"),
+                              CommonText(
+                                text: ad.reachCount.toString(),
+                                fontSize: 36,
+                                fontWeight: FontWeight.w700,
+                                color: Color(0xFF373838),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
                 SizedBox(height: 16.h),
@@ -130,16 +148,110 @@ class ViewAdsScreen extends StatelessWidget {
                 SizedBox(height: 12.h),
                 _buildInfoRow(label: 'Location:', value: ad.focusArea),
                 _buildInfoRow(label: 'Status:', value: ad.status),
-                _buildInfoRow(label: 'Start Date:', value: ad.startAt.toLocal().toString().split(' ')[0]),
-                _buildInfoRow(label: 'End Date:', value: ad.endAt.toLocal().toString().split(' ')[0]),
+                _buildInfoRow(
+                  label: 'Start Date:',
+                  value: ad.startAt.toLocal().toString().split(' ')[0],
+                ),
+                _buildInfoRow(
+                  label: 'End Date:',
+                  value: ad.endAt.toLocal().toString().split(' ')[0],
+                ),
                 _buildInfoRow(label: 'Price:', value: "\$${ad.price}"),
-                _buildInfoRow(label: 'Website:', value: ad.websiteUrl, isLink: true),
-                SizedBox(height: 20.h),
+                _buildInfoRow(
+                  label: 'Website:',
+                  value: ad.websiteUrl,
+                  isLink: true,
+                ),
+                SizedBox(height: 30.h),
+
+                buildStatusOption(controller),
               ],
             ),
           ),
         );
       },
+    );
+  }
+
+  Row buildStatusOption(ViewAdsScreenController controller) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        InkWell(
+          onTap: (){
+           Get.dialog(
+             barrierDismissible: true,
+             Dialog(
+               child: Container(
+                 height: 200.h,
+                 width: 300.w,
+                 decoration: BoxDecoration(
+                   borderRadius: BorderRadius.circular(12),
+                   color: Colors.white,
+                 ),
+                 child: Column(
+                   crossAxisAlignment: CrossAxisAlignment.center,
+                   mainAxisAlignment: MainAxisAlignment.center,
+                   children: [
+                     SizedBox(height: 16.h),
+
+
+
+
+                      SizedBox(
+                          height: 40.h,
+                          width: 40.w,
+                          child: Icon(Icons.delete,color: Colors.red,)),
+                      CommonText(text: "Are you sure you want to delete this post?"),
+                     SizedBox(height: 16.h),
+
+
+                   ],
+                 ),
+
+               ),
+             )
+           );
+          },
+          child: Container(
+            height: 48.h,
+            width: 172.w,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: AppColors.red, width: 1),
+            ),
+            child: Center(
+              child: CommonText(
+                text: 'Delete Post',
+                fontWeight: FontWeight.w600,
+                color: AppColors.red,
+              ),
+            ),
+          ),
+        ),
+
+        InkWell(
+          onTap: (){
+            Get.to(EditAdsScreen(),arguments: controller.ad!.id);
+          },
+          child: Container(
+            height: 48.h,
+            width: 172.w,
+            decoration: BoxDecoration(
+              color: AppColors.red,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: AppColors.red, width: 1),
+            ),
+            child: Center(
+              child: CommonText(
+                text: 'Update Post',
+                color: AppColors.white,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 

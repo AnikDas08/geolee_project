@@ -3,7 +3,7 @@ class ApiEndPoint {
   // Base URL =======================================
   static const String baseUrl = "http://10.10.7.7:5006/api/v1/";
   static const String imageUrl = "http://10.10.7.7:5006";
-  static const String socketUrl = "http://10.10.7.46:5001";
+  static const String socketUrl = "http://10.10.7.7:5006";
 
   // Auth ===========================================
   static const String signUp = "${baseUrl}users/create-user";
@@ -46,8 +46,10 @@ class ApiEndPoint {
 
 
   static const String createAds = "${baseUrl}advertisements/create";
-  static const String getAdvertisement = "${baseUrl}advertisements/all";
+  static const String getAdvertisementMe = "${baseUrl}advertisements/me";
   static const String getAdvertisementById = "${baseUrl}advertisements/single/";
+  static const String updateAdvertisementById = "${baseUrl}advertisements/update/";
+  static const String deleteAdvertisementById = "${baseUrl}advertisements/delete/";
 
 
 
