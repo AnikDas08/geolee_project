@@ -45,6 +45,13 @@ class ApiEndPoint {
   static const String joinChat = "${baseUrl}chats/join/696b6da6a27367444bc2403a";
 
 
+  static const String createAds = "${baseUrl}advertisements/create";
+  static const String getAdvertisement = "${baseUrl}advertisements/all";
+
+
+
+
+
 
 
   //Advertiser========================================================

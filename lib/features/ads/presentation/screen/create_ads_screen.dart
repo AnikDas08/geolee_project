@@ -168,8 +168,9 @@ class CreateAdsScreen extends StatelessWidget {
                       }),
 
                       // --- Submit Button ---
+
                       CommonButton(
-                        onTap: () => controller.submitAd(context),
+                        onTap: () => controller.createAds(),
                         titleText: 'Submit',
                         buttonColor: AppColors.primaryColor,
                         titleColor: AppColors.white,

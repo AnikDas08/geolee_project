@@ -172,9 +172,21 @@ class DashBoardProfile extends StatelessWidget {
                       CommonButton(
                         titleText: "Advertise with Us",
                         onTap: (){
-                          Get.toNamed(
-                              AppRoutes.serviceProviderInfo
-                          );
+
+
+                          if(controller.advToken.isEmpty){
+                            Get.toNamed(
+                                AppRoutes.serviceProviderInfo
+                            );
+                            print("My Role Is :===========================${LocalStorage.myRole.toString()}");
+                          }else{
+                            Get.toNamed(
+                                AppRoutes.homeNav
+                            );
+
+                          }
+
+
                         },
                       ),
 
