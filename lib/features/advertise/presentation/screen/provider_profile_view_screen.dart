@@ -5,18 +5,20 @@ import 'package:giolee78/component/button/common_button.dart';
 import 'package:giolee78/component/image/common_image.dart';
 import 'package:giolee78/component/text/common_text.dart';
 import 'package:giolee78/config/api/api_end_point.dart';
-import 'package:giolee78/features/profile/presentation/controller/my_profile_controller.dart';
 import 'package:giolee78/utils/constants/app_colors.dart';
 import 'package:giolee78/utils/constants/app_images.dart';
 import 'package:giolee78/utils/extensions/extension.dart';
 
-class MyProfileScreen extends StatelessWidget {
-  const MyProfileScreen({super.key});
+import '../controller/provider_profile_view_controller.dart';
+
+
+class ProviderProfileViewScreen extends StatelessWidget {
+  const ProviderProfileViewScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return GetBuilder<MyProfileController>(
-      init: MyProfileController(),
+    return GetBuilder<ProviderProfileViewController>(
+      init: ProviderProfileViewController(),
       builder: (controller) {
         return Scaffold(
           backgroundColor: AppColors.background,
@@ -60,7 +62,7 @@ class MyProfileScreen extends StatelessWidget {
 
                     /// Name
                     CommonText(
-                      text: controller.userName,
+                      text:controller.businessName,
                       fontSize: 18.sp,
                       fontWeight: FontWeight.w600,
                       color: AppColors.black,
@@ -93,7 +95,7 @@ class MyProfileScreen extends StatelessWidget {
   }
 
   /// Profile Image Widget
-  Widget _buildProfileImage(MyProfileController controller) {
+  Widget _buildProfileImage(ProviderProfileViewController controller) {
     return Container(
       width: 120.w,
       height: 120.h,
@@ -128,13 +130,13 @@ class MyProfileScreen extends StatelessWidget {
   }
 
   /// About Section Widget - Fixed to show label and content separately
-  Widget _buildAboutSection(MyProfileController controller) {
+  Widget _buildAboutSection(ProviderProfileViewController controller) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Label
         CommonText(
-          text: 'About',
+          text: 'Bio',
           fontSize: 16.sp,
           fontWeight: FontWeight.w600,
           color: AppColors.black,
@@ -143,7 +145,7 @@ class MyProfileScreen extends StatelessWidget {
         8.height,
         // Content (bio)
         CommonText(
-          text: controller.bio,
+          text: controller.about,
           fontSize: 14.sp,
           fontWeight: FontWeight.w400,
           color: AppColors.secondaryText,
@@ -155,18 +157,30 @@ class MyProfileScreen extends StatelessWidget {
   }
 
   /// Profile Details Widget
-  Widget _buildProfileDetails(MyProfileController controller) {
-    return Column(
-      children: [
-        // Uncomment if mobile is available in the API
-        // _buildDetailRow('Mobile', controller.mobile),
-        // 16.height,
-        _buildDetailRow('E-mail', controller.userEmail),
-        16.height,
-        _buildDetailRow('Date of Birth', controller.dateOfBirth),
-        16.height,
-        _buildDetailRow('Gender', controller.gender),
-      ],
+  Widget _buildProfileDetails(ProviderProfileViewController controller) {
+    return Container(
+      padding: EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(8),
+
+        color: Colors.white
+      ),
+      child: Column(
+        children: [
+          // Uncomment if mobile is available in the API
+          // _buildDetailRow('Mobile', controller.mobile),
+          // 16.height,
+          _buildDetailRow('E-mail', controller.userEmail),
+          16.height,
+          _buildDetailRow('Phone Number', controller.phone),
+          16.height,
+          _buildDetailRow('Business License Number', controller.businessLicenceNumber),
+          16.height,
+          _buildDetailRow('Business Type', controller.businessType),
+          16.height,
+          _buildDetailRow('Address', controller.address),
+        ],
+      ),
     );
   }
 
@@ -197,7 +211,7 @@ class MyProfileScreen extends StatelessWidget {
   }
 
   /// Edit Profile Button Widget
-  Widget _buildEditProfileButton(MyProfileController controller) {
+  Widget _buildEditProfileButton(ProviderProfileViewController controller) {
     return CommonButton(
       titleText: 'Edit Profile',
       onTap: controller.navigateToEditProfile,

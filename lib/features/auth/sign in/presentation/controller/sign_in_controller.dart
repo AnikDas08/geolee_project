@@ -25,12 +25,6 @@ class SignInController extends GetxController {
   /// Sign in Api call here
 
   Future<void> signInUser(GlobalKey<FormState> formKey) async {
-    LocalStorage.myRole = UserType.user.name;
-    LocalStorage.setString(LocalStorageKeys.myRole, LocalStorage.myRole);
-    appLog(LocalStorage.myRole.toString());
-    // Get.toNamed(AppRoutes.homeNav);
-    // return;
-
     if (!formKey.currentState!.validate()) return;
     // return;
 
@@ -42,13 +36,7 @@ class SignInController extends GetxController {
         "password": passwordController.text,
       };
 
-
-      Map<String, String> header = {
-        'Authorization': 'Bearer ${LocalStorage.token}',
-      };
-
       var response = await ApiService.post(
-        header: header,
         ApiEndPoint.signIn,
         body: body,
       ).timeout(const Duration(seconds: 30));
@@ -56,14 +44,19 @@ class SignInController extends GetxController {
       if (response.statusCode == 200) {
         var data = response.data;
 
+        Utils.successSnackBar('Login', "Successfully Login To Your Account");
 
-       Utils.successSnackBar('Login', "Successfully Login To Your Account");
-
-        LocalStorage.token = data['data']["accessToken"];
         LocalStorage.isLogIn = true;
 
-        LocalStorage.setBool(LocalStorageKeys.isLogIn, LocalStorage.isLogIn);
-        LocalStorage.setString(LocalStorageKeys.token, LocalStorage.token);
+        await LocalStorage.setBool(
+          LocalStorageKeys.isLogIn,
+          LocalStorage.isLogIn,
+        );
+        await LocalStorage.setRole(LocalStorageKeys.myRole, "user");
+
+        print(
+          "====================================================${LocalStorage.myRole}",
+        );
 
         getUserData();
 
@@ -93,19 +86,16 @@ class SignInController extends GetxController {
 
       if (response.statusCode == 200) {
         var data = response.data;
-
         LocalStorage.userId = data['data']?["_id"];
         LocalStorage.myImage = data['data']?["image"];
         LocalStorage.myName = data['data']?["name"];
         LocalStorage.myEmail = data['data']?["email"];
-        LocalStorage.myRole = data['data']?["role"];
 
         LocalStorage.setBool(LocalStorageKeys.isLogIn, LocalStorage.isLogIn);
         LocalStorage.setString(LocalStorageKeys.userId, LocalStorage.userId);
         LocalStorage.setString(LocalStorageKeys.myImage, LocalStorage.myImage);
         LocalStorage.setString(LocalStorageKeys.myName, LocalStorage.myName);
         LocalStorage.setString(LocalStorageKeys.myEmail, LocalStorage.myEmail);
-        LocalStorage.setString(LocalStorageKeys.myRole, LocalStorage.myRole);
       } else {
         Get.snackbar(response.statusCode.toString(), response.message);
       }

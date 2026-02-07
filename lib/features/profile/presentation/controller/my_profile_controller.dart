@@ -80,10 +80,7 @@ class MyProfileController extends GetxController {
     try {
       final response = await ApiService.get(
         ApiEndPoint.profile,
-        header: {
-          "Authorization": "Bearer ${LocalStorage.token}",
-          "Content-Type": "application/json",
-        },
+
       ).timeout(const Duration(seconds: 30));
 
       if (response.statusCode == 200) {
@@ -95,7 +92,7 @@ class MyProfileController extends GetxController {
         if (data == null) return;
 
         // ---------- SAFE DATE HANDLING ----------
-        _dateOfBirth = data.dob != null ? data.dob!.toIso8601String() : "";
+        _dateOfBirth = data.dob.toIso8601String();
 
         _gender = data.gender;
 
@@ -108,8 +105,8 @@ class MyProfileController extends GetxController {
         LocalStorage.bio = data.bio.isNotEmpty ? data.bio : "Bio Not Set Yet";
         LocalStorage.gender = data.gender;
         LocalStorage.dateOfBirth = _dateOfBirth;
-        LocalStorage.createdAt = data.createdAt?.toIso8601String() ?? "";
-        LocalStorage.updatedAt = data.updatedAt?.toIso8601String() ?? "";
+        LocalStorage.createdAt = data.createdAt.toIso8601String() ?? "";
+        LocalStorage.updatedAt = data.updatedAt.toIso8601String() ?? "";
         LocalStorage.verified = data.isVerified;
 
         // ---------- SAVE TO SHARED PREF ----------

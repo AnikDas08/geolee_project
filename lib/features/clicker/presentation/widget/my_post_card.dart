@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:get/get.dart';
 import 'package:giolee78/component/image/common_image.dart';
 import 'package:giolee78/component/text/common_text.dart';
-import 'package:giolee78/features/friend/presentation/screen/view_friend_screen.dart';
 import 'package:giolee78/utils/constants/app_colors.dart';
 
 class MyPostCards extends StatelessWidget {

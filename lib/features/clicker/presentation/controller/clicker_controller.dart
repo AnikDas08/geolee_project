@@ -1,5 +1,3 @@
-import 'package:dio/dio.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:giolee78/component/image/common_image.dart';
@@ -7,30 +5,30 @@ import 'package:giolee78/features/clicker/data/all_post_model.dart';
 import 'package:giolee78/features/clicker/data/single_user_model.dart';
 
 import 'package:giolee78/services/api/api_service.dart';
-import 'package:giolee78/services/storage/storage_services.dart';
 import 'package:giolee78/utils/app_utils.dart';
 import 'package:giolee78/utils/constants/app_images.dart';
 import '../../../../config/api/api_end_point.dart';
-import '../../../friend/data/friendship_request_status_response.dart';
 
 enum FriendStatus {
-  none,        // Add Friend
-  requested,   // Request Sent
-  friends      // Message
+  none, // Add Friend
+  requested, // Request Sent
+  friends, // Message
 }
 
 class ClickerController extends GetxController {
-
   final searchText = ''.obs;
   final TextEditingController searchController = TextEditingController();
 
   /// Carousel
   final _currentPosition = 0.obs;
+
   int get currentPosition => _currentPosition.value;
+
   void changePosition(int position) => _currentPosition.value = position;
 
   /// Filter
   final _selectedFilter = 'All'.obs;
+
   String get selectedFilter => _selectedFilter.value;
 
   void changeFilter(String newFilter) {
@@ -69,7 +67,6 @@ class ClickerController extends GetxController {
   void onInit() {
     super.onInit();
     getAllPosts();
-
     searchController.addListener(_onSearchChanged);
   }
 
@@ -93,7 +90,9 @@ class ClickerController extends GetxController {
 
     // Filter by clicker type
     if (selectedFilter != 'All') {
-      filtered = filtered.where((post) => post.clickerType == selectedFilter).toList();
+      filtered = filtered
+          .where((post) => post.clickerType == selectedFilter)
+          .toList();
     }
 
     // Filter by search text
@@ -120,25 +119,23 @@ class ClickerController extends GetxController {
 
       String url = ApiEndPoint.getAllPost;
 
-      if (clickerType != null && clickerType.isNotEmpty && clickerType != 'All') {
+      if (clickerType != null &&
+          clickerType.isNotEmpty &&
+          clickerType != 'All') {
         url += "?clickerType=$clickerType";
       }
 
-      var response = await ApiService.get(
-        url,
-        header: {
-          "Authorization": "Bearer ${LocalStorage.token}",
-          "Content-Type": "application/json",
-        },
-      );
+      var response = await ApiService.get(url);
 
       if (response.statusCode == 200) {
-        final responseData =
-        AllPostModel.fromJson(response.data);
+        final responseData = AllPostModel.fromJson(response.data);
         posts.assignAll(responseData.data);
         _filterPosts();
       } else {
-        Utils.errorSnackBar("Error", response.message ?? "Something went wrong");
+        Utils.errorSnackBar(
+          "Error",
+          response.message ?? "Something went wrong",
+        );
       }
     } catch (e) {
       Utils.errorSnackBar("Error", e.toString());
@@ -153,20 +150,24 @@ class ClickerController extends GetxController {
       isUserLoading.value = true;
 
       final url = "${ApiEndPoint.getUserById}$userId";
-      var response = await ApiService.get(
-        header: {
-          "Authorization": "Bearer ${LocalStorage.token}",
-          "Content-Type": "application/json",
-        },
-        url,
-      );
+      var response = await ApiService.get(url);
 
       if (response.statusCode == 200) {
-        final allPosts =
-        AllPostModel.fromJson(response.data);
-        userPosts.addAll(allPosts.data);
+        final responseData = AllPostModel.fromJson(response.data);
+
+        // 🔥 privacy filter
+        final filteredPosts = responseData.data.where((post) {
+          return post.privacy != "only me";
+        }).toList();
+
+        posts.assignAll(filteredPosts);
+
+        _filterPosts();
       } else {
-        Utils.errorSnackBar("Error", response.message ?? "Something went wrong");
+        Utils.errorSnackBar(
+          "Error",
+          response.message ?? "Something went wrong",
+        );
       }
     } catch (e) {
       Utils.errorSnackBar("Error", e.toString());
@@ -175,28 +176,20 @@ class ClickerController extends GetxController {
     }
   }
 
-
-
   Future<void> getUserById(String userId) async {
     try {
       isUserLoading.value = true;
 
       final url = "${ApiEndPoint.getUserSingleProfileById}$userId";
 
-      var response = await ApiService.get(
-        url,
-        header: {
-          "Authorization": "Bearer ${LocalStorage.token}",
-          "Content-Type": "application/json",
-        },
-      );
+      var response = await ApiService.get(url);
 
       if (response.statusCode == 200) {
         final responseData = SingleUserByIdModel.fromJson(
           response.data as Map<String, dynamic>,
         );
 
-        userData.value = responseData.data; // ✅ CORRECT
+        userData.value = responseData.data;
       } else {
         Utils.errorSnackBar(
           "Error",
@@ -213,7 +206,6 @@ class ClickerController extends GetxController {
   var friendStatus = FriendStatus.none.obs;
 
   Future<void> onTapAddFriendButton(String userId) async {
-
     if (friendStatus.value == FriendStatus.requested) {
       Get.defaultDialog(
         title: "Notice",
@@ -230,10 +222,6 @@ class ClickerController extends GetxController {
       final response = await ApiService.post(
         "${ApiEndPoint.createFriendRequest}",
         body: {"receiver": userId},
-        header: {
-          "Authorization": "Bearer ${LocalStorage.token}",
-          "Content-Type": "application/json",
-        },
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
@@ -251,19 +239,12 @@ class ClickerController extends GetxController {
 
   bool isFriend = false;
 
-  Future<FriendshipStatusResponse> fetchFriendshipStatus(String userId) async {
-    final dio = Dio();
-    final url="${ApiEndPoint.checkFriendStatus}${userId}";
+  fetchFriendshipStatus(String userId) async {
+    final url = "${ApiEndPoint.checkFriendStatus}${userId}";
 
-    final response = await dio.get(url,
-      options: Options(
-        headers: {
-          'Authorization': 'Bearer ${LocalStorage.token}',
-        },
-      ),
-    );
+    final response = await ApiService.get(url);
 
-    return FriendshipStatusResponse.fromJson(response.data);
+    return response.data;
   }
 
   Future<void> checkFriendship(String userId) async {
@@ -273,14 +254,11 @@ class ClickerController extends GetxController {
 
       if (data.isAlreadyFriend == true) {
         friendStatus.value = FriendStatus.friends;
-      }
-      else if (data.pendingFriendRequest != null) {
+      } else if (data.pendingFriendRequest != null) {
         friendStatus.value = FriendStatus.requested;
-      }
-      else {
+      } else {
         friendStatus.value = FriendStatus.none;
       }
-
     } catch (e) {
       print('Friendship check error: $e');
     }

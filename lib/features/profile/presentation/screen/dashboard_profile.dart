@@ -8,6 +8,7 @@ import 'package:giolee78/component/pop_up/common_pop_menu.dart';
 import 'package:giolee78/component/text/common_text.dart';
 import 'package:giolee78/config/route/app_routes.dart';
 import 'package:giolee78/features/ads/presentation/screen/history_ads_screen.dart';
+import 'package:giolee78/features/advertise/presentation/screen/provider_profile_view_screen.dart';
 import 'package:giolee78/features/auth/change_password/presentation/screen/change_password_screen.dart';
 import 'package:giolee78/features/profile/presentation/controller/profile_controller.dart';
 import 'package:giolee78/features/profile/presentation/screen/help_support_screen.dart';
@@ -36,7 +37,8 @@ class DashBoardProfile extends StatelessWidget {
               imageSrc: AppIcons.profile,
               title: 'My Profile',
               onTap: () {
-                Get.to(() => const MyProfileScreen());
+                print("===============================${LocalStorage.myRole}");
+                Get.to(() => const ProviderProfileViewScreen());
               },
             ),
             ProfileItemData(
@@ -46,7 +48,7 @@ class DashBoardProfile extends StatelessWidget {
                 Get.to(() => const ChangePasswordScreen());
               },
             ),
-            if (LocalStorage.myRole == UserType.advertise.name)
+            if (LocalStorage.myRole == UserType.advertiser.name)
               ProfileItemData(
                 imageSrc: AppIcons.edit,
                 title: 'Ads History',
@@ -165,29 +167,50 @@ class DashBoardProfile extends StatelessWidget {
                       },
                     ),
                     SizedBox(height: 20.h,),
-                    if (LocalStorage.myRole != UserType.advertise.name)
+
+                    if (LocalStorage.myRole != "advertiser")
                       CommonButton(
-                        titleText: "Adverise with Us",
+                        titleText: "Advertise with Us",
                         onTap: (){
-                          Get.toNamed(
-                              AppRoutes.serviceProviderInfo
-                          );
+
+
+                          if(controller.advToken.isEmpty){
+                            Get.toNamed(
+                                AppRoutes.serviceProviderInfo
+                            );
+                            print("My Role Is :===========================${LocalStorage.myRole.toString()}");
+                          }else{
+                            Get.toNamed(
+                                AppRoutes.homeNav
+                            );
+
+                          }
+
+
                         },
                       ),
-                    if (LocalStorage.myRole != UserType.user.name)
+
+                    if (LocalStorage.myRole != "user")
+
                       CommonButton(
                         titleText: "Become a User",
                         onTap: () {
+                          print("My Role Is :===========================${LocalStorage.myRole.toString()}");
+
                           successPopUps(
                             message:
                             'Your Role now User.',
                             onTap: () {
                               LocalStorage.myRole = UserType.user.name;
-                              LocalStorage.setString(
-                                LocalStorageKeys.myRole,
-                                LocalStorage.myRole,
-                              );
+                              // LocalStorage.setString(
+                              //   LocalStorageKeys.myRole, LocalStorage.myRole=UserType.user.name,
+                              //
+                              // );
+
+                              LocalStorage.setRole(LocalStorageKeys.myRole, LocalStorage.myRole='user');
+                              print("My Role Is :===========================${LocalStorage.myRole.toString()}");
                               //appLog(LocalStorage.myRole.toString());
+
                               Get.offAllNamed(AppRoutes.homeNav);
                             },
                             buttonTitle: 'Go to HomeScreen',

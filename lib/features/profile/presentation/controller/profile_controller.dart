@@ -12,6 +12,7 @@ import '../../../../config/api/api_end_point.dart';
 import '../../../../config/route/app_routes.dart';
 import '../../../../services/api/api_service.dart';
 import '../../../../utils/app_utils.dart';
+import '../../../../utils/log/app_log.dart';
 
 class ProfileController extends GetxController {
 
@@ -35,6 +36,22 @@ class ProfileController extends GetxController {
 
   /// Image picker instance
   final ImagePicker _picker = ImagePicker();
+
+  @override
+  void onInit() {
+    // TODO: implement onInit
+    super.onInit();
+    _loadAdvertiserStatus();
+  }
+
+  String? advertiserToken;
+  bool isLoadingRole = true;
+
+  Future<void> _loadAdvertiserStatus() async {
+    advertiserToken = await getUserDataForRole();
+    isLoadingRole = false;
+    update(); // 🔥 MUST
+  }
 
   /// Controllers
   TextEditingController nameController = TextEditingController()..text = LocalStorage.myName;
@@ -220,7 +237,6 @@ class ProfileController extends GetxController {
       var response = await ApiService.multipart(
         ApiEndPoint.updateProfile,
         method: "PATCH",
-        header: {"Authorization": "Bearer ${LocalStorage.token}"},
         body: body,
         imageName: 'image',
         imagePath: selectedImage?.path,
@@ -254,7 +270,7 @@ class ProfileController extends GetxController {
       } else {
         Utils.errorSnackBar(
           response.statusCode.toString(),
-          response.data?['message'] ?? "Failed to update profile",
+          response.data['message'] ?? "Failed to update profile",
         );
       }
     } catch (e) {
@@ -264,6 +280,68 @@ class ProfileController extends GetxController {
       update();
     }
   }
+
+  String advToken="";
+
+  Future<String?> getUserDataForRole() async {
+    isLoading = true;
+    update();
+
+    try {
+      var response = await ApiService.get(
+        ApiEndPoint.profile,
+      ).timeout(const Duration(seconds: 30));
+
+      if (response.statusCode == 200) {
+        var data = response.data;
+
+
+        String? advertiserToken = data['data']?['advertiser']?.toString();
+        advToken=advertiserToken??"";
+
+
+        print("afkd;ajdfa;sdjfk=================${advertiserToken}");
+
+
+        return advertiserToken;
+
+      } else {
+        Get.snackbar(response.statusCode.toString(), response.message);
+        return null;
+      }
+    } catch (e) {
+      Get.snackbar("Error", e.toString());
+      return null;
+    } finally {
+      isLoading = false;
+      update();
+    }
+  }
+
+
+  Future<void> changeRole(String newRole) async {
+    isLoading = true;
+    update();
+
+    try {
+      // 1. Update local variables
+      LocalStorage.myRole = newRole;
+
+      // 2. Persist to storage
+      await LocalStorage.setString(LocalStorageKeys.myRole, newRole);
+
+      // 3. Optional: Sync with Server here if you have an API for this
+      // await ApiService.post(ApiEndPoint.updateRole, body: {"role": newRole});
+
+      appLog("Role switched to: ${LocalStorage.myRole}");
+    } catch (e) {
+      appLog("Error switching role: $e");
+    } finally {
+      isLoading = false;
+      update(); // This refreshes the DashBoardProfile UI
+    }
+  }
+
 
   @override
   void onClose() {

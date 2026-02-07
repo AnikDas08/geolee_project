@@ -44,6 +44,24 @@ class ApiEndPoint {
   static const String leaveChat = "${baseUrl}chats/leave/696b6da6a27367444bc2403a";
   static const String joinChat = "${baseUrl}chats/join/696b6da6a27367444bc2403a";
 
+
+  static const String createAds = "${baseUrl}advertisements/create";
+  static const String getAdvertisement = "${baseUrl}advertisements/all";
+
+
+
+
+
+
+
+  //Advertiser========================================================
+  static const String advertiserCompleteProfile="${baseUrl}advertisers/create";
+  static const String advertiserVerify="${baseUrl}/advertisers/verify";
+  static const String resendOtp="${baseUrl}/auth/request-otp";
+  static const String advertisementsOverviewMe="${baseUrl}advertisements/overview/me";
+  static const String getsMyAdsByStatus="${baseUrl}advertisements/me";
+  static const String advertiserUpdate="${baseUrl}advertisers/update/me";
+
   // Misc ===========================================
   static const String support = "${baseUrl}supports/create";
   // Misc ===========================================
@@ -51,6 +69,7 @@ class ApiEndPoint {
   static const String post = "${baseUrl}posts";
   static const String customOffer = "${baseUrl}custom/offer";
   static const String profile = "${baseUrl}users/profile";
+  static const String advertiserProfile = "${baseUrl}advertisers/me";
   static const String notifications = "${baseUrl}notification/all";
   static const String category = "${baseUrl}category/service";
   static const String privacyPolicies = "${baseUrl}disclaimer/privacy-policy";
@@ -62,5 +81,8 @@ class ApiEndPoint {
   static const String servicePay = "${baseUrl}pay/booked-service";
   static const String myServiceHistory = "${baseUrl}pay/my-service-history";
   static const String updateRequest = "${baseUrl}pay/my-service-history/";
+
+
+
 
 }

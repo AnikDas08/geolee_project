@@ -47,9 +47,8 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                       child: ClipOval(
                         child: CommonImage(
                           fill: BoxFit.fill,
-                          imageSrc: LocalStorage.myImage != null &&
-                              LocalStorage.myImage!.isNotEmpty
-                              ? ApiEndPoint.imageUrl + LocalStorage.myImage!
+                          imageSrc: LocalStorage.myImage.isNotEmpty
+                              ? ApiEndPoint.imageUrl + LocalStorage.myImage
                               : "",
                           size: 40,
                           defaultImage: AppImages.profileImage,

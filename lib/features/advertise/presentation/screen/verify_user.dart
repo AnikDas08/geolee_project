@@ -1,44 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:giolee78/component/image/common_image.dart';
-import 'package:giolee78/component/pop_up/common_pop_menu.dart';
-import 'package:giolee78/config/route/app_routes.dart';
-import 'package:giolee78/features/dashboard/presentation/screen/dashboard_screen.dart';
-import 'package:giolee78/features/home/presentation/screen/home_nav_screen.dart';
-import 'package:giolee78/services/storage/storage_keys.dart';
-import 'package:giolee78/services/storage/storage_services.dart';
-import 'package:giolee78/utils/constants/app_icons.dart';
-import 'package:giolee78/utils/enum/enum.dart';
-import 'package:giolee78/utils/extensions/extension.dart';
-import 'package:giolee78/utils/log/app_log.dart';
-import '../../../../../component/button/common_button.dart';
-import '../../../../../component/text/common_text.dart';
-import '../controller/provider_info_controller.dart';
-import '../../../../../../../utils/constants/app_colors.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
+
+import '../../../../utils/extensions/extension.dart';
+import '../controller/provider_complete_profile_controller.dart';
+import '../../../../../../../utils/constants/app_colors.dart';
 import '../../../../../../../utils/constants/app_string.dart';
+import '../../../../../component/text/common_text.dart';
+import '../../../../../component/button/common_button.dart';
+import '../../../../../component/image/common_image.dart';
+import '../../../../../../../utils/constants/app_icons.dart';
 
-class VerifyUser extends StatefulWidget {
-  const VerifyUser({super.key});
+class ProviderVerifyUser extends StatelessWidget {
+  ProviderVerifyUser({super.key});
 
-  @override
-  State<VerifyUser> createState() => _VerifyUserState();
-}
-
-class _VerifyUserState extends State<VerifyUser> {
-  final formKey = GlobalKey<FormState>();
-
-  @override
-  void initState() {
-    ServiceProviderController().startTimer();
-    super.initState();
-  }
+  final controller = Get.find<ServiceProviderController>();
 
   @override
   Widget build(BuildContext context) {
+    // Start timer when screen opens
+    controller.startTimer();
+
     return Scaffold(
-      /// App Bar Section starts here
       appBar: AppBar(
         title: const CommonText(
           text: AppString.otpVerify,
@@ -46,139 +30,91 @@ class _VerifyUserState extends State<VerifyUser> {
           fontSize: 24,
         ),
       ),
-
-      /// Body Section starts here
-      body: GetBuilder<ServiceProviderController>(
-        builder: (controller) {
-          return SafeArea(
-            child: SingleChildScrollView(
-              padding: EdgeInsets.symmetric(vertical: 24.h, horizontal: 20.w),
-              child: Form(
-                key: formKey,
-                child: Column(
-                  children: [
-                    CommonImage(imageSrc: AppIcons.enterotp, size: 250),
-                    20.height,
-                    const CommonText(
-                      text: AppString.otpVerify,
-                      fontSize: 24,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.primaryColor,
-                      bottom: 8,
-                    ),
-
-                    /// instruction how to get OTP
-                    Center(
-                      child: CommonText(
-                        text:
-                            "${AppString.codeHasBeenSendTo} ${controller.emailController.text}",
-                        fontSize: 14,
-
-                        bottom: 40,
-                        maxLines: 3,
-                        color: AppColors.secondaryText,
-                      ),
-                    ),
-
-                    /// OTP Filed here
-                    Flexible(
-                      flex: 0,
-                      child: PinCodeTextField(
-                        controller: controller.otpController,
-                        autoDisposeControllers: false,
-                        cursorColor: AppColors.black,
-                        appContext: (context),
-                        autoFocus: true,
-                        pinTheme: PinTheme(
-                          shape: PinCodeFieldShape.box,
-                          borderRadius: BorderRadius.circular(16.r),
-                          fieldHeight: 60.h,
-                          fieldWidth: 60.w,
-                          activeFillColor: AppColors.transparent,
-                          selectedFillColor: AppColors.transparent,
-                          inactiveFillColor: AppColors.transparent,
-                          borderWidth: 0.5.w,
-                          selectedColor: AppColors.primaryColor,
-                          activeColor: AppColors.primaryColor,
-                          inactiveColor: AppColors.black,
-                        ),
-                        length: 6,
-                        keyboardType: TextInputType.number,
-                        autovalidateMode: AutovalidateMode.disabled,
-                        enableActiveFill: true,
-                        validator: (value) {
-                          if (value != null && value.length == 6) {
-                            return null;
-                          } else {
-                            return AppString.otpIsInValid;
-                          }
-                        },
-                      ),
-                    ),
-
-                    /// Resent OTP or show Timer
-                    /*GestureDetector(
-                      onTap: controller.time == '00:00'
-                          ? () {
-                              controller.startTimer();
-                              controller.signUpUser(formKey);
-                            }
-                          : () {},
-                      child: CommonText(
-                        text: controller.time == '00:00'
-                            ? AppString.resendCode
-                            : "${AppString.resendCodeIn} ${controller.time} ${AppString.minute}",
-                        bottom: 20,
-                        fontSize: 18,
-                      ),
-                    ),*/
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        CommonText(
-                          text: "Didn't receive the code?",
-                          fontSize: 16,
-                          bottom: 40,
-                          maxLines: 3,
-                          fontWeight: FontWeight.w400,
-                          color: AppColors.textPrimary,
-                        ),
-                        CommonText(
-                          text: "Resend",
-                          fontSize: 16,
-                          bottom: 40,
-                          fontWeight: FontWeight.w700,
-                          maxLines: 3,
-                          color: AppColors.primaryColor,
-                        ),
-                      ],
-                    ),
-
-                    ///  Submit Button here
-                    CommonButton(
-                      titleText: AppString.verify,
-                      onTap: () {
-                        successPopUps(
-                          message:
-                              'Your Registration has been successfully Complete.',
-                          onTap: () {
-                            LocalStorage.myRole = UserType.advertise.name;
-                            LocalStorage.setString(
-                              LocalStorageKeys.myRole,
-                              LocalStorage.myRole,
-                            );
-                            Get.off(HomeNav());
-                          },
-                          buttonTitle: 'Go to Dashboard',
-                        );
-                      },
-                    ),
-                  ],
-                ),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: EdgeInsets.symmetric(vertical: 24.h, horizontal: 20.w),
+          child: Column(
+            children: [
+              CommonImage(imageSrc: AppIcons.enterotp, size: 250),
+              20.height,
+              const CommonText(
+                text: AppString.otpVerify,
+                fontSize: 24,
+                fontWeight: FontWeight.w700,
+                color: AppColors.primaryColor,
+                bottom: 8,
               ),
-            ),
-          );
-        },
+              Center(
+                child: Obx(() => CommonText(
+                  text:
+                  "${AppString.codeHasBeenSendTo} ${controller.phoneNumberController.text}",
+                  fontSize: 14,
+                  bottom: 40,
+                  maxLines: 3,
+                  color: AppColors.secondaryText,
+                )),
+              ),
+
+              /// OTP field
+              PinCodeTextField(
+                controller: controller.otpController,
+                autoDisposeControllers: false,
+                cursorColor: AppColors.black,
+                appContext: context,
+                autoFocus: true,
+                pinTheme: PinTheme(
+                  shape: PinCodeFieldShape.box,
+                  borderRadius: BorderRadius.circular(16.r),
+                  fieldHeight: 60.h,
+                  fieldWidth: 60.w,
+                  activeFillColor: AppColors.transparent,
+                  selectedFillColor: AppColors.transparent,
+                  inactiveFillColor: AppColors.transparent,
+                  borderWidth: 0.5.w,
+                  selectedColor: AppColors.primaryColor,
+                  activeColor: AppColors.primaryColor,
+                  inactiveColor: AppColors.black,
+                ),
+                length: 6,
+                keyboardType: TextInputType.number,
+                enableActiveFill: true,
+                validator: (value) {
+                  if (value != null && value.length == 6) {
+                    return null;
+                  } else {
+                    return AppString.otpIsInValid;
+                  }
+                },
+              ),
+              SizedBox(height: 20.h),
+
+              /// Timer or Resend OTP
+              Obx(() => GestureDetector(
+                onTap: controller.isResendEnabled.value
+                    ? controller.resendOtp
+                    : null,
+                child: CommonText(
+                  text: controller.isResendEnabled.value
+                      ? AppString.resendCode
+                      : "${AppString.resendCodeIn} ${controller.time.value}",
+                  bottom: 20,
+                  fontSize: 18,
+                  color: controller.isResendEnabled.value
+                      ? AppColors.primaryColor
+                      : AppColors.textPrimary,
+                ),
+              )),
+
+              SizedBox(height: 20.h),
+
+              /// Submit Button
+              CommonButton(
+                titleText: AppString.verify,
+                onTap: controller.verifyOtp,
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

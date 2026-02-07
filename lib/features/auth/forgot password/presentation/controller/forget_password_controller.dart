@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
-import 'package:giolee78/component/pop_up/common_pop_menu.dart';
 import 'package:giolee78/features/auth/sign%20up/presentation/widget/success_profile.dart';
 
 import '../../../../../config/route/app_routes.dart';

@@ -3,11 +3,9 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart' hide MultipartFile, FormData, Response;
 import 'package:giolee78/config/api/api_end_point.dart';
-import 'package:giolee78/services/api/api_response_model.dart';
 import 'package:giolee78/services/api/api_service.dart';
 import 'package:image_picker/image_picker.dart';
 
-import '../../../../services/storage/storage_services.dart';
 
 class PostController extends GetxController {
   @override
@@ -90,7 +88,6 @@ class PostController extends GetxController {
 
       var response = await ApiService.post(
         url,
-        header: {'Authorization': 'Bearer ${LocalStorage.token}'},
         body: formData
       );
 

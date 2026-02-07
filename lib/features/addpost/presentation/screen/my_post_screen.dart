@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:get_storage/get_storage.dart';
 import 'package:giolee78/component/text/common_text.dart';
 import 'package:giolee78/config/api/api_end_point.dart';
 import 'package:giolee78/features/addpost/presentation/widgets/my_post_card.dart';
 import 'package:giolee78/features/profile/presentation/controller/post_controller.dart';
 import 'package:giolee78/utils/constants/app_colors.dart';
-import 'package:giolee78/utils/constants/app_images.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../utils/constants/app_icons.dart';
@@ -90,11 +88,11 @@ class _MyPostScreenState extends State<MyPostScreen> {
                         },
                         clickerType: data.clickerType,
                         isMyPost: true,
-                        userName: data.user?.name ?? "Unknown",
-                        userAvatar: "${ApiEndPoint.imageUrl}${data.user?.image}",
+                        userName: data.user.name ?? "Unknown",
+                        userAvatar: "${ApiEndPoint.imageUrl}${data.user.image}",
                         timeAgo: _formatPostTime(DateTime.parse(data.createdAt.toString())),
                         location: data.address,
-                        postImage: (data.photos != null && data.photos.isNotEmpty)
+                        postImage: (data.photos.isNotEmpty)
                             ? "${ApiEndPoint.imageUrl}${data.photos[0]}"
                             : "",
                         description: data.description ?? "No description",

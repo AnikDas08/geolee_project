@@ -5,7 +5,6 @@ import 'package:get/get.dart';
 import 'package:giolee78/component/button/common_button.dart';
 import 'package:giolee78/component/text/common_text.dart';
 import 'package:giolee78/config/api/api_end_point.dart';
-import 'package:giolee78/utils/extensions/extension.dart';
 import '../../../../utils/constants/app_images.dart';
 import '../controller/my_friend_controller.dart';
 

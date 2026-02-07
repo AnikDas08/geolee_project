@@ -27,7 +27,7 @@ class HomeNavController extends GetxController {
       currentIndex.value = 0;
       showNavBar.value = true;
     }
-    else if (isUser==false&&userType==UserType.advertise) {
+    else if (isUser==false&&userType==UserType.advertiser) {
       showNavBar.value = true;
     }
     else {
@@ -41,7 +41,7 @@ class HomeNavController extends GetxController {
   void changeIndex(int index) {
     currentIndex.value = index;
 
-    final bool isAdvertiser = userType == UserType.advertise;
+    final bool isAdvertiser = userType == UserType.advertiser;
 
     /// ✅ Show navbar rules
     /// Home (0) -> always show
@@ -66,8 +66,8 @@ class HomeNavController extends GetxController {
   UserType get userType {
     final roleString = LocalStorage.myRole;
 
-    final roleEnum = roleString == UserType.advertise.name
-        ? UserType.advertise
+    final roleEnum = roleString == UserType.advertiser.name
+        ? UserType.advertiser
         : UserType.user;
 
     appLog('UserType: $roleEnum');

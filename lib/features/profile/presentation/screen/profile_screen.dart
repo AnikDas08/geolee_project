@@ -7,7 +7,9 @@ import 'package:giolee78/component/other_widgets/item.dart';
 import 'package:giolee78/component/pop_up/common_pop_menu.dart';
 import 'package:giolee78/component/text/common_text.dart';
 import 'package:giolee78/config/route/app_routes.dart';
+import 'package:giolee78/features/advertise/presentation/screen/provider_complete_profile_screen.dart';
 import 'package:giolee78/features/auth/change_password/presentation/screen/change_password_screen.dart';
+import 'package:giolee78/features/home/presentation/screen/home_nav_screen.dart';
 import 'package:giolee78/features/profile/presentation/controller/my_profile_controller.dart';
 import 'package:giolee78/features/profile/presentation/controller/profile_controller.dart';
 import 'package:giolee78/features/profile/presentation/screen/help_support_screen.dart';
@@ -22,10 +24,30 @@ import 'package:giolee78/utils/enum/enum.dart';
 import 'package:giolee78/utils/extensions/extension.dart';
 
 import '../../../../config/api/api_end_point.dart';
+import '../../../../services/storage/storage_keys.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+
+
+class _ProfileScreenState extends State<ProfileScreen> {
+
+  final ProfileController controller = Get.put(ProfileController());
+
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    controller.getUserDataForRole();
+
+    print("===========================${LocalStorage.myRole}");
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -105,19 +127,21 @@ class ProfileScreen extends StatelessWidget {
                             return ClipOval(
                               child: myProfileController.userImage.isNotEmpty
                                   ? CommonImage(
-                                imageSrc: ApiEndPoint.imageUrl + myProfileController.userImage,
-                                width: 120.w,
-                                height: 120.h,
-                                fill: BoxFit.cover,
-                              )
+                                      imageSrc:
+                                          ApiEndPoint.imageUrl +
+                                          myProfileController.userImage,
+                                      width: 120.w,
+                                      height: 120.h,
+                                      fill: BoxFit.cover,
+                                    )
                                   : CommonImage(
-                                imageSrc: AppImages.profile,
-                                width: 120.w,
-                                height: 120.h,
-                                fill: BoxFit.cover,
-                              ),
+                                      imageSrc: AppImages.profile,
+                                      width: 120.w,
+                                      height: 120.h,
+                                      fill: BoxFit.cover,
+                                    ),
                             );
-                          }
+                          },
                         ),
                       ),
                     ),
@@ -131,7 +155,9 @@ class ProfileScreen extends StatelessWidget {
                       bottom: 8.h,
                     ),
                     CommonText(
-                      text:LocalStorage.bio.isNotEmpty?LocalStorage.bio:"Bio Not Set Yet",
+                      text: LocalStorage.bio.isNotEmpty
+                          ? LocalStorage.bio
+                          : "Bio Not Set Yet",
                       fontSize: 12,
                       fontWeight: FontWeight.w400,
                       bottom: 20,
@@ -140,20 +166,19 @@ class ProfileScreen extends StatelessWidget {
                       right: 25,
                       color: AppColors.secondaryText,
                     ),
-                    if(LocalStorage.myRole==UserType.user.name)
-                    CommonButton(
-                      titleText: 'Public',
-                      buttonWidth: 80.w,
-                      titleSize: 12,
-                      buttonHeight: 32.h,
-                      borderWidth: 4,
-                      borderColor: AppColors.primaryColor2,
-                      buttonColor: AppColors.primaryColor2,
-                    ),
+                    if (LocalStorage.myRole == UserType.user.name)
+                      CommonButton(
+                        titleText: 'Public',
+                        buttonWidth: 80.w,
+                        titleSize: 12,
+                        buttonHeight: 32.h,
+                        borderWidth: 4,
+                        borderColor: AppColors.primaryColor2,
+                        buttonColor: AppColors.primaryColor2,
+                      ),
 
                     16.height,
 
-                    /// Edit Profile item here
                     ListView.builder(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
@@ -167,16 +192,41 @@ class ProfileScreen extends StatelessWidget {
                         );
                       },
                     ),
-                    SizedBox(height: 20.h,),
-                    if (LocalStorage.myRole != UserType.advertise.name)
-                    CommonButton(
+
+                    SizedBox(height: 20.h),
+
+                    if (LocalStorage.myRole == UserType.user.name)
+                      CommonButton(
                         titleText: "Advertise with Us",
-                      onTap: (){
-                          Get.toNamed(
-                              AppRoutes.serviceProviderInfo
+                        onTap: () async{
+                          print(
+                            "My Role Is :=========================== ${LocalStorage.myRole.toString()}",
                           );
-                      },
-                    ),
+
+                          if(controller.advToken.isEmpty){
+
+                            print("Token is Empty I Have no token");
+                            await Get.to(()=>ServiceProviderInfoScreen());
+                          }else{
+                            // Update LocalStorage properly
+                            LocalStorage.myRole = UserType.advertiser.name;
+                            await LocalStorage.setString(LocalStorageKeys.myRole, LocalStorage.myRole);
+
+                            // Navigate to HomeNav after updating role
+                            Get.offAll(()=>HomeNav());
+                          }
+
+
+                          // if (LocalStorage.myRole == UserType.advertiser.name) {
+                          //   Get.offAllNamed(AppRoutes.homeNav);
+                          // } else {
+                          //   Get.toNamed(AppRoutes.serviceProviderInfo);
+                          // }
+
+
+
+                        },
+                      ),
                   ],
                 ),
               ),
@@ -187,8 +237,6 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 }
-
-
 
 void _showLogoutDialog() {
   Get.dialog(

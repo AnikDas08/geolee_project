@@ -6,12 +6,10 @@ import 'package:giolee78/component/text/common_text.dart';
 import 'package:giolee78/component/text_field/common_text_field.dart';
 import 'package:giolee78/config/api/api_end_point.dart';
 import 'package:giolee78/config/route/app_routes.dart';
-import 'package:giolee78/features/friend/data/my_friends_model.dart';
 import 'package:giolee78/features/friend/presentation/screen/view_friend_screen.dart';
 import 'package:giolee78/utils/constants/app_colors.dart';
 import 'package:giolee78/utils/constants/app_images.dart';
 
-import '../../data/friend_model.dart';
 import '../controller/my_friend_controller.dart';
 
 class MyFriendScreen extends StatelessWidget {

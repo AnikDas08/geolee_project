@@ -7,10 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import '../../../../config/api/api_end_point.dart';
 import '../../../../services/api/api_response_model.dart';
 import '../../../../services/api/api_service.dart';
-import '../../../../services/storage/storage_services.dart';
 import '../../../../utils/app_utils.dart';
-import '../../../../utils/constants/app_colors.dart';
-import '../../../profile/presentation/controller/post_controller.dart';
 import '../data/single_post_mode.dart';
 
 class EditPostControllers extends GetxController {
@@ -57,10 +54,7 @@ class EditPostControllers extends GetxController {
 
       ApiResponseModel response = await ApiService.get(
         url,
-        header: {
-          'Authorization': 'Bearer ${LocalStorage.token}',
-          'Content-Type': 'application/json',
-        },
+
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
@@ -85,14 +79,12 @@ class EditPostControllers extends GetxController {
       selectedPricingOption.value = post.clickerType ?? '';
       selectedPriorityLevel.value = post.privacy ?? '';
 
-      if (post.photos != null && post.photos!.isNotEmpty) {
-        existingImageUrls.assignAll(post.photos!);
+      if (post.photos.isNotEmpty) {
+        existingImageUrls.assignAll(post.photos);
       }
 
-      if (post.id != null) {
-        postId = post.id.toString();
-      }
-      update();
+      postId = post.id.toString();
+          update();
     }
   }
 
@@ -127,9 +119,7 @@ class EditPostControllers extends GetxController {
         method: "PATCH",
         body: body,
         files: files,
-        header: {
-          'Authorization': 'Bearer ${LocalStorage.token}',
-        },
+
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {

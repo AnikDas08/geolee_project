@@ -2,19 +2,35 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
-import 'package:giolee78/config/route/app_routes.dart';
 import 'package:giolee78/features/ads/presentation/screen/view_ads_screen.dart';
-import 'package:giolee78/features/clicker/presentation/widget/app_bar.dart';
-import 'package:giolee78/features/profile/presentation/screen/dashboard_profile.dart';
 
 import '../../../../component/image/common_image.dart';
 import '../../../../component/text/common_text.dart';
+import '../../../../services/storage/storage_services.dart';
 import '../../../../utils/constants/app_colors.dart';
 import '../../../../utils/constants/app_icons.dart';
 import '../../../../utils/constants/app_images.dart';
+import '../../../advertise/presentation/controller/provider_profile_view_controller.dart';
+import '../../../advertise/presentation/screen/provider_profile_view_screen.dart';
+import '../../../profile/presentation/screen/dashboard_profile.dart';
+import '../controller/dash_board_screen_controller.dart';
 
-class DashboardScreen extends StatelessWidget {
+class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
+
+  @override
+  State<DashboardScreen> createState() => _DashboardScreenState();
+}
+
+class _DashboardScreenState extends State<DashboardScreen> {
+
+  final ProviderProfileViewController _providerProfileViewController=ProviderProfileViewController();
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +44,7 @@ class DashboardScreen extends StatelessWidget {
               children: [
                 _buildHeader(),
                 SizedBox(height: 20.h),
-                _buildStatsGrid(),
+                _buildStatsGrid(DashBoardScreenController()),
                 SizedBox(height: 24.h),
                 const CommonText(
                   text: 'My Active Ads',
@@ -71,6 +87,8 @@ class DashboardScreen extends StatelessWidget {
       children: [
         GestureDetector(
           onTap: (){
+            _providerProfileViewController.getAdvertiserData();
+            print("My Role Is :===========================${LocalStorage.myRole.toString()}");
             Get.to(() => const DashBoardProfile());
           },
           child: Row(
@@ -143,7 +161,9 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildStatsGrid() {
+  Widget _buildStatsGrid(DashBoardScreenController controller) {
+    final data = controller.overviewData.value;
+
     return GridView.count(
       crossAxisCount: 2,
       crossAxisSpacing: 12.w,
@@ -151,11 +171,23 @@ class DashboardScreen extends StatelessWidget {
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       childAspectRatio: 156 / 82,
-      children: const [
-        _StatsCard(title: 'Active Ads', value: '05'),
-        _StatsCard(title: 'Ads Reach', value: '5,960'),
-        _StatsCard(title: 'Engagement', value: '95%'),
-        _StatsCard(title: 'Ads Click', value: '1,560'),
+      children: [
+        _StatsCard(
+          title: 'Active Ads',
+          value: data.totalActiveAds.toString(),
+        ),
+        _StatsCard(
+          title: 'Ads Reach',
+          value: data.totalReachCount.toString(),
+        ),
+        _StatsCard(
+          title: 'Engagement',
+          value: '${data.engagementRate}%',
+        ),
+        _StatsCard(
+          title: 'Ads Click',
+          value: data.totalClickCount.toString(),
+        ),
       ],
     );
   }

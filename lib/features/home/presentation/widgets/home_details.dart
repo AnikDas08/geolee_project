@@ -10,6 +10,7 @@ import 'package:giolee78/utils/extensions/extension.dart';
 import '../../../../component/image/common_image.dart';
 import '../../../../component/text/common_text.dart';
 import '../../../../config/api/api_end_point.dart';
+import '../../../../services/storage/storage_keys.dart';
 import '../../../../utils/constants/app_colors.dart';
 import '../../../../utils/constants/app_images.dart';
 
@@ -74,15 +75,18 @@ class _HomeDetailsState extends State<HomeDetails> {
         Row(
           children: [
             GestureDetector(
-              onTap: () => Get.toNamed(AppRoutes.profile),
+              onTap: () {
+                print("My Role Is :===========================${LocalStorage.myRole}");
+                Get.toNamed(AppRoutes.profile);
+                print("My Role Is :===========================${LocalStorage.myRole}");
+              },
               child: CircleAvatar(
                 radius: 20,
                 child: ClipOval(
                   child: CommonImage(
                     fill: BoxFit.fill,
-                    imageSrc: LocalStorage.myImage != null &&
-                        LocalStorage.myImage!.isNotEmpty
-                        ? ApiEndPoint.imageUrl + LocalStorage.myImage!
+                    imageSrc: LocalStorage.myImage.isNotEmpty
+                        ? ApiEndPoint.imageUrl + LocalStorage.myImage
                         : "",
                     size: 40,
                     defaultImage: AppImages.profileImage,
@@ -128,7 +132,10 @@ class _HomeDetailsState extends State<HomeDetails> {
             Padding(
               padding: const EdgeInsets.only(right: 10),
               child: GestureDetector(
-                onTap: () => Get.toNamed(AppRoutes.notifications),
+                onTap: () {
+                  print("======================Hamba Role======================${LocalStorage.myRole}");
+                  Get.toNamed(AppRoutes.notifications);
+                },
                 child: CommonImage(
                   imageSrc: AppIcons.notification,
                   size: 28,
