@@ -25,12 +25,7 @@ class _SplashScreenState extends State<SplashScreen> {
       if (LocalStorage.isLogIn) {
 
         print("My Role Is :===========================💕💕💕💕💕💕 ${LocalStorage.role.toString()}");
-       // Get.offAllNamed(AppRoutes.homeNav);
-        // Get.to(() => const DashboardScreen());
-         //Get.to(() => HomeNav());
-       //  Get.to(() => const DashboardScreen());
-          Get.to(() => const HistoryAdsScreen());
-        // Get.to(() => const SignInScreen());
+       Get.offAllNamed(AppRoutes.homeNav);
       } else {
         print("My Role Is :===========================💕💕💕💕💕💕 ${LocalStorage.role.toString()}");
         Get.offAllNamed(AppRoutes.onboarding);
