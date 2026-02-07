@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show debugPrint;
 import 'package:get/get.dart';
 import 'package:giolee78/features/ads/data/add_history_model.dart';
 import 'package:giolee78/config/api/api_end_point.dart';
@@ -37,4 +38,24 @@ class ViewAdsScreenController extends GetxController {
     isLoading = false;
     update();
   }
+
+
+  Future<void>deleteAdsById()async{
+    try{
+
+
+      ApiResponseModel response=await ApiService.delete(ApiEndPoint.deleteAdvertisementById+adsId);
+      if(response.statusCode==200){
+        Get.snackbar("Success", "Ads Deleted Successfully");
+      }else{
+        Get.snackbar("Error", response.message??"Something went wrong");
+      }
+
+    }catch(e){
+      debugPrint("Delete Ads Error: $e");
+    }
+
+  }
+
+
 }

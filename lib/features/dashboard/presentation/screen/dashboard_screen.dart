@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
+import 'package:giolee78/config/api/api_end_point.dart';
 import 'package:giolee78/features/ads/presentation/screen/view_ads_screen.dart';
 
 import '../../../../component/image/common_image.dart';
@@ -23,8 +24,8 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
-
-  final ProviderProfileViewController _providerProfileViewController=ProviderProfileViewController();
+  final ProviderProfileViewController _providerProfileViewController =
+      ProviderProfileViewController();
 
   @override
   void initState() {
@@ -34,51 +35,78 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        backgroundColor: AppColors.background,
-        body: SafeArea(
-          child: SingleChildScrollView(
-            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildHeader(),
-                SizedBox(height: 20.h),
-                _buildStatsGrid(DashBoardScreenController()),
-                SizedBox(height: 24.h),
-                const CommonText(
-                  text: 'My Active Ads',
-                  textAlign: TextAlign.left,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textColorFirst,
-                ),
-                SizedBox(height: 16.h),
-                _buildAdCard(
-                  image: AppImages.banner1,
-                  title: 'Delicious Fast Food',
-                  description:
-                      'Satisfy Your Cravings With Delicious Fast Food, Where Every Bite Is Packed With Flavour From Juicy Burgers And Crispy Fries To Cheesy Pizzas And Spicy Wraps.',
-                  onTap: () {
-                    Get.to(() => ViewAdsScreen(
+    return GetBuilder<DashBoardScreenController>(
+      builder: (controller) {
+        return Scaffold(
+          backgroundColor: AppColors.background,
+          body: SafeArea(
+            child: SingleChildScrollView(
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildHeader(),
+                  SizedBox(height: 20.h),
+                  _buildStatsGrid(DashBoardScreenController()),
+                  SizedBox(height: 24.h),
+                  const CommonText(
+                    text: 'My Active Ads',
+                    textAlign: TextAlign.left,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textColorFirst,
+                  ),
+                  SizedBox(height: 16.h),
 
-                    ));
-                  },
-                ),
-                SizedBox(height: 16.h),
-                _buildAdCard(
-                  image: AppImages.banner2,
-                  title: 'Delicious Fast Food',
-                  description:
-                      'Satisfy Your Cravings With Delicious Fast Food, Where Every Bite Is Packed With Flavour From Juicy Burgers And Crispy Fries To Cheesy Pizzas And Spicy Wraps.',
-                  onTap: () {
-                    Get.to(() => ViewAdsScreen());
-                  },
-                ),
-              ],
+                  ListView.separated(
+                    shrinkWrap: true,
+                    itemCount: controller.activeAds.length,
+                    itemBuilder: (context, index) {
+                      final data = controller.activeAds[index];
+                      return _buildAdCard(
+                        image: "${ApiEndPoint.imageUrl+data.image}",
+                        title: data.title,
+                        description:
+                           data.description,
+                        onTap: () {
+                          Get.to(ViewAdsScreen(),
+                            arguments: data.id,
+                          );
+                        },
+                      );
+                    },
+                    separatorBuilder: (BuildContext context, int index) {
+                      return SizedBox(height: 8.h);
+                    },
+                  ),
+
+                  // _buildAdCard(
+                  //   image: AppImages.banner1,
+                  //   title: 'Delicious Fast Food',
+                  //   description:
+                  //       'Satisfy Your Cravings With Delicious Fast Food, Where Every Bite Is Packed With Flavour From Juicy Burgers And Crispy Fries To Cheesy Pizzas And Spicy Wraps.',
+                  //   onTap: () {
+                  //     Get.to(() => ViewAdsScreen(
+                  //
+                  //     ));
+                  //   },
+                  // ),
+                  // SizedBox(height: 16.h),
+                  // _buildAdCard(
+                  //   image: AppImages.banner2,
+                  //   title: 'Delicious Fast Food',
+                  //   description:
+                  //       'Satisfy Your Cravings With Delicious Fast Food, Where Every Bite Is Packed With Flavour From Juicy Burgers And Crispy Fries To Cheesy Pizzas And Spicy Wraps.',
+                  //   onTap: () {
+                  //     Get.to(() => ViewAdsScreen());
+                  //   },
+                  // ),
+                ],
+              ),
             ),
           ),
-        ),
+        );
+      },
     );
   }
 
@@ -88,9 +116,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         GestureDetector(
-          onTap: (){
+          onTap: () {
             _providerProfileViewController.getAdvertiserData();
-            print("My Role Is :===========================${LocalStorage.myRole.toString()}");
+            print(
+              "My Role Is :===========================${LocalStorage.myRole.toString()}",
+            );
             Get.to(() => const DashBoardProfile());
           },
           child: Row(
@@ -174,22 +204,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
       physics: const NeverScrollableScrollPhysics(),
       childAspectRatio: 156 / 82,
       children: [
-        _StatsCard(
-          title: 'Active Ads',
-          value: data.totalActiveAds.toString(),
-        ),
-        _StatsCard(
-          title: 'Ads Reach',
-          value: data.totalReachCount.toString(),
-        ),
-        _StatsCard(
-          title: 'Engagement',
-          value: '${data.engagementRate}%',
-        ),
-        _StatsCard(
-          title: 'Ads Click',
-          value: data.totalClickCount.toString(),
-        ),
+        _StatsCard(title: 'Active Ads', value: data.totalActiveAds.toString()),
+        _StatsCard(title: 'Ads Reach', value: data.totalReachCount.toString()),
+        _StatsCard(title: 'Engagement', value: '${data.engagementRate}%'),
+        _StatsCard(title: 'Ads Click', value: data.totalClickCount.toString()),
       ],
     );
   }

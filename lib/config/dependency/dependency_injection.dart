@@ -9,6 +9,7 @@ import 'package:giolee78/features/profile/presentation/controller/edit_post_cont
 import 'package:giolee78/features/profile/presentation/controller/edit_service_provider_controller.dart';
 import 'package:giolee78/features/profile/presentation/controller/post_controller.dart';
 import 'package:giolee78/features/advertise/presentation/controller/provider_complete_profile_controller.dart';
+import '../../features/ads/presentation/controller/update_ads_controller.dart';
 import '../../features/ads/presentation/controller/view_ads_screen_controller.dart';
 import '../../features/advertise/presentation/controller/advertiser_edit_profile_controller.dart';
 import '../../features/advertise/presentation/controller/provider_profile_view_controller.dart';
@@ -54,5 +55,6 @@ class DependencyInjection extends Bindings {
     Get.lazyPut(() => ProviderProfileViewController(), fenix: true);
     Get.lazyPut(() => DashBoardScreenController(), fenix: true);
     Get.lazyPut(() => ViewAdsScreenController(), fenix: true);
+    Get.lazyPut(() => UpdateAdsController(), fenix: true);
   }
 }
