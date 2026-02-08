@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:giolee78/features/profile/presentation/controller/my_profile_controller.dart';
+import 'package:giolee78/services/api/api_response_model.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:giolee78/features/profile/data/model/user_profile_model.dart';
 import 'package:giolee78/services/storage/storage_keys.dart';
@@ -15,8 +17,8 @@ import '../../../../utils/app_utils.dart';
 import '../../../../utils/log/app_log.dart';
 
 class ProfileController extends GetxController {
+  final MyProfileController _myProfileController = MyProfileController();
 
-  final MyProfileController _myProfileController=MyProfileController();
   /// Language List here
   List<String> languages = ["English", "French", "Arabic"];
 
@@ -54,15 +56,18 @@ class ProfileController extends GetxController {
   }
 
   /// Controllers
-  TextEditingController nameController = TextEditingController()..text = LocalStorage.myName;
+  TextEditingController nameController = TextEditingController()
+    ..text = LocalStorage.myName;
   TextEditingController numberController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
-  TextEditingController aboutController = TextEditingController()..text=LocalStorage.bio;
+  TextEditingController aboutController = TextEditingController()
+    ..text = LocalStorage.bio;
   TextEditingController dateOfBirthController = TextEditingController()
     ..text = LocalStorage.dateOfBirth.isNotEmpty
         ? LocalStorage.dateOfBirth.split('T').first
         : "";
-  TextEditingController genderController = TextEditingController()..text = LocalStorage.gender;
+  TextEditingController genderController = TextEditingController()
+    ..text = LocalStorage.gender;
   TextEditingController addressController = TextEditingController();
 
   /// Request permission
@@ -99,7 +104,10 @@ class ProfileController extends GetxController {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text('Choose Image Source', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+              Text(
+                'Choose Image Source',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+              ),
               SizedBox(height: 20),
               ListTile(
                 leading: Icon(Icons.camera_alt, color: Colors.blue),
@@ -176,7 +184,8 @@ class ProfileController extends GetxController {
     DateTime? pickedDate = await showDatePicker(
       context: Get.context!,
       initialDate: dateOfBirthController.text.isNotEmpty
-          ? DateTime.tryParse(dateOfBirthController.text) ?? DateTime(2000, 1, 1)
+          ? DateTime.tryParse(dateOfBirthController.text) ??
+                DateTime(2000, 1, 1)
           : DateTime(2000, 1, 1),
       firstDate: DateTime(1950),
       lastDate: DateTime.now(),
@@ -184,7 +193,7 @@ class ProfileController extends GetxController {
 
     if (pickedDate != null) {
       dateOfBirthController.text =
-      "${pickedDate.year}-${pickedDate.month.toString().padLeft(2, '0')}-${pickedDate.day.toString().padLeft(2, '0')}";
+          "${pickedDate.year}-${pickedDate.month.toString().padLeft(2, '0')}-${pickedDate.day.toString().padLeft(2, '0')}";
       update();
     }
   }
@@ -222,16 +231,14 @@ class ProfileController extends GetxController {
         return;
       }
 
-// ✅ Convert to UTC to ensure the "Z" suffix is added
+      // ✅ Convert to UTC to ensure the "Z" suffix is added
       String formattedDob = dobDate.toUtc().toIso8601String();
-
 
       Map<String, String> body = {
         "name": nameController.text.trim(),
         "bio": aboutController.text.trim(),
         "dob": formattedDob, // Use the UTC version
         "gender": genderController.text.trim(),
-
       };
 
       var response = await ApiService.multipart(
@@ -248,24 +255,36 @@ class ProfileController extends GetxController {
         LocalStorage.myName = data['data']?["name"] ?? LocalStorage.myName;
         LocalStorage.myEmail = data['data']?["email"] ?? LocalStorage.myEmail;
         LocalStorage.myImage = data['data']?["image"] ?? LocalStorage.myImage;
-        LocalStorage.dateOfBirth = data['data']?['dob'] ?? LocalStorage.dateOfBirth;
+        LocalStorage.dateOfBirth =
+            data['data']?['dob'] ?? LocalStorage.dateOfBirth;
         LocalStorage.bio = data['data']?['bio'] ?? LocalStorage.bio;
-        LocalStorage.gender = data['data']?['gender'] ??LocalStorage.gender;
+        LocalStorage.gender = data['data']?['gender'] ?? LocalStorage.gender;
 
         await Future.wait([
           LocalStorage.setString(LocalStorageKeys.userId, LocalStorage.userId),
-          LocalStorage.setString(LocalStorageKeys.myImage, LocalStorage.myImage),
+          LocalStorage.setString(
+            LocalStorageKeys.myImage,
+            LocalStorage.myImage,
+          ),
           LocalStorage.setString(LocalStorageKeys.myName, LocalStorage.myName),
-          LocalStorage.setString(LocalStorageKeys.myEmail, LocalStorage.myEmail),
+          LocalStorage.setString(
+            LocalStorageKeys.myEmail,
+            LocalStorage.myEmail,
+          ),
           LocalStorage.setString(LocalStorageKeys.bio, LocalStorage.bio),
-          LocalStorage.setString(LocalStorageKeys.dateOfBirth, LocalStorage.dateOfBirth),
+          LocalStorage.setString(
+            LocalStorageKeys.dateOfBirth,
+            LocalStorage.dateOfBirth,
+          ),
           LocalStorage.setString(LocalStorageKeys.gender, LocalStorage.gender),
         ]);
 
         _myProfileController.getUserData();
 
-
-        Utils.successSnackBar("Success", data['message'] ?? "Profile Updated Successfully");
+        Utils.successSnackBar(
+          "Success",
+          data['message'] ?? "Profile Updated Successfully",
+        );
         Get.toNamed(AppRoutes.profile);
       } else {
         Utils.errorSnackBar(
@@ -281,7 +300,8 @@ class ProfileController extends GetxController {
     }
   }
 
-  String advToken="";
+  String advToken = "";
+  String userId = '';
 
   Future<String?> getUserDataForRole() async {
     isLoading = true;
@@ -295,16 +315,16 @@ class ProfileController extends GetxController {
       if (response.statusCode == 200) {
         var data = response.data;
 
-
         String? advertiserToken = data['data']?['advertiser']?.toString();
-        advToken=advertiserToken??"";
+        advToken = advertiserToken ?? "";
 
+        String? Id = data['data']?['_id']?.toString();
+        userId = Id!;
 
         print("afkd;ajdfa;sdjfk=================${advertiserToken}");
-
+        print(userId);
 
         return advertiserToken;
-
       } else {
         Get.snackbar(response.statusCode.toString(), response.message);
         return null;
@@ -317,7 +337,6 @@ class ProfileController extends GetxController {
       update();
     }
   }
-
 
   Future<void> changeRole(String newRole) async {
     isLoading = true;
@@ -343,16 +362,46 @@ class ProfileController extends GetxController {
   }
 
 
-  @override
-  void onClose() {
-    nameController.dispose();
-    numberController.dispose();
-    passwordController.dispose();
-    aboutController.dispose();
-    dateOfBirthController.dispose();
-    genderController.dispose();
-    addressController.dispose();
-    super.onClose();
+  Future<void> deleteAccount() async {
+    if (userId.isEmpty) {
+      Get.snackbar("Error", "User ID not found");
+      return;
+    }
+    isLoading = true;
+    update();
+
+    try {
+
+      String endpoint = "${ApiEndPoint.deleteAccount}";
+
+      ApiResponseModel response = await ApiService.delete(endpoint);
+
+      if (response.statusCode == 200) {
+        LocalStorage.removeAllPrefData();
+        Get.offAllNamed(AppRoutes.signIn);
+        Get.snackbar("Success", response.message ?? "Account deleted successfully");
+      } else {
+        Get.snackbar("Error", response.message ?? "Failed to delete account");
+      }
+    } catch (e) {
+      debugPrint("Delete Account Error: $e");
+      Get.snackbar("Error", "Something went wrong");
+    } finally {
+      isLoading = false;
+      update();
+    }
   }
 
+
+  @override
+  void onClose() {
+    // nameController.dispose();
+    // numberController.dispose();
+    // passwordController.dispose();
+    // aboutController.dispose();
+    // dateOfBirthController.dispose();
+    // genderController.dispose();
+    // addressController.dispose();
+    super.onClose();
+  }
 }

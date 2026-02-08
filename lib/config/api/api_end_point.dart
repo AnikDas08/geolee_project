@@ -19,6 +19,7 @@ class ApiEndPoint {
   static const String getProfile = "${baseUrl}users/profile";
   static const String getUserSingleProfileById = "${baseUrl}users/single/";
   static const String nearByUsers = "${baseUrl}users";
+  static const String deleteAccount = "${baseUrl}users/delete-account";
 
   // Post ===========================================
   static const String createPost = "${baseUrl}posts/create";
@@ -36,6 +37,9 @@ class ApiEndPoint {
   static const String getMyFriendRequest = "${baseUrl}friend-requests/my-requests";
   static const String getMyAllFriend = "${baseUrl}friendships/my-friends";
   static const String checkFriendStatus = "${baseUrl}/friendships/check/";
+  static const String cancelFriendRequest = "${baseUrl}/friend-requests/update/";
+  static const String unfriend = "${baseUrl}/friendships/";
+  static const String deleteFriend = "${baseUrl}friendships/";
 
   // Chat ===========================================
   static const String createOneToOneChat = "${baseUrl}chats/create-1-to-1";
@@ -53,11 +57,13 @@ class ApiEndPoint {
 
 
 
-
+// Plan========================================================
+  static const String getPlans="${baseUrl}plans";
 
 
 
   //Advertiser========================================================
+
   static const String advertiserCompleteProfile="${baseUrl}advertisers/create";
   static const String advertiserVerify="${baseUrl}/advertisers/verify";
   static const String resendOtp="${baseUrl}/auth/request-otp";
@@ -84,7 +90,6 @@ class ApiEndPoint {
   static const String servicePay = "${baseUrl}pay/booked-service";
   static const String myServiceHistory = "${baseUrl}pay/my-service-history";
   static const String updateRequest = "${baseUrl}pay/my-service-history/";
-
 
 
 

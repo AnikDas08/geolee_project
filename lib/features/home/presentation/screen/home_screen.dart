@@ -13,6 +13,7 @@ import 'package:giolee78/features/home/presentation/controller/home_nav_controll
 import 'package:giolee78/features/notifications/presentation/controller/notifications_controller.dart';
 import 'package:giolee78/utils/constants/app_icons.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import '../../../../services/storage/storage_services.dart';
 import '../../../../utils/constants/app_colors.dart';
@@ -225,15 +226,24 @@ class _HomeScreenState extends State<HomeScreen> {
                                 Item(
                                   imageSrc: AppIcons.bubbleChat,
                                   title: 'Chat Nearby',
-                                  onTap: () {
-                                    _showConfirmationDialog();
+                                  onTap: () async {
+                                    var status = await Permission.location.status;
+
+                                    if (status.isGranted) {
+                                      // Already granted → go directly
+                                      Get.to(() => const ChatNearbyScreen());
+                                    } else {
+                                      // Not granted → show dialog
+                                      _showConfirmationDialog();
+                                    }
                                   },
+
                                 ),
                                 Item(
                                   imageSrc: AppIcons.myPost,
                                   title: 'My Post',
-                                  onTap: () {
-                                    Get.to(() => MyPostScreen());
+                                  onTap: () async{
+                                   await Get.to(() => MyPostScreen());
                                   },
                                 ),
                                 Item(
@@ -247,6 +257,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                    Item(
                                       imageSrc: AppIcons.friend,
                                       title: 'Friend Request',
+                                      badgeText: '3',
                                       onTap: () {
                                         Get.to(() => FriendRequestScreen());
                                       },
@@ -263,7 +274,6 @@ class _HomeScreenState extends State<HomeScreen> {
               },
             )));
   }
-
   void _showConfirmationDialog() {
     Get.dialog(
       AlertDialog(
@@ -279,7 +289,9 @@ class _HomeScreenState extends State<HomeScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const Text(
-              'By Enabling Location, Your Nearby Activity May Be Visible To Others, And Your Location Data Will Be Stored Temporarily. You Can Remove This Data Anytime By Selecting Clear Location From The Top-Right Menu.',
+              'By Enabling Location, Your Nearby Activity May Be Visible To Others, '
+                  'And Your Location Data Will Be Stored Temporarily. You Can Remove This Data Anytime '
+                  'By Selecting Clear Location From The Top-Right Menu.',
               textAlign: TextAlign.start,
               style: TextStyle(
                 fontSize: 14,
@@ -307,23 +319,46 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     child: const Text(
                       'Back',
-                      style:
-                      TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
                     ),
                   ),
                 ),
                 const SizedBox(width: 10),
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.pop(Get.context!);
-                      Get.snackbar(
-                        'Location Enabled',
-                        'Navigating to the Chat Nearby Page...',
-                        backgroundColor: AppColors.primaryColor,
-                        colorText: Colors.white,
-                      );
-                      Get.to(() => const ChatNearbyScreen());
+                    onPressed: () async {
+                      Navigator.pop(Get.context!); // close dialog
+
+                      // Request location permission
+                      var status = await Permission.location.request();
+
+                      if (status.isGranted) {
+                        Get.snackbar(
+                          'Location Enabled',
+                          'Navigating to the Chat Nearby Page...',
+                          backgroundColor: AppColors.primaryColor,
+                          colorText: Colors.white,
+                        );
+                        Get.to(() => const ChatNearbyScreen());
+                      } else if (status.isDenied || status.isPermanentlyDenied) {
+                        Get.snackbar(
+                          'Permission Denied',
+                          'Location permission is required to access this feature.',
+                          backgroundColor: Colors.red,
+                          colorText: Colors.white,
+                        );
+
+                        // Optional: open app settings for permanently denied
+                        if (status.isPermanentlyDenied) {
+                          Get.snackbar(
+                            'Open Settings',
+                            'Please enable location from app settings',
+                            backgroundColor: Colors.orange,
+                            colorText: Colors.white,
+                          );
+                          await openAppSettings();
+                        }
+                      }
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primaryColor,
@@ -350,4 +385,15 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
+
+  void _handleLocationAndNavigate() async {
+    var status = await Permission.location.status;
+    if (status.isGranted) {
+
+      Get.to(() => const ChatNearbyScreen());
+    } else {
+      _showConfirmationDialog();
+    }
+  }
+
 }

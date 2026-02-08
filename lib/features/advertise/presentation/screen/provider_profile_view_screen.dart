@@ -145,7 +145,7 @@ class ProviderProfileViewScreen extends StatelessWidget {
         8.height,
         // Content (bio)
         CommonText(
-          text: controller.about,
+          text: controller.advertiserBion,
           fontSize: 14.sp,
           fontWeight: FontWeight.w400,
           color: AppColors.secondaryText,

@@ -37,17 +37,17 @@ class EditProfileController extends GetxController {
     dateOfBirth.value = DateTime(2000, 1, 1);
   }
 
-  @override
-  void onClose() {
-    fullNameController.dispose();
-    aboutController.dispose();
-    designationController.dispose();
-    experienceController.dispose();
-    stateController.dispose();
-    cityController.dispose();
-    skillController.dispose();
-    super.onClose();
-  }
+  // @override
+  // void onClose() {
+  //   fullNameController.dispose();
+  //   aboutController.dispose();
+  //   designationController.dispose();
+  //   experienceController.dispose();
+  //   stateController.dispose();
+  //   cityController.dispose();
+  //   skillController.dispose();
+  //   super.onClose();
+  // }
 
   // Method to pick image from gallery
   Future<void> pickImageFromGallery() async {

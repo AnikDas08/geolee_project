@@ -47,13 +47,13 @@ class ServiceProviderController extends GetxController {
 
   @override
   void onClose() {
-    businessNameController.dispose();
-    businessTypeController.dispose();
-    businessLicenseNumberController.dispose();
-    phoneNumberController.dispose();
-    bioController.dispose();
-    otpController.dispose();
-    _timer?.cancel();
+    // businessNameController.dispose();
+    // businessTypeController.dispose();
+    // businessLicenseNumberController.dispose();
+    // phoneNumberController.dispose();
+    // bioController.dispose();
+    // otpController.dispose();
+    // _timer?.cancel();
     super.onClose();
   }
 

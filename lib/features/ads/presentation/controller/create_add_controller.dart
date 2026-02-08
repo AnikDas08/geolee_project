@@ -8,12 +8,17 @@ import 'package:giolee78/services/api/api_service.dart';
 
 import '../../../../component/pop_up/common_pop_menu.dart';
 import '../../../../config/route/app_routes.dart';
+import '../../data/plan_model.dart';
 
+/// ---------------- CONTROLLER ----------------
 class CreateAdsController extends GetxController {
   /// ---------------- OBSERVABLES ----------------
   var coverImagePath = ''.obs;
-  var selectedPricingPlan = 'weekly'.obs; // weekly | monthly
+  var selectedPricingPlan = ''.obs; // weekly | monthly
   var isLoading = false.obs;
+
+  var plans = <PlanModel>[].obs; // fetched plans
+  var isPlansLoading = false.obs;
 
   /// ---------------- TEXT CONTROLLERS ----------------
   final titleController = TextEditingController();
@@ -24,18 +29,24 @@ class CreateAdsController extends GetxController {
 
   final ImagePicker _picker = ImagePicker();
 
-  /// ---------------- PLAN IDS (BACKEND) ----------------
-  /// এগুলো backend থেকে আসবে ideally
-  final String weeklyPlanId = 'WEEKLY_PLAN_ID_HERE';
-  final String monthlyPlanId = '6982d85cfcd98da54506b87';
+  /// ---------------- PLAN ID & PRICE ----------------
+  String get planId {
+    if (selectedPricingPlan.value.isEmpty || plans.isEmpty) return '';
+    final plan = plans.firstWhere(
+          (p) => p.name.toLowerCase() == selectedPricingPlan.value.toLowerCase(),
+      orElse: () => plans.first,
+    );
+    return plan.id;
+  }
 
-  String get planId =>
-      selectedPricingPlan.value == 'weekly'
-          ? weeklyPlanId
-          : monthlyPlanId;
-
-  double get selectedPrice =>
-      selectedPricingPlan.value == 'weekly' ? 10.0 : 50.0;
+  double get selectedPrice {
+    if (plans.isEmpty) return 0;
+    final plan = plans.firstWhere(
+          (p) => p.name.toLowerCase() == selectedPricingPlan.value.toLowerCase(),
+      orElse: () => plans.first,
+    );
+    return plan.price;
+  }
 
   void selectPricingPlan(String plan) {
     selectedPricingPlan.value = plan;
@@ -43,8 +54,7 @@ class CreateAdsController extends GetxController {
 
   /// ---------------- IMAGE PICK ----------------
   Future<void> pickImage() async {
-    final XFile? image =
-    await _picker.pickImage(source: ImageSource.gallery);
+    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
     if (image != null) {
       coverImagePath.value = image.path;
     }
@@ -76,13 +86,14 @@ class CreateAdsController extends GetxController {
       Get.snackbar("Error", "Please select ad start date");
       return false;
     }
+    if (planId.isEmpty) {
+      Get.snackbar("Error", "Please select a valid pricing plan");
+      return false;
+    }
     return true;
   }
 
   /// ---------------- DATE HELPERS ----------------
-
-  /// UI format → 07 Feb 2026
-  /// API format → 2026-02-07
   DateTime _parseUiDate() {
     final parts = adStartDateController.text.split(' ');
     return DateTime(
@@ -92,22 +103,39 @@ class CreateAdsController extends GetxController {
     );
   }
 
-  String _formatIso(DateTime date) {
-    return "${date.year.toString().padLeft(4, '0')}-"
-        "${date.month.toString().padLeft(2, '0')}-"
-        "${date.day.toString().padLeft(2, '0')}";
+  // 🔥 FIX: Return ISO 8601 datetime string with timezone
+  String _formatIsoDateTime(DateTime date) {
+    return date.toUtc().toIso8601String();
   }
 
+  // 🔥 FIX: Use datetime format instead of date-only
   String getIsoStartDate() {
-    return _formatIso(_parseUiDate());
+    final selectedDate = _parseUiDate();
+    // Set time to current time or beginning of day
+    final dateTime = DateTime(
+      selectedDate.year,
+      selectedDate.month,
+      selectedDate.day,
+      DateTime.now().hour,
+      DateTime.now().minute,
+      DateTime.now().second,
+    );
+    return _formatIsoDateTime(dateTime);
   }
 
   String getIsoEndDate() {
-    int daysToAdd =
-    selectedPricingPlan.value == 'weekly' ? 7 : 30;
-    DateTime endDate =
-    _parseUiDate().add(Duration(days: daysToAdd));
-    return _formatIso(endDate);
+    int daysToAdd = selectedPricingPlan.value.toLowerCase() == 'weekly' ? 7 : 30;
+    final selectedDate = _parseUiDate();
+    final dateTime = DateTime(
+      selectedDate.year,
+      selectedDate.month,
+      selectedDate.day,
+      DateTime.now().hour,
+      DateTime.now().minute,
+      DateTime.now().second,
+    );
+    DateTime endDate = dateTime.add(Duration(days: daysToAdd));
+    return _formatIsoDateTime(endDate);
   }
 
   int _monthToNumber(String month) {
@@ -130,10 +158,48 @@ class CreateAdsController extends GetxController {
 
   String _month(int m) {
     const months = [
-      'Jan','Feb','Mar','Apr','May','Jun',
-      'Jul','Aug','Sep','Oct','Nov','Dec'
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec'
     ];
     return months[m - 1];
+  }
+
+  /// ---------------- FETCH PLANS ----------------
+  Future<void> fetchPlans() async {
+    try {
+      isPlansLoading.value = true;
+      ApiResponseModel response = await ApiService.get(ApiEndPoint.getPlans);
+
+      if (response.statusCode == 200 && response.data != null) {
+        final Map<String, dynamic> res = response.data as Map<String, dynamic>;
+        List<dynamic> dataList = res['data'] ?? [];
+
+        plans.value = dataList.map((e) => PlanModel.fromJson(e)).toList();
+
+        debugPrint("📦 Plans loaded: ${plans.length}");
+
+        if (plans.isNotEmpty) {
+          selectedPricingPlan.value = plans.first.name;
+        }
+      } else {
+        Get.snackbar("Error", response.message ?? "Failed to load plans");
+      }
+    } catch (e) {
+      debugPrint("❌ Fetch Plans Error: $e");
+      Get.snackbar("Error", "Failed to load plans");
+    } finally {
+      isPlansLoading.value = false;
+    }
   }
 
   /// ---------------- CREATE ADS ----------------
@@ -143,8 +209,13 @@ class CreateAdsController extends GetxController {
     try {
       isLoading.value = true;
 
-      ApiResponseModel response =
-      await ApiService.multipartUpdate(
+      final startDate = getIsoStartDate();
+
+      print("📅 Start Date (ISO): $startDate");
+      print("💰 Plan ID: $planId");
+      print("🖼️ Image Path: ${coverImagePath.value}");
+
+      ApiResponseModel response = await ApiService.multipartUpdate(
         ApiEndPoint.createAds,
         method: "POST",
         body: {
@@ -154,73 +225,32 @@ class CreateAdsController extends GetxController {
           "latitude": "23.810332",
           "longitude": "90.4125181",
           "websiteUrl": websiteLinkController.text.trim(),
-          "startAt": getIsoStartDate(),
-          "endAt": getIsoEndDate(),
-          "plan": selectedPricingPlan.value,
+          "startAt": startDate, // 🔥 Now sends full ISO 8601 datetime
+          "plan": planId,
         },
         imageName: 'image',
         imagePath: coverImagePath.value,
       );
 
-      if (response.statusCode == 200 ||
-          response.statusCode == 201) {
+      print("📦 Response Status: ${response.statusCode}");
+      print("📦 Response Data: ${response.data}");
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
         _showSuccessPopup();
       } else {
-        Get.snackbar(
-            "Error", response.message ?? "Something went wrong");
+        Get.snackbar("Error", response.message ?? "Something went wrong");
       }
     } catch (e) {
-      debugPrint("Create Ads Error: $e");
+      debugPrint("❌ Create Ads Error: $e");
       Get.snackbar("Error", "Failed to create ad");
     } finally {
       isLoading.value = false;
     }
   }
 
-  /// ---------------- PAYMENT FLOW ----------------
-  void submitAd(BuildContext context) {
-    if (!_validate()) return;
-
-    Get.dialog(
-      AlertDialog(
-        title: const Text('Confirm Payment'),
-        content: Text(
-          'Price: \$${selectedPrice.toStringAsFixed(2)}',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Get.back(),
-            child: const Text("Cancel"),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Get.back();
-              createAds();
-            },
-            child: const Text("Pay & Submit"),
-          ),
-        ],
-      ),
-      barrierDismissible: false,
-    );
-  }
-
-  /// ---------------- SUCCESS ----------------
-  void _showSuccessPopup() {
-    successPopUps(
-      message:
-      'Your Ad submitted successfully. Please wait for admin approval.',
-      buttonTitle: 'Done',
-      onTap: () {
-        Get.offAllNamed(AppRoutes.homeNav);
-      },
-    );
-  }
-
   /// ---------------- DATE PICKER ----------------
   Future<void> selectDate(
-      BuildContext context,
-      TextEditingController controller) async {
+      BuildContext context, TextEditingController controller) async {
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
@@ -229,10 +259,19 @@ class CreateAdsController extends GetxController {
     );
     if (picked != null) {
       controller.text =
-      "${picked.day.toString().padLeft(2, '0')} "
-          "${_month(picked.month)} "
-          "${picked.year}";
+      "${picked.day.toString().padLeft(2, '0')} ${_month(picked.month)} ${picked.year}";
     }
+  }
+
+  /// ---------------- SUCCESS ----------------
+  void _showSuccessPopup() {
+    successPopUps(
+      message: 'Your Ad submitted successfully. Please wait for admin approval.',
+      buttonTitle: 'Done',
+      onTap: () {
+        Get.offAllNamed(AppRoutes.homeNav);
+      },
+    );
   }
 
   /// ---------------- DISPOSE ----------------

@@ -32,23 +32,103 @@ class AdvertiserEditProfileController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    _loadLocalStorageData();
+    _initializeControllers();
+    fetchAdvertiserProfile();
   }
 
-  // ================= LOAD FROM LOCAL STORAGE =================
-  void _loadLocalStorageData() {
-    businessNameController =
-        TextEditingController(text: LocalStorage.businessName);
-    businessLicenceController =
-        TextEditingController(text: LocalStorage.businessLicenceNumber);
-    businessTypeController =
-        TextEditingController(text: LocalStorage.businessType);
-    phoneNumberController =
-        TextEditingController(text: LocalStorage.phone);
-    bioController = TextEditingController(text: LocalStorage.advertiserBio);
+  // ================= INITIALIZE CONTROLLERS =================
+  void _initializeControllers() {
+    businessNameController = TextEditingController();
+    businessLicenceController = TextEditingController();
+    businessTypeController = TextEditingController();
+    phoneNumberController = TextEditingController();
+    bioController = TextEditingController();
+  }
 
-    // Optional: language load if saved before
+  // ================= FETCH ADVERTISER PROFILE =================
 
+  Future<void> fetchAdvertiserProfile() async {
+    isLoading = true;
+    update();
+
+    try {
+      print("🌐 Fetching advertiser profile...");
+
+      final response = await ApiService.get(ApiEndPoint.advertiserProfile);
+
+      print("📦 Response Status: ${response.statusCode}");
+      print("📦 Response Data: ${response.data}");
+
+      if (response.statusCode == 200 && response.data != null) {
+        final advertiserData = response.data['data'] ?? {};
+
+
+        debugPrint(" Advertiser Response Data Is: ${response.data}");
+
+        // ========== UPDATE TEXT CONTROLLERS ==========
+        businessNameController.text = advertiserData["businessName"] ?? '';
+        businessLicenceController.text = advertiserData["licenseNumber"] ?? '';
+        businessTypeController.text = advertiserData["businessType"] ?? '';
+        phoneNumberController.text = advertiserData["phone"] ?? '';
+        bioController.text = advertiserData["bio"] ?? '';
+
+        // ========== SAVE TO LOCAL STORAGE ==========
+        await _saveToLocalStorage(advertiserData);
+
+        print("✅ Profile data loaded and saved successfully");
+      } else {
+        print("❌ Failed to fetch profile: ${response.message}");
+        _loadFromLocalStorage();
+      }
+    } catch (e) {
+      print("❌ Fetch Profile Error: $e");
+      Utils.errorSnackBar("Error", "Failed to load profile data");
+      // Load from local storage as fallback
+      _loadFromLocalStorage();
+    } finally {
+      isLoading = false;
+      update();
+    }
+  }
+
+  // ================= SAVE TO LOCAL STORAGE =================
+  Future<void> _saveToLocalStorage(Map<String, dynamic> advertiserData) async {
+    try {
+      // Update LocalStorage variables
+      LocalStorage.userId = advertiserData["_id"] ?? LocalStorage.userId;
+      LocalStorage.businessName = advertiserData["businessName"] ?? '';
+      LocalStorage.businessType = advertiserData["businessType"] ?? '';
+      LocalStorage.businessLicenceNumber = advertiserData["licenseNumber"] ?? '';
+      LocalStorage.phone = advertiserData["phone"] ?? '';
+      LocalStorage.advertiserBio = advertiserData["bio"] ?? '';
+      LocalStorage.businessLogo = advertiserData["logo"] ?? '';
+
+      // Save to SharedPreferences
+      await Future.wait([
+        LocalStorage.setString(LocalStorageKeys.userId, LocalStorage.userId),
+        LocalStorage.setString(LocalStorageKeys.businessName, LocalStorage.businessName),
+        LocalStorage.setString(LocalStorageKeys.businessType, LocalStorage.businessType),
+        LocalStorage.setString(LocalStorageKeys.businessLicenceNumber, LocalStorage.businessLicenceNumber),
+        LocalStorage.setString(LocalStorageKeys.phone, LocalStorage.phone),
+        LocalStorage.setString(LocalStorageKeys.advertiserBio, LocalStorage.advertiserBio),
+        LocalStorage.setString(LocalStorageKeys.businessLogo, LocalStorage.businessLogo),
+      ]);
+
+      print("✅ Data saved to local storage");
+    } catch (e) {
+      print("❌ Error saving to local storage: $e");
+    }
+  }
+
+  // ================= LOAD FROM LOCAL STORAGE (FALLBACK) =================
+  void _loadFromLocalStorage() {
+    businessNameController.text = LocalStorage.businessName;
+    businessLicenceController.text = LocalStorage.businessLicenceNumber;
+    businessTypeController.text = LocalStorage.businessType;
+    phoneNumberController.text = LocalStorage.phone;
+    bioController.text = LocalStorage.advertiserBio;
+
+    print("📂 Loaded data from local storage");
   }
 
   // ================= IMAGE PICKER =================
@@ -74,33 +154,33 @@ class AdvertiserEditProfileController extends GetxController {
     try {
       final ImageSource? source = await showModalBottomSheet<ImageSource>(
         context: Get.context!,
-        shape: RoundedRectangleBorder(
+        shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
         ),
         builder: (context) => Container(
-          padding: EdgeInsets.all(20),
+          padding: const EdgeInsets.all(20),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
+              const Text(
                 'Choose Image Source',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               ListTile(
-                leading: Icon(Icons.camera_alt, color: Colors.blue),
-                title: Text('Camera'),
+                leading: const Icon(Icons.camera_alt, color: Colors.blue),
+                title: const Text('Camera'),
                 onTap: () => Navigator.pop(context, ImageSource.camera),
               ),
               ListTile(
-                leading: Icon(Icons.photo_library, color: Colors.green),
-                title: Text('Gallery'),
+                leading: const Icon(Icons.photo_library, color: Colors.green),
+                title: const Text('Gallery'),
                 onTap: () => Navigator.pop(context, ImageSource.gallery),
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: Text('Cancel'),
+                child: const Text('Cancel'),
               ),
             ],
           ),
@@ -117,10 +197,10 @@ class AdvertiserEditProfileController extends GetxController {
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.orange,
           colorText: Colors.white,
-          duration: Duration(seconds: 4),
+          duration: const Duration(seconds: 4),
           mainButton: TextButton(
             onPressed: () => openAppSettings(),
-            child: Text('Open Settings', style: TextStyle(color: Colors.white)),
+            child: const Text('Open Settings', style: TextStyle(color: Colors.white)),
           ),
         );
         return;
@@ -142,7 +222,7 @@ class AdvertiserEditProfileController extends GetxController {
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.green,
           colorText: Colors.white,
-          duration: Duration(seconds: 2),
+          duration: const Duration(seconds: 2),
         );
       }
     } catch (e) {
@@ -152,7 +232,7 @@ class AdvertiserEditProfileController extends GetxController {
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
         colorText: Colors.white,
-        duration: Duration(seconds: 3),
+        duration: const Duration(seconds: 3),
       );
     }
   }
@@ -160,7 +240,6 @@ class AdvertiserEditProfileController extends GetxController {
   // ================= LANGUAGE SELECT =================
   void selectLanguage(int index) {
     selectedLanguage = languages[index];
-
     update();
     Get.back();
   }
@@ -174,15 +253,20 @@ class AdvertiserEditProfileController extends GetxController {
     update();
 
     try {
+      print("📤 Updating advertiser profile...");
+
       Map<String, String> body = {
         "businessName": businessNameController.text.trim(),
-        "bio": bioController.text.trim(),
         "businessType": businessTypeController.text.trim(),
         "licenseNumber": businessLicenceController.text.trim(),
         "phone": phoneNumberController.text.trim(),
+        "bio": bioController.text.trim(),
       };
 
-      var response = await ApiService.multipart(
+      print("📦 Update Body: $body");
+      print("🖼️ Image Path: ${selectedImage?.path}");
+
+      var response = await ApiService.multipartUpdate(
         ApiEndPoint.advertiserUpdate,
         method: "PATCH",
         body: body,
@@ -190,38 +274,31 @@ class AdvertiserEditProfileController extends GetxController {
         imagePath: selectedImage?.path,
       );
 
+      print("📦📦📦📦📦📦📦 Response Status: ${response.statusCode}");
+      print("📦📦📦📦📦📦📦 Response Data: ${response.data}");
+
       if (response.statusCode == 200) {
-        var advertiserData = response.data['data'] ?? {};
+        final advertiserData = response.data['data'] ?? {};
 
-        // ========== LOCAL STORAGE UPDATE ==========
-        LocalStorage.userId = advertiserData["_id"] ?? LocalStorage.userId;
-        LocalStorage.businessName =
-            advertiserData["businessName"] ?? LocalStorage.businessName;
-        LocalStorage.businessType =
-            advertiserData["businessType"] ?? LocalStorage.businessType;
-        LocalStorage.phone = advertiserData["phone"] ?? LocalStorage.phone;
-        LocalStorage.advertiserBio = advertiserData["bio"] ?? LocalStorage.advertiserBio;
-        LocalStorage.businessLogo =
-            advertiserData["logo"] ?? LocalStorage.businessLogo;
-        LocalStorage.myImage = selectedImage?.path ?? LocalStorage.myImage;
+        // ========== SAVE TO LOCAL STORAGE ==========
 
-        // ========== SAVE TO SHARED PREFERENCES ==========
-        await Future.wait([
-          LocalStorage.setString(
-              LocalStorageKeys.businessName, LocalStorage.businessName),
-          LocalStorage.setString(
-              LocalStorageKeys.businessType, LocalStorage.businessType),
-          LocalStorage.setString(LocalStorageKeys.phone, LocalStorage.phone),
-          LocalStorage.setString(
-              LocalStorageKeys.businessLogo, LocalStorage.businessLogo),
-          LocalStorage.setString(LocalStorageKeys.advertiserBio, LocalStorage.advertiserBio),
-          LocalStorage.setString(LocalStorageKeys.myImage, LocalStorage.myImage),
-        ]);
+        await _saveToLocalStorage(advertiserData);
+
+        // If image was uploaded, save the local path too
+        if (selectedImage?.path != null) {
+          LocalStorage.myImage = selectedImage!.path;
+          await LocalStorage.setString(LocalStorageKeys.myImage, LocalStorage.myImage);
+        }
 
         Utils.successSnackBar(
-            "Success", response.data['message'] ?? "Profile Updated Successfully");
+          "Success",
+          response.data['message'] ?? "Profile Updated Successfully",
+        );
 
-        Get.toNamed(AppRoutes.profile);
+        print("✅ Profile updated successfully");
+
+        // Navigate back or refresh
+        Get.back();
       } else {
         Utils.errorSnackBar(
           response.statusCode.toString(),
@@ -229,6 +306,7 @@ class AdvertiserEditProfileController extends GetxController {
         );
       }
     } catch (e) {
+      print("❌ Update Profile Error: $e");
       Utils.errorSnackBar("Error", "Failed to update profile: $e");
     } finally {
       isLoading = false;
@@ -237,13 +315,13 @@ class AdvertiserEditProfileController extends GetxController {
   }
 
   // ================= LIFE CYCLE =================
-  @override
-  void onClose() {
-    businessNameController.dispose();
-    businessLicenceController.dispose();
-    businessTypeController.dispose();
-    phoneNumberController.dispose();
-    bioController.dispose();
-    super.onClose();
-  }
+  // @override
+  // void onClose() {
+  //   businessNameController.dispose();
+  //   bioController.dispose();
+  //   phoneNumberController.dispose();
+  //   businessLicenceController.dispose();
+  //   businessTypeController.dispose();
+  //   super.onClose();
+  // }
 }

@@ -76,9 +76,13 @@ class HistoryAdsScreen extends StatelessWidget {
                                 description: ad.description,
                                 onTap: () {
                                   Get.to(
-                                    () => ViewAdsScreen(),
+                                    ViewAdsScreen(),
                                     arguments: ad.id,
-                                  );
+                                  )?.then((value) {
+                                    if (value == true) {
+                                      controller.fetchAds();
+                                    }
+                                  });
                                 },
                               );
                             },
@@ -150,8 +154,6 @@ class HistoryAdsScreen extends StatelessWidget {
       ],
     );
   }
-
-  
 }
 
 class _HistoryAdCard extends StatelessWidget {

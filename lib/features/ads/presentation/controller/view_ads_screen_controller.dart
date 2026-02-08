@@ -40,22 +40,23 @@ class ViewAdsScreenController extends GetxController {
   }
 
 
-  Future<void>deleteAdsById()async{
-    try{
+  Future<void> deleteAdsById() async {
+    try {
+      ApiResponseModel response =
+      await ApiService.delete(ApiEndPoint.deleteAdvertisementById + adsId);
 
-
-      ApiResponseModel response=await ApiService.delete(ApiEndPoint.deleteAdvertisementById+adsId);
-      if(response.statusCode==200){
+      if (response.statusCode == 200) {
         Get.snackbar("Success", "Ads Deleted Successfully");
-      }else{
-        Get.snackbar("Error", response.message??"Something went wrong");
+        // Get.back();
+        Get.back(result: true);
+      } else {
+        Get.snackbar("Error", response.message ?? "Something went wrong");
       }
-
-    }catch(e){
+    } catch (e) {
       debugPrint("Delete Ads Error: $e");
     }
-
   }
+
 
 
 }

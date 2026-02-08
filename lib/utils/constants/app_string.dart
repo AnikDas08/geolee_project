@@ -12,8 +12,7 @@ class AppString {
   static const String cancel = "Cancel";
   static const String done = "Done";
   static const String delete = "Delete";
-  static const String deleteDetails =
-      "Type /deleteAccount/ to Delete your Account.";
+  static const String deleteDetails = "Type 'Delete Account' to confirm your action";
 
   static const String someThingWrong = "Some Thing Wrong";
   static const String tryAgain = "Try Again";

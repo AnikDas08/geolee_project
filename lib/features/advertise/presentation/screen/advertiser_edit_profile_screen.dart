@@ -19,6 +19,7 @@ class AdvertiserEditProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetBuilder<AdvertiserEditProfileController>(
+      init: AdvertiserEditProfileController(),
       builder: (controller) {
         return Scaffold(
           backgroundColor: AppColors.background,
@@ -131,7 +132,7 @@ class AdvertiserEditProfileScreen extends StatelessWidget {
 
                       Align(
                           alignment: Alignment.centerLeft,
-                          child: _buildLabel('Phone Number')),
+                          child: _buildLabel('Business Type')),
 
                       6.height,
 

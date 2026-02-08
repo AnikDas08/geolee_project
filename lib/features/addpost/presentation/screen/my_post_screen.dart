@@ -20,13 +20,14 @@ class MyPostScreen extends StatefulWidget {
 
 class _MyPostScreenState extends State<MyPostScreen> {
   final MyPostController controller = Get.put(MyPostController());
-  late Future _postFuture;
+  // late Future _postFuture;
 
   @override
   void initState() {
     super.initState();
-    // Assign the future once to avoid re-triggering it on every rebuild
-    _postFuture = controller.fetchMyPosts();
+    // // Assign the future once to avoid re-triggering it on every rebuild
+    // _postFuture = controller.fetchMyPosts();
+    // controller.fetchMyPosts();
   }
 
   String _formatPostTime(DateTime postTime) {
@@ -53,7 +54,7 @@ class _MyPostScreenState extends State<MyPostScreen> {
       ),
       body: SafeArea(
         child: FutureBuilder(
-          future: _postFuture,
+          future:controller.fetchMyPosts(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator());
