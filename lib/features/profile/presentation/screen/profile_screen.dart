@@ -209,7 +209,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             await Get.to(()=>ServiceProviderInfoScreen());
                           }else{
                             // Update LocalStorage properly
-                            LocalStorage.setString(LocalStorageKeys.role, "advertise");
+                           await LocalStorage.setString(LocalStorageKeys.role, "advertise");
 
                             // Navigate to HomeNav after updating role
                             Get.offAll(()=>HomeNav());
