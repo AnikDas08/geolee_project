@@ -3,6 +3,8 @@ import 'package:dots_indicator/dots_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
+
 import 'package:giolee78/component/image/common_image.dart';
 import 'package:giolee78/component/text_field/common_text_field.dart';
 import 'package:giolee78/config/api/api_end_point.dart';
@@ -12,7 +14,6 @@ import 'package:giolee78/features/clicker/presentation/widget/my_post_card.dart'
 import 'package:giolee78/features/notifications/presentation/controller/notifications_controller.dart';
 import 'package:giolee78/utils/constants/app_colors.dart';
 import 'package:giolee78/utils/constants/app_icons.dart';
-import 'package:intl/intl.dart';
 import '../../../addpost/presentation/widgets/full_screen_view_image.dart';
 import '../../../friend/presentation/screen/view_friend_screen.dart';
 
@@ -24,11 +25,11 @@ class ClickerScreen extends StatefulWidget {
 }
 
 class _ClickerScreenState extends State<ClickerScreen> {
+  // Controllers are initialized using Get.put
   final ClickerController controller = Get.put(ClickerController());
-  final NotificationsController notificationsController = Get.put(
-    NotificationsController(),
-  );
+  final NotificationsController notificationsController = Get.put(NotificationsController());
 
+  // Helper to format the post timestamp
   String _formatPostTime(DateTime postTime) {
     final now = DateTime.now();
     final difference = now.difference(postTime);
@@ -43,10 +44,13 @@ class _ClickerScreenState extends State<ClickerScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.background,
+      // Using the Stateful CustomAppBar we created
       appBar: CustomAppBar(
         notificationCount: notificationsController.unreadCount,
       ),
       body: Obx(() {
+        // Show loader only on initial fetch when list is empty
         if (controller.isLoading.value && controller.posts.isEmpty) {
           return const Center(child: CircularProgressIndicator());
         }
@@ -58,11 +62,13 @@ class _ClickerScreenState extends State<ClickerScreen> {
           },
           child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: EdgeInsets.symmetric(horizontal: 16.w),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: 10),
-                // Search bar
+                SizedBox(height: 16.h),
+
+                // Search Bar Section
                 CommonTextField(
                   controller: controller.searchController,
                   prefixIcon: const Icon(Icons.search),
@@ -71,13 +77,16 @@ class _ClickerScreenState extends State<ClickerScreen> {
                   suffixIcon: controller.searchText.value.isNotEmpty
                       ? IconButton(
                     icon: const Icon(Icons.clear),
-                    onPressed: () => controller.searchController.clear(),
+                    onPressed: () {
+                      controller.searchController.clear();
+                      FocusScope.of(context).unfocus();
+                    },
                   )
                       : const SizedBox.shrink(),
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: 16.h),
 
-                // Dynamic Banner Slider
+                // Dynamic Banner Slider Section
                 if (controller.adList.isNotEmpty) ...[
                   CarouselSlider(
                     items: controller.adList.map((ad) {
@@ -93,31 +102,33 @@ class _ClickerScreenState extends State<ClickerScreen> {
                     }).toList(),
                     options: CarouselOptions(
                       height: 150.h,
-                      viewportFraction: 0.8,
+                      viewportFraction: 0.85,
                       autoPlay: true,
                       enlargeCenterPage: true,
                       onPageChanged: (index, _) => controller.changePosition(index),
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  DotsIndicator(
-                    dotsCount: controller.adList.length,
-                    position: controller.currentPosition,
-                    decorator: DotsDecorator(
-                      activeColor: AppColors.primaryColor,
-                      color: Colors.grey.shade300,
-                      size: const Size.square(8.0),
-                      activeSize: const Size(18.0, 8.0),
-                      activeShape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(5.0),
+                  SizedBox(height: 8.h),
+                  Center(
+                    child: DotsIndicator(
+                      dotsCount: controller.adList.length,
+                      position: controller.currentPosition,
+                      decorator: DotsDecorator(
+                        activeColor: AppColors.primaryColor,
+                        color: Colors.grey.shade300,
+                        size: const Size.square(8.0),
+                        activeSize: const Size(18.0, 8.0),
+                        activeShape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(5.0),
+                        ),
                       ),
                     ),
                   ),
                 ],
 
-                const SizedBox(height: 16),
+                SizedBox(height: 16.h),
 
-                // Header & Filter
+                // Header & Filter Section
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -128,49 +139,43 @@ class _ClickerScreenState extends State<ClickerScreen> {
                     _buildFilterButton(context),
                   ],
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: 16.h),
 
-                // Posts List
+                // Posts List Section
                 controller.filteredPosts.isEmpty
                     ? _buildEmptyState()
                     : ListView.separated(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: controller.filteredPosts.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 16),
+                  separatorBuilder: (_, __) => SizedBox(height: 16.h),
                   itemBuilder: (context, index) {
                     final data = controller.filteredPosts[index];
-                    return GestureDetector(
-                      onTap: ()=>ViewFriendScreen(
-                      userId: data.user.id,
-                      isFriend: false, // Friendship state handled in controller
-                    ),
-                      child: MyPostCards(
-                        onTapPhoto: () {
-                          if (data.photos.isNotEmpty) {
-                            Get.to(() => FullScreenImageView(
-                              imageUrl: "${ApiEndPoint.imageUrl}${data.photos[0]}",
-                            ));
-                          }
-                        },
-                        onTapProfile: () => Get.to(() => ViewFriendScreen(
-                          userId: data.user.id,
-                          isFriend: false, // Friendship state handled in controller
-                        )),
-                        clickerType: data.clickerType,
-                        userName: data.user.name,
-                        userAvatar: "${ApiEndPoint.imageUrl}${data.user.image}",
-                        timeAgo: _formatPostTime(DateTime.parse(data.createdAt.toString())),
-                        location: data.address,
-                        postImage: data.photos.isNotEmpty ? "${ApiEndPoint.imageUrl}${data.photos[0]}" : "",
-                        description: data.description,
-                        isFriend: false,
-                        privacyImage: data.privacy == "public" ? AppIcons.public : AppIcons.onlyMe,
-                      ),
+                    return MyPostCards(
+                      onTapPhoto: () {
+                        if (data.photos.isNotEmpty) {
+                          Get.to(() => FullScreenImageView(
+                            imageUrl: "${ApiEndPoint.imageUrl}${data.photos[0]}",
+                          ));
+                        }
+                      },
+                      onTapProfile: () => Get.to(() => ViewFriendScreen(
+                        userId: data.user.id,
+                        isFriend: false, // Friendship state logic inside ViewFriendScreen
+                      )),
+                      clickerType: data.clickerType,
+                      userName: data.user.name,
+                      userAvatar: "${ApiEndPoint.imageUrl}${data.user.image}",
+                      timeAgo: _formatPostTime(DateTime.parse(data.createdAt.toString())),
+                      location: data.address,
+                      postImage: data.photos.isNotEmpty ? "${ApiEndPoint.imageUrl}${data.photos[0]}" : "",
+                      description: data.description,
+                      isFriend: false,
+                      privacyImage: data.privacy == "public" ? AppIcons.public : AppIcons.onlyMe,
                     );
                   },
                 ),
-                const SizedBox(height: 20),
+                SizedBox(height: 20.h),
               ],
             ),
           ),
@@ -179,20 +184,28 @@ class _ClickerScreenState extends State<ClickerScreen> {
     );
   }
 
+  // Widget for when no results are found
   Widget _buildEmptyState() {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 50),
+      padding: EdgeInsets.symmetric(vertical: 60.h),
       child: Center(
-        child: Text(
-          controller.searchText.value.isNotEmpty
-              ? "No posts found for '${controller.searchText.value}'"
-              : "No posts available",
-          style: const TextStyle(fontSize: 16),
+        child: Column(
+          children: [
+            Icon(Icons.post_add, size: 50, color: Colors.grey.shade400),
+            SizedBox(height: 10.h),
+            Text(
+              controller.searchText.value.isNotEmpty
+                  ? "No results for '${controller.searchText.value}'"
+                  : "No posts available right now",
+              style: TextStyle(fontSize: 16.sp, color: Colors.grey),
+            ),
+          ],
         ),
       ),
     );
   }
 
+  // Filter Button UI
   Widget _buildFilterButton(BuildContext context) {
     return GestureDetector(
       onTap: () => _showFilterBottomSheet(context),
@@ -204,40 +217,55 @@ class _ClickerScreenState extends State<ClickerScreen> {
         ),
         child: Row(
           children: [
-            Obx(() => Text(controller.selectedFilter)),
+            Text(
+              controller.selectedFilter,
+              style: const TextStyle(color: Colors.black, fontSize: 14),
+            ),
             const SizedBox(width: 8),
-            CommonImage(imageSrc: AppIcons.filter, height: 20, width: 20),
+            CommonImage(imageSrc: AppIcons.filter, height: 18, width: 18),
           ],
         ),
       ),
     );
   }
 
+  // Bottom Sheet for Category Selection
   void _showFilterBottomSheet(BuildContext context) {
     Get.bottomSheet(
       Container(
-        decoration: const BoxDecoration(
+        padding: EdgeInsets.all(16.w),
+        decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
-          children: controller.filterOptions.map((option) {
-            return Obx(() {
-              final isSelected = controller.selectedFilter == option;
-              return ListTile(
-                leading: Icon(
-                  isSelected ? Icons.radio_button_checked : Icons.radio_button_off,
-                  color: isSelected ? AppColors.primaryColor : Colors.grey,
-                ),
-                title: Text(option),
-                onTap: () {
-                  controller.changeFilter(option);
-                  Get.back();
-                },
-              );
-            });
-          }).toList(),
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              "Filter by Category",
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 10.h),
+            ...controller.filterOptions.map((option) {
+              return Obx(() {
+                final isSelected = controller.selectedFilter == option;
+                return ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: Icon(
+                    isSelected ? Icons.radio_button_checked : Icons.radio_button_off,
+                    color: isSelected ? AppColors.primaryColor : Colors.grey,
+                  ),
+                  title: Text(option),
+                  onTap: () {
+                    controller.changeFilter(option);
+                    Get.back();
+                  },
+                );
+              });
+            }).toList(),
+            SizedBox(height: 10.h),
+          ],
         ),
       ),
     );

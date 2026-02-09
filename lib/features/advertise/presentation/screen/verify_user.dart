@@ -19,7 +19,7 @@ class ProviderVerifyUser extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Start timer when screen opens
+
     controller.startTimer();
 
     return Scaffold(

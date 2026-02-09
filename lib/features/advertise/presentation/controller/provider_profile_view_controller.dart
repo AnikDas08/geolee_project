@@ -19,6 +19,7 @@ class ProviderProfileViewController extends GetxController {
   String get userName => LocalStorage.myName.isNotEmpty ? LocalStorage.myName : "User Name";
 
   String get userImage => LocalStorage.myImage;
+  String get businessLogo => LocalStorage.businessLogo;
 
   String get userEmail => LocalStorage.myEmail.isNotEmpty
       ? LocalStorage.myEmail

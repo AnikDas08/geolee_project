@@ -259,7 +259,7 @@ class AdvertiserEditProfileScreen extends StatelessWidget {
   Widget _buildNetworkOrDefaultImage() {
     if (LocalStorage.myImage.isNotEmpty) {
       return CommonImage(
-        imageSrc: ApiEndPoint.imageUrl + LocalStorage.myImage,
+        imageSrc: ApiEndPoint.imageUrl + LocalStorage.businessLogo,
         width: 100.w,
         height: 100.h,
         fill: BoxFit.cover,

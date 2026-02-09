@@ -10,6 +10,7 @@ import '../../../../services/api/api_service.dart';
 import '../../../../services/storage/storage_keys.dart';
 import '../../../../services/storage/storage_services.dart';
 import '../../../../utils/app_utils.dart';
+import '../../../profile/presentation/screen/dashboard_profile.dart';
 
 class AdvertiserEditProfileController extends GetxController {
   // ================= VARIABLES =================
@@ -297,8 +298,7 @@ class AdvertiserEditProfileController extends GetxController {
 
         print("✅ Profile updated successfully");
 
-        // Navigate back or refresh
-        Get.back();
+        Get.to(DashBoardProfile());
       } else {
         Utils.errorSnackBar(
           response.statusCode.toString(),

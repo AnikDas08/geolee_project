@@ -64,9 +64,8 @@ class _VerifyUserState extends State<VerifyUser> {
                     Center(
                       child: CommonText(
                         text:
-                            "${AppString.codeHasBeenSendTo} ${controller.emailController.text}",
+                        "${AppString.codeHasBeenSendTo} ${controller.emailController.text}",
                         fontSize: 14,
-
                         bottom: 40,
                         maxLines: 3,
                         color: AppColors.secondaryText,
@@ -82,7 +81,7 @@ class _VerifyUserState extends State<VerifyUser> {
                         cursorColor: AppColors.primaryColor,
                         appContext: (context),
                         autoFocus: true,
-                        textStyle: TextStyle(color: AppColors.primaryColor),
+                        textStyle: const TextStyle(color: AppColors.primaryColor),
                         pinTheme: PinTheme(
                           shape: PinCodeFieldShape.box,
                           borderRadius: BorderRadius.circular(16.r),
@@ -110,26 +109,21 @@ class _VerifyUserState extends State<VerifyUser> {
                       ),
                     ),
 
-                    /// Resent OTP or show Timer
-                    /*GestureDetector(
-                      onTap: controller.time == '00:00'
-                          ? () {
-                              controller.startTimer();
-                              controller.signUpUser(formKey);
-                            }
-                          : () {},
-                      child: CommonText(
-                        text: controller.time == '00:00'
-                            ? AppString.resendCode
-                            : "${AppString.resendCodeIn} ${controller.time} ${AppString.minute}",
+                    /// Show Timer
+                    if (controller.time != "00:00" && controller.time.isNotEmpty)
+                      CommonText(
+                        text: "Resend code in ${controller.time}",
+                        fontSize: 14,
                         bottom: 20,
-                        fontSize: 18,
+                        fontWeight: FontWeight.w400,
+                        color: AppColors.secondaryText,
                       ),
-                    ),*/
+
+                    /// Resend OTP Button
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        CommonText(
+                        const CommonText(
                           text: "Didn't receive the code?",
                           fontSize: 16,
                           bottom: 40,
@@ -137,17 +131,39 @@ class _VerifyUserState extends State<VerifyUser> {
                           fontWeight: FontWeight.w400,
                           color: AppColors.textPrimary,
                         ),
+                        const SizedBox(width: 4),
                         InkWell(
-                          onTap: (){
-                            // controller.resendOtp();
+                          onTap: controller.isResendingOtp || controller.time != "00:00"
+                              ? null
+                              : () {
+                            controller.resendOtp();
                           },
-                          child: CommonText(
+                          child: controller.isResendingOtp
+                              ? const SizedBox(
+                            width: 60,
+                            height: 20,
+                            child: Center(
+                              child: SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    AppColors.primaryColor,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          )
+                              : CommonText(
                             text: "Resend",
                             fontSize: 16,
                             bottom: 40,
                             fontWeight: FontWeight.w700,
                             maxLines: 3,
-                            color: AppColors.primaryColor,
+                            color: controller.time == "00:00"
+                                ? AppColors.primaryColor
+                                : AppColors.secondaryText,
                           ),
                         ),
                       ],

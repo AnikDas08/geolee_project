@@ -1,3 +1,4 @@
+
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
@@ -15,10 +16,15 @@ import '../../data/addbanner_model.dart';
 
 enum FriendStatus { none, requested, friends }
 
+
 class ClickerController extends GetxController {
   /// ================= Search & UI State
   final searchText = ''.obs;
   final TextEditingController searchController = TextEditingController();
+
+
+
+  /// ================= Carousel
   final _currentPosition = 0.obs;
   int get currentPosition => _currentPosition.value;
 
@@ -62,7 +68,7 @@ class ClickerController extends GetxController {
   @override
   void onClose() {
     searchController.removeListener(_onSearchChanged);
-    searchController.dispose();
+    // searchController.dispose();
     super.onClose();
   }
 

@@ -114,7 +114,7 @@ class ProviderProfileViewScreen extends StatelessWidget {
       child: ClipOval(
         child: controller.userImage.isNotEmpty
             ? CommonImage(
-          imageSrc: ApiEndPoint.imageUrl + controller.userImage,
+          imageSrc: ApiEndPoint.imageUrl + controller.businessLogo,
           width: 120.w,
           height: 120.h,
           fill: BoxFit.cover,

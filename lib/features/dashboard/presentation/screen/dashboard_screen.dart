@@ -135,7 +135,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
                 child: Center(
                   child: CommonImage(
-                    imageSrc: AppImages.logo,
+                    imageSrc: "${ApiEndPoint.imageUrl+_providerProfileViewController.businessLogo}",
                     borderRadius: 12.r,
                     size: 28.w,
                     fill: BoxFit.cover,

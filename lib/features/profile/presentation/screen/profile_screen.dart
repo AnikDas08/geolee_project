@@ -157,6 +157,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       bottom: 8.h,
                     ),
                     CommonText(
+                      textAlign: TextAlign.center,
                       text: LocalStorage.bio.isNotEmpty
                           ? LocalStorage.bio
                           : "Bio Not Set Yet",
