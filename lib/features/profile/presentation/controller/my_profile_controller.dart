@@ -73,7 +73,11 @@ class MyProfileController extends GetxController {
 
   // ================= API CALL =================
 
+
   Future<void> getUserData() async {
+    if(LocalStorage.token.isEmpty){
+      return;
+    }
     isLoading = true;
     update();
 

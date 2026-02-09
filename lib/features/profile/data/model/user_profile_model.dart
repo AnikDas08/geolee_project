@@ -76,7 +76,7 @@ class Data {
   factory Data.fromJson(Map<String, dynamic> json) => Data(
     location: Location.fromJson(json["location"]),
     id: json["_id"],
-    name: json["name"],
+    name: json["name"]??"User",
     role: json["role"],
     email: json["email"],
     image: json["image"],

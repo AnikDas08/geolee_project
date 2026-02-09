@@ -39,8 +39,16 @@ class HomeController extends GetxController {
     super.onInit();
     argument=Get.arguments;
     Get.find<HomeNavController>().refresh();
-    fetchPosts();
-    myProfileController.getUserData();
+    if (LocalStorage.token != null && LocalStorage.token!.isNotEmpty) {
+      fetchPosts(); // If this is a private feed
+      myProfileController.getUserData();
+    }
+    else{
+      allPosts = [];
+      filteredPosts = [];
+      isLoading = false;
+      update();
+    }
 
 
   }

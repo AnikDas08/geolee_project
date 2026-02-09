@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:geocoding/geocoding.dart'; // Required for address conversion
 
 import 'package:giolee78/config/route/app_routes.dart';
 import 'package:giolee78/services/storage/storage_services.dart';
@@ -10,13 +11,11 @@ import 'package:giolee78/utils/extensions/extension.dart';
 import '../../../../component/image/common_image.dart';
 import '../../../../component/text/common_text.dart';
 import '../../../../config/api/api_end_point.dart';
-import '../../../../services/storage/storage_keys.dart';
 import '../../../../utils/constants/app_colors.dart';
 import '../../../../utils/constants/app_images.dart';
 
 class HomeDetails extends StatefulWidget {
-  const HomeDetails({super.key,
-    required this.notificationCount});
+  const HomeDetails({super.key, required this.notificationCount});
 
   final int notificationCount;
 
@@ -25,45 +24,64 @@ class HomeDetails extends StatefulWidget {
 }
 
 class _HomeDetailsState extends State<HomeDetails> {
-  double? lat;
-  double? lng;
+  String displayLocation = "Fetching location...";
   bool loadingLocation = true;
 
   @override
   void initState() {
     super.initState();
-    _getCurrentLocation();
+    _getCurrentLocationAndAddress();
   }
 
-  Future<void> _getCurrentLocation() async {
+  Future<void> _getCurrentLocationAndAddress() async {
     try {
+      // 1. Check if location services are enabled
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
-        setState(() => loadingLocation = false);
+        setState(() {
+          displayLocation = "Location disabled";
+          loadingLocation = false;
+        });
         return;
       }
 
+      // 2. Handle Permissions
       LocationPermission permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          setState(() {
+            displayLocation = "Permission denied";
+            loadingLocation = false;
+          });
+          return;
+        }
       }
 
-      if (permission == LocationPermission.deniedForever) {
-        setState(() => loadingLocation = false);
-        return;
-      }
-
+      // 3. Get Coordinates
       Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
       );
 
+      // 4. Reverse Geocode: Convert Lat/Lng to "Mountain View"
+      List<Placemark> placemarks = await placemarkFromCoordinates(
+        position.latitude,
+        position.longitude,
+      );
+
+      if (placemarks.isNotEmpty) {
+        Placemark place = placemarks[0];
+        setState(() {
+          // locality returns the City (e.g., "Mountain View")
+          displayLocation = place.locality ?? "Unknown Location";
+          loadingLocation = false;
+        });
+      }
+    } catch (e) {
       setState(() {
-        lat = position.latitude;
-        lng = position.longitude;
+        displayLocation = "Location Error";
         loadingLocation = false;
       });
-    } catch (e) {
-      loadingLocation = false;
     }
   }
 
@@ -76,20 +94,20 @@ class _HomeDetailsState extends State<HomeDetails> {
           children: [
             GestureDetector(
               onTap: () {
-                print("My Role Is :===========================${LocalStorage.myRole}");
-                Get.toNamed(AppRoutes.profile);
-                print("My Role Is :===========================${LocalStorage.myRole}");
+                if (LocalStorage.token.isNotEmpty) {
+                  Get.toNamed(AppRoutes.profile);
+                }
               },
               child: CircleAvatar(
                 radius: 20,
                 child: ClipOval(
                   child: CommonImage(
                     fill: BoxFit.fill,
-                    imageSrc: LocalStorage.myImage.isNotEmpty
+                    imageSrc: LocalStorage.myImage.isNotEmpty&&LocalStorage.token.isNotEmpty
                         ? ApiEndPoint.imageUrl + LocalStorage.myImage
-                        : "",
+                        : "assets/images/profile.png",
                     size: 40,
-                    defaultImage: AppImages.profileImage,
+                    defaultImage: "assets/images/profile.png",
                   ),
                 ),
               ),
@@ -99,21 +117,17 @@ class _HomeDetailsState extends State<HomeDetails> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 CommonText(
-                  text: LocalStorage.myName,
+                  text: LocalStorage.myName.isEmpty ? "User" : LocalStorage.myName,
                   fontSize: 16,
                   color: AppColors.textColorFirst,
                   fontWeight: FontWeight.w600,
                 ),
                 Row(
                   children: [
-                    CommonImage(imageSrc: AppIcons.location),
+                    CommonImage(imageSrc: AppIcons.location, size: 14),
                     8.width,
                     CommonText(
-                      text: loadingLocation
-                          ? "Fetching location..."
-                          : lat != null && lng != null
-                          ? "${lat!.toStringAsFixed(4)}, ${lng!.toStringAsFixed(4)}"
-                          : "Location unavailable",
+                      text: displayLocation, // Shows "Mountain View"
                       fontSize: 12,
                       fontWeight: FontWeight.w400,
                       color: AppColors.secondaryText,
@@ -125,21 +139,15 @@ class _HomeDetailsState extends State<HomeDetails> {
           ],
         ),
 
-        /// 🔔 Notification
+        /// Notification Section
         Stack(
           clipBehavior: Clip.none,
           children: [
             Padding(
               padding: const EdgeInsets.only(right: 10),
               child: GestureDetector(
-                onTap: () {
-                  print("======================Hamba Role======================${LocalStorage.myRole}");
-                  Get.toNamed(AppRoutes.notifications);
-                },
-                child: CommonImage(
-                  imageSrc: AppIcons.notification,
-                  size: 28,
-                ),
+                onTap: () => Get.toNamed(AppRoutes.notifications),
+                child: CommonImage(imageSrc: AppIcons.notification, size: 28),
               ),
             ),
             if (widget.notificationCount > 0)
@@ -148,23 +156,10 @@ class _HomeDetailsState extends State<HomeDetails> {
                 top: -4,
                 child: Container(
                   padding: const EdgeInsets.all(4),
-                  decoration: const BoxDecoration(
-                    color: Colors.red,
-                    shape: BoxShape.circle,
-                  ),
-                  constraints: const BoxConstraints(
-                    minWidth: 18,
-                    minHeight: 18,
-                  ),
-                  child: Center(
-                    child: Text(
-                      "${widget.notificationCount}",
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                  decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
+                  child: Text(
+                    "${widget.notificationCount}",
+                    style: const TextStyle(color: Colors.white, fontSize: 10),
                   ),
                 ),
               ),

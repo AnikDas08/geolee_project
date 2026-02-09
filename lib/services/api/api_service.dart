@@ -9,6 +9,7 @@ import 'package:path_provider/path_provider.dart';
 import '../../config/api/api_end_point.dart';
 import '../../utils/constants/app_string.dart';
 import '../../utils/log/api_log.dart';
+import '../storage/storage_services.dart';
 import 'api_response_model.dart';
 
 class ApiService {
@@ -130,6 +131,13 @@ class ApiService {
     dynamic body,
     Map<String, String>? header,
   }) async {
+    bool isGuest = LocalStorage.token == null || LocalStorage.token!.isEmpty;
+    bool isPublicRoute = url.contains(ApiEndPoint.signIn) || url.contains("public"); // Adjust based on your public endpoints
+
+    if (isGuest && !isPublicRoute) {
+      debugPrint("Blocked request to $url because user is a Guest.");
+      return ApiResponseModel(204, {"message": "Guest Mode"});
+    }
     try {
       final response = await _dio.request(
         url,

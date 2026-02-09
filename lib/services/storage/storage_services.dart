@@ -128,6 +128,7 @@ class LocalStorage {
     if (key == LocalStorageKeys.activeRole) activeRole = value;
     if (key == LocalStorageKeys.myName) myName = value;
     if (key == LocalStorageKeys.myEmail) myEmail = value;
+    if (key == LocalStorageKeys.token) token = value;
   }
 
   static Future<void> setBool(String key, bool value) async {

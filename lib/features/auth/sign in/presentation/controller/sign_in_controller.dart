@@ -17,10 +17,10 @@ class SignInController extends GetxController {
 
   /// email and password Controller here
   TextEditingController emailController = TextEditingController(
-    text: kDebugMode ? 'jalad63157@juhxs.com' : '',
+    text: kDebugMode ? 'rahad.developer@gmail.com' : '',
   );
   TextEditingController passwordController = TextEditingController(
-    text: kDebugMode ? 'password123' : "",
+    text: kDebugMode ? 'P@ssword123' : "",
   );
 
   /// Sign in Api call here
@@ -46,6 +46,7 @@ class SignInController extends GetxController {
         var data = response.data;
 
         Utils.successSnackBar('Login', "Successfully Login To Your Account");
+        await LocalStorage.setString(LocalStorageKeys.token, data["data"]['accessToken']);
 
         LocalStorage.isLogIn = true;
 
@@ -54,8 +55,9 @@ class SignInController extends GetxController {
           LocalStorage.isLogIn,
         );
         await LocalStorage.setString(LocalStorageKeys.role, "user");
+        LocalStorage.getAllPrefData();
 
-        print("My Role Is :===========================💕💕💕💕💕💕 ${LocalStorage.role.toString()}");
+        print("My Token Is :===========================💕💕💕💕💕💕 ${LocalStorage.token.toString()}");
         await getUserData();
 
         Get.toNamed(AppRoutes.homeNav);

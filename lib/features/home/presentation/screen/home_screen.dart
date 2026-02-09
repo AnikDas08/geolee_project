@@ -220,9 +220,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                   imageSrc: AppIcons.clicker,
                                   title: 'Clicker',
                                   onTap: () {
-                                    Get.to(() => ClickerScreen());
+                                    Get.to(() => ClickerScreen(),arguments: controller);
                                   },
                                 ),
+                                if(LocalStorage.token!=""||LocalStorage.token.isNotEmpty)...[
                                 Item(
                                   imageSrc: AppIcons.bubbleChat,
                                   title: 'Chat Nearby',
@@ -263,6 +264,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                       },
 
                                 ),
+                  ]
                               ],
                             )
                           ],

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:giolee78/services/storage/storage_services.dart';
 
 import '../../data/model/notification_model.dart';
 import '../../repository/notification_repository.dart';
@@ -19,7 +20,9 @@ class NotificationsController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    getNotifications();
+    if(LocalStorage.token!=""){
+      getNotifications();
+    }
     moreNotification();
   }
 

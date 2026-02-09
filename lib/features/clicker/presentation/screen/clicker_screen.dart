@@ -29,7 +29,6 @@ class _ClickerScreenState extends State<ClickerScreen> {
     NotificationsController(),
   );
 
-  // Helper method - build এর বাইরে লিখুন
   String _formatPostTime(DateTime postTime) {
     final now = DateTime.now();
     final difference = now.difference(postTime);
@@ -48,236 +47,199 @@ class _ClickerScreenState extends State<ClickerScreen> {
         notificationCount: notificationsController.unreadCount,
       ),
       body: Obx(() {
-        // Loading indicator while fetching all posts
-        if (controller.isLoading.value) {
+        if (controller.isLoading.value && controller.posts.isEmpty) {
           return const Center(child: CircularProgressIndicator());
         }
 
-        return SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Column(
-            children: [
-              // Search bar with clear button
-              CommonTextField(
-                controller: controller.searchController,
-                prefixIcon: const Icon(Icons.search),
-                hintText: "Search",
-                borderRadius: 20.r,
-                suffixIcon: Obx(() => controller.searchText.value.isNotEmpty
-                    ? IconButton(
-                  icon: const Icon(Icons.clear),
-                  onPressed: () {
-                    controller.searchController.clear();
-                  },
-                )
-                    : const SizedBox.shrink()),
-              ),
-              const SizedBox(height: 16),
-
-              CarouselSlider(
-                items: controller.banners,
-                options: CarouselOptions(
-                  height: 150.h,
-                  viewportFraction: 0.6,
-                  autoPlay: true,
-                  autoPlayInterval: const Duration(seconds: 3),
-                  enlargeCenterPage: true,
-                  onPageChanged: (index, reason) {
-                    controller.changePosition(index);
-                  },
+        return RefreshIndicator(
+          onRefresh: () async {
+            await controller.getBanners();
+            await controller.getAllPosts();
+          },
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Column(
+              children: [
+                const SizedBox(height: 10),
+                // Search bar
+                CommonTextField(
+                  controller: controller.searchController,
+                  prefixIcon: const Icon(Icons.search),
+                  hintText: "Search",
+                  borderRadius: 20.r,
+                  suffixIcon: controller.searchText.value.isNotEmpty
+                      ? IconButton(
+                    icon: const Icon(Icons.clear),
+                    onPressed: () => controller.searchController.clear(),
+                  )
+                      : const SizedBox.shrink(),
                 ),
-              ),
-              const SizedBox(height: 8),
+                const SizedBox(height: 16),
 
-              // Dots Indicator
-              Obx(() {
-                return DotsIndicator(
-                  dotsCount: controller.banners.length,
-                  position: controller.currentPosition.toInt(),
-                  decorator: DotsDecorator(
-                    activeColor: AppColors.primaryColor,
-                    color: Colors.grey,
-                    size: const Size.square(8.0),
-                    activeSize: const Size.square(8.0),
-                    activeShape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                  ),
-                );
-              }),
-              const SizedBox(height: 16),
-
-              // Filter button and title
-              Row(
-                children: [
-                  const Text(
-                    'All Posts',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
-                  ),
-                  const Spacer(),
-                  _buildFilterButton(context),
-                ],
-              ),
-              const SizedBox(height: 16),
-
-              // Posts list or empty state
-              controller.filteredPosts.isEmpty
-                  ? Padding(
-                padding: const EdgeInsets.symmetric(vertical: 50),
-                child: Center(
-                  child: Text(
-                    controller.searchText.value.isNotEmpty
-                        ? "No posts found for '${controller.searchText.value}'"
-                        : "No posts available",
-                    style: const TextStyle(fontSize: 16),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-              )
-                  : ListView.separated(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: controller.filteredPosts.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 16),
-                itemBuilder: (context, index) {
-                  final data = controller.filteredPosts[index];
-                  return GestureDetector(
-                    onTap: () {
-                      Get.to(
-                            () => ViewFriendScreen(
-                          userId: data.user.id,
-                          isFriend: index % 2 == 0,
+                // Dynamic Banner Slider
+                if (controller.adList.isNotEmpty) ...[
+                  CarouselSlider(
+                    items: controller.adList.map((ad) {
+                      return ClipRRect(
+                        borderRadius: BorderRadius.circular(12.r),
+                        child: CommonImage(
+                          imageSrc: "${ApiEndPoint.imageUrl}${ad.image}",
+                          height: 150.h,
+                          width: double.infinity,
+                          fill: BoxFit.cover,
                         ),
                       );
-                    },
-                    child: MyPostCards(
-                      onTapPhoto: () {
-                        if (data.photos.isNotEmpty) {
-                          Get.to(() => FullScreenImageView(
-                            imageUrl: "${ApiEndPoint.imageUrl}${data.photos[0]}",
-                          ));
-                        }
-                      },
-                      onTapProfile: () {
-                        Get.to(
-                              () => ViewFriendScreen(
-                            userId: data.user.id,
-                            isFriend: index % 2 == 0,
-                          ),
-                        );
-                      },
-                      clickerType: data.clickerType,
-                      userName: data.user.name,
-                      userAvatar: "${ApiEndPoint.imageUrl}${data.user.image}",
-                      timeAgo: _formatPostTime(
-                        DateTime.parse(data.createdAt.toString()),
-                      ),
-                      location: data.address,
-                      postImage: data.photos.isNotEmpty
-                          ? "${ApiEndPoint.imageUrl}${data.photos[0]}"
-                          : "",
-                      description: data.description,
-                      isFriend: index % 2 == 0,
-                      privacyImage: data.privacy == "public"
-                          ? AppIcons.public
-                          : AppIcons.onlyMe,
+                    }).toList(),
+                    options: CarouselOptions(
+                      height: 150.h,
+                      viewportFraction: 0.8,
+                      autoPlay: true,
+                      enlargeCenterPage: true,
+                      onPageChanged: (index, _) => controller.changePosition(index),
                     ),
-                  );
-                },
-              ),
-            ],
+                  ),
+                  const SizedBox(height: 8),
+                  DotsIndicator(
+                    dotsCount: controller.adList.length,
+                    position: controller.currentPosition,
+                    decorator: DotsDecorator(
+                      activeColor: AppColors.primaryColor,
+                      color: Colors.grey.shade300,
+                      size: const Size.square(8.0),
+                      activeSize: const Size(18.0, 8.0),
+                      activeShape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(5.0),
+                      ),
+                    ),
+                  ),
+                ],
+
+                const SizedBox(height: 16),
+
+                // Header & Filter
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'All Posts',
+                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+                    ),
+                    _buildFilterButton(context),
+                  ],
+                ),
+                const SizedBox(height: 16),
+
+                // Posts List
+                controller.filteredPosts.isEmpty
+                    ? _buildEmptyState()
+                    : ListView.separated(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: controller.filteredPosts.length,
+                  separatorBuilder: (_, __) => const SizedBox(height: 16),
+                  itemBuilder: (context, index) {
+                    final data = controller.filteredPosts[index];
+                    return GestureDetector(
+                      onTap: ()=>ViewFriendScreen(
+                      userId: data.user.id,
+                      isFriend: false, // Friendship state handled in controller
+                    ),
+                      child: MyPostCards(
+                        onTapPhoto: () {
+                          if (data.photos.isNotEmpty) {
+                            Get.to(() => FullScreenImageView(
+                              imageUrl: "${ApiEndPoint.imageUrl}${data.photos[0]}",
+                            ));
+                          }
+                        },
+                        onTapProfile: () => Get.to(() => ViewFriendScreen(
+                          userId: data.user.id,
+                          isFriend: false, // Friendship state handled in controller
+                        )),
+                        clickerType: data.clickerType,
+                        userName: data.user.name,
+                        userAvatar: "${ApiEndPoint.imageUrl}${data.user.image}",
+                        timeAgo: _formatPostTime(DateTime.parse(data.createdAt.toString())),
+                        location: data.address,
+                        postImage: data.photos.isNotEmpty ? "${ApiEndPoint.imageUrl}${data.photos[0]}" : "",
+                        description: data.description,
+                        isFriend: false,
+                        privacyImage: data.privacy == "public" ? AppIcons.public : AppIcons.onlyMe,
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 20),
+              ],
+            ),
           ),
         );
       }),
     );
   }
 
-  // Filter button
+  Widget _buildEmptyState() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 50),
+      child: Center(
+        child: Text(
+          controller.searchText.value.isNotEmpty
+              ? "No posts found for '${controller.searchText.value}'"
+              : "No posts available",
+          style: const TextStyle(fontSize: 16),
+        ),
+      ),
+    );
+  }
+
   Widget _buildFilterButton(BuildContext context) {
     return GestureDetector(
       onTap: () => _showFilterBottomSheet(context),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        decoration: ShapeDecoration(
-          shape: RoundedRectangleBorder(
-            side: const BorderSide(color: Color(0xFFDEE2E3), width: 1),
-            borderRadius: BorderRadius.circular(6),
-          ),
+        decoration: BoxDecoration(
+          border: Border.all(color: const Color(0xFFDEE2E3)),
+          borderRadius: BorderRadius.circular(6),
         ),
         child: Row(
-          mainAxisSize: MainAxisSize.min,
           children: [
-            Obx(
-                  () => Text(
-                controller.selectedFilter,
-                style: const TextStyle(color: Colors.black, fontSize: 16),
-              ),
-            ),
+            Obx(() => Text(controller.selectedFilter)),
             const SizedBox(width: 8),
-            SizedBox(
-              width: 20,
-              height: 20,
-              child: CommonImage(imageSrc: AppIcons.filter),
-            ),
+            CommonImage(imageSrc: AppIcons.filter, height: 20, width: 20),
           ],
         ),
       ),
     );
   }
 
-  // Bottom sheet for filter options
   void _showFilterBottomSheet(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (_) {
-        return Obx(() {
-          return Column(
-            mainAxisSize: MainAxisSize.min,
-            children: controller.filterOptions.map((option) {
+    Get.bottomSheet(
+      Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: controller.filterOptions.map((option) {
+            return Obx(() {
               final isSelected = controller.selectedFilter == option;
-              return InkWell(
-                onTap: () {
-                  controller.changeFilter(option); // Apply filter
-                  Navigator.pop(context);
-                },
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 16,
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        isSelected
-                            ? Icons.radio_button_checked
-                            : Icons.radio_button_off,
-                        color: isSelected
-                            ? AppColors.primaryColor
-                            : Colors.grey,
-                      ),
-                      const SizedBox(width: 16),
-                      Text(
-                        option,
-                        style: TextStyle(
-                          color: isSelected
-                              ? AppColors.primaryColor
-                              : Colors.black,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ],
-                  ),
+              return ListTile(
+                leading: Icon(
+                  isSelected ? Icons.radio_button_checked : Icons.radio_button_off,
+                  color: isSelected ? AppColors.primaryColor : Colors.grey,
                 ),
+                title: Text(option),
+                onTap: () {
+                  controller.changeFilter(option);
+                  Get.back();
+                },
               );
-            }).toList(),
-          );
-        });
-      },
+            });
+          }).toList(),
+        ),
+      ),
     );
   }
 }
