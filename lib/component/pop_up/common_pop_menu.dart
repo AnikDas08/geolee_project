@@ -162,7 +162,7 @@ deletePopUp({
 
   // Add listener to check text in real-time
   controller.addListener(() {
-    isDeleteEnabled.value = controller.text == "deleteAccount";
+    isDeleteEnabled.value = controller.text == "Delete Account";
   });
 
   showDialog(

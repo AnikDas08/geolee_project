@@ -23,6 +23,10 @@ import 'package:giolee78/utils/constants/app_colors.dart';
 import 'package:giolee78/utils/enum/enum.dart';
 import 'package:giolee78/utils/extensions/extension.dart';
 
+import '../../../../config/api/api_end_point.dart';
+import '../../../advertise/presentation/controller/advertiser_edit_profile_controller.dart';
+import '../../../advertise/presentation/controller/provider_profile_view_controller.dart';
+
 class DashBoardProfile extends StatelessWidget {
   const DashBoardProfile({super.key});
 
@@ -37,7 +41,14 @@ class DashBoardProfile extends StatelessWidget {
               imageSrc: AppIcons.profile,
               title: 'My Profile',
               onTap: () {
+
+              final  advEditProfileController=Get.put(AdvertiserEditProfileController());
+
+              advEditProfileController.fetchAdvertiserProfile();
+
                 print("===============================${LocalStorage.myRole}");
+                print("===============================${LocalStorage.businessLicenceNumber}");
+
                 Get.to(() => const ProviderProfileViewScreen());
               },
             ),
@@ -83,7 +94,9 @@ class DashBoardProfile extends StatelessWidget {
               onTap: () {
                 deletePopUp(
                   controller: TextEditingController(),
-                  onTap: () {},
+                  onTap: () {
+                    controller.deleteAccount();
+                  },
                   isLoading: false,
                 );
               },
@@ -106,23 +119,30 @@ class DashBoardProfile extends StatelessWidget {
                   children: [
                     /// User Profile Image here
                     Center(
-                      child: CircleAvatar(
-                        radius: 50.sp,
-                        backgroundColor: Colors.transparent,
-                        child: ClipOval(
-                          child: CommonImage(
-                            imageSrc:
-                            "assets/images/profile_image.png",
-                            size: 100,
-                            defaultImage: AppImages.profileImage,
-                          ),
-                        ),
+                      child: GetBuilder<ProviderProfileViewController>(
+                        builder: (controller) {
+                          return ClipOval(
+                            child: controller.userImage.isNotEmpty
+                                ? CommonImage(
+                              imageSrc: ApiEndPoint.imageUrl + controller.userImage,
+                              width: 120.w,
+                              height: 120.h,
+                              fill: BoxFit.cover,
+                            )
+                                : CommonImage(
+                              imageSrc: AppImages.profile,
+                              width: 120.w,
+                              height: 120.h,
+                              fill: BoxFit.cover,
+                            ),
+                          );
+                        }
                       ),
                     ),
 
                     /// User Name here
                     CommonText(
-                      text: "Sakir Ahamed",
+                      text: LocalStorage.businessName,
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
                       top: 16,
@@ -130,7 +150,7 @@ class DashBoardProfile extends StatelessWidget {
                     ),
                     CommonText(
                       text:
-                      "Exploring one city at a time Capturing stories beyond borders",
+                      LocalStorage.advertiserBio,
                       fontSize: 12,
                       fontWeight: FontWeight.w400,
                       bottom: 20,

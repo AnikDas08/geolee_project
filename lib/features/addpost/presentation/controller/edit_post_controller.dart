@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:giolee78/features/addpost/presentation/controller/post_controller.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../../config/api/api_end_point.dart';
@@ -88,32 +89,30 @@ class EditPostControllers extends GetxController {
     }
   }
 
-  // ✅ Updated editPost using the multipartImage function
+
   Future<void> editPost() async {
     isLoading.value = true;
 
     try {
       final url = "${ApiEndPoint.updatePost}$postId";
 
-      // 1. Prepare text fields
       Map<String, String> body = {
         'description': descriptionController.text.trim(),
         'clickerType': selectedPricingOption.value,
         'privacy': selectedPriorityLevel.value.toLowerCase(),
-        // ✅ Format as JSON string: ["url1", "url2"]
         'removedImages': jsonEncode(removedImages),
       };
 
-      // 2. Prepare files to upload
+
       List<Map<String, dynamic>> files = [];
       for (var file in selectedImages) {
         files.add({
-          'name': 'image', // ✅ Matches "image" key in your screenshot
+          'name': 'image',
           'image': file.path,
         });
       }
 
-      // 3. Request using multipartImage
+
       var response = await ApiService.multipartImage(
         url,
         method: "PATCH",
@@ -124,10 +123,10 @@ class EditPostControllers extends GetxController {
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         Utils.successSnackBar("Post Updated", "Successfully saved changes");
+        Get.back();
 
-        // Use a generic refresh if PostController is available
         try {
-         // Get.find<PostController>().fetchMyPosts();
+          // Get.find<PostController>().fetchMyPosts();
         } catch (_) {}
 
         removedImages.clear();

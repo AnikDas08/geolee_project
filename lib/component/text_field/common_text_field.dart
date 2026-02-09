@@ -90,6 +90,7 @@ class _CommonTextFieldState extends State<CommonTextField> {
         ),
       ),
       child: TextFormField(
+
         autovalidateMode: AutovalidateMode.onUnfocus,
         keyboardType: widget.keyboardType,
         controller: widget.controller,

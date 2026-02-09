@@ -56,7 +56,7 @@ class SignInController extends GetxController {
         await LocalStorage.setString(LocalStorageKeys.role, "user");
 
         print("My Role Is :===========================💕💕💕💕💕💕 ${LocalStorage.role.toString()}");
-        //getUserData();
+        await getUserData();
 
         Get.toNamed(AppRoutes.homeNav);
         // Get.to(() => const HistoryAdsScreen());

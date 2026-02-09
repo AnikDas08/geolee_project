@@ -66,8 +66,8 @@ class ViewAdsScreen extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     SizedBox(
-                      height: 85.h,
-                      width: 170.w,
+                      height: 95.h,
+                      width: 180.w,
                       child: Card(
                         color: Colors.white,
                         elevation: 0,
@@ -88,8 +88,8 @@ class ViewAdsScreen extends StatelessWidget {
                       ),
                     ),
                     SizedBox(
-                      height: 78.h,
-                      width: 170.w,
+                      height: 95.h,
+                      width: 180.w,
                       child: Card(
                         color: Colors.white,
                         elevation: 0,
@@ -178,41 +178,78 @@ class ViewAdsScreen extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
         InkWell(
-          onTap: (){
-           Get.dialog(
-             barrierDismissible: true,
-             Dialog(
-               child: Container(
-                 height: 200.h,
-                 width: 300.w,
-                 decoration: BoxDecoration(
-                   borderRadius: BorderRadius.circular(12),
-                   color: Colors.white,
-                 ),
-                 child: Column(
-                   crossAxisAlignment: CrossAxisAlignment.center,
-                   mainAxisAlignment: MainAxisAlignment.center,
-                   children: [
-                     SizedBox(height: 16.h),
+          onTap: () {
+            Get.dialog(
+              barrierDismissible: true,
+              Dialog(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Container(
+                  padding: EdgeInsets.all(16.w),
+                  height: 200.h,
+                  width: 300.w,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.delete, color: Colors.red, size: 40.sp),
+                      SizedBox(height: 16.h),
+                      CommonText(
+                        text: "Are you sure you want to delete this post?",
+                        textAlign: TextAlign.center,
+                      ),
+                      SizedBox(height: 24.h),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          InkWell(
+                            onTap: () {
+                              controller.deleteAdsById();
+                              Get.back();
+                            },
+                            child: Container(
+                              height: 48.h,
+                              width: 130.w,
+                              decoration: BoxDecoration(
 
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: Colors.red,
+                                  width: 2
+                                )
+                              ),
+                              child: Center(
+                                child: CommonText(text: "Delete"),
+                              ),
+                            ),
+                          ),
+                          InkWell(
+                            onTap: (){
+                              Get.back();
+                            },
+                            child: Container(
+                              height: 48.h,
+                              width: 130.w,
+                              decoration: BoxDecoration(
 
+                                color: Colors.red,
+                                  borderRadius: BorderRadius.circular(12),
 
-
-                      SizedBox(
-                          height: 40.h,
-                          width: 40.w,
-                          child: Icon(Icons.delete,color: Colors.red,)),
-                      CommonText(text: "Are you sure you want to delete this post?"),
-                     SizedBox(height: 16.h),
-
-
-                   ],
-                 ),
-
-               ),
-             )
-           );
+                              ),
+                              child: Center(
+                                child: CommonText(text: "Cancel",color: AppColors.white,),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
           },
+
           child: Container(
             height: 48.h,
             width: 172.w,

@@ -96,7 +96,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
               onTap: () {
                 deletePopUp(
                   controller: TextEditingController(),
-                  onTap: () {},
+                  onTap: () {
+                    controller.deleteAccount();
+                  },
                   isLoading: false,
                 );
               },

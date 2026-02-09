@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
@@ -5,16 +7,19 @@ import 'package:image_picker/image_picker.dart';
 import 'package:giolee78/config/api/api_end_point.dart';
 import 'package:giolee78/services/api/api_response_model.dart';
 import 'package:giolee78/services/api/api_service.dart';
-
 import '../../../../component/pop_up/common_pop_menu.dart';
 import '../../../../config/route/app_routes.dart';
+import '../../data/plan_model.dart';
 import '../../data/single_ads_model.dart';
 
 class UpdateAdsController extends GetxController {
   /// ---------------- OBSERVABLES ----------------
-  RxString coverImagePath = ''.obs;
-  RxString selectedPricingPlan = 'weekly'.obs;
-  RxBool isLoading = false.obs;
+  var coverImagePath = ''.obs;
+  var selectedPricingPlan = ''.obs; // weekly | monthly
+  var isLoading = false.obs;
+
+  var plans = <PlanModel>[].obs;
+  var isPlansLoading = false.obs;
 
   late String adsId;
   SingleAdvertisement? ad;
@@ -28,21 +33,134 @@ class UpdateAdsController extends GetxController {
 
   final ImagePicker _picker = ImagePicker();
 
-  /// ---------------- PLAN IDS ----------------
-  final String weeklyPlanId = 'WEEKLY_PLAN_ID_HERE';
-  final String monthlyPlanId = '6982d85cfcd98da54506b87';
-
-  String get planId =>
-      selectedPricingPlan.value == 'weekly' ? weeklyPlanId : monthlyPlanId;
-
-  double get selectedPrice =>
-      selectedPricingPlan.value == 'weekly' ? 10.0 : 50.0;
-
   @override
   void onInit() {
     super.onInit();
     adsId = Get.arguments;
-    fetchAdById(); // 🔥 update এর আগে data load
+    _loadInitialData();
+  }
+
+  /// ---------------- LOAD INITIAL DATA ----------------
+  Future<void> _loadInitialData() async {
+    await Future.wait([
+      fetchAdById(),
+      fetchPlans(),
+    ]);
+  }
+
+  /// ---------------- FETCH SINGLE AD ----------------
+  Future<void> fetchAdById() async {
+    isLoading.value = true;
+
+    try {
+      final endpoint = "${ApiEndPoint.getAdvertisementById}$adsId";
+      print("🌐 Fetching ad from: $endpoint");
+
+      ApiResponseModel response = await ApiService.get(endpoint);
+
+      print("📦 Response Status: ${response.statusCode}");
+      print("📦 Response Data: ${response.data}");
+
+      if (response.statusCode == 200 && response.data != null) {
+        ad = SingleAdvertisement.fromJson(response.data['data']);
+
+        print("✅ Ad loaded: ${ad?.title}");
+
+        // Set text fields
+        titleController.text = ad?.title ?? '';
+        descriptionController.text = ad?.description ?? '';
+        focusAreaController.text = ad?.focusArea ?? '';
+        websiteLinkController.text = ad?.websiteUrl ?? '';
+
+        // Handle date
+        print("📅 Raw startAt: ${ad?.startAt}");
+
+        String? dateString;
+        if (ad?.startAt != null) {
+          if (ad!.startAt is String) {
+            dateString = ad!.startAt as String;
+          } else {
+            dateString = ad!.startAt.toString();
+          }
+        }
+
+        print("📅 Date String: $dateString");
+
+        final parsedDate = _safeParseDate(dateString)?.toLocal();
+        print("📅 Parsed Date: $parsedDate");
+
+        if (parsedDate != null) {
+          adStartDateController.text =
+          "${parsedDate.day.toString().padLeft(2, '0')} "
+              "${_month(parsedDate.month)} "
+              "${parsedDate.year}";
+          print("📅 Formatted Date: ${adStartDateController.text}");
+        } else {
+          print("❌ Date parsing failed!");
+        }
+
+        // Handle image
+        print("🖼️ Raw image: ${ad?.image}");
+
+        if (ad?.image != null && ad!.image!.isNotEmpty) {
+          // Store only the image path/filename, not the full URL
+          coverImagePath.value = ad!.image!;
+          print("🖼️ Image Path: ${coverImagePath.value}");
+        } else {
+          print("❌ No image found!");
+        }
+
+        // Handle plan
+        print("💰 Raw plan: ${ad?.plan}");
+        if (ad?.plan != null && ad!.plan!.isNotEmpty) {
+          selectedPricingPlan.value = ad!.plan!.toLowerCase().trim();
+          print("💰 Selected Plan: ${selectedPricingPlan.value}");
+        }
+      } else {
+        print("❌ Invalid response");
+        Get.snackbar("Error", "Failed to load ad data");
+      }
+    } catch (e, stackTrace) {
+      print("❌ Fetch Ad Error: $e");
+      print("❌ Stack Trace: $stackTrace");
+      Get.snackbar("Error", "Failed to load ad data: $e");
+    }
+
+    isLoading.value = false;
+    update();
+  }
+
+  /// ---------------- SAFE DATE PARSE ----------------
+  DateTime? _safeParseDate(String? date) {
+    if (date == null || date.isEmpty) return null;
+    try {
+      return DateTime.parse(date);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// ---------------- PLAN ID & PRICE ----------------
+  String get planId {
+    if (selectedPricingPlan.value.isEmpty || plans.isEmpty) return '';
+    final plan = plans.firstWhere(
+          (p) => p.name.toLowerCase() == selectedPricingPlan.value.toLowerCase(),
+      orElse: () => plans.first,
+    );
+    return plan.id;
+  }
+
+  double get selectedPrice {
+    if (plans.isEmpty) return 0;
+    final plan = plans.firstWhere(
+          (p) => p.name.toLowerCase() == selectedPricingPlan.value.toLowerCase(),
+      orElse: () => plans.first,
+    );
+    return plan.price;
+  }
+
+  void selectPricingPlan(String plan) {
+    selectedPricingPlan.value = plan;
   }
 
   /// ---------------- IMAGE PICK ----------------
@@ -50,11 +168,16 @@ class UpdateAdsController extends GetxController {
     final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
     if (image != null) {
       coverImagePath.value = image.path;
+      print("🖼️ New image picked: ${coverImagePath.value}");
     }
   }
 
   /// ---------------- VALIDATION ----------------
   bool _validate() {
+    if (coverImagePath.value.isEmpty) {
+      Get.snackbar("Error", "Please select a cover image");
+      return false;
+    }
     if (titleController.text.trim().isEmpty) {
       Get.snackbar("Error", "Please enter title");
       return false;
@@ -71,39 +194,53 @@ class UpdateAdsController extends GetxController {
       Get.snackbar("Error", "Please enter website link");
       return false;
     }
+    if (adStartDateController.text.trim().isEmpty) {
+      Get.snackbar("Error", "Please select ad start date");
+      return false;
+    }
     return true;
   }
 
-  /// ---------------- SAFE DATE PARSE ----------------
-  DateTime? _safeParseDate(String? date) {
-    if (date == null || date.isEmpty) return null;
-    try {
-      return DateTime.parse(date);
-    } catch (_) {
-      return null;
-    }
-  }
-
-  String _formatIso(DateTime date) {
-    return "${date.year.toString().padLeft(4, '0')}-"
-        "${date.month.toString().padLeft(2, '0')}-"
-        "${date.day.toString().padLeft(2, '0')}";
-  }
-
-  String getIsoStartDate() {
+  /// ---------------- DATE HELPERS ----------------
+  DateTime _parseUiDate() {
     final parts = adStartDateController.text.split(' ');
-    final date = DateTime(
+    return DateTime(
       int.parse(parts[2]),
       _monthToNumber(parts[1]),
       int.parse(parts[0]),
     );
-    return _formatIso(date);
+  }
+
+  String _formatIsoDateTime(DateTime date) {
+    return date.toUtc().toIso8601String();
+  }
+
+  String getIsoStartDate() {
+    final selectedDate = _parseUiDate();
+    final dateTime = DateTime(
+      selectedDate.year,
+      selectedDate.month,
+      selectedDate.day,
+      DateTime.now().hour,
+      DateTime.now().minute,
+      DateTime.now().second,
+    );
+    return _formatIsoDateTime(dateTime);
   }
 
   String getIsoEndDate() {
-    int days = selectedPricingPlan.value == 'weekly' ? 7 : 30;
-    final start = DateTime.parse(getIsoStartDate());
-    return _formatIso(start.add(Duration(days: days)));
+    int daysToAdd = selectedPricingPlan.value.toLowerCase() == 'weekly' ? 7 : 30;
+    final selectedDate = _parseUiDate();
+    final dateTime = DateTime(
+      selectedDate.year,
+      selectedDate.month,
+      selectedDate.day,
+      DateTime.now().hour,
+      DateTime.now().minute,
+      DateTime.now().second,
+    );
+    DateTime endDate = dateTime.add(Duration(days: daysToAdd));
+    return _formatIsoDateTime(endDate);
   }
 
   int _monthToNumber(String month) {
@@ -142,51 +279,33 @@ class UpdateAdsController extends GetxController {
     return months[m - 1];
   }
 
-  /// ---------------- FETCH SINGLE AD ----------------
-  Future<void> fetchAdById() async {
-    isLoading.value = true;
-    update();
-
+  /// ---------------- FETCH PLANS ----------------
+  Future<void> fetchPlans() async {
     try {
-      final endpoint = "${ApiEndPoint.getAdvertisementById}$adsId";
-      ApiResponseModel response = await ApiService.get(endpoint);
+      isPlansLoading.value = true;
+      ApiResponseModel response = await ApiService.get(ApiEndPoint.getPlans);
 
       if (response.statusCode == 200 && response.data != null) {
-        ad = SingleAdvertisement.fromJson(response.data['data']);
+        final Map<String, dynamic> res = response.data as Map<String, dynamic>;
+        List<dynamic> dataList = res['data'] ?? [];
 
-        titleController.text = ad?.title ?? '';
-        descriptionController.text = ad?.description ?? '';
-        focusAreaController.text = ad?.focusArea ?? '';
-        websiteLinkController.text = ad?.websiteUrl ?? '';
+        plans.value = dataList.map((e) => PlanModel.fromJson(e)).toList();
 
-        // 🔥 Fix: Parse and format date properly
-        final parsedDate = _safeParseDate(ad!.startAt as String?)?.toLocal();
+        debugPrint("📦 Plans loaded: ${plans.length}");
 
-        if (parsedDate != null) {
-          adStartDateController.text =
-          "${parsedDate.day.toString().padLeft(2, '0')} "
-              "${_month(parsedDate.month)} "
-              "${parsedDate.year}";
+        // Don't override selectedPricingPlan if already set from ad data
+        if (plans.isNotEmpty && selectedPricingPlan.value.isEmpty) {
+          selectedPricingPlan.value = plans.first.name;
         }
-
-            coverImagePath.value = ad!.image;
-
-        update();
-        if (ad?.plan != null) {
-          selectedPricingPlan.value = ad!.plan.toLowerCase();
-        }
-
-        update();
-
-        debugPrint("✅ Image Path: ${coverImagePath.value}");
-        debugPrint("✅ Start Date: ${adStartDateController.text}");
+      } else {
+        Get.snackbar("Error", response.message ?? "Failed to load plans");
       }
     } catch (e) {
-      debugPrint("❌ Fetch Ad Error: $e");
+      debugPrint("❌ Fetch Plans Error: $e");
+      Get.snackbar("Error", "Failed to load plans");
+    } finally {
+      isPlansLoading.value = false;
     }
-
-    isLoading.value = false;
-    update();
   }
 
   /// ---------------- UPDATE ADS ----------------
@@ -195,6 +314,12 @@ class UpdateAdsController extends GetxController {
 
     try {
       isLoading.value = true;
+
+      print("📤 Updating ad: $adsId");
+      print("🖼️ Image path: ${coverImagePath.value}");
+
+      // যদি image path local file path না হয়, শুধু text body পাঠাও
+      bool isLocalImage = File(coverImagePath.value).existsSync();
 
       ApiResponseModel response = await ApiService.multipartUpdate(
         ApiEndPoint.updateAdvertisementById + adsId,
@@ -208,32 +333,26 @@ class UpdateAdsController extends GetxController {
           "websiteUrl": websiteLinkController.text.trim(),
         },
         imageName: 'image',
-        imagePath: coverImagePath.value,
+        imagePath: isLocalImage ? coverImagePath.value : null,
       );
+
+      print("📦 Update Response: ${response.statusCode}");
+      print("📦 Response Data: ${response.data}");
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         _showSuccessPopup();
       } else {
+        debugPrint("Error Is 😜 ${response.message}");
         Get.snackbar("Error", response.message ?? "Something went wrong");
       }
     } catch (e) {
-      debugPrint("Create Ads Error: $e");
+      debugPrint("❌ Update Ads Error: $e");
       Get.snackbar("Error", "Failed to update ad");
     } finally {
       isLoading.value = false;
     }
   }
 
-  /// ---------------- SUCCESS ----------------
-  void _showSuccessPopup() {
-    successPopUps(
-      message: 'Your Ad updated successfully. Please wait for admin approval.',
-      buttonTitle: 'Done',
-      onTap: () {
-        Get.back();
-      },
-    );
-  }
 
   /// ---------------- DATE PICKER ----------------
   Future<void> selectDate(
@@ -248,20 +367,33 @@ class UpdateAdsController extends GetxController {
     );
     if (picked != null) {
       controller.text =
-      "${picked.day.toString().padLeft(2, '0')} "
-          "${_month(picked.month)} "
-          "${picked.year}";
+      "${picked.day.toString().padLeft(2, '0')} ${_month(picked.month)} ${picked.year}";
+      print("📅 Date selected: ${controller.text}");
     }
   }
+
+  /// ---------------- SUCCESS ----------------
+  void _showSuccessPopup() {
+    successPopUps(
+      message: 'Your Ad updated successfully. Please wait for admin approval.',
+      buttonTitle: 'Done',
+      onTap: () {
+        Get.back();
+      },
+    );
+  }
+
+
+
 
   /// ---------------- DISPOSE ----------------
   @override
   void onClose() {
-    titleController.dispose();
-    descriptionController.dispose();
-    focusAreaController.dispose();
-    websiteLinkController.dispose();
-    adStartDateController.dispose();
+    // titleController.dispose();
+    // descriptionController.dispose();
+    // focusAreaController.dispose();
+    // websiteLinkController.dispose();
+    // adStartDateController.dispose();
     super.onClose();
   }
 }

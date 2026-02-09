@@ -13,14 +13,25 @@ import 'package:giolee78/utils/constants/app_icons.dart';
 import '../../../../config/route/app_routes.dart';
 import '../controller/create_add_controller.dart';
 
-class CreateAdsScreen extends StatelessWidget {
+class CreateAdsScreen extends StatefulWidget {
   const CreateAdsScreen({super.key});
 
   @override
+  State<CreateAdsScreen> createState() => _CreateAdsScreenState();
+}
+
+class _CreateAdsScreenState extends State<CreateAdsScreen> {
+
+  final CreateAdsController controller = Get.put(CreateAdsController());
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    controller.fetchPlans();
+  }
+  @override
   Widget build(BuildContext context) {
-    // Delete any existing instance first, then create fresh controller
-    //Get.delete<CreateAdsController>(force: true);
-    final CreateAdsController controller = Get.put(CreateAdsController());
 
     return PopScope(
       canPop: false,
@@ -129,7 +140,7 @@ class CreateAdsScreen extends StatelessWidget {
                       // --- Pricing Plan Selection ---
                       _buildLabel('Select Pricing Plan'),
                       SizedBox(height: 10.h),
-                      Obx(() => _buildPricingCards(controller)),
+                     _buildPricingCards(controller),
                       SizedBox(height: 16.h),
 
                       // --- Ad Start Date (shown after selection) ---
@@ -192,125 +203,75 @@ class CreateAdsScreen extends StatelessWidget {
 
   // --- Pricing Cards with Radio Buttons ---
   Widget _buildPricingCards(CreateAdsController controller) {
-    return Column(
-      children: [
-        // Weekly Card
-        GestureDetector(
-          onTap: () => controller.selectPricingPlan('weekly'),
-          child: Card(
-            elevation: 2,
-            color: controller.selectedPricingPlan.value == 'weekly'
-                ? Colors.blue.shade50
-                : Colors.grey.shade50,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8.0),
-              side: BorderSide(
-                color: controller.selectedPricingPlan.value == 'weekly'
-                    ? Colors.blue
-                    : Colors.grey.shade300,
-                width: 2,
-              ),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: Row(
-                children: [
-                  Radio<String>(
-                    value: 'weekly',
-                    groupValue: controller.selectedPricingPlan.value,
-                    onChanged: (value) {
-                      if (value != null) {
-                        controller.selectPricingPlan(value);
-                      }
-                    },
-                    activeColor: Colors.blue,
-                  ),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Ad Price:',
-                          style: TextStyle(fontSize: 14, color: Colors.black54),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          '\$10.00/Weekly',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 24.sp,
-                            color: Colors.blue,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-        SizedBox(height: 12.h),
+    return Obx(() {
+      if (controller.plans.isEmpty) {
+        return const SizedBox.shrink();
+      }
 
-        // Monthly Card
-        GestureDetector(
-          onTap: () => controller.selectPricingPlan('monthly'),
-          child: Card(
-            elevation: 2,
-            color: controller.selectedPricingPlan.value == 'monthly'
-                ? Colors.blue.shade50
-                : Colors.grey.shade50,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8.0),
-              side: BorderSide(
-                color: controller.selectedPricingPlan.value == 'monthly'
-                    ? Colors.blue
-                    : Colors.grey.shade300,
-                width: 2,
+      return Column(
+        children: List.generate(controller.plans.length, (index) {
+          final plan = controller.plans[index];
+          final isSelected = controller.selectedPricingPlan.value == plan.name;
+
+          return Padding(
+            padding: EdgeInsets.only(bottom: 12.h),
+            child: GestureDetector(
+              onTap: () => controller.selectPricingPlan(plan.name),
+              child: Card(
+                elevation: 2,
+                color: isSelected ? Colors.blue.shade50 : Colors.grey.shade50,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                  side: BorderSide(
+                    color: isSelected ? Colors.blue : Colors.grey.shade300,
+                    width: 2,
+                  ),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: Row(
+                    children: [
+                      Radio<String>(
+                        value: plan.name,
+                        groupValue: controller.selectedPricingPlan.value,
+                        onChanged: (value) {
+                          if (value != null) {
+                            controller.selectPricingPlan(value);
+                          }
+                        },
+                        activeColor: Colors.blue,
+                      ),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Ad Price:',
+                              style: TextStyle(fontSize: 14, color: Colors.black54),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              '\$${plan.price.toStringAsFixed(2)}/${plan.name}',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 24.sp,
+                                color: Colors.blue,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
-            child: Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: Row(
-                children: [
-                  Radio<String>(
-                    value: 'monthly',
-                    groupValue: controller.selectedPricingPlan.value,
-                    onChanged: (value) {
-                      if (value != null) {
-                        controller.selectPricingPlan(value);
-                      }
-                    },
-                    activeColor: Colors.blue,
-                  ),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Ad Price:',
-                          style: TextStyle(fontSize: 14, color: Colors.black54),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          '\$50.00/Monthly',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 24.sp,
-                            color: Colors.blue,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
+          );
+        }),
+      );
+    });
   }
+
 
   Widget _buildselectedImage({
     required BuildContext context,

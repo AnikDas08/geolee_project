@@ -19,7 +19,7 @@ class MyPostController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    fetchMyPosts();
+    // fetchMyPosts();
   }
 
   Future<void> fetchMyPosts() async {

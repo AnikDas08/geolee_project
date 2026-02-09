@@ -38,13 +38,14 @@ class _ViewFriendScreenState extends State<ViewFriendScreen> {
   @override
   void initState() {
     super.initState();
+
     // Fetch posts by user ID
     controller.getPostsByUser(widget.userId);
     controller.getUserById(widget.userId);
     controller.checkFriendship(widget.userId);
+
   }
 
-  // Helper method - build এর বাইরে লিখুন
   String _formatPostTime(DateTime postTime) {
     final now = DateTime.now();
     final difference = now.difference(postTime);
@@ -110,7 +111,7 @@ class _ViewFriendScreenState extends State<ViewFriendScreen> {
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   itemBuilder: (context, index) {
-                    final data = controller.userPosts[index];
+                    final data = controller.usersPosts[index];
                     return MyPostCard(
                       onTapProfile: () {
                         Utils.successSnackBar(
@@ -148,7 +149,7 @@ class _ViewFriendScreenState extends State<ViewFriendScreen> {
                     );
                   },
                   separatorBuilder: (_, __) => SizedBox(height: 12.h),
-                  itemCount: controller.userPosts.length,
+                  itemCount: controller.usersPosts.length,
                 ),
               ],
             ),
@@ -225,35 +226,51 @@ class _ViewFriendScreenState extends State<ViewFriendScreen> {
           ),
 
           SizedBox(height: 16.h),
-
           Obx(() {
-            if (controller.friendStatus.value == FriendStatus.friends) {
-              return _buildButton(
-                title: 'Friends',
-                image: AppIcons.chat2,
-                onTap: () => Get.toNamed(AppRoutes.message),
-                color: AppColors.primaryColor,
-              );
-            }
+            switch (controller.friendStatus.value) {
 
-            if (controller.friendStatus.value == FriendStatus.requested) {
-              return _buildButton(
-                title: 'Cancel Request',
-                image: AppIcons.friendRequest,
-                onTap: () async {},
-                color: Colors.grey,
-              );
-            }
+            /// ✅ ALREADY FRIEND
+              case FriendStatus.friends:
+                return _buildButton(
+                  title: 'Message',
+                  image: AppIcons.chat2,
+                  color: AppColors.primaryColor,
+                  onTap: () {
+                    Get.toNamed(AppRoutes.message);
+                  },
+                );
 
-            return _buildButton(
-              title: controller.isLoading.value ? 'Sending...' : 'Add Friend',
-              image: AppIcons.friendRequest,
-              onTap: controller.isLoading.value
-                  ? () {}
-                  : () => controller.onTapAddFriendButton(widget.userId),
-              color: AppColors.primaryColor2,
-            );
-          }),
+            /// 📤 REQUEST SENT
+              case FriendStatus.requested:
+                return _buildButton(
+                  title: controller.isLoading.value
+                      ? 'Cancelling...'
+                      : 'Cancel Request',
+                  image: AppIcons.friendRequest,
+                  color: Colors.grey,
+                  onTap: controller.isLoading.value
+                      ? () {}
+                      : () {
+                    controller.cancelFriendRequest(widget.userId);
+                  },
+                );
+
+            /// ➕ NOT FRIEND
+              case FriendStatus.none:
+              default:
+                return _buildButton(
+                  title: controller.isLoading.value
+                      ? 'Sending...'
+                      : 'Add Friend',
+                  image: AppIcons.friendRequest,
+                  color: AppColors.primaryColor2,
+                  onTap: controller.isLoading.value
+                      ? () {}
+                      : () => controller.onTapAddFriendButton(widget.userId),
+                );
+            }
+          })
+
         ],
       );
     });
