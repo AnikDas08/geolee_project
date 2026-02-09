@@ -628,7 +628,7 @@ class SignUpController extends GetxController {
   @override
   void dispose() {
     _timer?.cancel();
-    mapController?.dispose();
+    // mapController?.dispose();
     super.dispose();
   }
 }

@@ -46,6 +46,9 @@ class MyPostCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
+    final MyPostController controller = Get.put(MyPostController());
+
     return Container(
       decoration: BoxDecoration(
         color: AppColors.white,
@@ -70,11 +73,12 @@ class MyPostCard extends StatelessWidget {
                 Expanded(
                   child: Row(
                     children: [
-
                       InkWell(
-                        onTap: isProfile ? onTapProfile : () {
-                          debugPrint('Already Profile');
-                        },
+                        onTap: isProfile
+                            ? onTapProfile
+                            : () {
+                                debugPrint('Already Profile');
+                              },
                         child: CircleAvatar(
                           radius: 18.r,
                           backgroundColor: Colors.transparent,
@@ -220,27 +224,36 @@ class MyPostCard extends StatelessWidget {
           PostAction.edit,
           Icons.edit_outlined,
           "Edit Post",
-              () {
+          () {
             Navigator.pop(context);
-            Get.to(EditPost(postId: postId.toString(),));
+            Get.to(EditPost(postId: postId.toString()))?.then((result) {
+              if (result == true) {
+                Get.find<MyPostController>().fetchMyPosts();
+              }
+            });
+
+            // Get.to(EditPost(postId: postId.toString(),));
           },
         ),
         _buildPopupMenuItem(
           PostAction.delete,
           Icons.delete_outline,
           "Delete Post",
-              () {
+          () {
             Navigator.pop(context);
-            showDeletePostDialog(context, onConfirmDelete: () {
-              myPostController.deletePost(postId.toString());
-            });
+            showDeletePostDialog(
+              context,
+              onConfirmDelete: () {
+                myPostController.deletePost(postId.toString());
+              },
+            );
           },
         ),
         _buildPopupMenuItem(
           PostAction.privacy,
           Icons.lock_outline,
           "Change Privacy",
-              () {
+          () {
             Navigator.pop(context);
           },
         ),
@@ -250,7 +263,6 @@ class MyPostCard extends StatelessWidget {
       padding: EdgeInsets.zero,
     );
   }
-
 
   PopupMenuItem<PostAction> _buildPopupMenuItem(
     PostAction value,
@@ -275,7 +287,6 @@ class MyPostCard extends StatelessWidget {
       ),
     );
   }
-
 
   Widget _buildCircleIcon({
     required IconData icon,

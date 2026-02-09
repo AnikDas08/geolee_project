@@ -15,9 +15,9 @@ import '../../../../config/route/app_routes.dart';
 import '../../../../services/api/api_service.dart';
 import '../../../../utils/app_utils.dart';
 import '../../../../utils/log/app_log.dart';
+import '../../../home/presentation/controller/home_nav_controller.dart';
 
 class ProfileController extends GetxController {
-  final MyProfileController _myProfileController = MyProfileController();
 
   /// Language List here
   List<String> languages = ["English", "French", "Arabic"];
@@ -41,7 +41,6 @@ class ProfileController extends GetxController {
 
   @override
   void onInit() {
-    // TODO: implement onInit
     super.onInit();
     _loadAdvertiserStatus();
   }
@@ -52,7 +51,7 @@ class ProfileController extends GetxController {
   Future<void> _loadAdvertiserStatus() async {
     advertiserToken = await getUserDataForRole();
     isLoadingRole = false;
-    update(); // 🔥 MUST
+    update(); 
   }
 
   /// Controllers
@@ -76,7 +75,6 @@ class ProfileController extends GetxController {
       final status = await Permission.camera.request();
       return status.isGranted;
     } else {
-      // For gallery/photos
       if (Platform.isAndroid) {
         final photosStatus = await Permission.photos.request();
         if (photosStatus.isGranted) return true;
@@ -135,15 +133,8 @@ class ProfileController extends GetxController {
       if (!permissionGranted) {
         Get.snackbar(
           'Permission Required',
-          'Please allow ${source == ImageSource.camera ? 'camera' : 'storage'} access',
+          'Please allow access',
           snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.orange,
-          colorText: Colors.white,
-          duration: Duration(seconds: 4),
-          mainButton: TextButton(
-            onPressed: () => openAppSettings(),
-            child: Text('Open Settings', style: TextStyle(color: Colors.white)),
-          ),
         );
         return;
       }
@@ -158,24 +149,9 @@ class ProfileController extends GetxController {
       if (pickedFile != null && pickedFile.path.isNotEmpty) {
         selectedImage = File(pickedFile.path);
         update();
-        Get.snackbar(
-          'Success',
-          'Image selected',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.green,
-          colorText: Colors.white,
-          duration: Duration(seconds: 2),
-        );
       }
     } catch (e) {
-      Get.snackbar(
-        'Error',
-        'Failed to select image: $e',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-        duration: Duration(seconds: 3),
-      );
+      appLog("Pick Image Error: $e");
     }
   }
 
@@ -183,10 +159,7 @@ class ProfileController extends GetxController {
   Future<void> pickDateOfBirth() async {
     DateTime? pickedDate = await showDatePicker(
       context: Get.context!,
-      initialDate: dateOfBirthController.text.isNotEmpty
-          ? DateTime.tryParse(dateOfBirthController.text) ??
-                DateTime(2000, 1, 1)
-          : DateTime(2000, 1, 1),
+      initialDate: DateTime(2000, 1, 1),
       firstDate: DateTime(1950),
       lastDate: DateTime.now(),
     );
@@ -196,13 +169,6 @@ class ProfileController extends GetxController {
           "${pickedDate.year}-${pickedDate.month.toString().padLeft(2, '0')}-${pickedDate.day.toString().padLeft(2, '0')}";
       update();
     }
-  }
-
-  /// Select language
-  void selectLanguage(int index) {
-    selectedLanguage = languages[index];
-    update();
-    Get.back();
   }
 
   /// Select gender
@@ -220,10 +186,7 @@ class ProfileController extends GetxController {
     update();
 
     try {
-      // Parse DOB to ISO8601
-      // ... inside your try block
       DateTime? dobDate = DateTime.tryParse(dateOfBirthController.text.trim());
-
       if (dobDate == null) {
         Utils.errorSnackBar("Error", "Invalid Date of Birth");
         isLoading = false;
@@ -231,13 +194,12 @@ class ProfileController extends GetxController {
         return;
       }
 
-      // ✅ Convert to UTC to ensure the "Z" suffix is added
       String formattedDob = dobDate.toUtc().toIso8601String();
 
       Map<String, String> body = {
         "name": nameController.text.trim(),
         "bio": aboutController.text.trim(),
-        "dob": formattedDob, // Use the UTC version
+        "dob": formattedDob,
         "gender": genderController.text.trim(),
       };
 
@@ -251,46 +213,34 @@ class ProfileController extends GetxController {
 
       if (response.statusCode == 200) {
         var data = response.data;
-        LocalStorage.userId = data['data']?["_id"] ?? LocalStorage.userId;
         LocalStorage.myName = data['data']?["name"] ?? LocalStorage.myName;
-        LocalStorage.myEmail = data['data']?["email"] ?? LocalStorage.myEmail;
         LocalStorage.myImage = data['data']?["image"] ?? LocalStorage.myImage;
-        LocalStorage.dateOfBirth =
-            data['data']?['dob'] ?? LocalStorage.dateOfBirth;
         LocalStorage.bio = data['data']?['bio'] ?? LocalStorage.bio;
         LocalStorage.gender = data['data']?['gender'] ?? LocalStorage.gender;
+        LocalStorage.dateOfBirth = data['data']?['dob'] ?? LocalStorage.dateOfBirth;
 
         await Future.wait([
-          LocalStorage.setString(LocalStorageKeys.userId, LocalStorage.userId),
-          LocalStorage.setString(
-            LocalStorageKeys.myImage,
-            LocalStorage.myImage,
-          ),
           LocalStorage.setString(LocalStorageKeys.myName, LocalStorage.myName),
-          LocalStorage.setString(
-            LocalStorageKeys.myEmail,
-            LocalStorage.myEmail,
-          ),
+          LocalStorage.setString(LocalStorageKeys.myImage, LocalStorage.myImage),
           LocalStorage.setString(LocalStorageKeys.bio, LocalStorage.bio),
-          LocalStorage.setString(
-            LocalStorageKeys.dateOfBirth,
-            LocalStorage.dateOfBirth,
-          ),
           LocalStorage.setString(LocalStorageKeys.gender, LocalStorage.gender),
+          LocalStorage.setString(LocalStorageKeys.dateOfBirth, LocalStorage.dateOfBirth),
         ]);
 
-        _myProfileController.getUserData();
+        // ✅ FIXED: Use Get.find to update the actual UI controller instance
+        if (Get.isRegistered<MyProfileController>()) {
+          Get.find<MyProfileController>().getUserData();
+        }
 
-        Utils.successSnackBar(
-          "Success",
-          data['message'] ?? "Profile Updated Successfully",
-        );
-        Get.toNamed(AppRoutes.profile);
+        // Refresh Navigation UI if needed
+        if (Get.isRegistered<HomeNavController>()) {
+          Get.find<HomeNavController>().update();
+        }
+
+        Utils.successSnackBar("Success", data['message'] ?? "Profile Updated Successfully");
+        Get.back(); // Go back to profile screen
       } else {
-        Utils.errorSnackBar(
-          response.statusCode.toString(),
-          response.data['message'] ?? "Failed to update profile",
-        );
+        Utils.errorSnackBar("Error", response.data['message'] ?? "Failed to update profile");
       }
     } catch (e) {
       Utils.errorSnackBar("Error", "Failed to update profile: $e");
@@ -304,104 +254,41 @@ class ProfileController extends GetxController {
   String userId = '';
 
   Future<String?> getUserDataForRole() async {
-    isLoading = true;
-    update();
-
     try {
-      var response = await ApiService.get(
-        ApiEndPoint.profile,
-      ).timeout(const Duration(seconds: 30));
-
+      var response = await ApiService.get(ApiEndPoint.profile).timeout(const Duration(seconds: 30));
       if (response.statusCode == 200) {
         var data = response.data;
-
-        String? advertiserToken = data['data']?['advertiser']?.toString();
-        advToken = advertiserToken ?? "";
-
-        String? Id = data['data']?['_id']?.toString();
-        userId = Id!;
-
-        print("afkd;ajdfa;sdjfk=================${advertiserToken}");
-        print(userId);
-
-        return advertiserToken;
-      } else {
-        Get.snackbar(response.statusCode.toString(), response.message);
-        return null;
+        advToken = data['data']?['advertiser']?.toString() ?? "";
+        userId = data['data']?['_id']?.toString() ?? "";
+        return advToken;
       }
-    } catch (e) {
-      Get.snackbar("Error", e.toString());
       return null;
-    } finally {
-      isLoading = false;
-      update();
+    } catch (e) {
+      return null;
     }
   }
 
   Future<void> changeRole(String newRole) async {
-    isLoading = true;
+    LocalStorage.myRole = newRole;
+    await LocalStorage.setString(LocalStorageKeys.myRole, newRole);
     update();
-
-    try {
-      // 1. Update local variables
-      LocalStorage.myRole = newRole;
-
-      // 2. Persist to storage
-      await LocalStorage.setString(LocalStorageKeys.myRole, newRole);
-
-      // 3. Optional: Sync with Server here if you have an API for this
-      // await ApiService.post(ApiEndPoint.updateRole, body: {"role": newRole});
-
-      appLog("Role switched to: ${LocalStorage.myRole}");
-    } catch (e) {
-      appLog("Error switching role: $e");
-    } finally {
-      isLoading = false;
-      update(); // This refreshes the DashBoardProfile UI
-    }
   }
 
-
   Future<void> deleteAccount() async {
-    if (userId.isEmpty) {
-      Get.snackbar("Error", "User ID not found");
-      return;
-    }
+    if (userId.isEmpty) return;
     isLoading = true;
     update();
-
     try {
-
-      String endpoint = "${ApiEndPoint.deleteAccount}";
-
-      ApiResponseModel response = await ApiService.delete(endpoint);
-
+      ApiResponseModel response = await ApiService.delete(ApiEndPoint.deleteAccount);
       if (response.statusCode == 200) {
         LocalStorage.removeAllPrefData();
         Get.offAllNamed(AppRoutes.signIn);
-        Get.snackbar("Success", response.message ?? "Account deleted successfully");
-      } else {
-        Get.snackbar("Error", response.message ?? "Failed to delete account");
       }
     } catch (e) {
-      debugPrint("Delete Account Error: $e");
-      Get.snackbar("Error", "Something went wrong");
+      appLog("Delete error: $e");
     } finally {
       isLoading = false;
       update();
     }
-  }
-
-
-  @override
-  void onClose() {
-    // nameController.dispose();
-    // numberController.dispose();
-    // passwordController.dispose();
-    // aboutController.dispose();
-    // dateOfBirthController.dispose();
-    // genderController.dispose();
-    // addressController.dispose();
-    super.onClose();
   }
 }

@@ -19,7 +19,7 @@ import '../../../addpost/presentation/widgets/full_screen_view_image.dart';
 class ViewFriendScreen extends StatefulWidget {
   final bool isFriend;
   final bool isRequest;
-  final String userId; // user id from ClickerScreen
+  final String userId;
 
   const ViewFriendScreen({
     super.key,

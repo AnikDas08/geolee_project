@@ -1,4 +1,3 @@
-
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
@@ -16,28 +15,31 @@ import '../../data/addbanner_model.dart';
 
 enum FriendStatus { none, requested, friends }
 
-
 class ClickerController extends GetxController {
   /// ================= Search & UI State
   final searchText = ''.obs;
   final TextEditingController searchController = TextEditingController();
 
-
-
   /// ================= Carousel
   final _currentPosition = 0.obs;
+
   int get currentPosition => _currentPosition.value;
 
   /// ================= Banners & Filters
   var adList = <AdBannerModel>[].obs;
   var isBannerLoading = false.obs;
   final _selectedFilter = 'All'.obs;
+
   String get selectedFilter => _selectedFilter.value;
   var userAddress = "Fetching location...".obs;
   var isLocationLoading = false.obs;
 
   final List<String> filterOptions = [
-    'All', 'Great Vibes', 'Off Vibes', 'Charming Gentleman', 'Lovely Lady',
+    'All',
+    'Great Vibes',
+    'Off Vibes',
+    'Charming Gentleman',
+    'Lovely Lady',
   ];
 
   /// ================= Post Data
@@ -118,18 +120,16 @@ class ClickerController extends GetxController {
   Future<void> getPostsByUser(String userId) async {
     try {
       isUserLoading.value = true;
-      usersPosts.clear();
-
       final url = "${ApiEndPoint.getUserById}$userId";
       final response = await ApiService.get(url);
 
       if (response.statusCode == 200) {
-        final responseData = PostResponseById.fromJson(response.data as Map<String, dynamic>);
+        final responseData = PostResponseById.fromJson(
+          response.data as Map<String, dynamic>,
+        );
         // Filter out "only me" posts for public/friend viewing
-        final filtered = responseData.data
-            .where((post) => post.privacy.toLowerCase() != "only me")
-            .toList();
-        usersPosts.assignAll(filtered);
+        final filtered = responseData.data.toList();
+        usersPosts.addAll(filtered);
       }
     } catch (e) {
       Utils.errorSnackBar("Error", e.toString());
@@ -143,9 +143,13 @@ class ClickerController extends GetxController {
     try {
       isUserLoading.value = true;
       userData.value = null;
-      final response = await ApiService.get("${ApiEndPoint.getUserSingleProfileById}$userId");
+      final response = await ApiService.get(
+        "${ApiEndPoint.getUserSingleProfileById}$userId",
+      );
       if (response.statusCode == 200) {
-        final responseData = SingleUserByIdModel.fromJson(response.data as Map<String, dynamic>);
+        final responseData = SingleUserByIdModel.fromJson(
+          response.data as Map<String, dynamic>,
+        );
         userData.value = responseData.data;
       }
     } catch (e) {
@@ -177,19 +181,21 @@ class ClickerController extends GetxController {
 
       // 2. Get Position
       Position position = await Geolocator.getCurrentPosition(
-          desiredAccuracy: LocationAccuracy.low // Low accuracy is faster and enough for city names
+        desiredAccuracy: LocationAccuracy
+            .low, // Low accuracy is faster and enough for city names
       );
 
       // 3. Get City Name
       List<Placemark> placemarks = await placemarkFromCoordinates(
-          position.latitude,
-          position.longitude
+        position.latitude,
+        position.longitude,
       );
 
       if (placemarks.isNotEmpty) {
         Placemark place = placemarks[0];
         // locality usually gives the city (e.g., "Dhaka" or "New York")
-        userAddress.value = place.locality ?? place.subAdministrativeArea ?? "Unknown";
+        userAddress.value =
+            place.locality ?? place.subAdministrativeArea ?? "Unknown";
       }
     } catch (e) {
       userAddress.value = "Location Error";
@@ -208,36 +214,52 @@ class ClickerController extends GetxController {
   void _filterPosts() {
     List<PostData> filtered = posts;
     if (selectedFilter != 'All') {
-      filtered = filtered.where((post) => post.clickerType == selectedFilter).toList();
+      filtered = filtered
+          .where((post) => post.clickerType == selectedFilter)
+          .toList();
     }
     if (searchText.value.isNotEmpty) {
       final query = searchText.value.toLowerCase();
-      filtered = filtered.where((post) =>
-      post.user.name.toLowerCase().contains(query) ||
-          post.description.toLowerCase().contains(query) ||
-          post.address.toLowerCase().contains(query)).toList();
+      filtered = filtered
+          .where(
+            (post) =>
+                post.user.name.toLowerCase().contains(query) ||
+                post.description.toLowerCase().contains(query) ||
+                post.address.toLowerCase().contains(query),
+          )
+          .toList();
     }
     filteredPosts.assignAll(filtered);
   }
 
   void changePosition(int position) => _currentPosition.value = position;
+
   void changeFilter(String newFilter) {
     _selectedFilter.value = newFilter;
     getAllPosts(clickerType: newFilter);
   }
+
   Future<void> cancelFriendRequest(String userId) async {
     try {
       isLoading.value = true;
       // Use pendingRequestId if available, otherwise fallback to userId
-      final idToUse = pendingRequestId.value.isNotEmpty ? pendingRequestId.value : userId;
+      final idToUse = pendingRequestId.value.isNotEmpty
+          ? pendingRequestId.value
+          : userId;
       final endpoint = "${ApiEndPoint.cancelFriendRequest}$idToUse";
 
-      final response = await ApiService.patch(endpoint, body: {"status": "cancelled"});
+      final response = await ApiService.patch(
+        endpoint,
+        body: {"status": "cancelled"},
+      );
 
       if (response.statusCode == 200) {
         friendStatus.value = FriendStatus.none;
         pendingRequestId.value = '';
-        Utils.successSnackBar("Cancelled", "Friend request cancelled successfully");
+        Utils.successSnackBar(
+          "Cancelled",
+          "Friend request cancelled successfully",
+        );
       }
     } catch (e) {
       Utils.errorSnackBar("Error", e.toString());
@@ -245,10 +267,13 @@ class ClickerController extends GetxController {
       isLoading.value = false;
     }
   }
+
   // ================= Friendship Logic
   Future<void> checkFriendship(String userId) async {
     try {
-      final response = await ApiService.get("${ApiEndPoint.checkFriendStatus}$userId");
+      final response = await ApiService.get(
+        "${ApiEndPoint.checkFriendStatus}$userId",
+      );
       if (response.statusCode == 200) {
         final data = response.data['data'];
         if (data['isAlreadyFriend'] == true) {
@@ -260,16 +285,23 @@ class ClickerController extends GetxController {
           friendStatus.value = FriendStatus.none;
         }
       }
-    } catch (e) { debugPrint("Friendship Error: $e"); }
+    } catch (e) {
+      debugPrint("Friendship Error: $e");
+    }
   }
 
   Future<void> onTapAddFriendButton(String userId) async {
     try {
-      final response = await ApiService.post(ApiEndPoint.createFriendRequest, body: {"receiver": userId});
+      final response = await ApiService.post(
+        ApiEndPoint.createFriendRequest,
+        body: {"receiver": userId},
+      );
       if (response.statusCode == 200) {
         friendStatus.value = FriendStatus.requested;
         Utils.successSnackBar("Sent", "Friend request sent");
       }
-    } catch (e) { Utils.errorSnackBar("Error", e.toString()); }
+    } catch (e) {
+      Utils.errorSnackBar("Error", e.toString());
+    }
   }
 }

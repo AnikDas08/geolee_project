@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:giolee78/features/addpost/presentation/screen/my_post_screen.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:giolee78/features/home/presentation/controller/home_controller.dart';
@@ -8,6 +9,7 @@ import 'package:giolee78/features/profile/presentation/controller/post_controlle
 import '../../../../config/api/api_end_point.dart';
 import '../../../../services/api/api_response_model.dart';
 import '../../../../services/api/api_service.dart';
+import '../../../addpost/my_post_model.dart';
 
 class EditPostController extends GetxController {
   final titleController = TextEditingController();
@@ -37,6 +39,7 @@ class EditPostController extends GetxController {
   var categoryMap = <String, String>{}.obs;
   var subCategories = <String>[].obs;
   var subCategoryMap = <String, String>{}.obs;
+
 
 
   final List<String> fallbackCategories = [
@@ -73,13 +76,13 @@ class EditPostController extends GetxController {
 
   @override
   void onClose() {
-    titleController.dispose();
-    descriptionController.dispose();
-    stateController.dispose();
-    cityController.dispose();
-    selectDateController.dispose();
-    selectTimeController.dispose();
-    priceController.dispose();
+    // titleController.dispose();
+    // descriptionController.dispose();
+    // stateController.dispose();
+    // cityController.dispose();
+    // selectDateController.dispose();
+    // selectTimeController.dispose();
+    // priceController.dispose();
     super.onClose();
   }
 
@@ -484,6 +487,8 @@ class EditPostController extends GetxController {
     }
   }
 
+
+
   Future<void> updatePost() async {
     if (titleController.text.trim().isEmpty) {
       Get.snackbar(
@@ -579,8 +584,12 @@ class EditPostController extends GetxController {
       }
       if (response.statusCode == 200) {
         Get.snackbar("Successful", "Update Your Post Data");
+
         Get.find<HomeController>().fetchPosts();
         Get.find<MyPostController>().fetchMyPosts();
+        Get.find<MyPostController>().refresh();
+
+
       }
 
       _handleUpdateResponse(response);
@@ -616,6 +625,10 @@ class EditPostController extends GetxController {
               backgroundColor: Colors.green,
               colorText: Colors.white,
             );
+
+            Get.find<MyPostController>().fetchMyPosts();
+            Get.find<MyPostController>().refresh();
+            Get.find<HomeController>().fetchPosts();
             Get.back(result: true);
           } else {
             Get.snackbar(
