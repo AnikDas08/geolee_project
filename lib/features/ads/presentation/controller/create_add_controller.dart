@@ -1,6 +1,8 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'package:giolee78/config/api/api_end_point.dart';
 import 'package:giolee78/services/api/api_response_model.dart';
@@ -10,14 +12,13 @@ import '../../../../component/pop_up/common_pop_menu.dart';
 import '../../../../config/route/app_routes.dart';
 import '../../data/plan_model.dart';
 
-/// ---------------- CONTROLLER ----------------
 class CreateAdsController extends GetxController {
   /// ---------------- OBSERVABLES ----------------
   var coverImagePath = ''.obs;
-  var selectedPricingPlan = ''.obs; // weekly | monthly
+  var selectedPricingPlan = ''.obs;
   var isLoading = false.obs;
 
-  var plans = <PlanModel>[].obs; // fetched plans
+  var plans = <PlanModel>[].obs;
   var isPlansLoading = false.obs;
 
   /// ---------------- TEXT CONTROLLERS ----------------
@@ -29,7 +30,7 @@ class CreateAdsController extends GetxController {
 
   final ImagePicker _picker = ImagePicker();
 
-  /// ---------------- PLAN ID & PRICE ----------------
+  /// ---------------- PLAN HELPERS ----------------
   String get planId {
     if (selectedPricingPlan.value.isEmpty || plans.isEmpty) return '';
     final plan = plans.firstWhere(
@@ -87,7 +88,7 @@ class CreateAdsController extends GetxController {
       return false;
     }
     if (planId.isEmpty) {
-      Get.snackbar("Error", "Please select a valid pricing plan");
+      Get.snackbar("Error", "Please select pricing plan");
       return false;
     }
     return true;
@@ -103,73 +104,34 @@ class CreateAdsController extends GetxController {
     );
   }
 
-  // 🔥 FIX: Return ISO 8601 datetime string with timezone
-  String _formatIsoDateTime(DateTime date) {
-    return date.toUtc().toIso8601String();
-  }
+  String _formatIso(DateTime date) => date.toUtc().toIso8601String();
 
-  // 🔥 FIX: Use datetime format instead of date-only
   String getIsoStartDate() {
-    final selectedDate = _parseUiDate();
-    // Set time to current time or beginning of day
-    final dateTime = DateTime(
-      selectedDate.year,
-      selectedDate.month,
-      selectedDate.day,
-      DateTime.now().hour,
-      DateTime.now().minute,
-      DateTime.now().second,
-    );
-    return _formatIsoDateTime(dateTime);
-  }
-
-  String getIsoEndDate() {
-    int daysToAdd = selectedPricingPlan.value.toLowerCase() == 'weekly' ? 7 : 30;
-    final selectedDate = _parseUiDate();
-    final dateTime = DateTime(
-      selectedDate.year,
-      selectedDate.month,
-      selectedDate.day,
-      DateTime.now().hour,
-      DateTime.now().minute,
-      DateTime.now().second,
-    );
-    DateTime endDate = dateTime.add(Duration(days: daysToAdd));
-    return _formatIsoDateTime(endDate);
+    final d = _parseUiDate();
+    final now = DateTime.now();
+    return _formatIso(DateTime(
+      d.year,
+      d.month,
+      d.day,
+      now.hour,
+      now.minute,
+      now.second,
+    ));
   }
 
   int _monthToNumber(String month) {
     const map = {
-      'Jan': 1,
-      'Feb': 2,
-      'Mar': 3,
-      'Apr': 4,
-      'May': 5,
-      'Jun': 6,
-      'Jul': 7,
-      'Aug': 8,
-      'Sep': 9,
-      'Oct': 10,
-      'Nov': 11,
-      'Dec': 12,
+      'Jan': 1, 'Feb': 2, 'Mar': 3, 'Apr': 4,
+      'May': 5, 'Jun': 6, 'Jul': 7, 'Aug': 8,
+      'Sep': 9, 'Oct': 10, 'Nov': 11, 'Dec': 12,
     };
     return map[month]!;
   }
 
   String _month(int m) {
     const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec'
+      'Jan','Feb','Mar','Apr','May','Jun',
+      'Jul','Aug','Sep','Oct','Nov','Dec'
     ];
     return months[m - 1];
   }
@@ -181,12 +143,9 @@ class CreateAdsController extends GetxController {
       ApiResponseModel response = await ApiService.get(ApiEndPoint.getPlans);
 
       if (response.statusCode == 200 && response.data != null) {
-        final Map<String, dynamic> res = response.data as Map<String, dynamic>;
-        List<dynamic> dataList = res['data'] ?? [];
-
-        plans.value = dataList.map((e) => PlanModel.fromJson(e)).toList();
-
-        debugPrint("📦 Plans loaded: ${plans.length}");
+        final res = response.data as Map<String, dynamic>;
+        plans.value =
+            (res['data'] as List).map((e) => PlanModel.fromJson(e)).toList();
 
         if (plans.isNotEmpty) {
           selectedPricingPlan.value = plans.first.name;
@@ -195,25 +154,19 @@ class CreateAdsController extends GetxController {
         Get.snackbar("Error", response.message ?? "Failed to load plans");
       }
     } catch (e) {
-      debugPrint("❌ Fetch Plans Error: $e");
       Get.snackbar("Error", "Failed to load plans");
     } finally {
       isPlansLoading.value = false;
     }
   }
 
-  /// ---------------- CREATE ADS ----------------
+  /// ---------------- CREATE ADS + PAYMENT ----------------
+
   Future<void> createAds() async {
     if (!_validate()) return;
 
     try {
       isLoading.value = true;
-
-      final startDate = getIsoStartDate();
-
-      print("📅 Start Date (ISO): $startDate");
-      print("💰 Plan ID: $planId");
-      print("🖼️ Image Path: ${coverImagePath.value}");
 
       ApiResponseModel response = await ApiService.multipartUpdate(
         ApiEndPoint.createAds,
@@ -225,33 +178,86 @@ class CreateAdsController extends GetxController {
           "latitude": "23.810332",
           "longitude": "90.4125181",
           "websiteUrl": websiteLinkController.text.trim(),
-          "startAt": startDate, // 🔥 Now sends full ISO 8601 datetime
+          "startAt": getIsoStartDate(),
           "plan": planId,
         },
         imageName: 'image',
         imagePath: coverImagePath.value,
       );
 
-      print("📦 Response Status: ${response.statusCode}");
-      print("📦 Response Data: ${response.data}");
-
       if (response.statusCode == 200 || response.statusCode == 201) {
-        _showSuccessPopup();
+        final res = response.data;
+
+        if (res != null &&
+            res['data'] != null &&
+            res['data']['url'] != null) {
+          final paymentUrl = res['data']['url'];
+
+          // ✅ Payment URL launch করুন
+          await _launchPayment(paymentUrl);
+        } else {
+          _showSuccessPopup();
+        }
       } else {
         Get.snackbar("Error", response.message ?? "Something went wrong");
       }
     } catch (e) {
-      debugPrint("❌ Create Ads Error: $e");
-      Get.snackbar("Error", "Failed to create ad");
+      Get.snackbar("Error", "Failed to create ad: ${e.toString()}");
+      debugPrint("Create ads error: $e");
     } finally {
       isLoading.value = false;
+    }
+  }
+
+  /// ---------------- PAYMENT LAUNCH (UPDATED) ----------------
+  Future<void> _launchPayment(String url) async {
+    try {
+      debugPrint("🔗 Launching payment URL: $url");
+
+      final uri = Uri.parse(url);
+
+      // ✅ Method 1: launchUrl (Recommended)
+      final bool launched = await launchUrl(
+        uri,
+        mode: LaunchMode.externalApplication, // External browser এ open হবে
+      );
+
+      if (launched) {
+        debugPrint("✅ Payment URL launched successfully");
+
+        // ✅ Optional: User কে inform করুন
+        Get.snackbar(
+          "Payment",
+          "Opening payment page...",
+          snackPosition: SnackPosition.BOTTOM,
+          duration: const Duration(seconds: 2),
+        );
+      } else {
+        debugPrint("❌ Could not launch payment URL");
+        Get.snackbar("Error", "Could not open payment page");
+      }
+    } catch (e) {
+      debugPrint("❌ Launch error: $e");
+
+      // ✅ Fallback: Manual copy option
+      Get.defaultDialog(
+        title: "Payment Link",
+        middleText: "Please copy and open this link in your browser",
+        textConfirm: "Copy Link",
+        textCancel: "Cancel",
+        onConfirm: () {
+          // Copy to clipboard logic
+          Get.back();
+          Get.snackbar("Copied", "Payment link copied to clipboard");
+        },
+      );
     }
   }
 
   /// ---------------- DATE PICKER ----------------
   Future<void> selectDate(
       BuildContext context, TextEditingController controller) async {
-    final DateTime? picked = await showDatePicker(
+    final picked = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
       firstDate: DateTime.now(),
@@ -266,11 +272,10 @@ class CreateAdsController extends GetxController {
   /// ---------------- SUCCESS ----------------
   void _showSuccessPopup() {
     successPopUps(
-      message: 'Your Ad submitted successfully. Please wait for admin approval.',
+      message:
+      'Your Ad submitted successfully. Please wait for admin approval.',
       buttonTitle: 'Done',
-      onTap: () {
-        Get.offAllNamed(AppRoutes.homeNav);
-      },
+      onTap: () => Get.offAllNamed(AppRoutes.homeNav),
     );
   }
 

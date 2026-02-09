@@ -18,11 +18,13 @@ import '../../../../../config/api/api_end_point.dart';
 import '../../../../../utils/app_utils.dart';
 
 class SignUpController extends GetxController {
-  /// Sign Up Form Key
 
+  /// Sign Up Form Key
+  ///
   bool isPopUpOpen = false;
   bool isLoading = false;
   bool isLoadingVerify = false;
+  bool isResendingOtp = false;
 
   GoogleMapController? mapController;
   Position? currentPosition;
@@ -50,9 +52,7 @@ class SignUpController extends GetxController {
   TextEditingController nameController = TextEditingController(
     text: kDebugMode ? "Md Ibrahim Nazmul" : "",
   );
-  TextEditingController emailController = TextEditingController(
-    text: kDebugMode ? "developernaimul00@gmail.com" : '',
-  );
+  TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController(
     text: kDebugMode ? 'password123' : '',
   );
@@ -62,9 +62,7 @@ class SignUpController extends GetxController {
   TextEditingController numberController = TextEditingController(
     text: kDebugMode ? '1865965581' : '',
   );
-  TextEditingController otpController = TextEditingController(
-    text: kDebugMode ? '123456' : '',
-  );
+  TextEditingController otpController = TextEditingController();
 
   final TextEditingController dateController = TextEditingController();
   final TextEditingController addressController = TextEditingController();
@@ -73,7 +71,6 @@ class SignUpController extends GetxController {
 
   String? selectedGender;
   final List<String> genderOptions = ['male', 'female', 'other'];
-
 
   Future<void> selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
@@ -117,29 +114,37 @@ class SignUpController extends GetxController {
   ///============================================Sign Up
 
   signUpUser(GlobalKey<FormState> signUpFormKey) async {
-    // Get.toNamed(AppRoutes.verifyUser);
-    // return;
-
     if (!signUpFormKey.currentState!.validate()) return;
+
     isLoading = true;
     update();
+
     try {
       Map<String, String> body = {
-        "name": nameController.text,
-        "email": emailController.text,
-        "password": passwordController.text,
-        // "confirmPassword": confirmPasswordController.text,
-        // "role": selectRole,
+        "name": nameController.text.trim(),
+        "email": emailController.text.trim(),
+        "password": passwordController.text.trim(),
       };
+
+      print("📤 Signing up user: ${body['email']}");
 
       var response = await ApiService.post(ApiEndPoint.signUp, body: body);
 
+      print("📦 Sign Up Response: ${response.statusCode}");
+      print("📦 Response Data: ${response.data}");
+
       if (response.statusCode == 200 || response.statusCode == 201) {
+        // Start OTP timer
+        startTimer();
+
+        Utils.successSnackBar("Success", "OTP has been sent to your email");
+
         Get.toNamed(AppRoutes.verifyUser);
       } else {
         Utils.errorSnackBar(response.statusCode.toString(), response.message);
       }
     } catch (e) {
+      print("❌ Sign Up Error: $e");
       Utils.errorSnackBar("Error", e.toString());
     } finally {
       isLoading = false;
@@ -150,12 +155,12 @@ class SignUpController extends GetxController {
   ///===========================================================================verify OTP
 
   Future<void> verifyOtpRepo() async {
-    // Get.toNamed(AppRoutes.completeProfile);
-    // return;
     isLoadingVerify = true;
     update();
+
     try {
-      debugPrint(emailController.text);
+      debugPrint("📤 Verifying OTP for: ${emailController.text}");
+
       Map<String, dynamic> body = {
         "email": emailController.text.trim(),
         "oneTimeCode": int.parse(otpController.text.trim()),
@@ -169,31 +174,110 @@ class SignUpController extends GetxController {
         header: header,
       );
 
+      print("📦 Verify OTP Response: ${response.statusCode}");
+      print("📦 Response Data: ${response.data}");
+
       if (response.statusCode == 200) {
         var data = response.data;
 
-        debugPrint('===============================${response.statusCode}');
-
         if (data['success'] == true) {
+          // Stop timer
+          _timer?.cancel();
 
           String bearerToken = data['data']['accessToken'];
 
+          Utils.successSnackBar("Success", "Email verified successfully");
 
           Get.toNamed(AppRoutes.completeProfile);
         } else {
           Utils.errorSnackBar("Error", data['message'] ?? "Unknown error");
         }
       } else {
-        debugPrint(
-          'error ===============================${response.statusCode}',
-        );
-
         Utils.errorSnackBar(response.statusCode.toString(), response.message);
       }
     } catch (e) {
+      print("❌ Verify OTP Error: $e");
       Get.snackbar("Error", e.toString());
     } finally {
       isLoadingVerify = false;
+      update();
+    }
+  }
+
+  ///===================================================Resend OTP
+  Future<void> resendOtp() async {
+    // Don't allow resend if timer is still running
+    if (start > 0) {
+      Utils.errorSnackBar("Please Wait", "You can resend OTP in $time");
+      return;
+    }
+
+    isResendingOtp = true;
+    update();
+
+    try {
+      print("📤 Resending OTP to: ${emailController.text}");
+
+      Map<String, String> body = {"email": emailController.text.trim()};
+
+      // Try different possible endpoints
+      var response = await ApiService.post(ApiEndPoint.resendOtp, body: body);
+
+      print("📦 Resend OTP Response: ${response.statusCode}");
+      print("📦 Response Data: ${response.data}");
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        // Clear current OTP
+        otpController.clear();
+
+        // Restart timer
+        startTimer();
+
+        Utils.successSnackBar(
+          "OTP Resent",
+          "A new OTP has been sent to your email",
+        );
+      } else {
+        Utils.errorSnackBar(
+          "Error ${response.statusCode}",
+          response.message ?? "Failed to resend OTP",
+        );
+      }
+    } catch (e) {
+      print("❌ Resend OTP Error: $e");
+
+      // If resend endpoint doesn't exist, try using signup endpoint
+      try {
+        print("📤 Trying alternative resend method...");
+
+        Map<String, String> body = {
+          "name": nameController.text.trim(),
+          "email": emailController.text.trim(),
+          "password": passwordController.text.trim(),
+        };
+
+        var response = await ApiService.post(ApiEndPoint.signUp, body: body);
+
+        if (response.statusCode == 200 || response.statusCode == 201) {
+          otpController.clear();
+          startTimer();
+
+          Utils.successSnackBar(
+            "OTP Resent",
+            "A new OTP has been sent to your email",
+          );
+        } else {
+          Utils.errorSnackBar(
+            "Error",
+            response.message ?? "Failed to resend OTP",
+          );
+        }
+      } catch (alternativeError) {
+        print("❌ Alternative Resend Error: $alternativeError");
+        Utils.errorSnackBar("Error", "Failed to resend OTP");
+      }
+    } finally {
+      isResendingOtp = false;
       update();
     }
   }
@@ -203,16 +287,13 @@ class SignUpController extends GetxController {
     isLoading = true;
     update();
 
-
-
     String formattedDob = "";
 
     if (dateController.text.isNotEmpty) {
       try {
-        DateTime parsedDate =
-        DateFormat('dd MMMM yyyy').parse(dateController.text.trim());
-
-        // ✅ Zod compatible ISO datetime
+        DateTime parsedDate = DateFormat(
+          'dd MMMM yyyy',
+        ).parse(dateController.text.trim());
         formattedDob = parsedDate.toUtc().toIso8601String();
       } catch (e) {
         debugPrint("❌ Invalid DOB format: ${dateController.text}");
@@ -220,18 +301,19 @@ class SignUpController extends GetxController {
       }
     }
 
-
     Map<String, String> body = {
       "gender": selectedGender!.toLowerCase(),
-      "dob": "2000-11-24T12:44:23.000Z",
-      'address': "Dhaka",
-      "bio":bioController.text.toString(),
+      "dob": formattedDob.isNotEmpty
+          ? formattedDob
+          : "2000-11-24T12:44:23.000Z",
+      'address': addressController.text.isNotEmpty
+          ? addressController.text
+          : "Dhaka",
+      "bio": bioController.text.toString(),
     };
 
     try {
       ApiResponseModel response;
-
-
 
       if (image != null && image!.isNotEmpty) {
         debugPrint("📸 Uploading profile image: $image");
@@ -243,9 +325,7 @@ class SignUpController extends GetxController {
           method: "PATCH",
         );
       } else {
-
         debugPrint("⚠️ No image selected, updating profile without image");
-
         response = await ApiService.patch(
           ApiEndPoint.updateProfile,
           body: body,
@@ -258,11 +338,12 @@ class SignUpController extends GetxController {
           title: "Your Registration Successfully Complete.",
         );
 
-
         Get.offAllNamed(AppRoutes.signIn);
       } else {
         Utils.errorSnackBar("Error ${response.statusCode}", response.message);
-        debugPrint("error is =>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>${response.message}");
+        debugPrint(
+          "error is =>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>${response.message}",
+        );
       }
     } catch (e) {
       debugPrint("error is =>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>${e.toString()}");
@@ -273,36 +354,9 @@ class SignUpController extends GetxController {
     }
   }
 
-  Future<void> resendOtp() async {
-    isLoading = true;
-    update();
-    try {
-      Map<String, String> body = {
-        "name": nameController.text,
-        "email": emailController.text,
-        "password": passwordController.text,
-        // "confirmPassword": confirmPasswordController.text,
-        // "role": selectRole,
-      };
-
-      var response = await ApiService.post(ApiEndPoint.signUp, body: body);
-
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        Get.toNamed(AppRoutes.verifyUser);
-      } else {
-        Utils.errorSnackBar(response.statusCode.toString(), response.message);
-      }
-    } catch (e) {
-      Utils.errorSnackBar("Error", e.toString());
-    } finally {
-      isLoading = false;
-      update();
-    }
-  }
-
   void startTimer() {
     _timer?.cancel();
-    start = 180;
+    start = 180; // 3 minutes
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (start > 0) {
         start--;
@@ -313,7 +367,9 @@ class SignUpController extends GetxController {
 
         update();
       } else {
+        time = "00:00";
         _timer?.cancel();
+        update();
       }
     });
   }
@@ -321,20 +377,15 @@ class SignUpController extends GetxController {
   // Location permission
   Future<void> _requestLocationPermission() async {
     try {
-      // Check current permission status
       var status = await Permission.location.status;
 
-      // If permission not determined yet or denied, request it
       if (status.isDenied || status.isRestricted || status.isLimited) {
-        // Request permission - this will show the system dialog
         status = await Permission.location.request();
       }
 
       if (status.isGranted || status.isLimited) {
-        // Permission granted, get location
         await getCurrentLocation();
       } else if (status.isDenied) {
-        // User denied the permission
         Get.snackbar(
           "Permission Denied",
           "Location permission is needed to show your position",
@@ -345,7 +396,7 @@ class SignUpController extends GetxController {
           mainButton: TextButton(
             onPressed: () {
               Get.back();
-              _requestLocationPermission(); // Ask again
+              _requestLocationPermission();
             },
             child: const Text(
               "Retry",
@@ -365,7 +416,6 @@ class SignUpController extends GetxController {
   // Location methods
   Future<void> getCurrentLocation() async {
     try {
-      // Check permission first
       final permissionStatus = await Permission.location.status;
       if (!permissionStatus.isGranted) {
         await _requestLocationPermission();
@@ -384,8 +434,6 @@ class SignUpController extends GetxController {
         return;
       }
 
-      // Show loading indicator
-
       Get.snackbar(
         "Getting Location",
         "Please wait...",
@@ -402,7 +450,6 @@ class SignUpController extends GetxController {
 
       currentPosition = position;
 
-      // Move camera to current location
       mapController?.animateCamera(
         CameraUpdate.newLatLngZoom(
           LatLng(position.latitude, position.longitude),
@@ -431,15 +478,12 @@ class SignUpController extends GetxController {
   void onMapCreated(GoogleMapController controller) {
     mapController = controller;
     debugPrint("✅ Google Map Created Successfully");
-    // Location will be fetched after permission is granted
   }
 
-  // Confirm location and add marker
   void confirmLocation() async {
     try {
       debugPrint("🔵 confirmLocation called");
 
-      // Get current camera position
       if (mapController == null) {
         debugPrint("❌ Map controller is null");
         Get.snackbar(
@@ -463,7 +507,6 @@ class SignUpController extends GetxController {
 
       debugPrint("📍 Center location: ${center.latitude}, ${center.longitude}");
 
-      // Update current position
       currentPosition = Position(
         latitude: center.latitude,
         longitude: center.longitude,
@@ -477,7 +520,6 @@ class SignUpController extends GetxController {
         speedAccuracy: 0,
       );
 
-      // Get address from coordinates using reverse geocoding
       String address = "";
       bool geocodingSuccess = false;
 
@@ -492,7 +534,6 @@ class SignUpController extends GetxController {
           Placemark place = placemarks[0];
           debugPrint("📍 Placemark found: ${place.toString()}");
 
-          // Build address string from available components
           List<String> addressParts = [];
 
           if (place.street != null && place.street!.isNotEmpty) {
@@ -528,14 +569,11 @@ class SignUpController extends GetxController {
         geocodingSuccess = false;
       }
 
-      // If geocoding failed or returned empty, use a user-friendly fallback
       if (!geocodingSuccess || address.isEmpty) {
-        // Instead of showing raw coordinates, show a more user-friendly message
         address =
             "Location: ${center.latitude.toStringAsFixed(4)}°N, ${center.longitude.toStringAsFixed(4)}°E";
         debugPrint("ℹ️ Using fallback address format");
 
-        // Show a warning to the user
         Get.snackbar(
           "Location Selected",
           "Address details unavailable. Please ensure you have internet connection for full address.",
@@ -545,11 +583,9 @@ class SignUpController extends GetxController {
         );
       }
 
-      // Update address field with readable address
       addressController.text = address;
       debugPrint("✅ Address controller updated: ${addressController.text}");
 
-      // Add marker at center
       markers.clear();
       markers.add(
         Marker(
@@ -562,9 +598,8 @@ class SignUpController extends GetxController {
 
       debugPrint("✅ Calling update()");
       update();
-      update(['address_field']); // Update specific GetBuilder
+      update(['address_field']);
 
-      // Show success message only if geocoding worked
       if (geocodingSuccess) {
         Get.snackbar(
           "Location Confirmed",
@@ -576,7 +611,6 @@ class SignUpController extends GetxController {
       }
 
       debugPrint("✅ Navigating back");
-      // Navigate back to complete profile
       await Future.delayed(const Duration(milliseconds: 800));
       Get.back();
     } catch (e) {

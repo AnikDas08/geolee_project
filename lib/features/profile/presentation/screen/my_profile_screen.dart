@@ -133,22 +133,28 @@ class MyProfileScreen extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Label
-        CommonText(
-          text: 'About',
-          fontSize: 16.sp,
-          fontWeight: FontWeight.w600,
-          color: AppColors.black,
-          textAlign: TextAlign.start,
+        Align(
+          alignment: Alignment.centerLeft,
+          child: CommonText(
+            text: 'About',
+            fontSize: 16.sp,
+            fontWeight: FontWeight.w600,
+            color: AppColors.black,
+            textAlign: TextAlign.start,
+          ),
         ),
         8.height,
         // Content (bio)
-        CommonText(
-          text: controller.bio,
-          fontSize: 14.sp,
-          fontWeight: FontWeight.w400,
-          color: AppColors.secondaryText,
-          textAlign: TextAlign.start,
-          maxLines: 10,
+        Align(
+          alignment: Alignment.centerLeft,
+          child: CommonText(
+            text: controller.bio,
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w400,
+            color: AppColors.secondaryText,
+            textAlign: TextAlign.start,
+            maxLines: 10,
+          ),
         ),
       ],
     );

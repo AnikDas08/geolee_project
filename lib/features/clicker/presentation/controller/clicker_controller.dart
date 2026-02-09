@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:giolee78/component/image/common_image.dart';
@@ -13,10 +11,12 @@ import '../../../friend/data/post_model_by_id.dart';
 
 enum FriendStatus { none, requested, friends }
 
+
 class ClickerController extends GetxController {
   /// ================= Search
   final searchText = ''.obs;
   final TextEditingController searchController = TextEditingController();
+
 
   /// ================= Carousel
   final _currentPosition = 0.obs;
@@ -59,7 +59,7 @@ class ClickerController extends GetxController {
 
   // ================= Friend
   var friendStatus = FriendStatus.none.obs;
-  var pendingRequestId = ''.obs; // ✅ Request ID store করার জন্য
+  var pendingRequestId = ''.obs;
 
   @override
   void onInit() {
@@ -71,7 +71,7 @@ class ClickerController extends GetxController {
   @override
   void onClose() {
     searchController.removeListener(_onSearchChanged);
-    searchController.dispose();
+    // searchController.dispose();
     super.onClose();
   }
 

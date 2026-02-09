@@ -29,7 +29,6 @@ class _ClickerScreenState extends State<ClickerScreen> {
     NotificationsController(),
   );
 
-  // Helper method - build এর বাইরে লিখুন
   String _formatPostTime(DateTime postTime) {
     final now = DateTime.now();
     final difference = now.difference(postTime);
@@ -63,14 +62,16 @@ class _ClickerScreenState extends State<ClickerScreen> {
                 prefixIcon: const Icon(Icons.search),
                 hintText: "Search",
                 borderRadius: 20.r,
-                suffixIcon: Obx(() => controller.searchText.value.isNotEmpty
-                    ? IconButton(
-                  icon: const Icon(Icons.clear),
-                  onPressed: () {
-                    controller.searchController.clear();
-                  },
-                )
-                    : const SizedBox.shrink()),
+                suffixIcon: Obx(
+                  () => controller.searchText.value.isNotEmpty
+                      ? IconButton(
+                          icon: const Icon(Icons.clear),
+                          onPressed: () {
+                            controller.searchController.clear();
+                          },
+                        )
+                      : const SizedBox.shrink(),
+                ),
               ),
               const SizedBox(height: 16),
 
@@ -123,68 +124,72 @@ class _ClickerScreenState extends State<ClickerScreen> {
               // Posts list or empty state
               controller.filteredPosts.isEmpty
                   ? Padding(
-                padding: const EdgeInsets.symmetric(vertical: 50),
-                child: Center(
-                  child: Text(
-                    controller.searchText.value.isNotEmpty
-                        ? "No posts found for '${controller.searchText.value}'"
-                        : "No posts available",
-                    style: const TextStyle(fontSize: 16),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-              )
-                  : ListView.separated(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: controller.filteredPosts.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 16),
-                itemBuilder: (context, index) {
-                  final data = controller.filteredPosts[index];
-                  return GestureDetector(
-                    onTap: () {
-                      Get.to(
-                            () => ViewFriendScreen(
-                          userId: data.user.id,
-                          isFriend: index % 2 == 0,
+                      padding: const EdgeInsets.symmetric(vertical: 50),
+                      child: Center(
+                        child: Text(
+                          controller.searchText.value.isNotEmpty
+                              ? "No posts found for '${controller.searchText.value}'"
+                              : "No posts available",
+                          style: const TextStyle(fontSize: 16),
+                          textAlign: TextAlign.center,
                         ),
-                      );
-                    },
-                    child: MyPostCards(
-                      onTapPhoto: () {
-                        if (data.photos.isNotEmpty) {
-                          Get.to(() => FullScreenImageView(
-                            imageUrl: "${ApiEndPoint.imageUrl}${data.photos[0]}",
-                          ));
-                        }
-                      },
-                      onTapProfile: () {
-                        Get.to(
+                      ),
+                    )
+                  : ListView.separated(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: controller.filteredPosts.length,
+                      separatorBuilder: (_, __) => const SizedBox(height: 16),
+                      itemBuilder: (context, index) {
+                        final data = controller.filteredPosts[index];
+                        return GestureDetector(
+                          onTap: () {
+                            Get.to(
                               () => ViewFriendScreen(
-                            userId: data.user.id,
+                                userId: data.user.id,
+                                isFriend: index % 2 == 0,
+                              ),
+                            );
+                          },
+                          child: MyPostCards(
+                            onTapPhoto: () {
+                              if (data.photos.isNotEmpty) {
+                                Get.to(
+                                  () => FullScreenImageView(
+                                    imageUrl:
+                                        "${ApiEndPoint.imageUrl}${data.photos[0]}",
+                                  ),
+                                );
+                              }
+                            },
+                            onTapProfile: () {
+                              Get.to(
+                                () => ViewFriendScreen(
+                                  userId: data.user.id,
+                                  isFriend: index % 2 == 0,
+                                ),
+                              );
+                            },
+                            clickerType: data.clickerType,
+                            userName: data.user.name,
+                            userAvatar:
+                                "${ApiEndPoint.imageUrl}${data.user.image}",
+                            timeAgo: _formatPostTime(
+                              DateTime.parse(data.createdAt.toString()),
+                            ),
+                            location: data.address,
+                            postImage: data.photos.isNotEmpty
+                                ? "${ApiEndPoint.imageUrl}${data.photos[0]}"
+                                : "",
+                            description: data.description,
                             isFriend: index % 2 == 0,
+                            privacyImage: data.privacy == "public"
+                                ? AppIcons.public
+                                : AppIcons.onlyMe,
                           ),
                         );
                       },
-                      clickerType: data.clickerType,
-                      userName: data.user.name,
-                      userAvatar: "${ApiEndPoint.imageUrl}${data.user.image}",
-                      timeAgo: _formatPostTime(
-                        DateTime.parse(data.createdAt.toString()),
-                      ),
-                      location: data.address,
-                      postImage: data.photos.isNotEmpty
-                          ? "${ApiEndPoint.imageUrl}${data.photos[0]}"
-                          : "",
-                      description: data.description,
-                      isFriend: index % 2 == 0,
-                      privacyImage: data.privacy == "public"
-                          ? AppIcons.public
-                          : AppIcons.onlyMe,
                     ),
-                  );
-                },
-              ),
             ],
           ),
         );
@@ -192,7 +197,6 @@ class _ClickerScreenState extends State<ClickerScreen> {
     );
   }
 
-  // Filter button
   Widget _buildFilterButton(BuildContext context) {
     return GestureDetector(
       onTap: () => _showFilterBottomSheet(context),
@@ -208,7 +212,7 @@ class _ClickerScreenState extends State<ClickerScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Obx(
-                  () => Text(
+              () => Text(
                 controller.selectedFilter,
                 style: const TextStyle(color: Colors.black, fontSize: 16),
               ),

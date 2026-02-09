@@ -19,6 +19,10 @@
 	<key>CFBundleShortVersionString</key>
 	<string>$(FLUTTER_BUILD_NAME)</string>
 	<key>CFBundleSignature</key>
+	<key>NSLocationWhenInUseUsageDescription</key>
+    <string>We need your location to find the best vibes around you.</string>
+    <key>NSLocationAlwaysUsageDescription</key>
+    <string>We need your location to find the best vibes around you.</string>
 	<string>????</string>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
