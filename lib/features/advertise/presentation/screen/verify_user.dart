@@ -45,7 +45,7 @@ class ProviderVerifyUser extends StatelessWidget {
                 bottom: 8,
               ),
               Center(
-                child: Obx(() => CommonText(
+                child: CommonText(
                   text:
                   "${AppString.codeHasBeenSendTo} ${controller.phoneNumberController.text}",
                   fontSize: 14,
@@ -53,7 +53,6 @@ class ProviderVerifyUser extends StatelessWidget {
                   maxLines: 3,
                   color: AppColors.secondaryText,
                 )),
-              ),
 
               /// OTP field
               PinCodeTextField(

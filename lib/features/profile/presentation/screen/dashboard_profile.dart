@@ -211,7 +211,6 @@ class DashBoardProfile extends StatelessWidget {
                       ),*/
 
                     if (LocalStorage.myRole != "user")
-
                       CommonButton(
                         titleText: "Become a User",
                         onTap: () {

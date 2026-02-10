@@ -206,7 +206,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             "My Role Is :=========================== ${LocalStorage.myRole.toString()}",
                           );
 
-                          if(controller.advToken.isEmpty||controller.advToken==""){
+                          if((controller.advToken.isEmpty||controller.advToken=="")){
 
                             print("Token is Empty I Have no token");
                             await Get.to(()=>ServiceProviderInfoScreen());

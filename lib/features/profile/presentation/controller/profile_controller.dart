@@ -236,9 +236,9 @@ class ProfileController extends GetxController {
         if (Get.isRegistered<HomeNavController>()) {
           Get.find<HomeNavController>().update();
         }
+        Get.back();
+        await Utils.successSnackBar("Success","Profile Updated Successfully");
 
-        Utils.successSnackBar("Success", data['message'] ?? "Profile Updated Successfully");
-        Get.back(); // Go back to profile screen
       } else {
         Utils.errorSnackBar("Error", response.data['message'] ?? "Failed to update profile");
       }
@@ -251,6 +251,7 @@ class ProfileController extends GetxController {
   }
 
   String advToken = "";
+  bool isVerified = false;
   String userId = '';
 
   Future<String?> getUserDataForRole() async {
@@ -259,6 +260,7 @@ class ProfileController extends GetxController {
       if (response.statusCode == 200) {
         var data = response.data;
         advToken = data['data']?['advertiser']?.toString() ?? "";
+        isVerified = data['data']?['isVerified']??false;
         userId = data['data']?['_id']?.toString() ?? "";
         return advToken;
       }

@@ -129,16 +129,15 @@ class ServiceProviderController extends GetxController {
       );
 
       if (response.statusCode == 200) {
-        Get.snackbar("Success", "Advertiser info updated successfully");
 
-        LocalStorage.myRole = UserType.advertiser.name;
-        LocalStorage.setString(LocalStorageKeys.myRole, LocalStorage.myRole);
+        /*LocalStorage.myRole = UserType.advertiser.name;
+        LocalStorage.setString(LocalStorageKeys.myRole, LocalStorage.myRole);*/
 
-
+        await LocalStorage.setString(LocalStorageKeys.token, "");
         Get.offAll(ProviderVerifyUser());
         startTimer();
       } else {
-        Get.snackbar("Error", "Something went wrong");
+        Get.snackbar("Error", response.message);
         debugPrint("Error: ${response.message}");
       }
     } catch (e) {
@@ -210,10 +209,13 @@ class ServiceProviderController extends GetxController {
         Get.snackbar('Verify', "OTP Verify SuccessFull");
 
         final data=response.data;
+        await LocalStorage.setString(LocalStorageKeys.role, "advertise");
 
-        LocalStorage.myRole = UserType.advertiser.name;
+        /*LocalStorage.myRole = UserType.advertiser.name;
         LocalStorage.setString(LocalStorageKeys.myRole, LocalStorage.myRole);
-
+*/
+        await LocalStorage.setString(LocalStorage.token, data["data"]["accessToken"]);
+        LocalStorage.token=data["data"]["accessToken"];
 
         successPopUps(message: 'Verify Success', onTap: (){
           Get.offAll(HomeNav());
