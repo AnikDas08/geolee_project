@@ -117,9 +117,11 @@ class ClickerController extends GetxController {
   }
 
   // ================= Get Posts By Specific User ID (The one you missed!)
-  Future<void> getPostsByUser(String userId) async {
+  Future<void> getPostsByUserId(String userId) async {
     try {
       isUserLoading.value = true;
+      usersPosts.clear();
+
       final url = "${ApiEndPoint.getUserById}$userId";
       final response = await ApiService.get(url);
 
@@ -127,9 +129,8 @@ class ClickerController extends GetxController {
         final responseData = PostResponseById.fromJson(
           response.data as Map<String, dynamic>,
         );
-        // Filter out "only me" posts for public/friend viewing
-        final filtered = responseData.data.toList();
-        usersPosts.addAll(filtered);
+
+        usersPosts.assignAll(responseData.data);
       }
     } catch (e) {
       Utils.errorSnackBar("Error", e.toString());
@@ -137,6 +138,7 @@ class ClickerController extends GetxController {
       isUserLoading.value = false;
     }
   }
+
 
   // ================= Get User Profile Info
   Future<void> getUserById(String userId) async {

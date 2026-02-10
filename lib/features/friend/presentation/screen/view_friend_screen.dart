@@ -40,7 +40,7 @@ class _ViewFriendScreenState extends State<ViewFriendScreen> {
     super.initState();
 
     // Fetch posts by user ID
-    controller.getPostsByUser(widget.userId);
+    controller.getPostsByUserId(widget.userId);
     controller.getUserById(widget.userId);
     controller.checkFriendship(widget.userId);
 
