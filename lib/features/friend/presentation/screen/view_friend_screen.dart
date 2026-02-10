@@ -113,14 +113,23 @@ class _ViewFriendScreenState extends State<ViewFriendScreen> {
                   physics: const NeverScrollableScrollPhysics(),
                   itemBuilder: (context, index) {
                     final data = controller.usersPosts[index];
+
+                    final List<String> postImages = data.photos.isNotEmpty
+                        ? data.photos
+                        .map((photo) => ApiEndPoint.imageUrl + photo)
+                        .toList()
+                        : [];
+
                     return CommonPostCards(
                       onTapPhoto: () {
-                        if (data.photos.isNotEmpty) {
+                        if (postImages.isNotEmpty) {
                           Get.to(() => FullScreenImageView(
-                            imageUrl: "${ApiEndPoint.imageUrl}${data.photos[0]}",
+                            images: postImages,
+                            initialIndex: 0, // যেই image এ tap করছো
                           ));
                         }
                       },
+
                       onTapProfile: () => Get.to(() => ViewFriendScreen(
                         userId: data.user.id,
                         isFriend: false,

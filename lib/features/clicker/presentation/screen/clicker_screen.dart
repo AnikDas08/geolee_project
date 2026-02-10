@@ -27,7 +27,9 @@ class ClickerScreen extends StatefulWidget {
 class _ClickerScreenState extends State<ClickerScreen> {
   // Controllers are initialized using Get.put
   final ClickerController controller = Get.put(ClickerController());
-  final NotificationsController notificationsController = Get.put(NotificationsController());
+  final NotificationsController notificationsController = Get.put(
+    NotificationsController(),
+  );
 
   // Helper to format the post timestamp
   String _formatPostTime(DateTime postTime) {
@@ -76,12 +78,12 @@ class _ClickerScreenState extends State<ClickerScreen> {
                   borderRadius: 20.r,
                   suffixIcon: controller.searchText.value.isNotEmpty
                       ? IconButton(
-                    icon: const Icon(Icons.clear),
-                    onPressed: () {
-                      controller.searchController.clear();
-                      FocusScope.of(context).unfocus();
-                    },
-                  )
+                          icon: const Icon(Icons.clear),
+                          onPressed: () {
+                            controller.searchController.clear();
+                            FocusScope.of(context).unfocus();
+                          },
+                        )
                       : const SizedBox.shrink(),
                 ),
                 SizedBox(height: 16.h),
@@ -105,7 +107,8 @@ class _ClickerScreenState extends State<ClickerScreen> {
                       viewportFraction: 0.85,
                       autoPlay: true,
                       enlargeCenterPage: true,
-                      onPageChanged: (index, _) => controller.changePosition(index),
+                      onPageChanged: (index, _) =>
+                          controller.changePosition(index),
                     ),
                   ),
                   SizedBox(height: 8.h),
@@ -134,7 +137,10 @@ class _ClickerScreenState extends State<ClickerScreen> {
                   children: [
                     const Text(
                       'All Posts',
-                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                     _buildFilterButton(context),
                   ],
@@ -145,40 +151,60 @@ class _ClickerScreenState extends State<ClickerScreen> {
                 controller.filteredPosts.isEmpty
                     ? _buildEmptyState()
                     : ListView.separated(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: controller.filteredPosts.length,
-                  separatorBuilder: (_, __) => SizedBox(height: 16.h),
-                  itemBuilder: (context, index) {
-                    final data = controller.filteredPosts[index];
-                    return CommonPostCards(
-                      onTapPhoto: () {
-                        if (data.photos.isNotEmpty) {
-                          Get.to(() => FullScreenImageView(
-                            imageUrl: "${ApiEndPoint.imageUrl}${data.photos[0]}",
-                          ));
-                        }
-                      },
-                      onTapProfile: () => Get.to(() => ViewFriendScreen(
-                        userId: data.user.id,
-                        isFriend: false, // Friendship state logic inside ViewFriendScreen
-                      )),
-                      clickerType: data.clickerType,
-                      userName: data.user.name,
-                      userAvatar: "${ApiEndPoint.imageUrl}${data.user.image}",
-                      timeAgo: _formatPostTime(DateTime.parse(data.createdAt.toString())),
-                      location: data.address,
-                      images: data.photos.isNotEmpty
-                          ? data.photos
-                          .map((photo) => ApiEndPoint.imageUrl + photo)
-                          .toList()
-                          : [],
-                      description: data.description,
-                      isFriend: false,
-                      privacyImage: data.privacy == "public" ? AppIcons.public : AppIcons.onlyMe,
-                    );
-                  },
-                ),
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: controller.filteredPosts.length,
+                        separatorBuilder: (_, __) => SizedBox(height: 16.h),
+                        itemBuilder: (context, index) {
+                          final data = controller.filteredPosts[index];
+                          final List<String> postImages = data.photos.isNotEmpty
+                              ? data.photos
+                              .map((photo) => ApiEndPoint.imageUrl + photo)
+                              .toList()
+                              : [];
+
+                          return CommonPostCards(
+                            onTapPhoto: () {
+                              if (postImages.isNotEmpty) {
+                                Get.to(() => FullScreenImageView(
+                                  images: postImages,
+                                  initialIndex: 0,
+                                ));
+                              }
+                            },
+                            onTapProfile: () => Get.to(
+                              () => ViewFriendScreen(
+                                userId: data.user.id,
+                                isFriend:
+                                    false, // Friendship state logic inside ViewFriendScreen
+                              ),
+                            ),
+                            clickerType: data.clickerType,
+                            userName: data.user.name,
+                            userAvatar:
+                                "${ApiEndPoint.imageUrl}${data.user.image}",
+                            timeAgo: _formatPostTime(
+                              DateTime.parse(data.createdAt.toString()),
+                            ),
+                            location: data.address,
+                            images: data.photos.isNotEmpty
+                                ? data.photos
+                                      .map(
+                                        (photo) => ApiEndPoint.imageUrl + photo,
+                                      )
+                                      .toList()
+                                : [],
+                            description: data.description,
+                            isFriend: false,
+                            privacyImage: data.privacy == "public"
+                                ? AppIcons.public
+                                : data.privacy == "friends"
+                                ? AppIcons.friends
+                                : AppIcons.onlyMe,
+
+                          );
+                        },
+                      ),
                 SizedBox(height: 20.h),
               ],
             ),
@@ -257,7 +283,9 @@ class _ClickerScreenState extends State<ClickerScreen> {
                 return ListTile(
                   contentPadding: EdgeInsets.zero,
                   leading: Icon(
-                    isSelected ? Icons.radio_button_checked : Icons.radio_button_off,
+                    isSelected
+                        ? Icons.radio_button_checked
+                        : Icons.radio_button_off,
                     color: isSelected ? AppColors.primaryColor : Colors.grey,
                   ),
                   title: Text(option),

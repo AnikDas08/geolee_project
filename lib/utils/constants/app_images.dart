@@ -15,4 +15,5 @@ class AppImages {
   static const String postImage2 = "$baseurl/post_image2.png";
   static const String success = "$baseurl/success_image.png";
   static const String emptyNotification = "assets/images/empty_notification.png";
+  static const String friends= "assets/images/friends.png";
 }

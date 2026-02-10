@@ -70,7 +70,7 @@ class CommonPostCards extends StatelessWidget {
                   ),
                 ),
                 SizedBox(width: 10.w),
-                Expanded(
+                Flexible(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -110,17 +110,17 @@ class CommonPostCards extends StatelessWidget {
                           Expanded(
                             child: Row(
                               children: [
-                                Expanded(
-                                  child: CommonText(
-                                    text: location,
-                                    fontSize: 11,
-                                    color: AppColors.secondaryText,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
+                                CommonText(
+                                  text: location,
+                                  fontSize: 11,
+                                  color: AppColors.secondaryText,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
                                 ),
-                                SizedBox(width: 6.w),
-                                CommonImage(imageSrc: privacyImage),
+                                SizedBox(width: 30.w),
+                                CommonImage(
+                                    size: 12,
+                                    imageSrc: privacyImage),
                               ],
                             ),
                           ),

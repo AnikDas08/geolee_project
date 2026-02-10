@@ -1,11 +1,33 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:photo_view/photo_view.dart';
+import 'package:photo_view/photo_view_gallery.dart';
 
-class FullScreenImageView extends StatelessWidget {
-  final String imageUrl;
+class FullScreenImageView extends StatefulWidget {
+  final List<String> images;
+  final int initialIndex;
 
-  const FullScreenImageView({super.key, required this.imageUrl});
+  const FullScreenImageView({
+    super.key,
+    required this.images,
+    this.initialIndex = 0,
+  });
+
+  @override
+  State<FullScreenImageView> createState() => _FullScreenImageViewState();
+}
+
+class _FullScreenImageViewState extends State<FullScreenImageView> {
+  late PageController _pageController;
+  late int currentIndex;
+
+  @override
+  void initState() {
+    super.initState();
+    currentIndex = widget.initialIndex;
+    _pageController = PageController(initialPage: currentIndex);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -13,43 +35,64 @@ class FullScreenImageView extends StatelessWidget {
       backgroundColor: Colors.black,
       body: Stack(
         children: [
-          Center(
-            child: PhotoView(
-              imageProvider: NetworkImage(imageUrl),
-              backgroundDecoration: const BoxDecoration(color: Colors.black),
-              loadingBuilder: (context, event) {
-                // Fancy circular loader
-                return Center(
-                  child: SizedBox(
-                    width: 100,
-                    height: 100,
-                    child: SizedBox(
-                      width: 100,
-                      height: 100,
-                      child: CircularProgressIndicator(
+          PhotoViewGallery.builder(
+            pageController: _pageController,
+            itemCount: widget.images.length,
+            onPageChanged: (index) {
+              setState(() => currentIndex = index);
+            },
+            builder: (context, index) {
+              return PhotoViewGalleryPageOptions(
+                imageProvider: NetworkImage(widget.images[index]),
+                minScale: PhotoViewComputedScale.contained,
+                maxScale: PhotoViewComputedScale.covered * 3,
+                heroAttributes: PhotoViewHeroAttributes(
+                  tag: widget.images[index],
+                ),
+              );
+            },
+            loadingBuilder: (context, event) => Center(
+              child: SizedBox(
+                width: 60.w,
+                height: 60.h,
+                child: CircularProgressIndicator(
+                  value: event == null
+                      ? null
+                      : event.cumulativeBytesLoaded /
+                      (event.expectedTotalBytes ?? 1),
+                  strokeWidth: 4,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+            backgroundDecoration: const BoxDecoration(color: Colors.black),
+          ),
 
-                        value: event == null
-                            ? null
-                            : event.cumulativeBytesLoaded /
-                            (event.expectedTotalBytes ?? 1),
-                        strokeWidth: 6,
-                        color: Colors.blueAccent,
-                      ),
-                    ),
-                  ),
-                );
-              },
+          /// ❌ Close button
+          Positioned(
+            top: 40.h,
+            right: 20.w,
+            child: CircleAvatar(
+              backgroundColor: Colors.red,
+              child: IconButton(onPressed: (){
+                Get.back();
+              }, icon: Icon(Icons.cancel_rounded,color: Colors.white,)),
             ),
           ),
-          // Close button
+
+          /// 🔢 Image counter
           Positioned(
-            top: 40,
-            right: 20,
-            child: IconButton(
-              icon: const Icon(Icons.close, color: Colors.white, size: 30),
-              onPressed: () {
-                Get.back();
-              },
+            bottom: 30.h,
+            left: 0,
+            right: 0,
+            child: Center(
+              child: Text(
+                '${currentIndex + 1} / ${widget.images.length}',
+                style: const TextStyle(
+                  color: Colors.white70,
+                  fontSize: 14,
+                ),
+              ),
             ),
           ),
         ],

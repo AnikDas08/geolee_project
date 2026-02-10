@@ -143,17 +143,18 @@ class _MyPostCardState extends State<MyPostCard> {
                                 Expanded(
                                   child: Row(
                                     children: [
-                                      Expanded(
-                                        child: CommonText(
-                                          text: widget.location,
-                                          fontSize: 11,
-                                          color: AppColors.secondaryText,
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
+                                      CommonText(
+                                        text: widget.location,
+                                        fontSize: 11,
+                                        color: AppColors.secondaryText,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
                                       ),
-                                      SizedBox(width: 6.w),
-                                      CommonImage(imageSrc: widget.privacyImage),
+                                      SizedBox(width: 30.w),
+                                      CommonImage(
+                                        size: 12,
+                                        imageSrc: widget.privacyImage,
+                                      ),
                                     ],
                                   ),
                                 ),
@@ -184,10 +185,7 @@ class _MyPostCardState extends State<MyPostCard> {
           /// Clicker type
           Padding(
             padding: EdgeInsets.fromLTRB(12.w, 12.h, 12.w, 4.h),
-            child: CommonText(
-              text: widget.clickerType,
-              fontSize: 12,
-            ),
+            child: CommonText(text: widget.clickerType, fontSize: 12),
           ),
 
           /// Description
@@ -209,39 +207,35 @@ class _MyPostCardState extends State<MyPostCard> {
 
     return PopupMenuButton<PostAction>(
       color: Colors.white,
-      icon: Icon(Icons.more_vert_rounded,
-          size: 24.sp, color: AppColors.secondaryText),
+      icon: Icon(
+        Icons.more_vert_rounded,
+        size: 24.sp,
+        color: AppColors.secondaryText,
+      ),
       itemBuilder: (context) => [
-        _popupItem(
-          PostAction.edit,
-          Icons.edit_outlined,
-          "Edit Post",
-              () {
-            Navigator.pop(context);
-            Get.to(EditPost(postId: widget.postId))?.then((value) {
-              if (value == true) myPostController.fetchMyPosts();
-            });
-          },
-        ),
-        _popupItem(
-          PostAction.delete,
-          Icons.delete_outline,
-          "Delete Post",
-              () {
-            Navigator.pop(context);
-            showDeletePostDialog(
-              context,
-              onConfirmDelete: () => myPostController.deletePost(widget.postId),
-            );
-          },
-        ),
+        _popupItem(PostAction.edit, Icons.edit_outlined, "Edit Post", () {
+          Navigator.pop(context);
+          Get.to(EditPost(postId: widget.postId))?.then((value) {
+            if (value == true) myPostController.fetchMyPosts();
+          });
+        }),
+        _popupItem(PostAction.delete, Icons.delete_outline, "Delete Post", () {
+          Navigator.pop(context);
+          showDeletePostDialog(
+            context,
+            onConfirmDelete: () => myPostController.deletePost(widget.postId),
+          );
+        }),
       ],
     );
   }
 
   PopupMenuItem<PostAction> _popupItem(
-
-      PostAction value, IconData icon, String title, VoidCallback onTap) {
+    PostAction value,
+    IconData icon,
+    String title,
+    VoidCallback onTap,
+  ) {
     return PopupMenuItem<PostAction>(
       value: value,
       child: GestureDetector(
@@ -304,7 +298,7 @@ class _PostImageSlider extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: List.generate(
                 images.length,
-                    (index) => AnimatedContainer(
+                (index) => AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
                   margin: EdgeInsets.symmetric(horizontal: 3.w),
                   width: currentIndex == index ? 8.r : 6.r,
