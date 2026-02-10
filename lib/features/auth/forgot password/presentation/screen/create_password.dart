@@ -25,6 +25,7 @@ class CreatePassword extends StatelessWidget {
 
       /// Body Section starts here
       body: GetBuilder<ForgetPasswordController>(
+        init: ForgetPasswordController(),
         builder: (controller) {
           return SafeArea(
             child: SingleChildScrollView(

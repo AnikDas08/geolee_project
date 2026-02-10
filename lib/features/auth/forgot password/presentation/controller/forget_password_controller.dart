@@ -43,8 +43,7 @@ class ForgetPasswordController extends GetxController {
   );
 
   /// create Forget Password Controller instance
-  static ForgetPasswordController get instance =>
-      Get.put(ForgetPasswordController());
+  static ForgetPasswordController get instance => Get.find<ForgetPasswordController>();
 
   @override
   void dispose() {
@@ -134,7 +133,9 @@ class ForgetPasswordController extends GetxController {
        LocalStorage.setString(LocalStorageKeys.forgotPasswordToken, LocalStorage.forgotPasswordToken=token);
         debugPrint("OTP VERIFIED → Navigating...");
 
-
+        emailController.clear();
+        otpController.clear();
+        update();
 
       } else {
         Utils.errorSnackBar(
@@ -192,11 +193,11 @@ class ForgetPasswordController extends GetxController {
               "Your password has been successfully reset. You can now log in using your new password.",
         );
 
-        emailController.clear();
-        otpController.clear();
+        //emailController.clear();
+        /*otpController.clear();
         passwordController.clear();
         confirmPasswordController.clear();
-        Get.offAllNamed(AppRoutes.signIn);
+        Get.offAllNamed(AppRoutes.signIn);*/
       } else {
         Get.snackbar(response.statusCode.toString(), response.message);
       }

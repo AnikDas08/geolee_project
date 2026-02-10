@@ -9,6 +9,7 @@ import '../../../../services/api/api_service.dart';
 import '../../../../services/storage/storage_keys.dart';
 import '../../../../services/storage/storage_services.dart';
 import '../../data/data_model.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class HomeController extends GetxController {
   bool isLoading = false;
@@ -20,7 +21,7 @@ class HomeController extends GetxController {
   String subCategory = "";
   int notificationCount = 0;
 
-  var clickerCount = RxnString(); // nullable, no initial value
+  var clickerCount = RxnString();
   var filterOption = RxnString();
 
   // Filter parameters
@@ -29,31 +30,54 @@ class HomeController extends GetxController {
   var endDate = DateTime.now().obs;
   String? argument;
 
+  // --- Static Heatmap Variables ---
+  Set<Heatmap> heatmaps = {};
+
   List<String> clickerOptions = ["All", "Great Vibes", "Off Vibes", "Charming Gentleman","Lovely Leady"];
   List<String> filterOptions = ["Option 1", "Option 2", "Option 3"];
-  final MyProfileController myProfileController=Get.put(MyProfileController());
+  final MyProfileController myProfileController = Get.put(MyProfileController());
 
   @override
   void onInit() {
-    print("My Role Is :===========================💕💕💕💕💕💕 ${LocalStorage.role.toString()}");
     super.onInit();
-    argument=Get.arguments;
+    argument = Get.arguments;
     Get.find<HomeNavController>().refresh();
     Get.find<MyProfileController>().refresh();
     myProfileController.getUserData();
 
+    // Initialize the static heatmap immediately
+    _loadStaticHeatmap();
+
     if (LocalStorage.token != null && LocalStorage.token!.isNotEmpty) {
-      fetchPosts(); // If this is a private feed
+      fetchPosts();
       myProfileController.getUserData();
     }
-    else{
+    else {
       allPosts = [];
       filteredPosts = [];
       isLoading = false;
       update();
     }
+  }
 
+  // --- Method to Load Static Heatmap Data ---
+  void _loadStaticHeatmap() {
+    List<WeightedLatLng> staticPoints = [
+      WeightedLatLng(LatLng(23.777176, 90.399452), weight: 1.0),
+      WeightedLatLng(LatLng(23.778000, 90.400000), weight: 1.5),
+      WeightedLatLng(LatLng(23.776500, 90.398000), weight: 2.0),
+    ];
 
+    heatmaps = {
+      Heatmap(
+        heatmapId: const HeatmapId("static_activity"),
+        data: staticPoints,
+        // Wrap the int in HeatmapRadius
+        radius: HeatmapRadius.fromPixels(40),
+        opacity: 0.7,
+      )
+    };
+    update();
   }
 
   void applyFilter(String period, DateTime start, DateTime end) {
@@ -61,29 +85,21 @@ class HomeController extends GetxController {
     startDate.value = start;
     endDate.value = end;
 
-    // Apply your filtering logic here
-    // For example, filter posts by date range
     if (period != 'Custom Range') {
-      // Auto-calculate date range based on period
       end = DateTime.now();
       if (period == 'Last 24 Hours') {
-        start = end.subtract(Duration(hours: 3));
+        start = end.subtract(const Duration(hours: 3));
       } else if (period == 'Last 7 days') {
-        start = end.subtract(Duration(hours: 24));
-      }else if (period == 'Last 30 Days') {
-        start = end.subtract(Duration(days: 30));
+        start = end.subtract(const Duration(hours: 24));
+      } else if (period == 'Last 30 Days') {
+        start = end.subtract(const Duration(days: 30));
       }
       startDate.value = start;
       endDate.value = end;
     }
 
-    // Filter posts based on date range
     filteredPosts = allPosts.where((post) {
-      // Assuming your Post model has a createdAt field
-      // Adjust this according to your actual data model
-      // DateTime postDate = post.createdAt;
-      // return postDate.isAfter(start) && postDate.isBefore(end);
-      return true; // Replace with actual filtering logic
+      return true;
     }).toList();
 
     update();
@@ -125,7 +141,7 @@ class HomeController extends GetxController {
         }
       }
     } catch (e) {
-      debugPrint('Error fetching posts: $e');
+      debugPrint('Error fetching profile: $e');
     } finally {
       isLoading = false;
       update();
@@ -147,10 +163,4 @@ class HomeController extends GetxController {
 
     update();
   }
-
-  /*void clearSearch() {
-    searchQuery = '';
-    filteredPosts = allPosts;
-    update();
-  }*/
 }

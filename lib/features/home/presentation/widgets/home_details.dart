@@ -35,54 +35,60 @@ class _HomeDetailsState extends State<HomeDetails> {
 
   Future<void> _getCurrentLocationAndAddress() async {
     try {
+      // 1. Check if Service is enabled
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
-        if(mounted){
-          setState(() {
-            displayLocation = "Location disabled";
-            loadingLocation = false;
-          });
-        }
+        _updateLocationText("GPS Disabled");
         return;
       }
 
+      // 2. Check Permissions
       LocationPermission permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
         if (permission == LocationPermission.denied) {
-          if(mounted){
-            setState(() {
-              displayLocation = "Permission denied";
-              loadingLocation = false;
-            });
-          }
+          _updateLocationText("Permission Denied");
           return;
         }
       }
 
+      if (permission == LocationPermission.deniedForever) {
+        _updateLocationText("Settings Blocked");
+        return;
+      }
+
+      // 3. Get Position with Timeout (Crucial for preventing infinite loading)
       Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
-      );
+      ).timeout(const Duration(seconds: 5));
 
-      List<Placemark> placemarks = await placemarkFromCoordinates(
-        position.latitude,
-        position.longitude,
-      );
-
-      if (placemarks.isNotEmpty && mounted) {
-        Placemark place = placemarks[0];
-        setState(() {
-          displayLocation = place.locality ?? "Unknown Location";
-          loadingLocation = false;
-        });
+      // 4. Reverse Geocoding with Try-Catch
+      try {
+        List<Placemark> placemarks = await placemarkFromCoordinates(
+          position.latitude,
+          position.longitude,
+        );
+        if (placemarks.isNotEmpty && mounted) {
+          setState(() {
+            displayLocation = placemarks[0].locality ?? "Unknown";
+            loadingLocation = false;
+          });
+        }
+      } catch (e) {
+        _updateLocationText("Address unavailable");
       }
     } catch (e) {
-      if(mounted){
-        setState(() {
-          displayLocation = "Location Error";
-          loadingLocation = false;
-        });
-      }
+      debugPrint("Location Error: $e");
+      _updateLocationText("Location Error");
+    }
+  }
+
+  void _updateLocationText(String text) {
+    if (mounted) {
+      setState(() {
+        displayLocation = text;
+        loadingLocation = false;
+      });
     }
   }
 
