@@ -241,6 +241,7 @@ class ClickerController extends GetxController {
     getAllPosts(clickerType: newFilter);
   }
 
+
   Future<void> cancelFriendRequest(String userId) async {
     try {
       isLoading.value = true;
@@ -269,6 +270,7 @@ class ClickerController extends GetxController {
       isLoading.value = false;
     }
   }
+
 
   // ================= Friendship Logic
   Future<void> checkFriendship(String userId) async {

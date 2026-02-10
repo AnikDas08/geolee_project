@@ -8,6 +8,7 @@ import 'package:giolee78/config/api/api_end_point.dart';
 import 'package:giolee78/config/route/app_routes.dart';
 import 'package:giolee78/features/addpost/presentation/widgets/my_post_card.dart';
 import 'package:giolee78/features/clicker/presentation/controller/clicker_controller.dart';
+import 'package:giolee78/services/storage/storage_services.dart';
 import 'package:giolee78/utils/constants/app_colors.dart';
 import 'package:giolee78/utils/constants/app_icons.dart';
 import 'package:giolee78/utils/extensions/extension.dart';
@@ -15,6 +16,7 @@ import 'package:intl/intl.dart';
 
 import '../../../../utils/app_utils.dart';
 import '../../../addpost/presentation/widgets/full_screen_view_image.dart';
+import '../../../clicker/presentation/widget/common_post_card.dart';
 
 class ViewFriendScreen extends StatefulWidget {
   final bool isFriend;
@@ -43,7 +45,6 @@ class _ViewFriendScreenState extends State<ViewFriendScreen> {
     controller.getPostsByUserId(widget.userId);
     controller.getUserById(widget.userId);
     controller.checkFriendship(widget.userId);
-
   }
 
   String _formatPostTime(DateTime postTime) {
@@ -112,40 +113,31 @@ class _ViewFriendScreenState extends State<ViewFriendScreen> {
                   physics: const NeverScrollableScrollPhysics(),
                   itemBuilder: (context, index) {
                     final data = controller.usersPosts[index];
-                    return MyPostCard(
-                      onTapProfile: () {
-                        Utils.successSnackBar(
-                          'Already Profile',
-                          'Your Are Already Profile',
-                        );
-                      },
-                      isProfile: true,
+                    return CommonPostCards(
                       onTapPhoto: () {
                         if (data.photos.isNotEmpty) {
-                          Get.to(
-                            () => FullScreenImageView(
-                              imageUrl:
-                                  "${ApiEndPoint.imageUrl}${data.photos[0]}",
-                            ),
-                          );
+                          Get.to(() => FullScreenImageView(
+                            imageUrl: "${ApiEndPoint.imageUrl}${data.photos[0]}",
+                          ));
                         }
                       },
-                      privacyImage: data.privacy == "public"
-                          ? AppIcons.public
-                          : AppIcons.onlyMe,
+                      onTapProfile: () => Get.to(() => ViewFriendScreen(
+                        userId: data.user.id,
+                        isFriend: false,
+                      )),
                       clickerType: data.clickerType,
-                      isMyPost: false,
                       userName: data.user.name,
                       userAvatar: "${ApiEndPoint.imageUrl}${data.user.image}",
-                      timeAgo: _formatPostTime(
-                        DateTime.parse(data.createdAt.toString()),
-                      ),
+                      timeAgo: _formatPostTime(DateTime.parse(data.createdAt.toString())),
                       location: data.address,
-                      postImage: data.photos.isNotEmpty
-                          ? "${ApiEndPoint.imageUrl}${data.photos[0]}"
-                          : "",
+                      images: data.photos.isNotEmpty
+                          ? data.photos
+                          .map((photo) => ApiEndPoint.imageUrl + photo)
+                          .toList()
+                          : [],
                       description: data.description,
-                      postId: '',
+                      isFriend: false,
+                      privacyImage: data.privacy == "public" ? AppIcons.public : AppIcons.onlyMe,
                     );
                   },
                   separatorBuilder: (_, __) => SizedBox(height: 12.h),
@@ -226,10 +218,12 @@ class _ViewFriendScreenState extends State<ViewFriendScreen> {
           ),
 
           SizedBox(height: 16.h),
+
+          if(widget.userId!=LocalStorage.userId)
+
           Obx(() {
             switch (controller.friendStatus.value) {
-
-            /// ✅ ALREADY FRIEND
+              /// ✅ ALREADY FRIEND
               case FriendStatus.friends:
                 return _buildButton(
                   title: 'Message',
@@ -240,7 +234,7 @@ class _ViewFriendScreenState extends State<ViewFriendScreen> {
                   },
                 );
 
-            /// 📤 REQUEST SENT
+              /// 📤 REQUEST SENT
               case FriendStatus.requested:
                 return _buildButton(
                   title: controller.isLoading.value
@@ -251,11 +245,11 @@ class _ViewFriendScreenState extends State<ViewFriendScreen> {
                   onTap: controller.isLoading.value
                       ? () {}
                       : () {
-                    controller.cancelFriendRequest(widget.userId);
-                  },
+                          controller.cancelFriendRequest(widget.userId);
+                        },
                 );
 
-            /// ➕ NOT FRIEND
+              /// ➕ NOT FRIEND
               case FriendStatus.none:
               default:
                 return _buildButton(
@@ -269,8 +263,7 @@ class _ViewFriendScreenState extends State<ViewFriendScreen> {
                       : () => controller.onTapAddFriendButton(widget.userId),
                 );
             }
-          })
-
+          }),
         ],
       );
     });

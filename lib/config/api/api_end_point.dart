@@ -1,12 +1,19 @@
 class ApiEndPoint {
 
-  // Base URL =======================================
+
   static const String baseUrl = "http://10.10.7.7:5006/api/v1/";
   static const String imageUrl = "http://10.10.7.7:5006";
   static const String socketUrl = "http://10.10.7.7:5006";
   /*static const String baseUrl = "http://148.230.126.149:5000/api/v1/";
   static const String imageUrl = "http://148.230.126.149:5000";
   static const String socketUrl = "http://148.230.126.149:5000";*/
+  /*static const String baseUrl = "http://10.10.7.7:5006/api/v1/";
+  static const String imageUrl = "http://10.10.7.7:5006";*/
+  // static const String baseUrl = "http://148.230.126.149:5000/api/v1/";
+  // static const String imageUrl = "http://148.230.126.149:5000";
+  //static const String socketUrl = "http://148.230.126.149:5006";
+
+
 
   // Auth ===========================================
   static const String signUp = "${baseUrl}users/create-user";
@@ -17,12 +24,14 @@ class ApiEndPoint {
   static const String resetPassword = "${baseUrl}auth/reset-password";
   static const String changePassword = "${baseUrl}auth/change-password";
 
+
   // User ===========================================
   static const String updateProfile = "${baseUrl}users/profile";
   static const String getProfile = "${baseUrl}users/profile";
   static const String getUserSingleProfileById = "${baseUrl}users/single/";
   static const String nearByUsers = "${baseUrl}users";
   static const String deleteAccount = "${baseUrl}users/delete-account";
+
 
   // Post ===========================================
   static const String createPost = "${baseUrl}posts/create";
@@ -32,6 +41,7 @@ class ApiEndPoint {
   static const String getMyPost = "${baseUrl}posts/my-posts";
   static const String getAllPost = "${baseUrl}posts";
   static const String deletePost = "${baseUrl}posts/delete/";
+
 
   // Friend =========================================
   static const String createFriendRequest = "${baseUrl}friend-requests/create/";
@@ -43,6 +53,7 @@ class ApiEndPoint {
   static const String cancelFriendRequest = "${baseUrl}/friend-requests/update/";
   static const String unfriend = "${baseUrl}/friendships/";
   static const String deleteFriend = "${baseUrl}friendships/";
+
 
   // Chat ===========================================
   static const String createOneToOneChat = "${baseUrl}chats/create-1-to-1";
@@ -62,7 +73,6 @@ class ApiEndPoint {
 
 // Plan========================================================
   static const String getPlans="${baseUrl}plans";
-
 
 
   //Advertiser========================================================

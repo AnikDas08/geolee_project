@@ -130,14 +130,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 height: 40.w,
                 width: 40.w,
                 decoration: BoxDecoration(
+                  shape: BoxShape.circle,
                   color: AppColors.white,
-                  borderRadius: BorderRadius.circular(12.r),
                 ),
                 child: Center(
                   child: CommonImage(
                     imageSrc: "${ApiEndPoint.imageUrl+_providerProfileViewController.businessLogo}",
                     borderRadius: 12.r,
-                    size: 28.w,
                     fill: BoxFit.cover,
                   ),
                 ),

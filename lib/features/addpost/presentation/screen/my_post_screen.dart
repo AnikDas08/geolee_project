@@ -18,26 +18,23 @@ class MyPostScreen extends StatefulWidget {
   State<MyPostScreen> createState() => _MyPostScreenState();
 }
 
-// Add WidgetsBindingObserver here
 class _MyPostScreenState extends State<MyPostScreen> with WidgetsBindingObserver {
   final MyPostController controller = Get.put(MyPostController());
 
   @override
   void initState() {
     super.initState();
-    // Add observer
     WidgetsBinding.instance.addObserver(this);
     controller.fetchMyPosts();
   }
 
   @override
   void dispose() {
-    // Remove observer when disposing
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
-  @override // Add @override annotation
+  @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       controller.fetchMyPosts();
@@ -85,15 +82,21 @@ class _MyPostScreenState extends State<MyPostScreen> with WidgetsBindingObserver
               separatorBuilder: (_, __) => SizedBox(height: 12.h),
               itemBuilder: (context, index) {
                 final data = controller.myPost[index];
+                
+                // ✅ FIXED: Pass all images instead of just the first one
+                final List<String> postImages = data.photos.isNotEmpty
+                    ? data.photos.map((photo) => ApiEndPoint.imageUrl + photo).toList()
+                    : [];
+
                 return MyPostCard(
                   onTapProfile: () {
                     debugPrint('Profile Tab');
                   },
                   isProfile: true,
                   onTapPhoto: () {
-                    if (data.photos.isNotEmpty) {
+                    if (postImages.isNotEmpty) {
                       Get.to(() => FullScreenImageView(
-                        imageUrl: "${ApiEndPoint.imageUrl}${data.photos[0]}",
+                        imageUrl: postImages[0],
                       ));
                     }
                   },
@@ -103,9 +106,7 @@ class _MyPostScreenState extends State<MyPostScreen> with WidgetsBindingObserver
                   userAvatar: "${ApiEndPoint.imageUrl}${data.user.image}",
                   timeAgo: _formatPostTime(DateTime.parse(data.createdAt.toString())),
                   location: data.address,
-                  postImage: (data.photos.isNotEmpty)
-                      ? "${ApiEndPoint.imageUrl}${data.photos[0]}"
-                      : "",
+                  images: postImages, // <-- Corrected list passed here
                   description: data.description ?? "No description",
                   privacyImage: data.privacy == "public"
                       ? AppIcons.public
