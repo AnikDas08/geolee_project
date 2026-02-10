@@ -10,7 +10,7 @@ import 'package:giolee78/component/text_field/common_text_field.dart';
 import 'package:giolee78/config/api/api_end_point.dart';
 import 'package:giolee78/features/clicker/presentation/controller/clicker_controller.dart';
 import 'package:giolee78/features/clicker/presentation/widget/app_bar.dart';
-import 'package:giolee78/features/clicker/presentation/widget/my_post_card.dart';
+import 'package:giolee78/features/clicker/presentation/widget/common_post_card.dart';
 import 'package:giolee78/features/notifications/presentation/controller/notifications_controller.dart';
 import 'package:giolee78/utils/constants/app_colors.dart';
 import 'package:giolee78/utils/constants/app_icons.dart';
@@ -151,7 +151,7 @@ class _ClickerScreenState extends State<ClickerScreen> {
                   separatorBuilder: (_, __) => SizedBox(height: 16.h),
                   itemBuilder: (context, index) {
                     final data = controller.filteredPosts[index];
-                    return MyPostCards(
+                    return CommonPostCards(
                       onTapPhoto: () {
                         if (data.photos.isNotEmpty) {
                           Get.to(() => FullScreenImageView(
@@ -168,7 +168,11 @@ class _ClickerScreenState extends State<ClickerScreen> {
                       userAvatar: "${ApiEndPoint.imageUrl}${data.user.image}",
                       timeAgo: _formatPostTime(DateTime.parse(data.createdAt.toString())),
                       location: data.address,
-                      postImage: data.photos.isNotEmpty ? "${ApiEndPoint.imageUrl}${data.photos[0]}" : "",
+                      images: data.photos.isNotEmpty
+                          ? data.photos
+                          .map((photo) => ApiEndPoint.imageUrl + photo)
+                          .toList()
+                          : [],
                       description: data.description,
                       isFriend: false,
                       privacyImage: data.privacy == "public" ? AppIcons.public : AppIcons.onlyMe,

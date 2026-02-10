@@ -6,20 +6,19 @@ import 'package:giolee78/component/text/common_text.dart';
 import 'package:giolee78/features/addpost/presentation/screen/edit_post.dart';
 import 'package:giolee78/features/profile/presentation/controller/post_controller.dart';
 import 'package:giolee78/utils/constants/app_colors.dart';
-
 import 'confirm_delete_dialog.dart';
 
-// Define an enum for the actions
+// Enum for post actions
 enum PostAction { edit, delete, privacy }
 
-class MyPostCard extends StatelessWidget {
+class MyPostCard extends StatefulWidget {
   const MyPostCard({
     super.key,
     required this.userName,
     required this.userAvatar,
     required this.timeAgo,
     required this.location,
-    required this.postImage,
+    required this.images,
     required this.description,
     this.isMyPost = false,
     required this.clickerType,
@@ -34,7 +33,7 @@ class MyPostCard extends StatelessWidget {
   final String userAvatar;
   final String timeAgo;
   final String location;
-  final String postImage;
+  final List<String> images;
   final String description;
   final bool isMyPost;
   final String clickerType;
@@ -45,10 +44,21 @@ class MyPostCard extends StatelessWidget {
   final String postId;
 
   @override
+  State<MyPostCard> createState() => _MyPostCardState();
+}
+
+class _MyPostCardState extends State<MyPostCard> {
+  int currentIndex = 0;
+  late final MyPostController controller;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = Get.put(MyPostController());
+  }
+
+  @override
   Widget build(BuildContext context) {
-
-    final MyPostController controller = Get.put(MyPostController());
-
     return Container(
       decoration: BoxDecoration(
         color: AppColors.white,
@@ -74,17 +84,15 @@ class MyPostCard extends StatelessWidget {
                   child: Row(
                     children: [
                       InkWell(
-                        onTap: isProfile
-                            ? onTapProfile
-                            : () {
-                                debugPrint('Already Profile');
-                              },
+                        onTap: widget.isProfile
+                            ? widget.onTapProfile
+                            : () => debugPrint('Already Profile'),
                         child: CircleAvatar(
                           radius: 18.r,
                           backgroundColor: Colors.transparent,
                           child: ClipOval(
                             child: CommonImage(
-                              imageSrc: userAvatar,
+                              imageSrc: widget.userAvatar,
                               size: 36.r,
                               fill: BoxFit.cover,
                             ),
@@ -97,11 +105,9 @@ class MyPostCard extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             CommonText(
-                              text: userName,
+                              text: widget.userName,
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
-                              color: AppColors.black,
-                              textAlign: TextAlign.start,
                               maxLines: 1,
                             ),
                             SizedBox(height: 4.h),
@@ -114,10 +120,9 @@ class MyPostCard extends StatelessWidget {
                                 ),
                                 SizedBox(width: 4.w),
                                 CommonText(
-                                  text: timeAgo,
+                                  text: widget.timeAgo,
                                   fontSize: 11,
                                   color: AppColors.secondaryText,
-                                  textAlign: TextAlign.start,
                                 ),
                                 SizedBox(width: 6.w),
                                 Container(
@@ -135,72 +140,63 @@ class MyPostCard extends StatelessWidget {
                                   color: AppColors.secondaryText,
                                 ),
                                 SizedBox(width: 4.w),
-                                CommonText(
-                                  text: location,
-                                  fontSize: 11,
-                                  color: AppColors.secondaryText,
-                                  textAlign: TextAlign.start,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
+                                Expanded(
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        child: CommonText(
+                                          text: widget.location,
+                                          fontSize: 11,
+                                          color: AppColors.secondaryText,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                      SizedBox(width: 6.w),
+                                      CommonImage(imageSrc: widget.privacyImage),
+                                    ],
+                                  ),
                                 ),
-
-                                SizedBox(width: 8.w),
-
-                                CommonImage(imageSrc: privacyImage),
                               ],
                             ),
                           ],
                         ),
                       ),
-                      SizedBox(width: 8.w),
                     ],
                   ),
                 ),
-
-                if (isMyPost) _buildPopupMenuButton(context),
+                if (widget.isMyPost) _buildPopupMenuButton(context),
               ],
             ),
           ),
 
-          /// Image
+          /// Image Slider with dot indicator
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 12.w),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(10.r),
-              child: InkWell(
-                onTap: onTapPhoto,
-                child: CommonImage(
-                  imageSrc: postImage,
-                  width: double.infinity,
-                  height: 190.h,
-                  fill: BoxFit.cover,
-                  borderRadius: 10.r,
-                ),
-              ),
+            child: _PostImageSlider(
+              images: widget.images,
+              onTapPhoto: widget.onTapPhoto,
+              currentIndex: currentIndex,
+              onPageChanged: (index) => setState(() => currentIndex = index),
             ),
           ),
 
+          /// Clicker type
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
+            padding: EdgeInsets.fromLTRB(12.w, 12.h, 12.w, 4.h),
             child: CommonText(
-              text: clickerType,
+              text: widget.clickerType,
               fontSize: 12,
-              textAlign: TextAlign.start,
-              fontWeight: FontWeight.w800,
             ),
           ),
 
           /// Description
           Padding(
-            padding: EdgeInsets.fromLTRB(12.w, 12.h, 12.w, 12.h),
+            padding: EdgeInsets.fromLTRB(12.w, 6.h, 12.w, 12.h),
             child: CommonText(
-              text: description,
+              text: widget.description,
               fontSize: 12,
-              fontWeight: FontWeight.w400,
-              color: AppColors.textColorFirst,
-              textAlign: TextAlign.start,
               maxLines: 6,
-              overflow: TextOverflow.visible,
             ),
           ),
         ],
@@ -208,109 +204,122 @@ class MyPostCard extends StatelessWidget {
     );
   }
 
-  // 🌟 Helper method to build the PopupMenuButton
   Widget _buildPopupMenuButton(BuildContext context) {
     final MyPostController myPostController = Get.put(MyPostController());
 
     return PopupMenuButton<PostAction>(
       color: Colors.white,
-      icon: Icon(
-        Icons.more_vert_rounded,
-        size: 24.sp,
-        color: AppColors.secondaryText,
-      ),
+      icon: Icon(Icons.more_vert_rounded,
+          size: 24.sp, color: AppColors.secondaryText),
       itemBuilder: (context) => [
-        _buildPopupMenuItem(
+        _popupItem(
           PostAction.edit,
           Icons.edit_outlined,
           "Edit Post",
-          () {
+              () {
             Navigator.pop(context);
-            Get.to(EditPost(postId: postId.toString()))?.then((result) {
-              if (result == true) {
-                Get.find<MyPostController>().fetchMyPosts();
-              }
+            Get.to(EditPost(postId: widget.postId))?.then((value) {
+              if (value == true) myPostController.fetchMyPosts();
             });
-
-            // Get.to(EditPost(postId: postId.toString(),));
           },
         ),
-        _buildPopupMenuItem(
+        _popupItem(
           PostAction.delete,
           Icons.delete_outline,
           "Delete Post",
-          () {
+              () {
             Navigator.pop(context);
             showDeletePostDialog(
               context,
-              onConfirmDelete: () {
-                myPostController.deletePost(postId.toString());
-              },
+              onConfirmDelete: () => myPostController.deletePost(widget.postId),
             );
           },
         ),
-        _buildPopupMenuItem(
-          PostAction.privacy,
-          Icons.lock_outline,
-          "Change Privacy",
-          () {
-            Navigator.pop(context);
-          },
-        ),
       ],
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
-      elevation: 4,
-      padding: EdgeInsets.zero,
     );
   }
 
-  PopupMenuItem<PostAction> _buildPopupMenuItem(
-    PostAction value,
-    IconData icon,
-    String title,
-    VoidCallback onTap,
-  ) {
+  PopupMenuItem<PostAction> _popupItem(
+
+      PostAction value, IconData icon, String title, VoidCallback onTap) {
     return PopupMenuItem<PostAction>(
       value: value,
       child: GestureDetector(
         onTap: onTap,
         child: Row(
           children: [
-            Icon(icon, size: 18.sp, color: AppColors.black),
+            Icon(icon, size: 18.sp),
             SizedBox(width: 10.w),
-            Text(
-              title,
-              style: TextStyle(fontSize: 14.sp, color: AppColors.black),
-            ),
+            Text(title),
           ],
         ),
       ),
     );
   }
+}
 
-  Widget _buildCircleIcon({
-    required IconData icon,
-    required VoidCallback onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(16.r),
-      child: Container(
-        width: 28.r,
-        height: 28.r,
-        decoration: BoxDecoration(
-          color: AppColors.white,
-          shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.06),
-              blurRadius: 6.r,
-              offset: const Offset(0, 2),
+/// =======================================================
+/// IMAGE SLIDER WITH DOT INDICATOR
+/// =======================================================
+class _PostImageSlider extends StatelessWidget {
+  final List<String> images;
+  final VoidCallback onTapPhoto;
+  final int currentIndex;
+  final Function(int) onPageChanged;
+
+  const _PostImageSlider({
+    required this.images,
+    required this.onTapPhoto,
+    required this.currentIndex,
+    required this.onPageChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(10.r),
+          child: SizedBox(
+            height: 190.h,
+            child: PageView.builder(
+              itemCount: images.length,
+              onPageChanged: onPageChanged,
+              itemBuilder: (context, index) => InkWell(
+                onTap: onTapPhoto,
+                child: CommonImage(
+                  imageSrc: images[index],
+                  width: double.infinity,
+                  height: 190.h,
+                  fill: BoxFit.cover,
+                ),
+              ),
             ),
-          ],
+          ),
         ),
-        child: Icon(icon, size: 16.sp, color: AppColors.secondaryText),
-      ),
+        if (images.length > 1)
+          Padding(
+            padding: EdgeInsets.only(top: 8.h),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(
+                images.length,
+                    (index) => AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  margin: EdgeInsets.symmetric(horizontal: 3.w),
+                  width: currentIndex == index ? 8.r : 6.r,
+                  height: currentIndex == index ? 8.r : 6.r,
+                  decoration: BoxDecoration(
+                    color: currentIndex == index
+                        ? AppColors.primaryColor
+                        : AppColors.secondaryText.withOpacity(0.4),
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ),
+            ),
+          ),
+      ],
     );
   }
 }

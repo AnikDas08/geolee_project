@@ -8,6 +8,7 @@ import 'package:giolee78/utils/enum/enum.dart';
 import '../../../../services/api/api_service.dart';
 import '../../../../services/storage/storage_keys.dart';
 import '../../../../services/storage/storage_services.dart';
+import '../../../friend/data/friend_request_model.dart';
 import '../../data/data_model.dart';
 
 class HomeController extends GetxController {
@@ -19,6 +20,9 @@ class HomeController extends GetxController {
   RxString image = "".obs;
   String subCategory = "";
   int notificationCount = 0;
+  RxList<FriendModel> friendRequestsList = <FriendModel>[].obs;
+
+  RxBool IsLoading=false.obs;
 
   var clickerCount = RxnString(); // nullable, no initial value
   var filterOption = RxnString();
@@ -147,6 +151,36 @@ class HomeController extends GetxController {
 
     update();
   }
+
+
+
+
+  Future<void> fetchFriendRequests() async {
+    try {
+      final url = "${ApiEndPoint.getMyFriendRequest}";
+      IsLoading.value = true;
+
+      final response = await ApiService.get(url);
+
+      if (response.statusCode == 200) {
+        debugPrint("response => ${response.data}");
+
+        // ধরে নিচ্ছি response.data = { "data": [ {...}, {...} ] }
+        final dataList = response.data['data'] as List<dynamic>;
+        friendRequestsList.value = dataList
+            .map((e) => FriendModel.fromJson(e as Map<String, dynamic>))
+            .toList();
+
+      } else {
+        debugPrint("Error response => ${response.data}");
+      }
+    } catch (e) {
+      Get.snackbar('Error', e.toString());
+    } finally {
+      IsLoading.value = false;
+    }
+  }
+
 
   /*void clearSearch() {
     searchQuery = '';

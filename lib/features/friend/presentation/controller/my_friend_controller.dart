@@ -76,7 +76,6 @@ class MyFriendController extends GetxController {
         Get.snackbar(
           "Success",
           "Friend request accepted",
-          backgroundColor: Colors.green,
           colorText: Colors.white,
         );
       } else {

@@ -86,12 +86,6 @@ class FriendRequestScreen extends StatelessWidget {
                           ),
                         ),
                         SizedBox(height: 2.h),
-                        const CommonText(
-                          text: '2 Days Ago',
-                          fontSize: 12,
-                          fontWeight: FontWeight.w400,
-                          color: Color(0xFF737373),
-                        ),
                         SizedBox(height: 12.h),
 
                         // Action Buttons
