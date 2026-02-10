@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../../utils/constants/app_colors.dart';
 import '../../../../utils/constants/app_images.dart';
 import '../controller/notifications_controller.dart';
 import '../widgets/notification_item.dart';
@@ -11,12 +12,14 @@ class NotificationScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.white,
       appBar: AppBar(
+        backgroundColor: Colors.white,
         title: const Text("Notifications"),
       ),
 
       body: GetBuilder<NotificationsController>(
-        init: NotificationsController(), // controller init
+        init: NotificationsController(),
         builder: (controller) {
 
           /// First loading

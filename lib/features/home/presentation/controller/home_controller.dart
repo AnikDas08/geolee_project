@@ -70,6 +70,7 @@ class HomeController extends GetxController {
       WeightedLatLng(LatLng(23.777176, 90.399452), weight: 1.0),
       WeightedLatLng(LatLng(23.778000, 90.400000), weight: 1.5),
       WeightedLatLng(LatLng(23.776500, 90.398000), weight: 2.0),
+      WeightedLatLng(LatLng(23.456550, 90.378000), weight: 5.0),
     ];
 
     heatmaps = {

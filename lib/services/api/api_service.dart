@@ -230,7 +230,6 @@ class ApiService {
 }
 
 /// ========== [ DIO INSTANCE WITH INTERCEPTORS ] ========== ///
-///
 
 CookieJar cookieJar = CookieJar();
 

@@ -68,11 +68,9 @@ class _MyPostScreenState extends State<MyPostScreen> with WidgetsBindingObserver
           if (controller.isLoading.value && controller.myPost.isEmpty) {
             return const Center(child: CircularProgressIndicator());
           }
-
           if (controller.myPost.isEmpty) {
             return const Center(child: Text("No posts found."));
           }
-
           return RefreshIndicator(
             onRefresh: () => controller.fetchMyPosts(),
             child: ListView.separated(
@@ -82,7 +80,6 @@ class _MyPostScreenState extends State<MyPostScreen> with WidgetsBindingObserver
               separatorBuilder: (_, __) => SizedBox(height: 12.h),
               itemBuilder: (context, index) {
                 final data = controller.myPost[index];
-                
                 // ✅ FIXED: Pass all images instead of just the first one
                 final List<String> postImages = data.photos.isNotEmpty
                     ? data.photos.map((photo) => ApiEndPoint.imageUrl + photo).toList()
@@ -93,13 +90,15 @@ class _MyPostScreenState extends State<MyPostScreen> with WidgetsBindingObserver
                     debugPrint('Profile Tab');
                   },
                   isProfile: true,
-                  onTapPhoto: () {
-                    if (postImages.isNotEmpty) {
-                      Get.to(() => FullScreenImageView(
-                        imageUrl: postImages[0],
-                      ));
-                    }
-                  },
+                    onTapPhoto: () {
+                      if (postImages.isNotEmpty) {
+                        Get.to(() => FullScreenImageView(
+                          images: postImages,
+                          initialIndex: 0,
+                        ));
+                      }
+                    },
+
                   clickerType: data.clickerType,
                   isMyPost: true,
                   userName: data.user.name ?? "Unknown",
@@ -110,6 +109,8 @@ class _MyPostScreenState extends State<MyPostScreen> with WidgetsBindingObserver
                   description: data.description ?? "No description",
                   privacyImage: data.privacy == "public"
                       ? AppIcons.public
+                      : data.privacy == "friends"
+                      ? AppIcons.friends
                       : AppIcons.onlyMe,
                   postId: data.id,
                 );

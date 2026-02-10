@@ -145,8 +145,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const CommonText(
-                    text: 'Fast Food Company',
+                  CommonText(
+                    text: _providerProfileViewController.businessName,
                     textAlign: TextAlign.left,
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
