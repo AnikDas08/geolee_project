@@ -18,16 +18,30 @@ class MyPostScreen extends StatefulWidget {
   State<MyPostScreen> createState() => _MyPostScreenState();
 }
 
-class _MyPostScreenState extends State<MyPostScreen> {
+// Add WidgetsBindingObserver here
+class _MyPostScreenState extends State<MyPostScreen> with WidgetsBindingObserver {
   final MyPostController controller = Get.put(MyPostController());
-  // late Future _postFuture;
 
   @override
   void initState() {
     super.initState();
-    // // Assign the future once to avoid re-triggering it on every rebuild
-    // _postFuture = controller.fetchMyPosts();
-    // controller.fetchMyPosts();
+    // Add observer
+    WidgetsBinding.instance.addObserver(this);
+    controller.fetchMyPosts();
+  }
+
+  @override
+  void dispose() {
+    // Remove observer when disposing
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override // Add @override annotation
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      controller.fetchMyPosts();
+    }
   }
 
   String _formatPostTime(DateTime postTime) {
@@ -53,63 +67,55 @@ class _MyPostScreenState extends State<MyPostScreen> {
         title: const CommonText(text: 'My Post', fontSize: 18, fontWeight: FontWeight.w600),
       ),
       body: SafeArea(
-        child: FutureBuilder(
-          future:controller.fetchMyPosts(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            } else if (snapshot.hasError) {
-              return Center(child: Text("Error: ${snapshot.error}"));
-            } else {
-              // Once the future is done, we use GetBuilder to display the data
-              return GetBuilder<MyPostController>(
-                builder: (controller) {
-                  if (controller.myPost.isEmpty) {
-                    return const Center(child: Text("No posts found."));
-                  }
-                  return ListView.separated(
-                    padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-                    physics: const BouncingScrollPhysics(),
-                    itemCount: controller.myPost.length,
-                    separatorBuilder: (_, __) => SizedBox(height: 12.h),
-                    itemBuilder: (context, index) {
-                      final data = controller.myPost[index];
-                      return MyPostCard(
+        child: Obx(() {
+          if (controller.isLoading.value && controller.myPost.isEmpty) {
+            return const Center(child: CircularProgressIndicator());
+          }
 
-                        onTapProfile: (){
-                          debugPrint('Profile Tab');
-                        },
-                        isProfile: true,
-                        onTapPhoto:   (){
-                          if (data.photos.isNotEmpty) {
-                            Get.to(() => FullScreenImageView(
-                              imageUrl: "${ApiEndPoint.imageUrl+data.photos[0]}",
-                            ));
-                          }
-                        },
-                        clickerType: data.clickerType,
-                        isMyPost: true,
-                        userName: data.user.name ?? "Unknown",
-                        userAvatar: "${ApiEndPoint.imageUrl}${data.user.image}",
-                        timeAgo: _formatPostTime(DateTime.parse(data.createdAt.toString())),
-                        location: data.address,
-                        postImage: (data.photos.isNotEmpty)
-                            ? "${ApiEndPoint.imageUrl}${data.photos[0]}"
-                            : "",
-                        description: data.description ?? "No description",
-                        privacyImage: data.privacy == "public"
-                          ? AppIcons.public
-                          : AppIcons.onlyMe,
-                        postId: data.id,
+          if (controller.myPost.isEmpty) {
+            return const Center(child: Text("No posts found."));
+          }
 
-                      );
-                    },
-                  );
-                },
-              );
-            }
-          },
-        ),
+          return RefreshIndicator(
+            onRefresh: () => controller.fetchMyPosts(),
+            child: ListView.separated(
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+              physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+              itemCount: controller.myPost.length,
+              separatorBuilder: (_, __) => SizedBox(height: 12.h),
+              itemBuilder: (context, index) {
+                final data = controller.myPost[index];
+                return MyPostCard(
+                  onTapProfile: () {
+                    debugPrint('Profile Tab');
+                  },
+                  isProfile: true,
+                  onTapPhoto: () {
+                    if (data.photos.isNotEmpty) {
+                      Get.to(() => FullScreenImageView(
+                        imageUrl: "${ApiEndPoint.imageUrl}${data.photos[0]}",
+                      ));
+                    }
+                  },
+                  clickerType: data.clickerType,
+                  isMyPost: true,
+                  userName: data.user.name ?? "Unknown",
+                  userAvatar: "${ApiEndPoint.imageUrl}${data.user.image}",
+                  timeAgo: _formatPostTime(DateTime.parse(data.createdAt.toString())),
+                  location: data.address,
+                  postImage: (data.photos.isNotEmpty)
+                      ? "${ApiEndPoint.imageUrl}${data.photos[0]}"
+                      : "",
+                  description: data.description ?? "No description",
+                  privacyImage: data.privacy == "public"
+                      ? AppIcons.public
+                      : AppIcons.onlyMe,
+                  postId: data.id,
+                );
+              },
+            ),
+          );
+        }),
       ),
     );
   }

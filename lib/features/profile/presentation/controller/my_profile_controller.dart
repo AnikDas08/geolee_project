@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:giolee78/config/api/api_end_point.dart';
 import 'package:giolee78/config/route/app_routes.dart';
+import 'package:giolee78/features/home/presentation/controller/home_controller.dart';
 import 'package:giolee78/features/profile/data/model/user_profile_model.dart';
 import 'package:giolee78/services/api/api_service.dart';
 import 'package:giolee78/services/storage/storage_keys.dart';
@@ -160,6 +161,9 @@ class MyProfileController extends GetxController {
             LocalStorage.updatedAt,
           ),
         ]);
+
+
+
       } else {
         Get.snackbar(
           response.statusCode.toString(),

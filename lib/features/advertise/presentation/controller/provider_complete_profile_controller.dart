@@ -44,18 +44,18 @@ class ServiceProviderController extends GetxController {
     experience.value = '5 Years';
     skills.value = ['Electrician', 'House', 'Wiring'];
   }
-
-  @override
-  void onClose() {
-    // businessNameController.dispose();
-    // businessTypeController.dispose();
-    // businessLicenseNumberController.dispose();
-    // phoneNumberController.dispose();
-    // bioController.dispose();
-    // otpController.dispose();
-    // _timer?.cancel();
-    super.onClose();
-  }
+  //
+  // @override
+  // void onClose() {
+  //   businessNameController.dispose();
+  //   businessTypeController.dispose();
+  //   businessLicenseNumberController.dispose();
+  //   phoneNumberController.dispose();
+  //   bioController.dispose();
+  //   otpController.dispose();
+  //   _timer?.cancel();
+  //   super.onClose();
+  // }
 
   // ================= Image Picker =================
   Future<void> pickImage() async {

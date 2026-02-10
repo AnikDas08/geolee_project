@@ -19,7 +19,7 @@ import '../../../addpost/presentation/widgets/full_screen_view_image.dart';
 class ViewFriendScreen extends StatefulWidget {
   final bool isFriend;
   final bool isRequest;
-  final String userId; // user id from ClickerScreen
+  final String userId;
 
   const ViewFriendScreen({
     super.key,
@@ -40,7 +40,7 @@ class _ViewFriendScreenState extends State<ViewFriendScreen> {
     super.initState();
 
     // Fetch posts by user ID
-    controller.getPostsByUser(widget.userId);
+    controller.getPostsByUserId(widget.userId);
     controller.getUserById(widget.userId);
     controller.checkFriendship(widget.userId);
 

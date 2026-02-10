@@ -31,9 +31,7 @@ class ForgetPasswordController extends GetxController {
   String time = "00:00";
 
   /// here all Text Editing Controller
-  TextEditingController emailController = TextEditingController(
-    text: kDebugMode ? "user@gmail.com" : '',
-  );
+  TextEditingController emailController = TextEditingController();
   TextEditingController otpController = TextEditingController(
     text: kDebugMode ? '123456' : '',
   );
@@ -124,7 +122,6 @@ class ForgetPasswordController extends GetxController {
       final response = await ApiService.post(
         ApiEndPoint.verifyOtp,
         body: body,
-        header: {"Content-Type": "application/json"},
       );
 
       final data = response.data;
