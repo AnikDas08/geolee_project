@@ -185,7 +185,6 @@ class _OnboardingScreenState extends State<OnboardingScreen>
         position.latitude.toString(),
       );
 
-
       await LocalStorage.setString(
         LocalStorageKeys.log,
         position.longitude.toString(),
