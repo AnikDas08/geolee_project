@@ -11,7 +11,10 @@ class AppString {
   static const String enterYouPassword = "Type here";
   static const String cancel = "Cancel";
   static const String done = "Done";
+  static const String successful = "successful";
   static const String delete = "Delete";
+  static const String payment_successful = "payment_successful";
+  static const String payment_cancel = "payment_cancel";
   static const String deleteDetails = "Type 'Delete Account' to confirm your action";
 
   static const String someThingWrong = "Some Thing Wrong";

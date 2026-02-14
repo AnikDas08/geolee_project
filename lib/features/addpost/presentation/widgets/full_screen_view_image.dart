@@ -72,12 +72,11 @@ class _FullScreenImageViewState extends State<FullScreenImageView> {
           Positioned(
             top: 40.h,
             right: 20.w,
-            child: CircleAvatar(
-              backgroundColor: Colors.red,
-              child: IconButton(onPressed: (){
-                Get.back();
-              }, icon: Icon(Icons.cancel_rounded,color: Colors.white,)),
-            ),
+            child: IconButton(onPressed: (){
+              Get.back();
+            }, icon: Icon(
+              size: 30,
+              Icons.cancel_rounded,color: Colors.grey,)),
           ),
 
           /// 🔢 Image counter

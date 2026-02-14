@@ -10,6 +10,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../component/pop_up/common_pop_menu.dart';
 import '../../../../config/route/app_routes.dart';
+import '../../../notifications/presentation/screen/stripe_web_view_screen.dart';
 import '../../data/plan_model.dart';
 
 class CreateAdsController extends GetxController {
@@ -193,8 +194,9 @@ class CreateAdsController extends GetxController {
             res['data']['url'] != null) {
           final paymentUrl = res['data']['url'];
 
-          // ✅ Payment URL launch করুন
-          await _launchPayment(paymentUrl);
+
+          Get.to(() => StripeWebViewPage(checkoutUrl: paymentUrl));
+
         } else {
           _showSuccessPopup();
         }
