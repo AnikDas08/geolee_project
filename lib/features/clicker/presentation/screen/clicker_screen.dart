@@ -48,12 +48,10 @@ class _ClickerScreenState extends State<ClickerScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      // Using the Stateful CustomAppBar we created
       appBar: CustomAppBar(
         notificationCount: notificationsController.unreadCount,
       ),
       body: Obx(() {
-        // Show loader only on initial fetch when list is empty
         if (controller.isLoading.value && controller.posts.isEmpty) {
           return const Center(child: CircularProgressIndicator());
         }

@@ -71,11 +71,11 @@ class ApiEndPoint {
 
 
 
-// Plan========================================================
+// Plan===============================================
   static const String getPlans="${baseUrl}plans";
 
 
-  //Advertiser========================================================
+  //Advertiser========================================
 
   static const String advertiserCompleteProfile="${baseUrl}advertisers/create";
   static const String advertiserVerify="${baseUrl}/advertisers/verify";

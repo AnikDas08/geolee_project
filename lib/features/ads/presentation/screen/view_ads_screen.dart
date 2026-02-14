@@ -203,9 +203,9 @@ class ViewAdsScreen extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
                           InkWell(
-                            onTap: () {
-                              controller.deleteAdsById();
+                            onTap: () async{
                               Get.back();
+                              await controller.deleteAdsById();
                             },
                             child: Container(
                               height: 48.h,

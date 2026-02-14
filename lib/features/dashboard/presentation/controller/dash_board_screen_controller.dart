@@ -15,25 +15,30 @@ class DashBoardScreenController extends GetxController {
     totalActiveAds: 0,
     totalReachCount: 0,
     totalClickCount: 0,
-    engagementRate: 0,
+    engagementRate: 0.0, // ✅ Changed to 0.0 for double
   ).obs;
+
+  List<MyActiveAdvertisement> activeAds = [];
 
   @override
   void onInit() {
-    fetchAdvertisementOverview();
     super.onInit();
+    fetchAdvertisementOverview();
     fetchMyActiveAds();
   }
-
-  List<MyActiveAdvertisement> activeAds = [];
 
   Future<void> fetchAdvertisementOverview() async {
     try {
       isLoading(true);
 
+      debugPrint("📊 Fetching advertisement overview...");
+
       ApiResponseModel response = await ApiService.get(
         ApiEndPoint.advertisementsOverviewMe,
       );
+
+      debugPrint("📊 Response status: ${response.statusCode}");
+      debugPrint("📊 Response data: ${response.data}");
 
       if (response.statusCode == 200 && response.data != null) {
         final result = AdvertisementOverviewResponse.fromJson(
@@ -42,11 +47,18 @@ class DashBoardScreenController extends GetxController {
 
         if (result.success) {
           overviewData.value = result.data;
-          update();
+
+          debugPrint("✅ Overview updated:");
+          debugPrint("   Active Ads: ${overviewData.value.totalActiveAds}");
+          debugPrint("   Reach Count: ${overviewData.value.totalReachCount}");
+          debugPrint("   Click Count: ${overviewData.value.totalClickCount}");
+          debugPrint("   Engagement: ${overviewData.value.engagementRate}");
+
+          update(); // ✅ Trigger UI update
         }
       }
     } catch (e) {
-      debugPrint(e.toString());
+      debugPrint("❌ Error fetching overview: $e");
     } finally {
       isLoading(false);
     }
@@ -58,21 +70,21 @@ class DashBoardScreenController extends GetxController {
 
       ApiResponseModel responseActive = await ApiService.get(activeEndpoint);
 
-      print('Active Ads Response: ${responseActive.data}');
+      debugPrint('📢 Active Ads Response: ${responseActive.data}');
 
       if (responseActive.statusCode == 200 && responseActive.data != null) {
-
         debugPrint("${responseActive.data}");
 
         final List<dynamic> jsonList = responseActive.data['data'];
         activeAds = jsonList
             .map((e) => MyActiveAdvertisement.fromJson(e))
             .toList();
-        update();
-        print('Active Ads parsed: ${activeAds.length}');
+
+        debugPrint('✅ Active Ads parsed: ${activeAds.length}');
+        update(); // ✅ Trigger UI update
       }
     } catch (e) {
-      debugPrint("Exception Error Is :${e}");
+      debugPrint("❌ Exception Error: $e");
     }
   }
 }

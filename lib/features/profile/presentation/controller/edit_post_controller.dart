@@ -582,19 +582,51 @@ class EditPostController extends GetxController {
           body: body,
         );
       }
-      if (response.statusCode == 200) {
-        Get.snackbar("Successful", "Update Your Post Data");
 
-        Get.find<HomeController>().fetchPosts();
-        Get.find<MyPostController>().fetchMyPosts();
-        Get.find<MyPostController>().refresh();
+      // ✅ Handle response properly
+      if (response.statusCode == 200||response.statusCode==201) {
+        // Show success message
+        Get.snackbar(
+          "Success",
+          "Post updated successfully!",
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+        );
 
+        // Refresh posts in both controllers (if they exist)
+        try {
+          if (Get.isRegistered<HomeController>()) {
+            await Get.find<HomeController>().fetchPosts();
+            Get.find<HomeController>().refresh();
+          }
+        } catch (e) {
+          debugPrint("HomeController not found: $e");
+        }
 
+        try {
+          if (Get.isRegistered<MyPostController>()) {
+            await Get.find<MyPostController>().fetchMyPosts();
+            Get.find<MyPostController>().refresh();
+          }
+        } catch (e) {
+          debugPrint("MyPostController not found: $e");
+        }
+
+        // Navigate back with result
+        Get.back(result: true);
+      } else {
+        // Handle error
+        final errorMessage = _getErrorMessage(response);
+        Get.snackbar(
+          'Error',
+          errorMessage,
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
       }
-
-      _handleUpdateResponse(response);
     } catch (e) {
-      isLoading.value = false;
       Get.snackbar(
         'Error',
         'Failed to update post: $e',
@@ -602,8 +634,14 @@ class EditPostController extends GetxController {
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );
+      debugPrint("Update post error: $e");
+    } finally {
+      isLoading.value = false;
     }
   }
+
+// ❌ Remove or comment out _handleUpdateResponse - no longer needed
+// void _handleUpdateResponse(dynamic response) { ... }
 
   void _handleUpdateResponse(dynamic response) {
     isLoading.value = false;

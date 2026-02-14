@@ -36,6 +36,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   Widget build(BuildContext context) {
     return GetBuilder<DashBoardScreenController>(
+      init: DashBoardScreenController(), // ✅ Initialize once
       builder: (controller) {
         return Scaffold(
           backgroundColor: AppColors.background,
@@ -47,7 +48,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 children: [
                   _buildHeader(),
                   SizedBox(height: 20.h),
-                  _buildStatsGrid(DashBoardScreenController()),
+                  _buildStatsGrid(controller), // ✅ Pass the controller from builder
                   SizedBox(height: 24.h),
                   const CommonText(
                     text: 'My Active Ads',
@@ -58,49 +59,38 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ),
                   SizedBox(height: 16.h),
 
-                  ListView.separated(
+                  // ✅ Show loading or content
+                  controller.isLoading.value
+                      ? const Center(child: CircularProgressIndicator())
+                      : controller.activeAds.isEmpty
+                      ? const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(20.0),
+                      child: Text("No active ads found"),
+                    ),
+                  )
+                      : ListView.separated(
                     shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
                     itemCount: controller.activeAds.length,
                     itemBuilder: (context, index) {
                       final data = controller.activeAds[index];
                       return _buildAdCard(
-                        image: "${ApiEndPoint.imageUrl+data.image}",
+                        image: "${ApiEndPoint.imageUrl}${data.image}",
                         title: data.title,
-                        description:
-                           data.description,
+                        description: data.description,
                         onTap: () {
-                          Get.to(ViewAdsScreen(),
+                          Get.to(
+                                () => const ViewAdsScreen(),
                             arguments: data.id,
                           );
                         },
                       );
                     },
-                    separatorBuilder: (BuildContext context, int index) {
+                    separatorBuilder: (context, index) {
                       return SizedBox(height: 8.h);
                     },
                   ),
-
-                  // _buildAdCard(
-                  //   image: AppImages.banner1,
-                  //   title: 'Delicious Fast Food',
-                  //   description:
-                  //       'Satisfy Your Cravings With Delicious Fast Food, Where Every Bite Is Packed With Flavour From Juicy Burgers And Crispy Fries To Cheesy Pizzas And Spicy Wraps.',
-                  //   onTap: () {
-                  //     Get.to(() => ViewAdsScreen(
-                  //
-                  //     ));
-                  //   },
-                  // ),
-                  // SizedBox(height: 16.h),
-                  // _buildAdCard(
-                  //   image: AppImages.banner2,
-                  //   title: 'Delicious Fast Food',
-                  //   description:
-                  //       'Satisfy Your Cravings With Delicious Fast Food, Where Every Bite Is Packed With Flavour From Juicy Burgers And Crispy Fries To Cheesy Pizzas And Spicy Wraps.',
-                  //   onTap: () {
-                  //     Get.to(() => ViewAdsScreen());
-                  //   },
-                  // ),
                 ],
               ),
             ),
@@ -135,7 +125,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
                 child: Center(
                   child: CommonImage(
-                    imageSrc: "${ApiEndPoint.imageUrl+_providerProfileViewController.businessLogo}",
+                    imageSrc: "${ApiEndPoint.imageUrl+LocalStorage.businessLogo}",
                     borderRadius: 12.r,
                     fill: BoxFit.cover,
                   ),
@@ -205,7 +195,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
       children: [
         _StatsCard(title: 'Active Ads', value: data.totalActiveAds.toString()),
         _StatsCard(title: 'Ads Reach', value: data.totalReachCount.toString()),
-        _StatsCard(title: 'Engagement', value: '${data.engagementRate}%'),
+        _StatsCard(
+          title: 'Engagement',
+          value: '${(data.engagementRate * 100).toStringAsFixed(1)}%', // ✅ Format as percentage
+        ),
         _StatsCard(title: 'Ads Click', value: data.totalClickCount.toString()),
       ],
     );
