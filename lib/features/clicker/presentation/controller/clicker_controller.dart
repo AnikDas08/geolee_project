@@ -151,7 +151,6 @@ class ClickerController extends GetxController {
   }
 
   // Inside ClickerController
-
   Future<void> clickBanner(String bannerId) async {
     try {
       // URL structure: advertisements/track-click/ID
@@ -288,7 +287,6 @@ class ClickerController extends GetxController {
   }
 
   void changePosition(int position) => _currentPosition.value = position;
-
   void changeFilter(String newFilter) {
     _selectedFilter.value = newFilter;
     getAllPosts(clickerType: newFilter);
@@ -346,7 +344,6 @@ class ClickerController extends GetxController {
       debugPrint("Friendship Error: $e");
     }
   }
-
   Future<void> onTapAddFriendButton(String userId) async {
     try {
       final response = await ApiService.post(

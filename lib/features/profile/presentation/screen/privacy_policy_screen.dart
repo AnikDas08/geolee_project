@@ -31,7 +31,7 @@ class _PrivacyPolicyScreenState extends State<PrivacyPolicyScreen> {
     final double horizontalPadding = 20.w;
 
     return Scaffold(
-      backgroundColor: AppColor.background,
+      backgroundColor: Colors.white,
       appBar: AppBar(
         elevation: 0,
         centerTitle: true,

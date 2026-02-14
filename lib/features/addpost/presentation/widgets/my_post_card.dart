@@ -291,28 +291,59 @@ class _PostImageSlider extends StatelessWidget {
             ),
           ),
         ),
+
+        ///Indicator===========================
         if (images.length > 1)
           Padding(
-            padding: EdgeInsets.only(top: 8.h),
+            padding: EdgeInsets.only(top: 10.h),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: List.generate(
                 images.length,
-                (index) => AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  margin: EdgeInsets.symmetric(horizontal: 3.w),
-                  width: currentIndex == index ? 8.r : 6.r,
-                  height: currentIndex == index ? 8.r : 6.r,
-                  decoration: BoxDecoration(
-                    color: currentIndex == index
-                        ? AppColors.primaryColor
-                        : AppColors.secondaryText.withOpacity(0.4),
-                    shape: BoxShape.circle,
-                  ),
-                ),
+                    (index) {
+                  final isActive = currentIndex == index;
+
+                  return AnimatedScale(
+                    scale: isActive ? 1.1 : 1,
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeOutCubic,
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 350),
+                      curve: Curves.easeOutCubic,
+                      margin: EdgeInsets.symmetric(horizontal: 4.w),
+                      height: 6.h,
+                      width: isActive ? 26.w : 8.w,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20.r),
+                        gradient: isActive
+                            ? LinearGradient(
+                          colors: [
+                            AppColors.primaryColor,
+                            AppColors.primaryColor.withOpacity(0.7),
+                          ],
+                        )
+                            : null,
+                        color: isActive
+                            ? null
+                            : AppColors.secondaryText.withOpacity(0.25),
+                        boxShadow: isActive
+                            ? [
+                          BoxShadow(
+                            color: AppColors.primaryColor
+                                .withOpacity(0.4),
+                            blurRadius: 6.r,
+                            offset: const Offset(0, 2),
+                          )
+                        ]
+                            : [],
+                      ),
+                    ),
+                  );
+                },
               ),
             ),
           ),
+
       ],
     );
   }

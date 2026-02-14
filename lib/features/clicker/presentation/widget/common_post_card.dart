@@ -217,28 +217,53 @@ class _PostImageSliderState extends State<_PostImageSlider> {
         ),
 
         /// ================= Dot Indicator
+        /// ================= Dot Indicator
         if (widget.images.length > 1)
           Padding(
-            padding: EdgeInsets.only(top: 8.h),
+            padding: EdgeInsets.only(top: 10.h),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: List.generate(
                 widget.images.length,
-                    (index) => AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  margin: EdgeInsets.symmetric(horizontal: 3.w),
-                  width: currentIndex == index ? 8.r : 6.r,
-                  height: currentIndex == index ? 8.r : 6.r,
-                  decoration: BoxDecoration(
-                    color: currentIndex == index
-                        ? AppColors.primaryColor
-                        : AppColors.secondaryText.withOpacity(0.4),
-                    shape: BoxShape.circle,
-                  ),
-                ),
+                    (index) {
+                  final isActive = currentIndex == index;
+
+                  return AnimatedContainer(
+                    duration: const Duration(milliseconds: 350),
+                    curve: Curves.easeOutCubic,
+                    margin: EdgeInsets.symmetric(horizontal: 4.w),
+                    height: 6.h,
+                    width: isActive ? 26.w : 8.w,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20.r),
+                      gradient: isActive
+                          ? const LinearGradient(
+                        colors: [
+                          Color(0xFFFF0000),
+                          Color(0xFFF43C3C),
+                        ],
+                      )
+                          : null,
+                      color: isActive
+                          ? null
+                          : Colors.grey.withOpacity(0.35),
+                      boxShadow: isActive
+                          ? [
+                        BoxShadow(
+                          color: Color(0xFFF66666),
+
+                          blurRadius: 6.r,
+                          offset: const Offset(0, 2),
+                        )
+                      ]
+                          : [],
+                    ),
+                  );
+                },
               ),
             ),
           ),
+
       ],
     );
   }
