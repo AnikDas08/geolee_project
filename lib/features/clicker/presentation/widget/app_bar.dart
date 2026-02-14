@@ -11,7 +11,6 @@ import '../../../../component/image/common_image.dart';
 import '../../../../component/text/common_text.dart';
 import '../../../../config/api/api_end_point.dart';
 import '../../../../utils/constants/app_colors.dart';
-import '../../../../utils/constants/app_images.dart';
 
 class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
   const CustomAppBar({super.key, required this.notificationCount});
@@ -26,46 +25,87 @@ class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
 }
 
 class _CustomAppBarState extends State<CustomAppBar> {
+  // Use same initial state as HomeDetails
   String displayLocation = "Fetching location...";
+  bool loadingLocation = true;
 
   @override
   void initState() {
     super.initState();
-    _handleLocation();
+    _getCurrentLocationAndAddress();
   }
 
-  Future<void> _handleLocation() async {
+  /// Same location logic as HomeDetails
+  Future<void> _getCurrentLocationAndAddress() async {
     try {
-      // 1. Check Permissions
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        _updateLocationText("GPS Disabled");
+        return;
+      }
+
       LocationPermission permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          _updateLocationText("Permission Denied");
+          return;
+        }
       }
 
-      if (permission == LocationPermission.always || permission == LocationPermission.whileInUse) {
-        // 2. Get Position
-        Position position = await Geolocator.getCurrentPosition(
-          desiredAccuracy: LocationAccuracy.low,
-        );
+      Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      ).timeout(const Duration(seconds: 10));
 
-        // 3. Convert to Address
+      try {
         List<Placemark> placemarks = await placemarkFromCoordinates(
           position.latitude,
           position.longitude,
         );
 
-        if (placemarks.isNotEmpty) {
+        if (placemarks.isNotEmpty && mounted) {
           Placemark place = placemarks[0];
+
+          // Same Priority list: Road -> Area -> City -> State -> Country
+          List<String?> potentialFields = [
+            place.thoroughfare,
+            place.subLocality,
+            place.locality,
+            place.administrativeArea,
+            place.country,
+          ];
+
+          List<String> finalParts = [];
+
+          // Stop at 3 fields to keep it consistent
+          for (var field in potentialFields) {
+            if (field != null && field.isNotEmpty) {
+              finalParts.add(field);
+            }
+            if (finalParts.length == 3) break;
+          }
+
           setState(() {
-            // Priority: Locality (City) -> SubAdmin (District) -> Name
-            displayLocation = place.locality ?? place.subAdministrativeArea ?? place.name ?? "Unknown";
+            displayLocation = finalParts.isNotEmpty
+                ? finalParts.join(", ")
+                : "Location Found";
+            loadingLocation = false;
           });
         }
-      } else {
-        setState(() => displayLocation = "Permission denied");
+      } catch (e) {
+        _updateLocationText("Address unavailable");
       }
     } catch (e) {
-      setState(() => displayLocation = "Location unavailable");
+      _updateLocationText("Location Error");
+    }
+  }
+
+  void _updateLocationText(String text) {
+    if (mounted) {
+      setState(() {
+        displayLocation = text;
+        loadingLocation = false;
+      });
     }
   }
 
@@ -82,52 +122,61 @@ class _CustomAppBarState extends State<CustomAppBar> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  GestureDetector(
-                    onTap: () => Navigator.pop(context),
-                    child: const Icon(Icons.arrow_back_ios_new_rounded),
-                  ),
-                  10.width,
-                  GestureDetector(
-                    onTap: () => Get.toNamed(AppRoutes.profile),
-                    child: CircleAvatar(
-                      radius: 20,
-                      child: ClipOval(
-                        child: CommonImage(
-                          fill: BoxFit.fill,
-                          imageSrc: (LocalStorage.myImage.isNotEmpty && LocalStorage.token.isNotEmpty)
-                              ? ApiEndPoint.imageUrl + LocalStorage.myImage
-                              : "assets/images/profile.png",
-                          size: 40,
-                          defaultImage: "assets/images/profile.png",
+              Expanded(
+                child: Row(
+                  children: [
+                    GestureDetector(
+                      onTap: () => Navigator.pop(context),
+                      child: const Icon(Icons.arrow_back_ios_new_rounded),
+                    ),
+                    10.width,
+                    GestureDetector(
+                      onTap: () => Get.toNamed(AppRoutes.profile),
+                      child: CircleAvatar(
+                        radius: 20,
+                        backgroundColor: Colors.grey[200],
+                        child: ClipOval(
+                          child: CommonImage(
+                            fill: BoxFit.cover,
+                            imageSrc: (LocalStorage.myImage.isNotEmpty && LocalStorage.token.isNotEmpty)
+                                ? ApiEndPoint.imageUrl + LocalStorage.myImage
+                                : "assets/images/profile.png",
+                            size: 40,
+                            defaultImage: "assets/images/profile.png",
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  12.width,
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      CommonText(
-                        text: (LocalStorage.myName.isNotEmpty && LocalStorage.token.isNotEmpty)
-                            ? LocalStorage.myName
-                            : "User",
-                        fontSize: 16,
-                        color: AppColors.textColorFirst,
-                        fontWeight: FontWeight.w600,
+                    12.width,
+                    Expanded(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          CommonText(
+                            text: (LocalStorage.myName.isNotEmpty && LocalStorage.token.isNotEmpty)
+                                ? LocalStorage.myName
+                                : "User",
+                            fontSize: 16,
+                            color: AppColors.textColorFirst,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          // Matches HomeDetails display style
+                          Text(
+                            displayLocation,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w400,
+                              color: AppColors.secondaryText,
+                            ),
+                          ),
+                        ],
                       ),
-                      // Dynamic Location Text
-                      CommonText(
-                        text: displayLocation,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w400,
-                        color: AppColors.secondaryText,
-                      ),
-                    ],
-                  ),
-                ],
+                    ),
+                  ],
+                ),
               ),
 
               /// Notification Stack
@@ -167,7 +216,11 @@ class _CustomAppBarState extends State<CustomAppBar> {
       child: Center(
         child: Text(
           "${widget.notificationCount}",
-          style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+          style: const TextStyle(
+              color: Colors.white,
+              fontSize: 10,
+              fontWeight: FontWeight.bold
+          ),
         ),
       ),
     );

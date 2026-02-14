@@ -1,4 +1,6 @@
+import 'dart:io';
 import 'dart:math';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
@@ -60,12 +62,14 @@ class ClickerController extends GetxController {
   void onInit() {
     super.onInit();
     getAllPosts();
+    _getUniqueDeviceId();
     getCurrentLocation(); // Fetch location on startup
     if (LocalStorage.token.isNotEmpty) {
       getBanners();
       searchController.addListener(_onSearchChanged);
     }
   }
+
 
   @override
   void onClose() {
@@ -78,7 +82,25 @@ class ClickerController extends GetxController {
   Future<void> getBanners() async {
     try {
       isBannerLoading.value = true;
-      final response = await ApiService.get("advertisements/nearby-active/");
+
+      // 1. Get current position
+      Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.low,
+      );
+
+      // 2. Get the unique hardware ID
+      String deviceId = await _getUniqueDeviceId();
+
+      // 3. Construct URL with dynamic data
+      final String url = "advertisements/nearby-active"
+          "?lng=${position.longitude}"
+          "&lat=${position.latitude}"
+          "&deviceId=$deviceId";
+
+      debugPrint("Hitting Banner API: $url");
+
+      final response = await ApiService.get(url);
+
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data['data'];
         adList.assignAll(data.map((e) => AdBannerModel.fromJson(e)).toList());
@@ -113,6 +135,37 @@ class ClickerController extends GetxController {
       Utils.errorSnackBar("Error", e.toString());
     } finally {
       isLoading.value = false;
+    }
+  }
+
+  Future<String> _getUniqueDeviceId() async {
+    DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+    if (Platform.isAndroid) {
+      AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
+      return androidInfo.id; // Unique ID on Android
+    } else if (Platform.isIOS) {
+      IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
+      return iosInfo.identifierForVendor ?? "unknown_ios_id"; // Unique ID on iOS
+    }
+    return "unknown_device";
+  }
+
+  // Inside ClickerController
+
+  Future<void> clickBanner(String bannerId) async {
+    try {
+      // URL structure: advertisements/track-click/ID
+      final String url = "advertisements/track-click/$bannerId";
+
+      // We hit this as a POST or GET depending on your backend requirement.
+      // Usually tracking is a POST or PATCH. Adjust method as needed.
+      final response = await ApiService.post(url);
+
+      if (response.statusCode == 200) {
+        debugPrint("Banner click tracked successfully for ID: $bannerId");
+      }
+    } catch (e) {
+      debugPrint("Error tracking banner click: $e");
     }
   }
 

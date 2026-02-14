@@ -16,6 +16,7 @@ import 'package:giolee78/utils/constants/app_colors.dart';
 import 'package:giolee78/utils/constants/app_icons.dart';
 import '../../../addpost/presentation/widgets/full_screen_view_image.dart';
 import '../../../friend/presentation/screen/view_friend_screen.dart';
+import '../widget/webview_screen.dart';
 
 class ClickerScreen extends StatefulWidget {
   const ClickerScreen({super.key});
@@ -92,13 +93,27 @@ class _ClickerScreenState extends State<ClickerScreen> {
                 if (controller.adList.isNotEmpty) ...[
                   CarouselSlider(
                     items: controller.adList.map((ad) {
-                      return ClipRRect(
-                        borderRadius: BorderRadius.circular(12.r),
-                        child: CommonImage(
-                          imageSrc: "${ApiEndPoint.imageUrl}${ad.image}",
-                          height: 150.h,
-                          width: double.infinity,
-                          fill: BoxFit.cover,
+                      return GestureDetector(
+                        onTap: () {
+                          // 1. Hit the tracking API
+                          controller.clickBanner(ad.id);
+
+                          // 2. Open the WebView if URL exists
+                          if (ad.websiteUrl != null && ad.websiteUrl!.isNotEmpty) {
+                            Get.to(() => CommonWebViewScreen(
+                              url: ad.websiteUrl!,
+                              title: ad.title,
+                            ));
+                          }
+                        },
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(12.r),
+                          child: CommonImage(
+                            imageSrc: "${ApiEndPoint.imageUrl}${ad.image}",
+                            height: 150.h,
+                            width: double.infinity,
+                            fill: BoxFit.cover,
+                          ),
                         ),
                       );
                     }).toList(),

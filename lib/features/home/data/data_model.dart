@@ -59,6 +59,8 @@ class Post {
   final int price;
   final String priority;
   final String bookingStatus;
+  final String clickerType;
+  final String address;
   final User user;
 
   Post({
@@ -73,22 +75,47 @@ class Post {
     required this.price,
     required this.priority,
     required this.bookingStatus,
+    required this.clickerType,
+    required this.address,
     required this.user,
   });
 
   factory Post.fromJson(Map<String, dynamic> json) {
+    // Extract coordinates from location object
+    double latitude = 0.0;
+    double longitude = 0.0;
+
+    if (json['location'] != null && json['location']['coordinates'] != null) {
+      List<dynamic> coords = json['location']['coordinates'];
+      if (coords.length >= 2) {
+        // GeoJSON format: [longitude, latitude]
+        longitude = (coords[0] ?? 0).toDouble();
+        latitude = (coords[1] ?? 0).toDouble();
+      }
+    }
+
+    // Fallback to lat/long fields if they exist
+    if (json['lat'] != null) {
+      latitude = (json['lat'] ?? 0).toDouble();
+    }
+    if (json['long'] != null) {
+      longitude = (json['long'] ?? 0).toDouble();
+    }
+
     return Post(
       id: json['_id'] ?? '',
       title: json['title'] ?? '',
       description: json['description'] ?? '',
       image: json['image'] ?? '',
-      lat: (json['lat'] ?? 0).toDouble(),
-      long: (json['long'] ?? 0).toDouble(),
+      lat: latitude,
+      long: longitude,
       serviceDate: json['serviceDate'] ?? '',
       serviceTime: json['serviceTime'] ?? '',
       price: json['price'] ?? 0,
       priority: json['priority'] ?? '',
       bookingStatus: json['bookingStatus'] ?? '',
+      clickerType: json['clickerType'] ?? '',
+      address: json['address'] ?? '',
       user: User.fromJson(json['user'] ?? {}),
     );
   }

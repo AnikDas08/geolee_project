@@ -12,6 +12,10 @@
 	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+    <string>This app needs access to location to show nearby banners and posts.</string>
+    <key>NSLocationAlwaysUsageDescription</key>
+    <string>This app needs access to location to show nearby banners and posts.</string>
 	<key>CFBundleName</key>
 	<string>giolee78</string>
 	<key>CFBundlePackageType</key>
