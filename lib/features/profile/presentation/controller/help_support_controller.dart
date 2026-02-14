@@ -85,7 +85,7 @@ class HelpSupportController extends GetxController {
     } else {
       Utils.errorSnackBar(response.statusCode, response.message);
       status = Status.error;
-      debugPrint("Response Is : >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>${response.message}");
+      debugPrint("Response Is : >>>>>>>>>>>>>>>>>>>>>>>>>>${response.message}");
       update();
     }
   }

@@ -116,7 +116,7 @@ class ClickerController extends GetxController {
     }
   }
 
-  // ================= Get Posts By Specific User ID (The one you missed!)
+  // ================= Get Posts By Specific User ID
   Future<void> getPostsByUserId(String userId) async {
     try {
       isUserLoading.value = true;
@@ -138,7 +138,6 @@ class ClickerController extends GetxController {
       isUserLoading.value = false;
     }
   }
-
 
   // ================= Get User Profile Info
   Future<void> getUserById(String userId) async {
@@ -183,8 +182,7 @@ class ClickerController extends GetxController {
 
       // 2. Get Position
       Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy
-            .low, // Low accuracy is faster and enough for city names
+        desiredAccuracy: LocationAccuracy.low,
       );
 
       // 3. Get City Name
@@ -195,7 +193,6 @@ class ClickerController extends GetxController {
 
       if (placemarks.isNotEmpty) {
         Placemark place = placemarks[0];
-        // locality usually gives the city (e.g., "Dhaka" or "New York")
         userAddress.value =
             place.locality ?? place.subAdministrativeArea ?? "Unknown";
       }
@@ -225,10 +222,10 @@ class ClickerController extends GetxController {
       filtered = filtered
           .where(
             (post) =>
-                post.user.name.toLowerCase().contains(query) ||
-                post.description.toLowerCase().contains(query) ||
-                post.address.toLowerCase().contains(query),
-          )
+        post.user.name.toLowerCase().contains(query) ||
+            post.description.toLowerCase().contains(query) ||
+            post.address.toLowerCase().contains(query),
+      )
           .toList();
     }
     filteredPosts.assignAll(filtered);
@@ -241,37 +238,6 @@ class ClickerController extends GetxController {
     getAllPosts(clickerType: newFilter);
   }
 
-
-  Future<void> cancelFriendRequest(String userId) async {
-    try {
-      isLoading.value = true;
-      // Use pendingRequestId if available, otherwise fallback to userId
-      final idToUse = pendingRequestId.value.isNotEmpty
-          ? pendingRequestId.value
-          : userId;
-      final endpoint = "${ApiEndPoint.cancelFriendRequest}$idToUse";
-
-      final response = await ApiService.patch(
-        endpoint,
-        body: {"status": "cancelled"},
-      );
-
-      if (response.statusCode == 200) {
-        friendStatus.value = FriendStatus.none;
-        pendingRequestId.value = '';
-        Utils.successSnackBar(
-          "Cancelled",
-          "Friend request cancelled successfully",
-        );
-      }
-    } catch (e) {
-      Utils.errorSnackBar("Error", e.toString());
-    } finally {
-      isLoading.value = false;
-    }
-  }
-
-
   // ================= Friendship Logic
   Future<void> checkFriendship(String userId) async {
     try {
@@ -282,11 +248,13 @@ class ClickerController extends GetxController {
         final data = response.data['data'];
         if (data['isAlreadyFriend'] == true) {
           friendStatus.value = FriendStatus.friends;
+          pendingRequestId.value = '';
         } else if (data['pendingFriendRequest'] != null) {
           friendStatus.value = FriendStatus.requested;
           pendingRequestId.value = data['pendingFriendRequest']['_id'] ?? '';
         } else {
           friendStatus.value = FriendStatus.none;
+          pendingRequestId.value = '';
         }
       }
     } catch (e) {
@@ -296,16 +264,62 @@ class ClickerController extends GetxController {
 
   Future<void> onTapAddFriendButton(String userId) async {
     try {
+      isLoading.value = true;
       final response = await ApiService.post(
         ApiEndPoint.createFriendRequest,
         body: {"receiver": userId},
       );
+
       if (response.statusCode == 200) {
+        // 🔥 EXTRACT THE FRIEND REQUEST ID FROM RESPONSE
+        final data = response.data['data'];
+
+        // Store the friend request ID for cancellation
+        if (data != null && data['_id'] != null) {
+          pendingRequestId.value = data['_id'];
+        }
         friendStatus.value = FriendStatus.requested;
-        Utils.successSnackBar("Sent", "Friend request sent");
+
+        debugPrint("✅ Friend request created with ID: ${pendingRequestId.value}");
       }
     } catch (e) {
       Utils.errorSnackBar("Error", e.toString());
+      debugPrint("❌ Add friend error: $e");
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> cancelFriendRequest(String userId) async {
+    try {
+      isLoading.value = true;
+
+      // Use pendingRequestId if available, otherwise fallback to userId
+      final idToUse = pendingRequestId.value.isNotEmpty
+          ? pendingRequestId.value
+          : userId;
+
+      debugPrint("🔄 Cancelling friend request with ID: $idToUse");
+
+      final endpoint = "${ApiEndPoint.cancelFriendRequest}$idToUse";
+
+      final response = await ApiService.patch(
+        endpoint,
+        body: {"status": "cancelled"},
+      );
+
+      if (response.statusCode == 200) {
+        // ✅ Reset state after successful cancellation
+        friendStatus.value = FriendStatus.none;
+        pendingRequestId.value = '';
+
+        debugPrint("✅ Friend request cancelled successfully");
+      }
+    } catch (e) {
+      Utils.errorSnackBar("Error", e.toString());
+      debugPrint("❌ Cancel request error: $e");
+    } finally {
+      isLoading.value = false;
     }
   }
 }

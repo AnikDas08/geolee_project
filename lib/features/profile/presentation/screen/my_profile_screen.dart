@@ -24,6 +24,7 @@ class MyProfileScreen extends StatelessWidget {
             backgroundColor: AppColors.background,
             elevation: 0,
             leading: GestureDetector(
+
               onTap: () {
                 Navigator.pop(context);
               },
@@ -31,7 +32,7 @@ class MyProfileScreen extends StatelessWidget {
                 margin: EdgeInsets.only(left: 20.w),
                 alignment: Alignment.center,
                 child: Icon(
-                  Icons.arrow_back_ios,
+                  Icons.arrow_back,
                   color: AppColors.black,
                   size: 20.sp,
                 ),

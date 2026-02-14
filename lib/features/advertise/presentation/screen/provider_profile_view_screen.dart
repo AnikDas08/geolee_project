@@ -33,7 +33,7 @@ class ProviderProfileViewScreen extends StatelessWidget {
                 margin: EdgeInsets.only(left: 20.w),
                 alignment: Alignment.center,
                 child: Icon(
-                  Icons.arrow_back_ios,
+                  Icons.arrow_back,
                   color: AppColors.black,
                   size: 20.sp,
                 ),

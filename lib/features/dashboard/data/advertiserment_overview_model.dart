@@ -18,12 +18,11 @@ class AdvertisementOverviewResponse {
   }
 }
 
-
 class AdvertisementOverviewData {
   final int totalActiveAds;
   final int totalReachCount;
   final int totalClickCount;
-  final int engagementRate;
+  final double engagementRate; // ✅ Changed from int to double
 
   AdvertisementOverviewData({
     required this.totalActiveAds,
@@ -37,7 +36,7 @@ class AdvertisementOverviewData {
       totalActiveAds: json['totalActiveAds'] ?? 0,
       totalReachCount: json['totalReachCount'] ?? 0,
       totalClickCount: json['totalClickCount'] ?? 0,
-      engagementRate: json['engagementRate'] ?? 0,
+      engagementRate: (json['engagementRate'] ?? 0).toDouble(), // ✅ Ensure double conversion
     );
   }
 }

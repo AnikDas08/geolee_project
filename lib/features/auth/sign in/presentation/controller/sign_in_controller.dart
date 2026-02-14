@@ -1,7 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:giolee78/utils/app_utils.dart';
+import 'package:giolee78/utils/constants/app_colors.dart';
 import 'package:giolee78/utils/enum/enum.dart';
 import 'package:giolee78/utils/log/app_log.dart';
 import '../../../../../config/route/app_routes.dart';
@@ -45,7 +47,9 @@ class SignInController extends GetxController {
       if (response.statusCode == 200) {
         var data = response.data;
 
-        Utils.successSnackBar('Login', "Successfully Login To Your Account");
+        Get.snackbar(
+          barBlur: 0.5,
+            "Welcome Back","Logged In Successfully");
         await LocalStorage.setString(LocalStorageKeys.token, data["data"]['accessToken']);
 
         LocalStorage.isLogIn = true;
@@ -66,8 +70,10 @@ class SignInController extends GetxController {
         emailController.clear();
         passwordController.clear();
       } else {
-        Utils.successSnackBar('Error', "${response.message}");
-        Get.snackbar(response.statusCode.toString(), response.message);
+        Get.snackbar(
+          colorText: AppColors.white,
+          backgroundColor: AppColors.red,
+            'Invalid Credential', "${response.message}");
       }
     } catch (e) {
       Get.snackbar("Error", e.toString());
