@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:giolee78/config/route/app_routes.dart';
+import 'package:giolee78/features/chat_nearby/data/nearby_friends_model.dart';
 
 import '../../../../component/button/common_button.dart';
 import '../../../../component/image/common_image.dart';
@@ -16,7 +17,7 @@ class ChatNearbyProfileScreen extends StatelessWidget {
     super.key,
     this.onTapProfile,
     this.onSendGreetings,
-    this.greetingsController,
+    this.greetingsController, required NearbyChatUserModel user,
   });
 
   final VoidCallback? onTapProfile;

@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:giolee78/config/api/api_end_point.dart';
+import 'package:giolee78/features/chat_nearby/data/nearby_friends_model.dart';
+import 'package:giolee78/features/chat_nearby/presentation/controller/nearby_chat_controller.dart';
 import 'package:giolee78/features/chat_nearby/presentation/screen/chat_nearby_profile_screen.dart';
+import 'package:giolee78/utils/constants/app_images.dart';
 
 import '../../../../component/image/common_image.dart';
 import '../../../../component/text/common_text.dart';
@@ -10,36 +14,78 @@ import '../../../../utils/constants/app_colors.dart';
 class ChatNearbyScreen extends StatelessWidget {
   const ChatNearbyScreen({super.key});
 
-  static const List<_NearbyUser> _users = [
-    _NearbyUser(name: 'Arlene McCoy'),
-    _NearbyUser(name: 'Cameron Williamson'),
-    _NearbyUser(name: 'Brooklyn Simmons'),
-    _NearbyUser(name: 'Kathryn Murphy'),
-    _NearbyUser(name: 'Bessie Cooper'),
-    _NearbyUser(name: 'Floyd Miles'),
-    _NearbyUser(name: 'Theresa Webb'),
-    _NearbyUser(name: 'Cody Fisher'),
-    _NearbyUser(name: 'Annette Black'),
-    _NearbyUser(name: 'Annette Black'),
-  ];
-
   @override
   Widget build(BuildContext context) {
+    final controller = Get.put(NearbyChatController());
+
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(kToolbarHeight),
         child: _ChatNearbyAppBar(),
       ),
-      body: ListView.separated(
-        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
-        itemBuilder: (context, index) {
-          final user = _users[index];
-          return _NearbyUserCard(user: user);
-        },
-        separatorBuilder: (context, index) => SizedBox(height: 12.h),
-        itemCount: _users.length,
-      ),
+      body: Obx(() {
+        // Handle loading state
+        if (controller.isNearbyChatLoading.value) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+
+        // Handle error state
+        if (controller.nearbyChatError.value.isNotEmpty) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.error_outline, size: 48.r, color: Colors.red),
+                SizedBox(height: 16.h),
+                Text(
+                  controller.nearbyChatError.value,
+                  style: TextStyle(color: Colors.red, fontSize: 14.sp),
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: 16.h),
+                ElevatedButton(
+                  onPressed: () => controller.getNearbyChat(),
+                  child: const Text('Retry'),
+                ),
+              ],
+            ),
+          );
+        }
+
+        // Handle empty state
+        if (controller.nearbyChatList.isEmpty) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.people_outline, size: 48.r, color: Colors.grey),
+                SizedBox(height: 16.h),
+                Text(
+                  'No nearby users found',
+                  style: TextStyle(fontSize: 16.sp, color: Colors.grey),
+                ),
+              ],
+            ),
+          );
+        }
+
+        // Display list
+        return RefreshIndicator(
+          onRefresh: () => controller.getNearbyChat(),
+          child: ListView.separated(
+            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
+            itemBuilder: (context, index) {
+              final user = controller.nearbyChatList[index];
+              return _NearbyUserCard(nearbyChatUser: user);
+            },
+            separatorBuilder: (context, index) => SizedBox(height: 12.h),
+            itemCount: controller.nearbyChatList.length,
+          ),
+        );
+      }),
     );
   }
 }
@@ -75,14 +121,12 @@ class _ChatNearbyAppBar extends StatelessWidget {
                   ),
                 ),
               ),
-              // Replaced IconButton with PopupMenuButton
               PopupMenuButton<String>(
                 onSelected: (String result) {
                   if (result == 'clear_data') {
-                    // TODO: Implement the actual clear data logic (e.g., clearing a list/database)
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
-                        content: Text('Clear Data action selected! (To be implemented)'),
+                        content: Text('Clear Data action selected!'),
                         duration: Duration(seconds: 2),
                       ),
                     );
@@ -108,7 +152,6 @@ class _ChatNearbyAppBar extends StatelessWidget {
                   ),
                 ],
                 icon: const Icon(Icons.more_horiz_rounded),
-                // Ensure padding is handled consistently
                 padding: EdgeInsets.zero,
               ),
             ],
@@ -120,15 +163,15 @@ class _ChatNearbyAppBar extends StatelessWidget {
 }
 
 class _NearbyUserCard extends StatelessWidget {
-  const _NearbyUserCard({required this.user});
+  const _NearbyUserCard({required this.nearbyChatUser});
 
-  final _NearbyUser user;
+  final NearbyChatUserModel nearbyChatUser; // Changed from NearbyChatResponseModel
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        Get.to(() => const ChatNearbyProfileScreen());
+        Get.to(() => ChatNearbyProfileScreen(user: nearbyChatUser));
       },
       child: Container(
         decoration: ShapeDecoration(
@@ -146,17 +189,29 @@ class _NearbyUserCard extends StatelessWidget {
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
         child: Row(
           children: [
+
+
+
             CircleAvatar(
               radius: 20.r,
-              backgroundColor: Colors.transparent,
-              child: ClipOval(
-                child: CommonImage(
+              backgroundColor: AppColors.primaryColor2.withOpacity(0.1),
+              child: nearbyChatUser.privacy == "public"
+                  ? ClipOval(
+                child: nearbyChatUser.image != null && nearbyChatUser.image!.isNotEmpty
+                    ? CommonImage(
+                  imageSrc: ApiEndPoint.imageUrl + nearbyChatUser.image!,
+                  size: 40.r,
+                  fill: BoxFit.cover,
+                )
+                    : CommonImage(
                   imageSrc: "assets/images/profile_image.png",
                   size: 40.r,
                   fill: BoxFit.cover,
                 ),
-              ),
+              )
+                  : Image.asset(AppImages.private),
             ),
+
             SizedBox(width: 16.w),
             Expanded(
               child: Column(
@@ -164,16 +219,18 @@ class _NearbyUserCard extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   CommonText(
-                    text: user.name,
+                    text: nearbyChatUser.name,
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w500,
                     color: AppColors.black,
                     textAlign: TextAlign.start,
                     maxLines: 1,
                   ),
+
                   SizedBox(height: 4.h),
+
                   CommonText(
-                    text: 'Within 400 M',
+                    text: nearbyChatUser.location.toString(),
                     fontSize: 12.sp,
                     fontWeight: FontWeight.w400,
                     color: AppColors.primaryColor2,
@@ -188,10 +245,4 @@ class _NearbyUserCard extends StatelessWidget {
       ),
     );
   }
-}
-
-class _NearbyUser {
-  const _NearbyUser({required this.name});
-
-  final String name;
 }

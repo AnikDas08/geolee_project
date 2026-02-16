@@ -30,13 +30,20 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _initializeLocation();
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
+  }
+
+  /// 🔁 Check permission every time screen is visible
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // This ensures we check permission every time we navigate to this screen
+    _initializeLocation();
   }
 
   /// 🔁 App foreground এ এলে আবার check + save
@@ -71,30 +78,37 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                 permission == LocationPermission.whileInUse);
       });
 
-      debugPrint("🔍 Location Status: Enabled=$isLocationEnabled");
+      debugPrint("🔍 Location Status: Service=$serviceEnabled, Permission=$permission, Enabled=$isLocationEnabled");
     } catch (e) {
       debugPrint("❌ Location check error: $e");
-      setState(() => isLocationEnabled = false);
+      if (mounted) {
+        setState(() => isLocationEnabled = false);
+      }
     }
   }
 
-  /// 🔄 Switch toggle
+  /// 🔄 Switch toggle - Always shows permission dialog
   Future<void> _toggleLocation(bool value) async {
     if (isLoading) return;
+
     setState(() => isLoading = true);
 
     try {
       if (value) {
+        // Turning ON - Request permission
         await _enableLocation();
       } else {
+        // Turning OFF - Guide user to settings
         await _disableLocation();
       }
     } finally {
-      setState(() => isLoading = false);
+      if (mounted) {
+        setState(() => isLoading = false);
+      }
     }
   }
 
-  /// ✅ Enable location
+  /// ✅ Enable location - Shows permission dialog
   Future<void> _enableLocation() async {
     // Step 1: Check if service is enabled
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
@@ -103,27 +117,46 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       bool? open = await _showLocationServiceDialog();
       if (open == true) {
         await Geolocator.openLocationSettings();
+        // Wait a bit for user to enable location
+        await Future.delayed(const Duration(milliseconds: 500));
       }
       await _initializeLocation(); // Re-check and save if enabled
       return;
     }
 
-    // Step 2: Check permission
+    // Step 2: Check current permission
     LocationPermission permission = await Geolocator.checkPermission();
 
+    // Step 3: Request permission if denied
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
+
+      if (permission == LocationPermission.denied) {
+        // User denied permission
+        await _checkLocationStatus();
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Location permission denied'),
+              backgroundColor: Colors.orange,
+            ),
+          );
+        }
+        return;
+      }
     }
 
+    // Step 4: If permanently denied, show settings dialog
     if (permission == LocationPermission.deniedForever) {
       await _showPermissionDeniedDialog();
       return;
     }
 
-    // Step 3: If permission granted, update status and save
+    // Step 5: If permission granted, save location immediately
     if (permission == LocationPermission.whileInUse ||
         permission == LocationPermission.always) {
-      await _checkLocationStatus();
+
+      await _checkLocationStatus(); // Update toggle state
 
       // 🔥 SAVE LOCATION immediately after enabling
       bool saved = await _saveCurrentLocation();
@@ -132,9 +165,10 @@ class _OnboardingScreenState extends State<OnboardingScreen>
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(saved
-                ? 'Location enabled & saved successfully'
-                : 'Location enabled but failed to save'),
+                ? '✅ Location enabled & saved successfully'
+                : '⚠️ Location enabled but failed to get coordinates'),
             backgroundColor: saved ? Colors.green : Colors.orange,
+            duration: const Duration(seconds: 2),
           ),
         );
       }
@@ -148,7 +182,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       builder: (context) => AlertDialog(
         title: const Text('Disable Location'),
         content: const Text(
-          'Please disable location manually from device settings.',
+          'To disable location, please turn it off manually from device settings.',
         ),
         actions: [
           TextButton(
@@ -165,6 +199,8 @@ class _OnboardingScreenState extends State<OnboardingScreen>
 
     if (goToSettings == true) {
       await Geolocator.openLocationSettings();
+      // Wait for user to return
+      await Future.delayed(const Duration(milliseconds: 500));
     }
 
     await _initializeLocation(); // Re-check status
@@ -186,7 +222,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       );
 
       await LocalStorage.setString(
-        LocalStorageKeys.log,
+        LocalStorageKeys.long,
         position.longitude.toString(),
       );
 
@@ -203,6 +239,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
           SnackBar(
             content: Text('Failed to get location: ${e.toString()}'),
             backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
           ),
         );
       }
@@ -217,9 +254,9 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
-        title: const Text('Location Disabled'),
+        title: const Text('Location Service Disabled'),
         content: const Text(
-          'Please enable location services to continue.',
+          'Location services are turned off. Please enable them to continue.',
         ),
         actions: [
           TextButton(
@@ -242,7 +279,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       builder: (context) => AlertDialog(
         title: const Text('Permission Denied'),
         content: const Text(
-          'Location permission is permanently denied. Enable it from settings.',
+          'Location permission is permanently denied. Please enable it from app settings to use this feature.',
         ),
         actions: [
           TextButton(
@@ -259,6 +296,8 @@ class _OnboardingScreenState extends State<OnboardingScreen>
 
     if (openSettings == true) {
       await openAppSettings();
+      // Wait for user to return from settings
+      await Future.delayed(const Duration(milliseconds: 500));
       await _initializeLocation(); // Re-check and save if enabled
     }
   }
@@ -294,8 +333,13 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                 buttonHeight: 50.h,
                 buttonRadius: 10.r,
                 titleSize: 18.sp,
-                onTap: (){
-                  debugPrint("Location long Is:${LocalStorage.log} Lat Is:${LocalStorage.lat} ");
+                onTap: () async {
+                  // Get current saved location
+                  String? lat = await LocalStorage.lat.toString();
+                  String? log = await LocalStorage.long.toString();
+
+                  debugPrint("🚀 Navigation - Location -> Lat: $lat, Long: $log");
+
                   Get.toNamed(AppRoutes.signUp);
                 },
               ),

@@ -34,8 +34,9 @@ class LocalStorage {
   static bool verified = false;
   static String bio = "";
   static String advertiserBio = '';
-  static double lat = 0.0;
-  static double log = 0.0;
+  static double lat = 90.4125;
+  static double long = 23.8103;
+  static String radius = "5";
   static bool accountInfoStatus = false;
   static String createdAt = "";
   static String updatedAt = "";
@@ -106,7 +107,7 @@ class LocalStorage {
     verified = localStorage.getBool(LocalStorageKeys.verified) ?? false;
     bio = localStorage.getString(LocalStorageKeys.bio) ?? "";
     lat = localStorage.getDouble(LocalStorageKeys.lat) ?? 0.0;
-    log = localStorage.getDouble(LocalStorageKeys.log) ?? 0.0;
+    long = localStorage.getDouble(LocalStorageKeys.long) ?? 0.0;
     accountInfoStatus = localStorage.getBool(LocalStorageKeys.accountInfoStatus) ?? false;
     createdAt = localStorage.getString(LocalStorageKeys.createdAt) ?? "";
     updatedAt = localStorage.getString(LocalStorageKeys.updatedAt) ?? "";

@@ -24,7 +24,7 @@ class LocalStorageKeys {
   static const String verified = "verified";
   static const String bio = "bio";
   static const String lat = "lat";
-  static const String log = "log";
+  static const String long = "log";
   static const String accountInfoStatus = "accountInfoStatus";
   static const String createdAt = "createdAt";
   static const String updatedAt = "updatedAt";

@@ -46,7 +46,7 @@ class MyProfileController extends GetxController {
 
   double get lat => LocalStorage.lat;
 
-  double get log => LocalStorage.log;
+  double get log => LocalStorage.long;
 
   bool get accountInfoStatus => LocalStorage.accountInfoStatus;
 
@@ -147,7 +147,7 @@ class MyProfileController extends GetxController {
             LocalStorage.verified,
           ),
           LocalStorage.setDouble(LocalStorageKeys.lat, LocalStorage.lat),
-          LocalStorage.setDouble(LocalStorageKeys.log, LocalStorage.log),
+          LocalStorage.setDouble(LocalStorageKeys.long, LocalStorage.long),
           LocalStorage.setBool(
             LocalStorageKeys.accountInfoStatus,
             LocalStorage.accountInfoStatus,

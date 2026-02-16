@@ -33,7 +33,7 @@ class AlreadyAccountRichText extends StatelessWidget {
             recognizer: TapGestureRecognizer()
               ..onTap = () {
 
-              debugPrint("====================${LocalStorage.log}");
+              debugPrint("====================${LocalStorage.long}");
 
                 Get.toNamed(AppRoutes.signIn);
               },

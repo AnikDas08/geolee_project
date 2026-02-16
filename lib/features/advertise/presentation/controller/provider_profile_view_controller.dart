@@ -41,7 +41,7 @@ class ProviderProfileViewController extends GetxController {
 
   double get lat => LocalStorage.lat;
 
-  double get log => LocalStorage.log;
+  double get log => LocalStorage.long;
 
   bool get accountInfoStatus => LocalStorage.accountInfoStatus;
 
@@ -127,7 +127,7 @@ class ProviderProfileViewController extends GetxController {
             : "Bio Not Set Yet";
 
         LocalStorage.lat = lat;
-        LocalStorage.log = log;
+        LocalStorage.long = log;
 
         LocalStorage.createdAt = createdAt;
         LocalStorage.updatedAt = updatedAt;
@@ -151,7 +151,7 @@ class ProviderProfileViewController extends GetxController {
           LocalStorage.setString(LocalStorageKeys.dateOfBirth, LocalStorage.dateOfBirth),
           LocalStorage.setString(LocalStorageKeys.address, LocalStorage.address),
           LocalStorage.setDouble(LocalStorageKeys.lat, LocalStorage.lat),
-          LocalStorage.setDouble(LocalStorageKeys.log, LocalStorage.log),
+          LocalStorage.setDouble(LocalStorageKeys.long, LocalStorage.long),
           LocalStorage.setString(LocalStorageKeys.createdAt, LocalStorage.createdAt),
           LocalStorage.setString(LocalStorageKeys.updatedAt, LocalStorage.updatedAt),
           LocalStorage.setString(LocalStorageKeys.businessName, LocalStorage.businessName),

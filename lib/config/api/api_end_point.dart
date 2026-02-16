@@ -1,13 +1,13 @@
 class ApiEndPoint {
 
 
-  // static const String baseUrl = "http://10.10.7.7:5006/api/v1/";
-  // static const String imageUrl = "http://10.10.7.7:5006";
-  // static const String socketUrl = "http://10.10.7.7:5006";
+  static const String baseUrl = "http://10.10.7.7:5006/api/v1/";
+  static const String imageUrl = "http://10.10.7.7:5006";
+  static const String socketUrl = "http://10.10.7.7:5006";
 
-  static const String baseUrl = "http://148.230.126.149:5000/api/v1/";
-  static const String imageUrl = "http://148.230.126.149:5000";
-  static const String socketUrl = "http://148.230.126.149:5000";
+  // static const String baseUrl = "http://148.230.126.149:5000/api/v1/";
+  // static const String imageUrl = "http://148.230.126.149:5000";
+  // static const String socketUrl = "http://148.230.126.149:5000";
 
   /*static const String baseUrl = "http://10.10.7.7:5006/api/v1/";
   static const String imageUrl = "http://10.10.7.7:5006";*/
@@ -63,6 +63,7 @@ class ApiEndPoint {
   static const String deleteChatById = "${baseUrl}chats/696b6da6a27367444bc2403a";
   static const String leaveChat = "${baseUrl}chats/leave/696b6da6a27367444bc2403a";
   static const String joinChat = "${baseUrl}chats/join/696b6da6a27367444bc2403a";
+  static const String nearbyChat = "${baseUrl}users/";
 
 
   static const String createAds = "${baseUrl}advertisements/create";

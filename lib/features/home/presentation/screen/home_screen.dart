@@ -376,6 +376,8 @@ class _HomeScreenState extends State<HomeScreen> {
             imageSrc: AppIcons.clicker,
             title: 'Clicker',
             onTap: () {
+
+              debugPrint("Lat is : =============================${LocalStorage.lat.toString()}");
               try {
                 Get.to(() => ClickerScreen(), arguments: controller);
               } catch (e) {
