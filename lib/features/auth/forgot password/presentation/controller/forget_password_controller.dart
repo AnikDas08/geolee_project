@@ -92,11 +92,11 @@ class ForgetPasswordController extends GetxController {
       //
       if (response.statusCode == 200) {
         var data = response.data;
-        Utils.successSnackBar(response.statusCode.toString(), response.message);
+        Utils.successSnackBar("OTP Send", response.message);
         Get.toNamed(AppRoutes.verifyEmail);
       } else {
         Utils.errorSnackBar(response.statusCode, response.message);
-        Get.snackbar(response.statusCode.toString(), response.message);
+        // Get.snackbar(response.statusCode.toString(), response.message);
       }
     } catch (e) {
       Get.snackbar("Error is =============================", e.toString());

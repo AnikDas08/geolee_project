@@ -52,9 +52,10 @@ class ServiceProviderInfoScreen extends StatelessWidget {
                         child: ClipOval(
                           child: controller.profileImagePath.value.isEmpty
                               ? CommonImage(
-                            imageSrc: "assets/images/profile_image.png",
+
+                            imageSrc: "assets/images/profilePlaceholder.jpg",
                             size: 100,
-                            defaultImage: AppImages.profileImage,
+                            defaultImage: "assets/images/profilePlaceholder.jpg",
                           )
                               : Image.file(
                             File(controller.profileImagePath.value),

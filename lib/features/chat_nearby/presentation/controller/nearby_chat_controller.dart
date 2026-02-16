@@ -16,12 +16,26 @@ class NearbyChatController extends GetxController {
   void onInit() {
     super.onInit();
     getNearbyChat();
+
+    debugPrint("Lat Long Is : ${LocalStorage.lat}${LocalStorage.long}");
   }
 
   Future<void> getNearbyChat() async {
     try {
-      final url =
-          "${ApiEndPoint.nearbyChat}?lat=23.78&lng=90.41&radius=5";
+      // Get coordinates from LocalStorage
+      double lat = LocalStorage.lat ?? 0.0;
+      double lng = LocalStorage.long ?? 0.0;
+
+      // Validate coordinates
+      if (lat == 0.0 || lng == 0.0) {
+        nearbyChatError.value = "Location not available. Please enable location.";
+        debugPrint("Invalid coordinates - Lat: $lat, Lng: $lng");
+        return;
+      }
+
+      final url = "${ApiEndPoint.nearbyChat}?lat=$lat&lng=$lng&radius=5";
+
+      debugPrint("Fetching Nearby Chat - URL: $url");
 
       isNearbyChatLoading.value = true;
       nearbyChatError.value = '';

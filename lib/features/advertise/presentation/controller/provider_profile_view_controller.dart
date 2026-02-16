@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:giolee78/config/api/api_end_point.dart';
 import 'package:giolee78/features/advertise/presentation/screen/advertiser_edit_profile_screen.dart';
@@ -163,7 +164,8 @@ class ProviderProfileViewController extends GetxController {
 
       }
     } catch (e) {
-      Get.snackbar("Error", "Failed to load profile");
+
+      debugPrint("Failed To Load Profile");
     }
 
     isLoading = false;

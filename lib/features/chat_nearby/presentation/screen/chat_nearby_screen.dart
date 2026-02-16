@@ -28,7 +28,9 @@ class ChatNearbyScreen extends StatelessWidget {
         // Handle loading state
         if (controller.isNearbyChatLoading.value) {
           return const Center(
-            child: CircularProgressIndicator(),
+            child: CircularProgressIndicator(
+              color: Colors.blue,
+            ),
           );
         }
 
@@ -230,13 +232,14 @@ class _NearbyUserCard extends StatelessWidget {
                   SizedBox(height: 4.h),
 
                   CommonText(
-                    text: nearbyChatUser.location.toString(),
+                    text:"Within ${ nearbyChatUser.distance?.toStringAsFixed(2) ?? "0"} M",
                     fontSize: 12.sp,
                     fontWeight: FontWeight.w400,
                     color: AppColors.primaryColor2,
                     textAlign: TextAlign.start,
                     maxLines: 1,
                   ),
+
                 ],
               ),
             ),

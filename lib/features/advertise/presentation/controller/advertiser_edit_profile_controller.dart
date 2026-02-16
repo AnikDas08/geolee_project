@@ -83,7 +83,7 @@ class AdvertiserEditProfileController extends GetxController {
       }
     } catch (e) {
       print("❌ Fetch Profile Error: $e");
-      Utils.errorSnackBar("Error", "Failed to load profile data");
+      // Utils.errorSnackBar("Error", "Failed to load profile data");
       // Load from local storage as fallback
       _loadFromLocalStorage();
     } finally {

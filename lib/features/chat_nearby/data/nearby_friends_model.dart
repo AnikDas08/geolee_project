@@ -70,6 +70,7 @@ class NearbyChatUserModel {
   final DateTime createdAt;
   final DateTime updatedAt;
   final AdvertiserModel? advertiser;
+  final double? distance; // ✅ add this
 
   NearbyChatUserModel({
     required this.id,
@@ -91,6 +92,7 @@ class NearbyChatUserModel {
     required this.createdAt,
     required this.updatedAt,
     this.advertiser,
+    this.distance, // ✅ add this
   });
 
   factory NearbyChatUserModel.fromJson(Map<String, dynamic> json) {
@@ -116,9 +118,11 @@ class NearbyChatUserModel {
       advertiser: json['advertiser'] != null
           ? AdvertiserModel.fromJson(json['advertiser'])
           : null,
+      distance: (json['distance'] as num?)?.toDouble(), // ✅ parse
     );
   }
 }
+
 
 
 class AdvertiserModel {

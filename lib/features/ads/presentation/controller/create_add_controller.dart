@@ -141,21 +141,31 @@ class CreateAdsController extends GetxController {
   Future<void> fetchPlans() async {
     try {
       isPlansLoading.value = true;
+      debugPrint("🔍 Fetching plans from: ${ApiEndPoint.getPlans}");
+
       ApiResponseModel response = await ApiService.get(ApiEndPoint.getPlans);
+
+      debugPrint("📊 Response Status: ${response.statusCode}");
+      debugPrint("📦 Response Data: ${response.data}");
 
       if (response.statusCode == 200 && response.data != null) {
         final res = response.data as Map<String, dynamic>;
         plans.value =
             (res['data'] as List).map((e) => PlanModel.fromJson(e)).toList();
 
+        debugPrint("✅ Plans loaded: ${plans.length} items");
+        debugPrint("📋 Plans: ${plans.map((p) => p.name).toList()}");
+
         if (plans.isNotEmpty) {
           selectedPricingPlan.value = plans.first.name;
         }
       } else {
+        debugPrint("❌ Failed - Status: ${response.statusCode}, Message: ${response.message}");
         Get.snackbar("Error", response.message ?? "Failed to load plans");
       }
     } catch (e) {
-      Get.snackbar("Error", "Failed to load plans");
+      debugPrint("❌ Exception: $e");
+      Get.snackbar("Error", "Failed to load plans: $e");
     } finally {
       isPlansLoading.value = false;
     }
@@ -284,11 +294,11 @@ class CreateAdsController extends GetxController {
   /// ---------------- DISPOSE ----------------
   @override
   void onClose() {
-    titleController.dispose();
-    descriptionController.dispose();
-    focusAreaController.dispose();
-    websiteLinkController.dispose();
-    adStartDateController.dispose();
+    // titleController.dispose();
+    // descriptionController.dispose();
+    // focusAreaController.dispose();
+    // websiteLinkController.dispose();
+    // adStartDateController.dispose();
     super.onClose();
   }
 }

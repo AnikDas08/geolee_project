@@ -19,10 +19,10 @@ class SignInController extends GetxController {
 
   /// email and password Controller here
   TextEditingController emailController = TextEditingController(
-    text: kDebugMode ? 'rahad.developer@gmail.com' : '',
+    text: kDebugMode ? 'ebrahimnazmul20032@gmail.com' : '',
   );
   TextEditingController passwordController = TextEditingController(
-    text: kDebugMode ? 'P@ssword123' : "",
+    text: kDebugMode ? 'password123' : "",
   );
 
   /// Sign in Api call here

@@ -204,8 +204,36 @@ class _CreateAdsScreenState extends State<CreateAdsScreen> {
   // --- Pricing Cards with Radio Buttons ---
   Widget _buildPricingCards(CreateAdsController controller) {
     return Obx(() {
+      // Show loading indicator
+      if (controller.isPlansLoading.value) {
+        return const Center(
+          child: Padding(
+            padding: EdgeInsets.all(16.0),
+            child: CircularProgressIndicator(),
+          ),
+        );
+      }
+
+      // Show error message if no plans loaded
       if (controller.plans.isEmpty) {
-        return const SizedBox.shrink();
+        return Center(
+          child: Padding(
+            padding: EdgeInsets.all(16.0),
+            child: Column(
+              children: [
+                const Text(
+                  'No pricing plans available',
+                  style: TextStyle(color: Colors.red),
+                ),
+                SizedBox(height: 8.h),
+                TextButton(
+                  onPressed: () => controller.fetchPlans(),
+                  child: const Text('Retry'),
+                ),
+              ],
+            ),
+          ),
+        );
       }
 
       return Column(

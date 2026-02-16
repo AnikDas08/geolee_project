@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:giolee78/config/api/api_end_point.dart';
 import 'package:giolee78/config/route/app_routes.dart';
@@ -171,7 +172,8 @@ class MyProfileController extends GetxController {
         );
       }
     } catch (e) {
-      Get.snackbar("Error", "Failed to load profile");
+      debugPrint("Faile To Load Profile${e.toString()}");
+      // Get.snackbar("Error", "Failed to load profile");
     }
 
     isLoading = false;

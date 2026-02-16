@@ -31,6 +31,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    _providerProfileViewController.getAdvertiserData();
   }
 
   @override
@@ -125,7 +126,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
                 child: Center(
                   child: CommonImage(
-                    imageSrc: "${ApiEndPoint.imageUrl+LocalStorage.businessLogo}",
+                    imageSrc: "${ApiEndPoint.imageUrl+_providerProfileViewController.businessLogo}",
                     borderRadius: 12.r,
                     fill: BoxFit.cover,
                   ),

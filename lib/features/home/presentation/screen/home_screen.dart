@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -440,12 +441,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _handleLocationAndNavigate() async {
     try {
-      var status = await Permission.location.status;
-      if (status.isGranted) {
-        Get.to(() => const ChatNearbyScreen());
-      } else {
-        _showConfirmationDialog();
-      }
+      // Always show confirmation dialog first
+      _showConfirmationDialog();
     } catch (e) {
       debugPrint('Error handling location: $e');
       Get.snackbar(
@@ -478,13 +475,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 children: [
                   Expanded(
                     child: OutlinedButton(
-                      onPressed: () {
-                        try {
-                          Get.back();
-                        } catch (e) {
-                          debugPrint('Error closing dialog: $e');
-                        }
-                      },
+                      onPressed: () => Get.back(),
                       style: OutlinedButton.styleFrom(foregroundColor: Colors.black),
                       child: const Text('Back'),
                     ),
@@ -494,18 +485,85 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: ElevatedButton(
                       onPressed: () async {
                         try {
-                          Get.back();
-                          var status = await Permission.location.request();
+                          Get.back(); // Close dialog
+
+                          // Show loading
+                          Get.dialog(
+                            const Center(
+                              child: CircularProgressIndicator(
+                                color: Colors.blue,
+                              ),
+                            ),
+                            barrierDismissible: false,
+                          );
+
+                          // Check permission status
+                          var status = await Permission.location.status;
+
+                          // Request if not granted
+                          if (!status.isGranted) {
+                            status = await Permission.location.request();
+                          }
+
                           if (status.isGranted) {
-                            Get.to(() => const ChatNearbyScreen());
+                            try {
+                              // Check if location services are enabled
+                              bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+
+                              if (!serviceEnabled) {
+                                Get.back(); // Close loading
+
+                                Get.snackbar(
+                                  'GPS Disabled',
+                                  'Please enable GPS/Location services',
+                                  snackPosition: SnackPosition.BOTTOM,
+                                  backgroundColor: Colors.orange.withOpacity(0.7),
+                                  colorText: Colors.white,
+                                );
+                                return;
+                              }
+
+                              // Fetch current location
+                              Position position = await Geolocator.getCurrentPosition(
+                                desiredAccuracy: LocationAccuracy.high,
+                              );
+
+                              // Close loading
+                              Get.back();
+
+                              // Save coordinates to LocalStorage
+                              LocalStorage.lat = position.latitude;
+                              LocalStorage.long = position.longitude;
+
+                              debugPrint("Location Enabled - Lat: ${position.latitude}, Lng: ${position.longitude}");
+
+                              // Navigate to Chat Nearby Screen
+                              Get.to(() => const ChatNearbyScreen());
+
+                            } catch (e) {
+                              Get.back(); // Close loading
+
+                              debugPrint("Location fetch error: $e");
+
+                              Get.snackbar(
+                                'Location Error',
+                                'Unable to get your location. Please enable GPS and try again.',
+                                snackPosition: SnackPosition.BOTTOM,
+                                backgroundColor: Colors.orange.withOpacity(0.7),
+                                colorText: Colors.white,
+                              );
+                            }
                           } else {
-                            Get.snackbar('Permission Denied', 'Location is required.');
+                            Get.back(); // Close loading
+                            Get.snackbar('Permission Denied', 'Location permission is required.');
+
                             if (status.isPermanentlyDenied) {
                               await openAppSettings();
                             }
                           }
                         } catch (e) {
                           debugPrint('Error requesting permission: $e');
+                          Get.back(); // Close loading if open
                           Get.snackbar(
                             'Error',
                             'Failed to request location permission',

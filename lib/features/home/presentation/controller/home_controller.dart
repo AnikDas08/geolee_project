@@ -431,7 +431,7 @@ class HomeController extends GetxController {
         debugPrint('Updating profile with location: [${position.longitude}, ${position.latitude}]');
 
         // Update profile with new location
-        //await updateProfile(position.longitude, position.latitude);
+        await updateProfile(position.longitude, position.latitude);
       } else {
         debugPrint('Could not get current location');
       }
@@ -443,7 +443,7 @@ class HomeController extends GetxController {
   }
 
   // Update user profile with location
-  /*Future<void> updateProfile(double longitude, double latitude) async {
+  Future<void> updateProfile(double longitude, double latitude) async {
     try {
       Map<String, dynamic> body = {
         "location": [longitude, latitude]
@@ -467,7 +467,7 @@ class HomeController extends GetxController {
       debugPrint('Error updating profile: $e');
       // Don't show error to user as this is a background operation
     }
-  }*/
+  }
 
   void searchPosts(String query) {
     try {

@@ -6,7 +6,6 @@ import 'package:giolee78/config/api/api_end_point.dart';
 import 'package:giolee78/services/api/api_service.dart';
 import 'package:image_picker/image_picker.dart';
 
-
 class PostController extends GetxController {
   @override
   void onInit() {
@@ -49,8 +48,40 @@ class PostController extends GetxController {
   Future<void> createPost() async {
     if (selectedPricingOption.value.isEmpty) {
       Get.snackbar(
-        'Error',
+        'Field Missing',
         'Please select a clicker type',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+      return;
+    }
+    if (description.value.text.isEmpty) {
+      Get.snackbar(
+        'Field Missing',
+        'Please Write a description',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+      return;
+    }
+
+    if (selectedPricingOption.value.isEmpty) {
+      Get.snackbar(
+        'Field Missing',
+        'Please Select a clicker type',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+      return;
+    }
+
+    if (selectedPriorityLevel.value.isEmpty) {
+      Get.snackbar(
+        'Field Missing',
+        'Please Select Privacy ',
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
         colorText: Colors.white,
@@ -61,7 +92,6 @@ class PostController extends GetxController {
     isLoading.value = true;
 
     try {
-      // MultipartFile for each image
       List<MultipartFile> imageFiles = [];
       for (var file in selectedImages) {
         imageFiles.add(
@@ -70,6 +100,16 @@ class PostController extends GetxController {
             filename: file.path.split('/').last,
           ),
         );
+      }
+
+      if (imageFiles.isEmpty) {
+        Get.snackbar(
+            "Field Missing", "Please Select an image",
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+        return;
       }
 
       FormData formData = FormData.fromMap({
@@ -86,10 +126,7 @@ class PostController extends GetxController {
 
       final url = "${ApiEndPoint.createPost}";
 
-      var response = await ApiService.post(
-        url,
-        body: formData
-      );
+      var response = await ApiService.post(url, body: formData);
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         Get.snackbar(
@@ -106,7 +143,7 @@ class PostController extends GetxController {
         selectedPricingOption.value = '';
         selectedPriorityLevel.value = '';
       } else {
-        debugPrint('Response  is =>>>>>>>>>>>>>>>>>>>>>>$response',);
+        debugPrint('Response  is =>>>>>>>>>>>>>>>>>>>>>>$response');
         Get.snackbar(
           'Error',
           'Failed to create post',
@@ -127,7 +164,6 @@ class PostController extends GetxController {
       isLoading.value = false;
     }
   }
-
 
   void removeImageAtIndex(int index) {
     if (index >= 0 && index < selectedImages.length) {
