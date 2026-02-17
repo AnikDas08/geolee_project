@@ -10,6 +10,10 @@ import 'package:giolee78/features/friend/presentation/screen/view_friend_screen.
 import 'package:giolee78/utils/constants/app_colors.dart';
 import 'package:giolee78/utils/constants/app_images.dart';
 
+import '../../../../component/image/common_image.dart';
+import '../../../../services/storage/storage_services.dart';
+import '../../../../utils/constants/app_icons.dart';
+import '../../../../utils/enum/enum.dart';
 import '../controller/my_friend_controller.dart';
 
 class MyFriendScreen extends StatelessWidget {
@@ -50,29 +54,28 @@ class MyFriendScreen extends StatelessWidget {
               SizedBox(height: 16.h),
 
               /// ================= Suggested Friends =================
-              if (controller.suggestedFriends.isNotEmpty) ...[
-                const CommonText(
-                  text: 'Suggested Friends',
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  textAlign: TextAlign.start,
-                  color: AppColors.black,
-                ),
-                SizedBox(height: 12.h),
-
+              const CommonText(
+                text: 'Suggested Friends',
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                textAlign: TextAlign.start,
+                color: AppColors.black,
+              ),
+              SizedBox(height: 12.h),
+              if (controller.suggestedFriendList.isNotEmpty) ...[
                 ListView.builder(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
-                  itemCount: controller.suggestedFriends.length,
+                  itemCount: controller.suggestedFriendList.length,
                   itemBuilder: (context, index) {
-                    final friend = controller.suggestedFriends[index];
+                    final friend = controller.suggestedFriendList[index];
 
                     return Padding(
                       padding: EdgeInsets.only(bottom: 10.h),
                       child: _SuggestedFriendCard(
-                        userId: friend['id'],
-                        userName: friend['name'],
-                        avatar: friend['avatar'],
+                        userId: friend.id,
+                        userName: friend.name,
+                        avatar: "${ApiEndPoint.imageUrl}${friend.image}",
                         controller: controller,
                       ),
                     );
@@ -110,7 +113,7 @@ class MyFriendScreen extends StatelessWidget {
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: controller.myFriendsList.length,
                   itemBuilder: (context, index) {
-                   var data = controller.myFriendsList[index];
+                    var data = controller.myFriendsList[index];
                     final friend = data.friend;
                     return Padding(
                       padding: EdgeInsets.only(bottom: 10.h),
@@ -166,65 +169,114 @@ class _SuggestedFriendCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Obx(() {
-      final isRequestSent = controller.isRequestSent(userId);
-
-      return GestureDetector(
-        onTap: () =>
-            Get.to(() => ViewFriendScreen(isFriend: false, userId: userId)),
-        child: Container(
-          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
-          decoration: BoxDecoration(
-            color: AppColors.white,
-            borderRadius: BorderRadius.circular(14.r),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  CircleAvatar(
-                    radius: 22.r,
-                    backgroundImage: AssetImage(avatar ?? AppImages.profileImage),
-                  ),
-                  SizedBox(width: 12.w),
-                  CommonText(
-                    text: userName,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.black,
-                    maxLines: 1,
-                  ),
-                ],
-              ),
-              isRequestSent
-                  ? Icon(Icons.check_circle, color: Colors.green, size: 20.sp)
-                  : GestureDetector(
-                      onTap: () => controller.sendFriendRequest(userId),
-                      child: Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 16.w,
-                          vertical: 6.h,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppColors.red,
-                          borderRadius: BorderRadius.circular(8.r),
-                        ),
-                        child: const CommonText(
-                          text: 'Add',
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.white,
-                        ),
-                      ),
-                    ),
-            ],
-          ),
+    return GestureDetector(
+      onTap: () =>
+          Get.to(() => ViewFriendScreen(isFriend: false, userId: userId)),
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+        decoration: BoxDecoration(
+          color: AppColors.white,
+          borderRadius: BorderRadius.circular(14.r),
         ),
-      );
-    });
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                CircleAvatar(
+                  radius: 22.r,
+                  backgroundImage:
+                      (avatar != null && avatar!.startsWith('http'))
+                      ? NetworkImage(avatar!) as ImageProvider
+                      : AssetImage(AppImages.profileImage),
+                ),
+                SizedBox(width: 12.w),
+                CommonText(
+                  text: userName,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.black,
+                  maxLines: 1,
+                ),
+              ],
+            ),
+
+            if (userId != LocalStorage.userId)
+              Obx(() {
+                final status = controller.getFriendStatus(userId);
+                final loading = controller.isUserLoading(userId);
+
+                switch (status) {
+                  case FriendStatus.requested:
+                    return _buildButton(
+                      title: loading ? 'Cancelling...' : 'Cancel Request',
+                      color: Colors.grey,
+                      onTap: loading
+                          ? () {}
+                          : () => controller.cancelFriendRequest(userId),
+                      image: '',
+                    );
+
+                  case FriendStatus.friends:
+                    return _buildButton(
+                      title: 'Friends',
+                      color: Colors.green,
+                      onTap: () {},
+                      image: '',
+                    );
+
+                  case FriendStatus.none:
+                  default:
+                    return _buildButton(
+                      title: loading ? 'Sending...' : 'Add Friend',
+                      color: AppColors.primaryColor,
+                      onTap: loading
+                          ? () {}
+                          : () => controller.onTapAddFriendButton(userId),
+                      image: '',
+                    );
+                }
+              }),
+          ],
+        ),
+      ),
+    );
   }
+}
+
+Widget _buildButton({
+  required String title,
+  required String image,
+  required VoidCallback onTap, // This was being passed but ignored
+  required Color color,
+}) {
+  return GestureDetector(
+    onTap: onTap, // <--- Add this!
+    child: Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: ShapeDecoration(
+        color: color,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const SizedBox(width: 6),
+          Text(
+            title,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+              fontFamily: 'Poppins',
+              fontWeight: FontWeight.w600,
+              height: 1.50,
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
 }
 
 /// ================= Friend List Item =================
@@ -260,7 +312,8 @@ class _FriendListItem extends StatelessWidget {
               children: [
                 CircleAvatar(
                   radius: 22.r,
-                  backgroundImage: (avatar != null && avatar!.startsWith('http'))
+                  backgroundImage:
+                      (avatar != null && avatar!.startsWith('http'))
                       ? NetworkImage(avatar!) as ImageProvider
                       : AssetImage(AppImages.profileImage),
                 ),

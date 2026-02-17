@@ -16,7 +16,8 @@ class FriendModel {
     message: json["message"],
     pagination: Pagination.fromJson(json["pagination"]),
     data: List<FriendData>.from(
-        json["data"].map((x) => FriendData.fromJson(x))),
+      json["data"].map((x) => FriendData.fromJson(x)),
+    ),
   );
 
   Map<String, dynamic> toJson() => {
@@ -29,7 +30,7 @@ class FriendModel {
 
 class FriendData {
   String id;
-  Sender sender;  // sender info
+  Sender sender; // sender info
   String receiver;
   String status;
   DateTime createdAt;

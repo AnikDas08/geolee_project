@@ -104,7 +104,10 @@ class _MyPostScreenState extends State<MyPostScreen> with WidgetsBindingObserver
                   userName: data.user.name ?? "Unknown",
                   userAvatar: "${ApiEndPoint.imageUrl}${data.user.image}",
                   timeAgo: _formatPostTime(DateTime.parse(data.createdAt.toString())),
-                  location: data.address,
+                  location: data.address != null && data.address!.isNotEmpty
+                      ? data.address!.split(',')[0]
+                      : "",
+
                   images: postImages, // <-- Corrected list passed here
                   description: data.description ?? "No description",
                   privacyImage: data.privacy == "public"

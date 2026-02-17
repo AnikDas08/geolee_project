@@ -99,7 +99,7 @@ class AdvertiserEditProfileScreen extends StatelessWidget {
 
                       CommonTextField(
                         controller: controller.phoneNumberController,
-                        validator: OtherHelper.validator,
+                        validator: OtherHelper.phoneValidator,
                         hintText: '01787000000',
                         keyboardType: TextInputType.text,
                         borderColor: AppColors.borderColor,

@@ -20,11 +20,15 @@ class ServiceProviderController extends GetxController {
   var skills = <String>[].obs;
   var profileImagePath = ''.obs;
 
+  final formKey=GlobalKey<FormState>();
+
   // Timer & OTP
   var start = 180.obs;
   var time = "03:00".obs;
   var isResendEnabled = false.obs;
   Timer? _timer;
+
+  var isLoading = false.obs; // ✅ RxBool
 
   // Text controllers
   var businessNameController = TextEditingController();
@@ -82,7 +86,13 @@ class ServiceProviderController extends GetxController {
   // ================= Advertiser Info =================
   Future<void> completeAdvertiserInfo() async {
     try {
-      // Validations
+
+
+      if (profileImagePath.value.isEmpty) {
+        Get.snackbar('Validation Error', 'Please Select an Image');
+        return;
+      }
+
       if (businessNameController.text.isEmpty) {
         Get.snackbar('Validation Error', 'Please Enter Your Business Name');
         return;
@@ -91,6 +101,11 @@ class ServiceProviderController extends GetxController {
         Get.snackbar('Validation Error', 'Please Enter a Bio');
         return;
       }
+
+      if (!formKey.currentState!.validate()) {
+        return;
+      }
+
       if (phoneNumberController.text.isEmpty) {
         Get.snackbar('Validation Error', 'Please Enter your Phone Number');
         return;
@@ -104,12 +119,10 @@ class ServiceProviderController extends GetxController {
         Get.snackbar('Validation Error', 'Please Enter your Business Type');
         return;
       }
-      if (profileImagePath.value.isEmpty) {
-        Get.snackbar('Validation Error', 'Please Select an Image');
-        return;
-      }
 
-      // API Body & Header
+
+      isLoading.value=true;
+
       final body = {
         "businessName": businessNameController.text.trim(),
         "bio": bioController.text.trim(),
@@ -129,18 +142,20 @@ class ServiceProviderController extends GetxController {
       );
 
       if (response.statusCode == 200) {
+        isLoading.value = false ;
 
-        /*LocalStorage.myRole = UserType.advertiser.name;
-        LocalStorage.setString(LocalStorageKeys.myRole, LocalStorage.myRole);*/
+
 
         await LocalStorage.setString(LocalStorageKeys.token, "");
         Get.offAll(ProviderVerifyUser());
         startTimer();
       } else {
+        isLoading.value=false;
         Get.snackbar("Error", response.message);
         debugPrint("Error: ${response.message}");
       }
     } catch (e) {
+      isLoading.value=false;
       debugPrint("Exception: ${e.toString()}");
     }
   }

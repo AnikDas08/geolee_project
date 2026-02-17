@@ -151,9 +151,11 @@ class _MyPostCardState extends State<MyPostCard> {
                                         overflow: TextOverflow.ellipsis,
                                       ),
                                       SizedBox(width: 30.w),
-                                      CommonImage(
-                                        size: 12,
-                                        imageSrc: widget.privacyImage,
+                                      Expanded(
+                                        child: CommonImage(
+                                          size: 12,
+                                          imageSrc: widget.privacyImage,
+                                        ),
                                       ),
                                     ],
                                   ),

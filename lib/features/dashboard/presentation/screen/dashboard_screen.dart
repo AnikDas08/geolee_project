@@ -136,6 +136,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+
+
                   CommonText(
                     text: _providerProfileViewController.businessName,
                     textAlign: TextAlign.left,

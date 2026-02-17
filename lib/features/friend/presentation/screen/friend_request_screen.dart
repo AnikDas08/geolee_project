@@ -16,9 +16,7 @@ class FriendRequestScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Friend Requests"),
-      ),
+      appBar: AppBar(title: const Text("Friend Requests")),
       body: Obx(() {
         if (controller.isLoading.value) {
           return const Center(child: CircularProgressIndicator());
@@ -28,7 +26,6 @@ class FriendRequestScreen extends StatelessWidget {
         final pendingRequests = controller.requests
             .where((r) => r.status == "pending")
             .toList();
-
 
         if (pendingRequests.isEmpty) {
           return const Center(child: Text("No friend requests"));
@@ -61,13 +58,16 @@ class FriendRequestScreen extends StatelessWidget {
                   // Profile Image with fallback
                   ClipRRect(
                     borderRadius: BorderRadius.circular(50.r),
-                    child: CachedNetworkImage( // Recommended over NetworkImage for better UX
+                    child: CachedNetworkImage(
+                      // Recommended over NetworkImage for better UX
                       imageUrl: "${ApiEndPoint.imageUrl}${friendInfo.image}",
                       height: 50.h,
                       width: 50.w,
                       fit: BoxFit.cover,
-                      placeholder: (context, url) => const CircularProgressIndicator(),
-                      errorWidget: (context, url, error) => Image.asset(AppImages.profileImage),
+                      placeholder: (context, url) =>
+                          const CircularProgressIndicator(),
+                      errorWidget: (context, url, error) =>
+                          Image.asset(AppImages.profileImage),
                     ),
                   ),
                   SizedBox(width: 12.w),
@@ -95,7 +95,10 @@ class FriendRequestScreen extends StatelessWidget {
                               child: CommonButton(
                                 buttonHeight: 36.h,
                                 titleText: 'Accept',
-                                onTap: () => controller.acceptFriendRequest(data.id, index),
+                                onTap: () => controller.acceptFriendRequest(
+                                  data.id,
+                                  index,
+                                ),
                               ),
                             ),
                             SizedBox(width: 10.w),
@@ -104,9 +107,13 @@ class FriendRequestScreen extends StatelessWidget {
                                 borderColor: Colors.transparent,
                                 buttonHeight: 36.h,
                                 titleText: 'Reject',
-                                buttonColor: Color(0xFFDEE2E3), // Make Reject less prominent
-                                titleColor:Color(0xFF737373),
-                                onTap: () => controller.rejectFriendRequest(data.id, index),
+                                buttonColor: Color(0xFFDEE2E3),
+                                // Make Reject less prominent
+                                titleColor: Color(0xFF737373),
+                                onTap: () => controller.rejectFriendRequest(
+                                  data.id,
+                                  index,
+                                ),
                               ),
                             ),
                           ],

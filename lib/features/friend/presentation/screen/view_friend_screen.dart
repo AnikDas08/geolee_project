@@ -138,7 +138,9 @@ class _ViewFriendScreenState extends State<ViewFriendScreen> {
                       userName: data.user.name,
                       userAvatar: "${ApiEndPoint.imageUrl}${data.user.image}",
                       timeAgo: _formatPostTime(DateTime.parse(data.createdAt.toString())),
-                      location: data.address,
+                      location: data.address != null && data.address!.isNotEmpty
+                          ? data.address!.split(',')[0]
+                          : "",
                       images: data.photos.isNotEmpty
                           ? data.photos
                           .map((photo) => ApiEndPoint.imageUrl + photo)
@@ -163,7 +165,6 @@ class _ViewFriendScreenState extends State<ViewFriendScreen> {
   Widget _buildHeader() {
     return Obx(() {
       final user = controller.userData.value;
-
       if (controller.isUserLoading.value) {
         return const Center(child: CircularProgressIndicator());
       }
@@ -211,20 +212,27 @@ class _ViewFriendScreenState extends State<ViewFriendScreen> {
 
           SizedBox(height: 8.h),
 
-          /// ADDRESS
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               CommonImage(imageSrc: AppIcons.location, size: 12),
               SizedBox(width: 8.w),
-              CommonText(
-                text: user?.address ?? "Address not available",
-                fontSize: 13,
-                fontWeight: FontWeight.w400,
-                color: AppColors.secondaryText,
+
+              /// 👇 IMPORTANT PART
+              Flexible(
+                child: CommonText(
+                  maxLines: 4,
+                  textAlign: TextAlign.center,
+                  text: user?.address ?? "Address not available",
+                  fontSize: 13,
+                  fontWeight: FontWeight.w400,
+                  color: AppColors.secondaryText,
+                ),
               ),
             ],
           ),
+
 
           SizedBox(height: 16.h),
 

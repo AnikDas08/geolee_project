@@ -26,17 +26,42 @@ class ClickerScreen extends StatefulWidget {
 }
 
 class _ClickerScreenState extends State<ClickerScreen> {
-  // Controllers are initialized using Get.put
   final ClickerController controller = Get.put(ClickerController());
   final NotificationsController notificationsController = Get.put(
     NotificationsController(),
   );
 
-  // Helper to format the post timestamp
+  // ScrollController to detect bottom scroll for pagination
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  // Trigger load more when within 300px of bottom
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 300) {
+      if (!controller.isLoadingMore.value &&
+          !controller.isLoading.value &&
+          controller.currentPage.value < controller.totalPages.value) {
+        controller.getAllPosts(isLoadMore: true);
+      }
+    }
+  }
+
   String _formatPostTime(DateTime postTime) {
     final now = DateTime.now();
     final difference = now.difference(postTime);
-
     if (difference.inDays >= 1) {
       return DateFormat('MMM dd, yyyy').format(postTime);
     } else {
@@ -52,6 +77,7 @@ class _ClickerScreenState extends State<ClickerScreen> {
         notificationCount: notificationsController.unreadCount,
       ),
       body: Obx(() {
+        // Initial loading state (empty list)
         if (controller.isLoading.value && controller.posts.isEmpty) {
           return const Center(child: CircularProgressIndicator());
         }
@@ -59,9 +85,10 @@ class _ClickerScreenState extends State<ClickerScreen> {
         return RefreshIndicator(
           onRefresh: () async {
             await controller.getBanners();
-            await controller.getAllPosts();
+            await controller.getAllPosts(); // Fresh load resets page to 1
           },
           child: SingleChildScrollView(
+            controller: _scrollController, // Attach scroll controller
             physics: const AlwaysScrollableScrollPhysics(),
             padding: EdgeInsets.symmetric(horizontal: 16.w),
             child: Column(
@@ -69,7 +96,7 @@ class _ClickerScreenState extends State<ClickerScreen> {
               children: [
                 SizedBox(height: 16.h),
 
-                // Search Bar Section
+                // ── Search Bar ──────────────────────────────────────────
                 CommonTextField(
                   controller: controller.searchController,
                   prefixIcon: const Icon(Icons.search),
@@ -87,21 +114,21 @@ class _ClickerScreenState extends State<ClickerScreen> {
                 ),
                 SizedBox(height: 16.h),
 
-                // Dynamic Banner Slider Section
+                // ── Banner Slider ───────────────────────────────────────
                 if (controller.adList.isNotEmpty) ...[
                   CarouselSlider(
                     items: controller.adList.map((ad) {
                       return GestureDetector(
                         onTap: () {
-                          // 1. Hit the tracking API
                           controller.clickBanner(ad.id);
-
-                          // 2. Open the WebView if URL exists
-                          if (ad.websiteUrl != null && ad.websiteUrl!.isNotEmpty) {
-                            Get.to(() => CommonWebViewScreen(
-                              url: ad.websiteUrl!,
-                              title: ad.title,
-                            ));
+                          if (ad.websiteUrl != null &&
+                              ad.websiteUrl!.isNotEmpty) {
+                            Get.to(
+                              () => CommonWebViewScreen(
+                                url: ad.websiteUrl!,
+                                title: ad.title,
+                              ),
+                            );
                           }
                         },
                         child: ClipRRect(
@@ -144,7 +171,7 @@ class _ClickerScreenState extends State<ClickerScreen> {
 
                 SizedBox(height: 16.h),
 
-                // Header & Filter Section
+                // ── Header & Filter ─────────────────────────────────────
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -160,7 +187,7 @@ class _ClickerScreenState extends State<ClickerScreen> {
                 ),
                 SizedBox(height: 16.h),
 
-                // Posts List Section
+                // ── Posts List ──────────────────────────────────────────
                 controller.filteredPosts.isEmpty
                     ? _buildEmptyState()
                     : ListView.separated(
@@ -172,41 +199,36 @@ class _ClickerScreenState extends State<ClickerScreen> {
                           final data = controller.filteredPosts[index];
                           final List<String> postImages = data.photos.isNotEmpty
                               ? data.photos
-                              .map((photo) => ApiEndPoint.imageUrl + photo)
-                              .toList()
+                                    .map((p) => ApiEndPoint.imageUrl + p)
+                                    .toList()
                               : [];
 
                           return CommonPostCards(
                             onTapPhoto: () {
                               if (postImages.isNotEmpty) {
-                                Get.to(() => FullScreenImageView(
-                                  images: postImages,
-                                  initialIndex: 0,
-                                ));
+                                Get.to(
+                                  () => FullScreenImageView(
+                                    images: postImages,
+                                    initialIndex: 0,
+                                  ),
+                                );
                               }
                             },
                             onTapProfile: () => Get.to(
                               () => ViewFriendScreen(
                                 userId: data.user.id,
-                                isFriend:
-                                    false, // Friendship state logic inside ViewFriendScreen
+                                isFriend: false,
                               ),
                             ),
                             clickerType: data.clickerType,
                             userName: data.user.name,
                             userAvatar:
                                 "${ApiEndPoint.imageUrl}${data.user.image}",
-                            timeAgo: _formatPostTime(
-                              DateTime.parse(data.createdAt.toString()),
-                            ),
-                            location: data.address,
-                            images: data.photos.isNotEmpty
-                                ? data.photos
-                                      .map(
-                                        (photo) => ApiEndPoint.imageUrl + photo,
-                                      )
-                                      .toList()
-                                : [],
+                            timeAgo: _formatPostTime(data.createdAt),
+                            location: data.address.isNotEmpty
+                                ? data.address.split(',')[0]
+                                : "",
+                            images: postImages,
                             description: data.description,
                             isFriend: false,
                             privacyImage: data.privacy == "public"
@@ -214,10 +236,35 @@ class _ClickerScreenState extends State<ClickerScreen> {
                                 : data.privacy == "friends"
                                 ? AppIcons.friends
                                 : AppIcons.onlyMe,
-
                           );
                         },
                       ),
+
+                Obx(() {
+                  if (controller.isLoadingMore.value) {
+                    return Padding(
+                      padding: EdgeInsets.symmetric(vertical: 20.h),
+                      child: const Center(child: CircularProgressIndicator()),
+                    );
+                  }
+                  // Show "end of posts" message only when all pages loaded
+                  if (!controller.isLoading.value &&
+                      controller.filteredPosts.isNotEmpty &&
+                      controller.currentPage.value >=
+                          controller.totalPages.value) {
+                    return Padding(
+                      padding: EdgeInsets.symmetric(vertical: 20.h),
+                      child: Center(
+                        child: Text(
+                          "You've reached the end",
+                          style: TextStyle(fontSize: 14.sp, color: Colors.grey),
+                        ),
+                      ),
+                    );
+                  }
+                  return const SizedBox.shrink();
+                }),
+
                 SizedBox(height: 20.h),
               ],
             ),
@@ -227,7 +274,6 @@ class _ClickerScreenState extends State<ClickerScreen> {
     );
   }
 
-  // Widget for when no results are found
   Widget _buildEmptyState() {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 60.h),
@@ -248,7 +294,6 @@ class _ClickerScreenState extends State<ClickerScreen> {
     );
   }
 
-  // Filter Button UI
   Widget _buildFilterButton(BuildContext context) {
     return GestureDetector(
       onTap: () => _showFilterBottomSheet(context),
@@ -272,7 +317,6 @@ class _ClickerScreenState extends State<ClickerScreen> {
     );
   }
 
-  // Bottom Sheet for Category Selection
   void _showFilterBottomSheet(BuildContext context) {
     Get.bottomSheet(
       Container(

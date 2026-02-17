@@ -1,8 +1,12 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:geocoding/geocoding.dart';
 import 'package:get/get.dart';
 import 'package:giolee78/config/api/api_end_point.dart';
 import 'package:giolee78/features/home/presentation/controller/home_nav_controller.dart';
 import 'package:giolee78/features/profile/presentation/controller/my_profile_controller.dart';
+import 'package:giolee78/services/api/api_response_model.dart';
 import 'package:giolee78/utils/enum/enum.dart';
 
 import '../../../../services/api/api_service.dart';
@@ -417,36 +421,65 @@ class HomeController extends GetxController {
     }
   }
 
-  // Get current location and update profile
-  Future<void> getCurrentLocationAndUpdateProfile() async {
+// Reverse Geocoding using ApiService.get
+//   Future<String?> getAddressFromCoordinate(double lat, double lng) async {
+//     try {
+//       const String googleApiKey = "AIzaSyAp3rwzXU0fAqaPCTRfx81ixNMu5flXnPo";
+//
+//       final url ="https://maps.googleapis.com/maps/api/geocode/json?latlng=$lat,$lng&key=$googleApiKey";
+//
+//       ApiResponseModel response = await ApiService.get(url);
+//
+//       if (response.statusCode == 200) {
+//         final data = response.data as Map<String, dynamic>; // Decode JSON safely
+//
+//         if (data['status'] == 'OK' && data['results'] != null && data['results'].isNotEmpty) {
+//           String formattedAddress = data['results'][0]['formatted_address'];
+//           debugPrint('Reverse Geocoded Address: $formattedAddress');
+//           return formattedAddress;
+//         } else {
+//           debugPrint('No address found for coordinates');
+//           return null;
+//         }
+//       } else {
+//         debugPrint('Failed to fetch address: ${response.statusCode}');
+//         return null;
+//       }
+//     } catch (e) {
+//       debugPrint("Error in getAddressFromCoordinate: $e");
+//       return null;
+//     }
+//   }
+
+
+  Future<String?> getAddressFromCoordinate(double lat, double lng) async {
     try {
-      isLocationUpdating.value = true;
+      List<Placemark> placemarks = await placemarkFromCoordinates(lat, lng);
 
-      Position? position = await getCurrentLocation();
-
-      if (position != null) {
-        currentLatitude.value = position.latitude;
-        currentLongitude.value = position.longitude;
-
-        debugPrint('Updating profile with location: [${position.longitude}, ${position.latitude}]');
-
-        // Update profile with new location
-        await updateProfile(position.longitude, position.latitude);
+      if (placemarks.isNotEmpty) {
+        Placemark place = placemarks.first;
+        String address =
+            "${place.street}, ${place.subLocality}, ${place.locality}, ${place.administrativeArea}, ${place.country}";
+        debugPrint("Reverse Geocoded Address: $address");
+        return address;
       } else {
-        debugPrint('Could not get current location');
+        debugPrint("No placemark found for coordinates");
+        return null;
       }
     } catch (e) {
-      debugPrint('Error in getCurrentLocationAndUpdateProfile: $e');
-    } finally {
-      isLocationUpdating.value = false;
+      debugPrint("Error in getAddressFromCoordinate: $e");
+      return null;
     }
   }
 
-  // Update user profile with location
   Future<void> updateProfile(double longitude, double latitude) async {
     try {
+
+      String? address = await getAddressFromCoordinate(latitude, longitude);
+
       Map<String, dynamic> body = {
-        "location": [longitude, latitude]
+        "location": [longitude, latitude],
+        "address":address ??"Location Unavailable"
       };
 
       debugPrint('Updating profile with body: $body');
@@ -465,9 +498,34 @@ class HomeController extends GetxController {
       }
     } catch (e) {
       debugPrint('Error updating profile: $e');
-      // Don't show error to user as this is a background operation
     }
   }
+
+// Get current location + update profile
+  Future<void> getCurrentLocationAndUpdateProfile() async {
+    try {
+      isLocationUpdating.value = true;
+
+      Position? position = await getCurrentLocation();
+
+      if (position != null) {
+        currentLatitude.value = position.latitude;
+        currentLongitude.value = position.longitude;
+
+        debugPrint('Updating profile with location: [${position.longitude}, ${position.latitude}]');
+
+        // Update profile with new location + address
+        await updateProfile(position.longitude, position.latitude);
+      } else {
+        debugPrint('Could not get current location');
+      }
+    } catch (e) {
+      debugPrint('Error in getCurrentLocationAndUpdateProfile: $e');
+    } finally {
+      isLocationUpdating.value = false;
+    }
+  }
+
 
   void searchPosts(String query) {
     try {

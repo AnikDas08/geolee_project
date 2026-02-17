@@ -7,14 +7,22 @@ import 'package:giolee78/utils/constants/app_string.dart';
 import '../constants/app_colors.dart';
 
 class OtherHelper {
-  static RegExp emailRegexp = RegExp(
-    r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+",
-  );
+  static RegExp emailRegexp = RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+",);
   static RegExp passRegExp = RegExp(r'(?=.*[a-z])(?=.*[0-9])');
+  static RegExp phoneRegexp = RegExp(r'(^(?:[+0]9)?[0-9]{10,15}$)');
 
   static String? validator(value) {
     if (value.isEmpty) {
       return AppString.thisFieldIsRequired;
+    }
+    return null;
+  }
+
+  static String? phoneValidator(value) {
+    if (value == null || value.isEmpty) {
+      return AppString.thisFieldIsRequired;
+    } else if (!phoneRegexp.hasMatch(value)) {
+      return AppString.enterValidPhone;
     }
     return null;
   }

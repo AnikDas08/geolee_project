@@ -75,16 +75,39 @@ class ChatNearbyScreen extends StatelessWidget {
         }
 
         // Display list
+        // Display list with pagination
         return RefreshIndicator(
           onRefresh: () => controller.getNearbyChat(),
-          child: ListView.separated(
-            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
-            itemBuilder: (context, index) {
-              final user = controller.nearbyChatList[index];
-              return _NearbyUserCard(nearbyChatUser: user);
+          child: NotificationListener<ScrollNotification>(
+            onNotification: (ScrollNotification scrollInfo) {
+              // ✅ Load more when reaching bottom
+              if (scrollInfo.metrics.pixels == scrollInfo.metrics.maxScrollExtent) {
+                controller.loadMore();
+              }
+              return false;
             },
-            separatorBuilder: (context, index) => SizedBox(height: 12.h),
-            itemCount: controller.nearbyChatList.length,
+            child: ListView.separated(
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
+              itemCount: controller.nearbyChatList.length + 1, // +1 for loader
+              separatorBuilder: (context, index) => SizedBox(height: 12.h),
+              itemBuilder: (context, index) {
+                if (index == controller.nearbyChatList.length) {
+                  return Obx(() => controller.isPaginationLoading.value
+                      ? Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(16.h),
+                      child: CircularProgressIndicator(
+                        color: AppColors.primaryColor,
+                      ),
+                    ),
+                  )
+                      : SizedBox.shrink());
+                }
+
+                final user = controller.nearbyChatList[index];
+                return _NearbyUserCard(nearbyChatUser: user);
+              },
+            ),
           ),
         );
       }),

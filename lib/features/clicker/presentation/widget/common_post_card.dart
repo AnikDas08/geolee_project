@@ -118,9 +118,11 @@ class CommonPostCards extends StatelessWidget {
                                   overflow: TextOverflow.ellipsis,
                                 ),
                                 SizedBox(width: 30.w),
-                                CommonImage(
-                                    size: 12,
-                                    imageSrc: privacyImage),
+                                Expanded(
+                                  child: CommonImage(
+                                      size: 12,
+                                      imageSrc: privacyImage),
+                                ),
                               ],
                             ),
                           ),

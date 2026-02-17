@@ -20,6 +20,7 @@ class AppString {
   static const String someThingWrong = "Some Thing Wrong";
   static const String tryAgain = "Try Again";
   static const String phoneNumber = "Phone Number";
+  static const String enterValidPhone = "enterValidPhone";
   static const String test = "Test";
   static const String changePassword = "Change Password";
   static const String currentPassword = "Current Password";

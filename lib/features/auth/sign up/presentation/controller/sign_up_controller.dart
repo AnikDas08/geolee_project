@@ -289,6 +289,29 @@ class SignUpController extends GetxController {
 
     String formattedDob = "";
 
+
+    if (image == null || image!.isEmpty) {
+      Get.snackbar('Validation Error', 'Please select a profile image');
+      return;
+    }
+
+    if (bioController.text.trim().isEmpty) {
+      Get.snackbar('Validation Error', 'Please enter a bio');
+      return;
+    }
+
+    if (ageController.text.trim().isEmpty) {
+      Get.snackbar('Validation Error', 'Please select your age');
+      return;
+    }
+
+    if (selectedGender == null || selectedGender!.isEmpty) {
+      Get.snackbar('Validation Error', 'Please select your gender');
+      return;
+    }
+
+
+
     if (dateController.text.isNotEmpty) {
       try {
         DateTime parsedDate = DateFormat(
@@ -300,6 +323,9 @@ class SignUpController extends GetxController {
         formattedDob = "";
       }
     }
+
+
+
 
     Map<String, String> body = {
       "gender": selectedGender!.toLowerCase(),

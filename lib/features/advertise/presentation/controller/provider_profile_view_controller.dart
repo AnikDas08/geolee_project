@@ -13,6 +13,7 @@ class ProviderProfileViewController extends GetxController {
 
   String _dateOfBirth = "";
   String _gender = "";
+  String localAddress='';
 
 
   // ================= USER DATA GETTERS =================
@@ -90,51 +91,59 @@ class ProviderProfileViewController extends GetxController {
       final response = await ApiService.get(ApiEndPoint.advertiserProfile);
 
       if (response.statusCode == 200) {
-        final Map<String, dynamic> res =
-        response.data as Map<String, dynamic>;
-
+        final Map<String, dynamic> res = response.data as Map<String, dynamic>;
         final advertiser = res['data'];
-        if (advertiser == null) return;
+
+        if (advertiser == null) {
+          debugPrint("❌ Advertiser data is null");
+          return;
+        }
 
         final user = advertiser['user'];
 
+        if (user == null) {
+          debugPrint("❌ User data is null");
+          return;
+        }
+
+        // ---------- DEBUG RAW DATA ----------
+        debugPrint("📍 Raw address from API: ${user['address']}");
+        debugPrint("📍 Full user data: $user");
+
         // ---------- LOCATION ----------
-
-        final coordinates =
-            user?['location']?['coordinates'] ?? [0, 0];
-
-        final double lat =
-        coordinates.length > 1 ? coordinates[1].toDouble() : 0.0;
-        final double log =
-        coordinates.length > 0 ? coordinates[0].toDouble() : 0.0;
+        final coordinates = user['location']?['coordinates'] ?? [0, 0];
+        final double lat = coordinates.length > 1 ? coordinates[1].toDouble() : 0.0;
+        final double log = coordinates.length > 0 ? coordinates[0].toDouble() : 0.0;
 
         // ---------- DATE ----------
-        final String dob = user?['dob'] ?? "";
+        final String dob = user['dob'] ?? "";
         final String createdAt = advertiser['createdAt'] ?? "";
         final String updatedAt = advertiser['updatedAt'] ?? "";
 
         // ---------- LOCAL STORAGE ----------
-        LocalStorage.userId = user?['_id'] ?? "";
-        LocalStorage.myName = user?['name'] ?? "";
-        LocalStorage.myEmail = user?['email'] ?? "";
-        LocalStorage.myImage = user?['image'] ?? "";
-        LocalStorage.gender = user?['gender'] ?? "";
+        LocalStorage.userId = user['_id'] ?? "";
+        LocalStorage.myName = user['name'] ?? "";
+        LocalStorage.myEmail = user['email'] ?? "";
+        LocalStorage.myImage = user['image'] ?? "";
+        LocalStorage.gender = user['gender'] ?? "";
         LocalStorage.dateOfBirth = dob;
-        LocalStorage.address = user?['address'] ?? "";
+        LocalStorage.address = user['address'] ?? "";
+        localAddress = user['address'] ?? "";
 
-        LocalStorage.advertiserBio =
-        (advertiser['bio'] != null && advertiser['bio'].toString().isNotEmpty)
+        debugPrint("✅ Address stored in LocalStorage😁😁😁😁: ${LocalStorage.address}");
+        debugPrint("✅ Address in local variable😁😁😁😁 : $localAddress");
+
+        LocalStorage.advertiserBio = (advertiser['bio'] != null &&
+            advertiser['bio'].toString().isNotEmpty)
             ? advertiser['bio']
             : "Bio Not Set Yet";
 
         LocalStorage.lat = lat;
         LocalStorage.long = log;
-
         LocalStorage.createdAt = createdAt;
         LocalStorage.updatedAt = updatedAt;
 
-        // advertiser specific
-
+        // Advertiser specific
         LocalStorage.businessName = advertiser['businessName'] ?? "";
         LocalStorage.businessType = advertiser['businessType'] ?? "";
         LocalStorage.businessLogo = advertiser['logo'] ?? "";
@@ -142,7 +151,6 @@ class ProviderProfileViewController extends GetxController {
         LocalStorage.businessLicenceNumber = advertiser['licenseNumber'] ?? "";
 
         // ---------- SAVE PREF ----------
-
         await Future.wait([
           LocalStorage.setString(LocalStorageKeys.userId, LocalStorage.userId),
           LocalStorage.setString(LocalStorageKeys.myName, LocalStorage.myName),
@@ -159,13 +167,14 @@ class ProviderProfileViewController extends GetxController {
           LocalStorage.setString(LocalStorageKeys.businessType, LocalStorage.businessType),
           LocalStorage.setString(LocalStorageKeys.businessLogo, LocalStorage.businessLogo),
           LocalStorage.setString(LocalStorageKeys.phone, LocalStorage.phone),
-          LocalStorage.setString(LocalStorageKeys.advertiserBio, LocalStorage.advertiserBio),
+          LocalStorage.setString(LocalStorageKeys.advertiserBio, LocalStorage.advertiserBio ?? ""),
         ]);
 
+        debugPrint("✅ Profile data saved successfully");
+        debugPrint("✅ Final address from getter: $address");
       }
     } catch (e) {
-
-      debugPrint("Failed To Load Profile");
+      debugPrint("❌ Failed To Load Profile: $e");
     }
 
     isLoading = false;

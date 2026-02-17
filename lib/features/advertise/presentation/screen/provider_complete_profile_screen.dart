@@ -6,6 +6,7 @@ import 'package:giolee78/component/image/common_image.dart';
 import 'package:giolee78/component/text_field/common_text_field.dart';
 import 'package:giolee78/utils/constants/app_colors.dart';
 import 'package:giolee78/utils/constants/app_images.dart';
+import 'package:giolee78/utils/helpers/other_helper.dart';
 import 'dart:io'; // Import for File
 import '../controller/provider_complete_profile_controller.dart';
 
@@ -88,97 +89,108 @@ class ServiceProviderInfoScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 20),
-              const Text(
-                'Business Name',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.black87,
+              Form(
+                key: controller.formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Business Name',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    CommonTextField(
+                      controller: controller.businessNameController,
+                      hintText: 'Business Name',
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    // Experience TextField
+                    const Text(
+                      'Bio',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    CommonTextField(
+                      controller: controller.bioController,
+                      hintText: 'Bio',
+                      maxLines: 2,
+                    ),
+                    const SizedBox(height: 20),
+
+                    // Experience TextField
+                    const Text(
+                      'Phone Number',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    CommonTextField(
+                      validator: OtherHelper.phoneValidator,
+                      controller: controller.phoneNumberController,
+                      hintText: 'Phone Number',
+                    ),
+                    const SizedBox(height: 20),
+
+                    const Text(
+                      'Business License Number ',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    CommonTextField(
+
+                      controller: controller.businessLicenseNumberController,
+                      hintText: 'Business License Number',
+                    ),
+                    const SizedBox(height: 20),
+
+                    // Sub Category Dropdown
+                    const Text(
+                      'Business Type',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    CommonTextField(
+                      controller: controller.businessTypeController,
+                      hintText: 'Business Type',
+                    ),
+                    const SizedBox(height: 20),
+                  ],
                 ),
               ),
-              const SizedBox(height: 8),
-              CommonTextField(
-                controller: controller.businessNameController,
-                hintText: 'Business Name',
-              ),
-
-              const SizedBox(height: 20),
-
-              // Experience TextField
-              const Text(
-                'Bio',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.black87,
-                ),
-              ),
-              const SizedBox(height: 8),
-              CommonTextField(
-                controller: controller.bioController,
-                hintText: 'Bio',
-                maxLines: 2,
-              ),
-              const SizedBox(height: 20),
-
-              // Experience TextField
-              const Text(
-                'Phone Number',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.black87,
-                ),
-              ),
-              const SizedBox(height: 8),
-              CommonTextField(
-                controller: controller.phoneNumberController,
-                hintText: 'Phone Number',
-              ),
-              const SizedBox(height: 20),
-
-              const Text(
-                'Business License Number ',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.black87,
-                ),
-              ),
-              const SizedBox(height: 8),
-              CommonTextField(
-                controller: controller.businessLicenseNumberController,
-                hintText: 'Business License Number',
-              ),
-              const SizedBox(height: 20),
-
-              // Sub Category Dropdown
-              const Text(
-                'Business Type',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.black87,
-                ),
-              ),
-              const SizedBox(height: 8),
-              CommonTextField(
-                controller: controller.businessTypeController,
-                hintText: 'Business Type',
-              ),
-              const SizedBox(height: 20),
 
               // Experience TextField
               const SizedBox(height: 20),
 
               // Confirm Button
-              CommonButton(
+              Obx(() => CommonButton(
+                isLoading: controller.isLoading.value,
                 titleText: "Confirm",
                 buttonHeight: 40,
                 onTap: () {
                   controller.completeAdvertiserInfo();
                 },
-              ),
+              )),
             ],
           ),
         ),

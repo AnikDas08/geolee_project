@@ -178,8 +178,8 @@ class ProviderProfileViewScreen extends StatelessWidget {
           16.height,
           _buildDetailRow('Business Type', controller.businessType),
           16.height,
-          _buildDetailRow('Address', controller.address),
-        ],
+          _buildDetailRow('Address', controller.address,)
+            ],
       ),
     );
   }

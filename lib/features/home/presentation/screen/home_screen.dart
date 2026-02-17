@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
+import 'package:giolee78/features/friend/presentation/controller/my_friend_controller.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -31,7 +32,13 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final Completer<GoogleMapController> _controller = Completer<GoogleMapController>();
+  final Completer<GoogleMapController> _controller =
+      Completer<GoogleMapController>();
+  final myFriendController = Get.put(MyFriendController());
+
+  late final pendingRequests = myFriendController.requests
+      .where((r) => r.status == "pending")
+      .toList();
 
   // Default initial position (Dhaka)
   CameraPosition get _initialPosition => CameraPosition(
@@ -114,9 +121,7 @@ class _HomeScreenState extends State<HomeScreen> {
       return GetBuilder<NotificationsController>(
         init: NotificationsController(),
         builder: (notifController) {
-          return HomeDetails(
-            notificationCount: notifController.unreadCount,
-          );
+          return HomeDetails(notificationCount: notifController.unreadCount);
         },
       );
     } catch (e) {
@@ -153,9 +158,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Container(
       height: 350.h,
       width: double.infinity,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10.r),
-      ),
+      decoration: BoxDecoration(borderRadius: BorderRadius.circular(10.r)),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(10.r),
         child: Stack(
@@ -175,9 +178,7 @@ class _HomeScreenState extends State<HomeScreen> {
               Positioned(
                 bottom: 16.h,
                 left: 16.w,
-                child: IgnorePointer(
-                  child: _buildHeatmapInfoBadge(controller),
-                ),
+                child: IgnorePointer(child: _buildHeatmapInfoBadge(controller)),
               ),
           ],
         ),
@@ -190,7 +191,8 @@ class _HomeScreenState extends State<HomeScreen> {
       return GoogleMap(
         compassEnabled: true,
         mapType: MapType.satellite,
-        initialCameraPosition: _initialPosition, // Use the getter
+        initialCameraPosition: _initialPosition,
+        // Use the getter
         myLocationEnabled: true,
         myLocationButtonEnabled: true,
         zoomControlsEnabled: true,
@@ -225,7 +227,9 @@ class _HomeScreenState extends State<HomeScreen> {
           }
         },
         onTap: (LatLng position) {
-          debugPrint('Map tapped at: ${position.latitude}, ${position.longitude}');
+          debugPrint(
+            'Map tapped at: ${position.latitude}, ${position.longitude}',
+          );
         },
       );
     } catch (e) {
@@ -274,10 +278,12 @@ class _HomeScreenState extends State<HomeScreen> {
             },
             child: Row(
               children: [
-                Obx(() => Text(
-                  controller.clickerCount.value ?? 'Select Clicker',
-                  style: TextStyle(fontSize: 12.sp, color: Colors.black87),
-                )),
+                Obx(
+                  () => Text(
+                    controller.clickerCount.value ?? 'Select Clicker',
+                    style: TextStyle(fontSize: 12.sp, color: Colors.black87),
+                  ),
+                ),
                 Icon(Icons.arrow_drop_down, size: 24.sp),
               ],
             ),
@@ -286,9 +292,7 @@ class _HomeScreenState extends State<HomeScreen> {
           _buildOverlayButton(
             onTap: () {
               try {
-                Get.dialog(
-                  FilterDialog(onApply: controller.applyFilter),
-                );
+                Get.dialog(FilterDialog(onApply: controller.applyFilter));
               } catch (e) {
                 debugPrint('Error showing filter dialog: $e');
                 Get.snackbar('Error', 'Failed to open filter');
@@ -296,7 +300,10 @@ class _HomeScreenState extends State<HomeScreen> {
             },
             child: Row(
               children: [
-                Text('Filter', style: TextStyle(fontSize: 12.sp, color: Colors.black87)),
+                Text(
+                  'Filter',
+                  style: TextStyle(fontSize: 12.sp, color: Colors.black87),
+                ),
                 SizedBox(width: 4.w),
                 Icon(Icons.filter_alt, size: 16.sp),
               ],
@@ -320,7 +327,7 @@ class _HomeScreenState extends State<HomeScreen> {
       return Container(
         padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
         decoration: BoxDecoration(
-          color: Colors.black.withOpacity(0.7),
+          color: Colors.red,
           borderRadius: BorderRadius.circular(8.r),
         ),
         child: Row(
@@ -329,8 +336,8 @@ class _HomeScreenState extends State<HomeScreen> {
             Icon(Icons.location_on, size: 16.sp, color: Colors.white),
             SizedBox(width: 4.w),
             Text(
-              '$totalPoints ${totalPoints == 1 ? 'location' : 'locations'}',
-              style: TextStyle(fontSize: 12.sp, color: Colors.white),
+              '$totalPoints ${totalPoints == 1 ? 'location' : 'Total Post'}',
+              style: TextStyle(fontSize: 14.sp, color: Colors.white),
             ),
           ],
         ),
@@ -341,7 +348,10 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  Widget _buildOverlayButton({required VoidCallback onTap, required Widget child}) {
+  Widget _buildOverlayButton({
+    required VoidCallback onTap,
+    required Widget child,
+  }) {
     try {
       return GestureDetector(
         onTap: onTap,
@@ -369,7 +379,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildActionList(HomeController controller) {
     try {
-      bool isLoggedIn = LocalStorage.token != null && LocalStorage.token!.isNotEmpty;
+      bool isLoggedIn =
+          LocalStorage.token != null && LocalStorage.token!.isNotEmpty;
 
       return Column(
         children: [
@@ -377,8 +388,9 @@ class _HomeScreenState extends State<HomeScreen> {
             imageSrc: AppIcons.clicker,
             title: 'Clicker',
             onTap: () {
-
-              debugPrint("Lat is : =============================${LocalStorage.lat.toString()}");
+              debugPrint(
+                "Lat is : =============================${LocalStorage.lat.toString()}",
+              );
               try {
                 Get.to(() => ClickerScreen(), arguments: controller);
               } catch (e) {
@@ -417,18 +429,20 @@ class _HomeScreenState extends State<HomeScreen> {
                 }
               },
             ),
-            Item(
-              imageSrc: AppIcons.friend,
-              title: 'Friend Request',
-              badgeText: controller.friendRequestsList.length.toString(),
-              onTap: () {
-                try {
-                  Get.to(() => FriendRequestScreen());
-                } catch (e) {
-                  debugPrint('Error navigating to Friend Request: $e');
-                  Get.snackbar('Error', 'Failed to open Friend Request');
-                }
-              },
+            Obx(
+              () => Item(
+                imageSrc: AppIcons.friend,
+                title: 'Friend Request',
+                badgeText:pendingRequests.length.toString(),
+                onTap: () {
+                  try {
+                    Get.to(() => FriendRequestScreen());
+                  } catch (e) {
+                    debugPrint('Error navigating to Friend Request: $e');
+                    Get.snackbar('Error', 'Failed to open Friend Request');
+                  }
+                },
+              ),
             ),
           ],
         ],
@@ -460,15 +474,21 @@ class _HomeScreenState extends State<HomeScreen> {
       Get.dialog(
         AlertDialog(
           backgroundColor: Colors.white,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8.0),
+          ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               const Text(
                 'By Enabling Location, Your Nearby Activity May Be Visible To Others, '
-                    'And Your Location Data Will Be Stored Temporarily.',
+                'And Your Location Data Will Be Stored Temporarily.',
                 textAlign: TextAlign.start,
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, height: 1.5),
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  height: 1.5,
+                ),
               ),
               const SizedBox(height: 24),
               Row(
@@ -476,7 +496,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   Expanded(
                     child: OutlinedButton(
                       onPressed: () => Get.back(),
-                      style: OutlinedButton.styleFrom(foregroundColor: Colors.black),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.black,
+                      ),
                       child: const Text('Back'),
                     ),
                   ),
@@ -508,7 +530,8 @@ class _HomeScreenState extends State<HomeScreen> {
                           if (status.isGranted) {
                             try {
                               // Check if location services are enabled
-                              bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+                              bool serviceEnabled =
+                                  await Geolocator.isLocationServiceEnabled();
 
                               if (!serviceEnabled) {
                                 Get.back(); // Close loading
@@ -517,16 +540,19 @@ class _HomeScreenState extends State<HomeScreen> {
                                   'GPS Disabled',
                                   'Please enable GPS/Location services',
                                   snackPosition: SnackPosition.BOTTOM,
-                                  backgroundColor: Colors.orange.withOpacity(0.7),
+                                  backgroundColor: Colors.orange.withOpacity(
+                                    0.7,
+                                  ),
                                   colorText: Colors.white,
                                 );
                                 return;
                               }
 
                               // Fetch current location
-                              Position position = await Geolocator.getCurrentPosition(
-                                desiredAccuracy: LocationAccuracy.high,
-                              );
+                              Position position =
+                                  await Geolocator.getCurrentPosition(
+                                    desiredAccuracy: LocationAccuracy.high,
+                                  );
 
                               // Close loading
                               Get.back();
@@ -535,11 +561,12 @@ class _HomeScreenState extends State<HomeScreen> {
                               LocalStorage.lat = position.latitude;
                               LocalStorage.long = position.longitude;
 
-                              debugPrint("Location Enabled - Lat: ${position.latitude}, Lng: ${position.longitude}");
+                              debugPrint(
+                                "Location Enabled - Lat: ${position.latitude}, Lng: ${position.longitude}",
+                              );
 
                               // Navigate to Chat Nearby Screen
                               Get.to(() => const ChatNearbyScreen());
-
                             } catch (e) {
                               Get.back(); // Close loading
 
@@ -555,7 +582,10 @@ class _HomeScreenState extends State<HomeScreen> {
                             }
                           } else {
                             Get.back(); // Close loading
-                            Get.snackbar('Permission Denied', 'Location permission is required.');
+                            Get.snackbar(
+                              'Permission Denied',
+                              'Location permission is required.',
+                            );
 
                             if (status.isPermanentlyDenied) {
                               await openAppSettings();
@@ -573,8 +603,13 @@ class _HomeScreenState extends State<HomeScreen> {
                           );
                         }
                       },
-                      style: ElevatedButton.styleFrom(backgroundColor: AppColors.primaryColor),
-                      child: const Text('OK', style: TextStyle(color: Colors.white)),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primaryColor,
+                      ),
+                      child: const Text(
+                        'OK',
+                        style: TextStyle(color: Colors.white),
+                      ),
                     ),
                   ),
                 ],
