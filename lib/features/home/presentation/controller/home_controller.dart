@@ -1,16 +1,12 @@
-import 'dart:convert';
-
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:get/get.dart';
 import 'package:giolee78/config/api/api_end_point.dart';
 import 'package:giolee78/features/home/presentation/controller/home_nav_controller.dart';
 import 'package:giolee78/features/profile/presentation/controller/my_profile_controller.dart';
-import 'package:giolee78/services/api/api_response_model.dart';
-import 'package:giolee78/utils/enum/enum.dart';
-
 import '../../../../services/api/api_service.dart';
-import '../../../../services/storage/storage_keys.dart';
 import '../../../../services/storage/storage_services.dart';
 import '../../../friend/data/friend_request_model.dart';
 import '../../data/data_model.dart';
@@ -33,14 +29,19 @@ class HomeController extends GetxController {
   var clickerCount = RxnString();
   var filterOption = RxnString();
 
-  // Filter parameters
-  var selectedPeriod = 'Last 24 Hours'.obs;
-  var startDate = DateTime.now().obs;
-  var endDate = DateTime.now().obs;
+  // ─── Filter parameters ───
+  var selectedPeriod = ''.obs;
+  Rxn<DateTime> startDate = Rxn<DateTime>();
+  Rxn<DateTime> endDate = Rxn<DateTime>();
+  RxBool isDateFilterActive = false.obs;
   String? argument;
 
   // --- Heatmap Variables ---
   Set<Heatmap> heatmaps = {};
+
+
+  //this on for map  marker and post count
+  RxList<Marker> markerList = <Marker>[].obs;
 
   // --- Current Location Variables ---
   RxDouble currentLatitude = 0.0.obs;
@@ -61,16 +62,13 @@ class HomeController extends GetxController {
       myProfileController.getUserData();
 
       if (LocalStorage.token != null && LocalStorage.token!.isNotEmpty) {
-        // Get current location and update profile
         getCurrentLocationAndUpdateProfile();
-
         fetchPosts();
         myProfileController.getUserData();
       } else {
         allPosts = [];
         filteredPosts = [];
         isLoading = false;
-        // Load static heatmap if no posts available
         update();
       }
     } catch (e) {
@@ -79,164 +77,289 @@ class HomeController extends GetxController {
     }
   }
 
+  HeatmapGradient _getHeatmapGradient() {
+    final clicker = clickerCount.value;
+    if (clicker == "Great Vibes") {
+      return HeatmapGradient([
+        HeatmapGradientColor(Colors.lightGreen, 0.1),
+        HeatmapGradientColor(Colors.green, 0.4),
+        HeatmapGradientColor(Colors.green.shade700, 0.7),
+        HeatmapGradientColor(Colors.green.shade900, 1.0),
+      ]);
+    } else if (clicker == "Off Vibes") {
+      return HeatmapGradient([
+        HeatmapGradientColor(Colors.orange.shade200, 0.1),
+        HeatmapGradientColor(Colors.orange, 0.4),
+        HeatmapGradientColor(Colors.deepOrange, 0.7),
+        HeatmapGradientColor(Colors.red.shade900, 1.0),
+      ]);
+    } else if (clicker == "Charming Gentleman") {
+      return HeatmapGradient([
+        HeatmapGradientColor(Colors.lightBlue, 0.1),
+        HeatmapGradientColor(Colors.blue, 0.4),
+        HeatmapGradientColor(Colors.indigo, 0.7),
+        HeatmapGradientColor(Colors.purple.shade900, 1.0),
+      ]);
+    } else if (clicker == "Lovely Lady") {
+      return HeatmapGradient([
+        HeatmapGradientColor(Colors.pink.shade100, 0.1),
+        HeatmapGradientColor(Colors.pinkAccent, 0.4),
+        HeatmapGradientColor(Colors.pink, 0.7),
+        HeatmapGradientColor(Colors.pink.shade900, 1.0),
+      ]);
+    } else {
+      return HeatmapGradient([
+        HeatmapGradientColor(Colors.cyan, 0.1),
+        HeatmapGradientColor(Colors.yellow, 0.4),
+        HeatmapGradientColor(Colors.orange, 0.7),
+        HeatmapGradientColor(Colors.red, 1.0),
+      ]);
+    }
+  }
 
-  // --- Method to Generate Heatmap from Post Coordinates ---
+  Color _getMarkerColor() {
+    final clicker = clickerCount.value;
+    if (clicker == "Great Vibes") return Colors.green;
+    if (clicker == "Off Vibes") return Colors.deepOrange;
+    if (clicker == "Charming Gentleman") return Colors.indigo;
+    if (clicker == "Lovely Lady") return Colors.pink;
+    return Colors.red;
+  }
+
+  Future<BitmapDescriptor> _createCountMarkerIcon(int count, Color bgColor) async {
+    try {
+      const double size = 60;
+      double fontSize = 22.sp;
+
+      final ui.PictureRecorder recorder = ui.PictureRecorder();
+      final Canvas canvas = Canvas(recorder);
+
+      final Paint borderPaint = Paint()..color = Colors.white;
+      canvas.drawCircle(const Offset(size / 2, size / 2), size / 2, borderPaint);
+
+      final Paint bgPaint = Paint()..color = bgColor;
+      canvas.drawCircle(const Offset(size / 2, size / 2), (size / 2) - 4, bgPaint);
+
+      final TextPainter textPainter = TextPainter(
+        text: TextSpan(
+          text: count.toString(),
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: fontSize,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        textDirection: TextDirection.ltr,
+      );
+      textPainter.layout();
+      textPainter.paint(
+        canvas,
+        Offset(size / 2 - textPainter.width / 2, size / 2 - textPainter.height / 2),
+      );
+
+      final ui.Image image = await recorder.endRecording().toImage(size.toInt(), size.toInt());
+      final data = await image.toByteData(format: ui.ImageByteFormat.png);
+      return BitmapDescriptor.fromBytes(data!.buffer.asUint8List());
+    } catch (e) {
+      debugPrint('Error creating count marker icon: $e');
+      return BitmapDescriptor.defaultMarker;
+    }
+  }
+
+  // ✅ async শেষে markerList.assignAll() → Obx তে সাথে সাথে update হবে
+  Future<void> _generateMarkersFromPosts(List<Post> posts) async {
+    try {
+      markerList.clear();
+
+      Map<String, List<Post>> grouped = {};
+
+      for (var post in posts) {
+        if (post.lat == 0 && post.long == 0) continue;
+        if (post.lat < -90 || post.lat > 90 || post.long < -180 || post.long > 180) continue;
+
+        double roundedLat = (post.lat * 1000).roundToDouble() / 1000;
+        double roundedLng = (post.long * 1000).roundToDouble() / 1000;
+        String key = '${roundedLat}_$roundedLng';
+        grouped.putIfAbsent(key, () => []).add(post);
+      }
+
+      final Color markerColor = _getMarkerColor();
+      List<Marker> newMarkers = [];
+
+      for (var entry in grouped.entries) {
+        final parts = entry.key.split('_');
+        final double lat = double.parse(parts[0]);
+        final double lng = double.parse(parts[1]);
+        final int count = entry.value.length;
+        final BitmapDescriptor icon = await _createCountMarkerIcon(count, markerColor);
+
+        newMarkers.add(
+          Marker(
+            markerId: MarkerId(entry.key),
+            position: LatLng(lat, lng),
+            icon: icon,
+            infoWindow: InfoWindow(
+              title: '$count ${count == 1 ? 'Post' : 'Posts'}',
+              snippet: entry.value.first.clickerType ?? '',
+            ),
+          ),
+        );
+      }
+
+      // ✅ assignAll → RxList notify করে, Obx সাথে সাথে rebuild করে
+      markerList.assignAll(newMarkers);
+      debugPrint('Markers updated: ${markerList.length} markers');
+    } catch (e) {
+      debugPrint('Error generating markers: $e');
+    }
+  }
+
   void _generateHeatmapFromPosts(List<Post> posts) {
     try {
       if (posts.isEmpty) {
-        debugPrint('No posts available, loading static heatmap');
+        heatmaps = {};
+        markerList.clear();
+        update();
         return;
       }
 
       List<WeightedLatLng> heatmapPoints = [];
-      int validCoordinatesCount = 0;
-      int invalidCoordinatesCount = 0;
 
       for (var post in posts) {
         try {
-          // Check if coordinates are valid
           if (post.lat != 0 && post.long != 0) {
-            // Validate coordinate ranges
             if (post.lat >= -90 && post.lat <= 90 && post.long >= -180 && post.long <= 180) {
-              // Create weighted point - you can adjust weight based on post properties
               double weight = 1.0;
+              if (post.clickerType == "Great Vibes") weight = 2.0;
+              else if (post.clickerType == "Off Vibes") weight = 1.5;
+              else if (post.clickerType == "Charming Gentleman" || post.clickerType == "Lovely Leady") weight = 2.5;
 
-              // Optional: Adjust weight based on clicker type or other criteria
-              try {
-                if (post.clickerType == "Great Vibes") {
-                  weight = 2.0;
-                } else if (post.clickerType == "Off Vibes") {
-                  weight = 1.5;
-                } else if (post.clickerType == "Charming Gentleman" || post.clickerType == "Lovely Leady") {
-                  weight = 2.5;
-                }
-              } catch (e) {
-                debugPrint('Error determining weight for post ${post.id}: $e');
-                weight = 1.0; // Default weight
-              }
-
-              heatmapPoints.add(
-                WeightedLatLng(
-                  LatLng(post.lat, post.long),
-                  weight: weight,
-                ),
-              );
-              validCoordinatesCount++;
-            } else {
-              invalidCoordinatesCount++;
-              debugPrint('Invalid coordinate range for post ${post.id}: lat=${post.lat}, long=${post.long}');
+              heatmapPoints.add(WeightedLatLng(LatLng(post.lat, post.long), weight: weight));
             }
-          } else {
-            invalidCoordinatesCount++;
-            debugPrint('Zero coordinates for post ${post.id}');
           }
         } catch (e) {
           debugPrint('Error processing post ${post.id}: $e');
-          invalidCoordinatesCount++;
         }
       }
 
-      debugPrint('Heatmap generation: $validCoordinatesCount valid, $invalidCoordinatesCount invalid coordinates');
-
-      // If we have valid points, create heatmap
       if (heatmapPoints.isNotEmpty) {
-        try {
-          heatmaps = {
-            Heatmap(
-              heatmapId: const HeatmapId("posts_activity"),
-              data: heatmapPoints,
-              radius: HeatmapRadius.fromPixels(50),
-              opacity: 0.8,
-            )
-          };
-          debugPrint('Heatmap created successfully with ${heatmapPoints.length} points');
-        } catch (e) {
-          debugPrint('Error creating heatmap object: $e');
-        }
+        heatmaps = {
+          Heatmap(
+            heatmapId: const HeatmapId("posts_activity"),
+            data: heatmapPoints,
+            radius: HeatmapRadius.fromPixels(50),
+            opacity: 0.8,
+            gradient: _getHeatmapGradient(),
+          )
+        };
       } else {
-        // No valid points, load static heatmap
-        debugPrint('No valid heatmap points, loading static heatmap');
+        heatmaps = {};
       }
 
       update();
+
+      // ✅ async marker generation — শেষ হলে Obx তে auto-update
+      _generateMarkersFromPosts(posts);
     } catch (e) {
       debugPrint('Error in _generateHeatmapFromPosts: $e');
     }
   }
 
-  void applyFilter(String period, DateTime start, DateTime end) {
+  void applyPeriodFilter(String period) {
     try {
-      selectedPeriod.value = period;
-      startDate.value = start;
-      endDate.value = end;
+      final DateTime now = DateTime.now();
+      DateTime calculatedStart;
 
-      if (period != 'Custom Range') {
-        end = DateTime.now();
-        if (period == 'Last 24 Hours') {
-          start = end.subtract(const Duration(hours: 3));
-        } else if (period == 'Last 7 days') {
-          start = end.subtract(const Duration(hours: 24));
-        } else if (period == 'Last 30 Days') {
-          start = end.subtract(const Duration(days: 30));
-        }
-        startDate.value = start;
-        endDate.value = end;
+      if (period == 'Last 24 Hours') {
+        calculatedStart = now.subtract(const Duration(hours: 24));
+      } else if (period == 'Last 7 Days') {
+        calculatedStart = now.subtract(const Duration(days: 7));
+      } else if (period == 'Last 15 Days') {
+        calculatedStart = now.subtract(const Duration(days: 15));
+      } else if (period == 'Last 30 Days') {
+        calculatedStart = now.subtract(const Duration(days: 30));
+      } else {
+        calculatedStart = now.subtract(const Duration(hours: 24));
       }
 
-      // Fetch posts with current filter
-      fetchPostsWithFilter();
+      selectedPeriod.value = period;
+      startDate.value = calculatedStart;
+      endDate.value = now;
+      isDateFilterActive.value = true;
 
+      fetchPostsWithFilter();
+      update();
+    } catch (e) {
+      debugPrint('Error in applyPeriodFilter: $e');
+      Get.snackbar('Filter Error', 'Failed to apply period filter.',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red.withOpacity(0.7),
+          colorText: Colors.white);
+    }
+  }
+
+  void applyFilter(String period, DateTime start, DateTime end) {
+    try {
+      selectedPeriod.value = 'Custom Range';
+      startDate.value = start;
+      endDate.value = end;
+      isDateFilterActive.value = true;
+
+      fetchPostsWithFilter();
       update();
     } catch (e) {
       debugPrint('Error in applyFilter: $e');
-      Get.snackbar(
-        'Filter Error',
-        'Failed to apply filter. Please try again.',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red.withOpacity(0.7),
-        colorText: Colors.white,
-      );
+      Get.snackbar('Filter Error', 'Failed to apply date filter.',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red.withOpacity(0.7),
+          colorText: Colors.white);
     }
   }
 
-  // Apply clicker type filter (Local filtering - no API call)
-  // Apply clicker type filter (API call with filter)
+  void clearDateFilter() {
+    try {
+      selectedPeriod.value = '';
+      startDate.value = null;
+      endDate.value = null;
+      isDateFilterActive.value = false;
+      fetchPostsWithFilter();
+      update();
+    } catch (e) {
+      debugPrint('Error clearing date filter: $e');
+    }
+  }
+
   void applyClickerFilter(String? clickerType) async {
     try {
       clickerCount.value = clickerType;
-
-      debugPrint('Applying clicker filter: $clickerType');
-
-      // Fetch posts with filter from API
       await fetchPostsWithFilter();
-
     } catch (e) {
       debugPrint('Error in applyClickerFilter: $e');
-      Get.snackbar(
-        'Filter Error',
-        'Failed to apply clicker filter. Please try again.',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red.withOpacity(0.7),
-        colorText: Colors.white,
-      );
+      Get.snackbar('Filter Error', 'Failed to apply clicker filter.',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red.withOpacity(0.7),
+          colorText: Colors.white);
     }
   }
 
-  // Fetch posts with active filters from API
   Future<void> fetchPostsWithFilter() async {
     try {
       isLoading = true;
       update();
 
-      // Build URL with query parameters
       String url = "${ApiEndPoint.post}?limit=100";
 
-      // Add clickerType filter if selected and not "All"
       if (clickerCount.value != null && clickerCount.value != "All") {
-        url += "&clickerType=${Uri.encodeComponent(clickerCount.value!)}&limit=100";
+        url += "&clickerType=${Uri.encodeComponent(clickerCount.value!)}";
       }
 
-      debugPrint('Fetching posts with filter URL: $url');
+      if (startDate.value != null && endDate.value != null) {
+        final String start = startDate.value!.toUtc().toIso8601String();
+        final String end = endDate.value!.toUtc().toIso8601String();
+        url += "&startDate=${Uri.encodeComponent(start)}&endDate=${Uri.encodeComponent(end)}";
+      }
+
+      debugPrint('Fetch URL: $url');
 
       final response = await ApiService.get(url);
 
@@ -245,227 +368,79 @@ class HomeController extends GetxController {
           final postResponse = PostResponseModel.fromJson(response.data);
           allPosts = postResponse.data;
           filteredPosts = allPosts;
-
-          debugPrint('Fetched ${allPosts.length} posts successfully with filter: ${clickerCount.value}');
-
-          // Generate heatmap from fetched posts
           _generateHeatmapFromPosts(allPosts);
         } catch (e) {
           debugPrint('Error parsing post response: $e');
           allPosts = [];
           filteredPosts = [];
-          Get.snackbar(
-            'Data Error',
-            'Failed to parse posts data',
-            snackPosition: SnackPosition.BOTTOM,
-            backgroundColor: Colors.orange.withOpacity(0.7),
-            colorText: Colors.white,
-          );
         }
-      } else {
-        debugPrint('Failed to fetch posts: Status code ${response.statusCode}');
-        Get.snackbar(
-          'Error',
-          'Failed to fetch posts. Status: ${response.statusCode}',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red.withOpacity(0.7),
-          colorText: Colors.white,
-        );
       }
     } catch (e) {
-      debugPrint('Error fetching posts with filter: $e');
+      debugPrint('Error fetching posts: $e');
       allPosts = [];
       filteredPosts = [];
-      Get.snackbar(
-        'Network Error',
-        'Failed to load posts. Please check your connection.',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red.withOpacity(0.7),
-        colorText: Colors.white,
-      );
     } finally {
       isLoading = false;
       update();
     }
   }
 
-  // Fetch posts with filters (clickerType, date range, etc.)
   Future<void> fetchPosts() async {
     try {
       isLoading = true;
       update();
 
-      final response = await ApiService.get(
-        "${ApiEndPoint.post}?limit=100",
-      );
+      final response = await ApiService.get("${ApiEndPoint.post}?limit=100");
 
       if (response.statusCode == 200) {
         try {
           final postResponse = PostResponseModel.fromJson(response.data);
           allPosts = postResponse.data;
           filteredPosts = allPosts;
-
-          debugPrint('Fetched ${allPosts.length} posts successfully');
-
-          // Generate heatmap from fetched posts
           _generateHeatmapFromPosts(allPosts);
         } catch (e) {
           debugPrint('Error parsing post response: $e');
           allPosts = [];
           filteredPosts = [];
-          Get.snackbar(
-            'Data Error',
-            'Failed to parse posts data',
-            snackPosition: SnackPosition.BOTTOM,
-            backgroundColor: Colors.orange.withOpacity(0.7),
-            colorText: Colors.white,
-          );
         }
-      } else {
-        debugPrint('Failed to fetch posts: Status code ${response.statusCode}');
-        Get.snackbar(
-          'Error',
-          'Failed to fetch posts. Status: ${response.statusCode}',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red.withOpacity(0.7),
-          colorText: Colors.white,
-        );
       }
     } catch (e) {
       debugPrint('Error fetching posts: $e');
       allPosts = [];
       filteredPosts = [];
-      // Load static heatmap on error
-      Get.snackbar(
-        'Network Error',
-        'Failed to load posts. Please check your connection.',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red.withOpacity(0.7),
-        colorText: Colors.white,
-      );
     } finally {
       isLoading = false;
       update();
     }
   }
 
-  /*void getProfile() async {
-    try {
-      final response = await ApiService.get(
-        "user/profile",
-      );
-
-      if (response.statusCode == 200) {
-        try {
-          name.value = response.data["data"]["name"] ?? "";
-          image.value = response.data["data"]["image"] ?? "";
-          if (response.data["data"].isNotEmpty) {
-            notificationCount = 0;
-          }
-        } catch (e) {
-          debugPrint('Error parsing profile data: $e');
-        }
-      } else {
-        debugPrint('Failed to fetch profile: Status code ${response.statusCode}');
-      }
-    } catch (e) {
-      debugPrint('Error fetching profile: $e');
-    } finally {
-      isLoading = false;
-      update();
-    }
-  }*/
-
-  // Get current device location
   Future<Position?> getCurrentLocation() async {
     try {
-      // Check if location services are enabled
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-      if (!serviceEnabled) {
-        debugPrint('Location services are disabled.');
-        Get.snackbar(
-          'Location Disabled',
-          'Please enable location services',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.orange.withOpacity(0.7),
-          colorText: Colors.white,
-        );
-        return null;
-      }
+      if (!serviceEnabled) return null;
 
-      // Check location permission
       LocationPermission permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
-        if (permission == LocationPermission.denied) {
-          debugPrint('Location permissions are denied');
-          return null;
-        }
+        if (permission == LocationPermission.denied) return null;
       }
+      if (permission == LocationPermission.deniedForever) return null;
 
-      if (permission == LocationPermission.deniedForever) {
-        debugPrint('Location permissions are permanently denied');
-        return null;
-      }
-
-      // Get current position
-      Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-      );
-
-      debugPrint('Current location: ${position.latitude}, ${position.longitude}');
-      return position;
+      return await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
     } catch (e) {
       debugPrint('Error getting current location: $e');
       return null;
     }
   }
 
-// Reverse Geocoding using ApiService.get
-//   Future<String?> getAddressFromCoordinate(double lat, double lng) async {
-//     try {
-//       const String googleApiKey = "AIzaSyAp3rwzXU0fAqaPCTRfx81ixNMu5flXnPo";
-//
-//       final url ="https://maps.googleapis.com/maps/api/geocode/json?latlng=$lat,$lng&key=$googleApiKey";
-//
-//       ApiResponseModel response = await ApiService.get(url);
-//
-//       if (response.statusCode == 200) {
-//         final data = response.data as Map<String, dynamic>; // Decode JSON safely
-//
-//         if (data['status'] == 'OK' && data['results'] != null && data['results'].isNotEmpty) {
-//           String formattedAddress = data['results'][0]['formatted_address'];
-//           debugPrint('Reverse Geocoded Address: $formattedAddress');
-//           return formattedAddress;
-//         } else {
-//           debugPrint('No address found for coordinates');
-//           return null;
-//         }
-//       } else {
-//         debugPrint('Failed to fetch address: ${response.statusCode}');
-//         return null;
-//       }
-//     } catch (e) {
-//       debugPrint("Error in getAddressFromCoordinate: $e");
-//       return null;
-//     }
-//   }
-
-
   Future<String?> getAddressFromCoordinate(double lat, double lng) async {
     try {
       List<Placemark> placemarks = await placemarkFromCoordinates(lat, lng);
-
       if (placemarks.isNotEmpty) {
         Placemark place = placemarks.first;
-        String address =
-            "${place.street}, ${place.subLocality}, ${place.locality}, ${place.administrativeArea}, ${place.country}";
-        debugPrint("Reverse Geocoded Address: $address");
-        return address;
-      } else {
-        debugPrint("No placemark found for coordinates");
-        return null;
+        return "${place.street}, ${place.subLocality}, ${place.locality}, ${place.administrativeArea}, ${place.country}";
       }
+      return null;
     } catch (e) {
       debugPrint("Error in getAddressFromCoordinate: $e");
       return null;
@@ -474,50 +449,28 @@ class HomeController extends GetxController {
 
   Future<void> updateProfile(double longitude, double latitude) async {
     try {
-
       String? address = await getAddressFromCoordinate(latitude, longitude);
-
       Map<String, dynamic> body = {
         "location": [longitude, latitude],
-        "address":address ??"Location Unavailable"
+        "address": address ?? "Location Unavailable"
       };
-
-      debugPrint('Updating profile with body: $body');
-
-      final response = await ApiService.patch(
-        "users/profile",
-        body: body,
-      );
-
+      final response = await ApiService.patch("users/profile", body: body);
       if (response.statusCode == 200) {
-        debugPrint('Profile location updated successfully');
-        debugPrint('Response: ${response.data}');
-      } else {
-        debugPrint('Failed to update profile: Status code ${response.statusCode}');
-        debugPrint('Response: ${response.data}');
+        debugPrint('Profile location updated: $longitude, $latitude');
       }
     } catch (e) {
       debugPrint('Error updating profile: $e');
     }
   }
 
-// Get current location + update profile
   Future<void> getCurrentLocationAndUpdateProfile() async {
     try {
       isLocationUpdating.value = true;
-
       Position? position = await getCurrentLocation();
-
       if (position != null) {
         currentLatitude.value = position.latitude;
         currentLongitude.value = position.longitude;
-
-        debugPrint('Updating profile with location: [${position.longitude}, ${position.latitude}]');
-
-        // Update profile with new location + address
         await updateProfile(position.longitude, position.latitude);
-      } else {
-        debugPrint('Could not get current location');
       }
     } catch (e) {
       debugPrint('Error in getCurrentLocationAndUpdateProfile: $e');
@@ -526,79 +479,49 @@ class HomeController extends GetxController {
     }
   }
 
-
   void searchPosts(String query) {
     try {
       searchQuery = query.toLowerCase();
+      filteredPosts = searchQuery.isEmpty
+          ? allPosts
+          : allPosts.where((post) {
+        try {
+          return post.title.toLowerCase().contains(searchQuery) ||
+              post.description.toLowerCase().contains(searchQuery) ||
+              post.user.name.toLowerCase().contains(searchQuery);
+        } catch (e) {
+          return false;
+        }
+      }).toList();
 
-      if (searchQuery.isEmpty) {
-        filteredPosts = allPosts;
-      } else {
-        filteredPosts = allPosts.where((post) {
-          try {
-            return post.title.toLowerCase().contains(searchQuery) ||
-                post.description.toLowerCase().contains(searchQuery) ||
-                post.user.name.toLowerCase().contains(searchQuery);
-          } catch (e) {
-            debugPrint('Error searching post: $e');
-            return false;
-          }
-        }).toList();
-      }
-
-      // Update heatmap based on search results
       _generateHeatmapFromPosts(filteredPosts);
-
       update();
     } catch (e) {
       debugPrint('Error in searchPosts: $e');
-      Get.snackbar(
-        'Search Error',
-        'Failed to search posts',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red.withOpacity(0.7),
-        colorText: Colors.white,
-      );
     }
   }
 
   Future<void> fetchFriendRequests() async {
     try {
-      final url = "${ApiEndPoint.getMyFriendRequest}";
       IsLoading.value = true;
-
-      final response = await ApiService.get(url);
-
+      final response = await ApiService.get("${ApiEndPoint.getMyFriendRequest}");
       if (response.statusCode == 200) {
         try {
-          debugPrint("response => ${response.data}");
-
           final dataList = response.data['data'] as List<dynamic>;
-          friendRequestsList.value = dataList
-              .map((e) => FriendModel.fromJson(e as Map<String, dynamic>))
-              .toList();
+          friendRequestsList.value =
+              dataList.map((e) => FriendModel.fromJson(e as Map<String, dynamic>)).toList();
         } catch (e) {
           debugPrint("Error parsing friend requests: $e");
           friendRequestsList.value = [];
         }
-      } else {
-        debugPrint("Error response => ${response.data}");
       }
     } catch (e) {
       debugPrint('Error fetching friend requests: $e');
-      Get.snackbar(
-        'Error',
-        'Failed to fetch friend requests',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red.withOpacity(0.7),
-        colorText: Colors.white,
-      );
     } finally {
       IsLoading.value = false;
     }
   }
 
-  // Method to refresh everything
   Future<void> refreshAll() async {
     try {
       await fetchPosts();
@@ -608,13 +531,9 @@ class HomeController extends GetxController {
     }
   }
 
-  // Clear heatmap
   void clearHeatmap() {
-    try {
-      heatmaps = {};
-      update();
-    } catch (e) {
-      debugPrint('Error clearing heatmap: $e');
-    }
+    heatmaps = {};
+    markerList.clear();
+    update();
   }
 }

@@ -31,13 +31,13 @@ class ChangePasswordController extends GetxController {
       );
 
       if (response.statusCode == 200) {
-        Get.snackbar(response.statusCode.toString(), response.message);
+        Get.snackbar('Password Changed !', response.message);
         currentPasswordController.clear();
         newPasswordController.clear();
         confirmPasswordController.clear();
         Get.back();
       } else {
-        Get.snackbar(response.statusCode.toString(), response.message);
+        Get.snackbar("Failed", response.message);
       }
       isLoading = false;
       update();

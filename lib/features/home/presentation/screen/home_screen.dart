@@ -7,7 +7,6 @@ import 'package:giolee78/features/friend/presentation/controller/my_friend_contr
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-// Project Imports
 import 'package:giolee78/component/other_widgets/item.dart';
 import 'package:giolee78/features/chat_nearby/presentation/screen/chat_nearby_screen.dart';
 import 'package:giolee78/features/clicker/presentation/screen/clicker_screen.dart';
@@ -32,23 +31,21 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final Completer<GoogleMapController> _controller =
-      Completer<GoogleMapController>();
+  final Completer<GoogleMapController> _mapController = Completer<GoogleMapController>();
   final myFriendController = Get.put(MyFriendController());
 
   late final pendingRequests = myFriendController.requests
       .where((r) => r.status == "pending")
       .toList();
 
-  // Default initial position (Dhaka)
   CameraPosition get _initialPosition => CameraPosition(
     target: LatLng(
       Get.find<HomeController>().currentLatitude.value != 0.0
           ? Get.find<HomeController>().currentLatitude.value
-          : 23.777176, // Fallback to Dhaka
+          : 23.777176,
       Get.find<HomeController>().currentLongitude.value != 0.0
           ? Get.find<HomeController>().currentLongitude.value
-          : 90.399452, // Fallback to Dhaka
+          : 90.399452,
     ),
     zoom: 14.4746,
   );
@@ -72,25 +69,18 @@ class _HomeScreenState extends State<HomeScreen> {
             return SafeArea(
               child: Column(
                 children: [
-                  // Top Details Section - Fixed
                   Padding(
                     padding: EdgeInsets.fromLTRB(20.w, 20.h, 20.w, 0),
                     child: _buildTopDetails(),
                   ),
-
                   SizedBox(height: 20.h),
-
-                  // Google Map Section - Fixed (non-scrollable parent)
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: 20.w),
                     child: controller.isLoading
                         ? _buildLoadingMap()
                         : _buildMapSection(controller),
                   ),
-
                   SizedBox(height: 20.h),
-
-                  // Action Items List - Scrollable
                   Expanded(
                     child: RefreshIndicator(
                       onRefresh: () async {
@@ -144,10 +134,8 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             CircularProgressIndicator(color: AppColors.primaryColor),
             SizedBox(height: 16.h),
-            Text(
-              'Loading map data...',
-              style: TextStyle(fontSize: 14.sp, color: Colors.grey[600]),
-            ),
+            Text('Loading map data...',
+                style: TextStyle(fontSize: 14.sp, color: Colors.grey[600])),
           ],
         ),
       ),
@@ -163,17 +151,57 @@ class _HomeScreenState extends State<HomeScreen> {
         borderRadius: BorderRadius.circular(10.r),
         child: Stack(
           children: [
-            // Google Map - Full touchable area
-            _buildGoogleMap(controller),
+            // ✅ Obx দিয়ে GoogleMap wrap — markerList বদলালেই map instantly update হবে
+            Obx(() => GoogleMap(
+              compassEnabled: true,
+              mapType: MapType.satellite,
+              initialCameraPosition: _initialPosition,
+              myLocationEnabled: true,
+              myLocationButtonEnabled: true,
+              zoomControlsEnabled: true,
+              zoomGesturesEnabled: true,
+              scrollGesturesEnabled: true,
+              tiltGesturesEnabled: true,
+              rotateGesturesEnabled: true,
+              heatmaps: controller.heatmaps,
+              // ✅ RxList কে Set এ convert করে pass করা হচ্ছে
+              markers: Set<Marker>.from(controller.markerList),
+              onMapCreated: (GoogleMapController mapController) async {
+                try {
+                  if (!_mapController.isCompleted) {
+                    _mapController.complete(mapController);
+                    if (controller.currentLatitude.value != 0.0 &&
+                        controller.currentLongitude.value != 0.0) {
+                      await mapController.animateCamera(
+                        CameraUpdate.newCameraPosition(
+                          CameraPosition(
+                            target: LatLng(
+                              controller.currentLatitude.value,
+                              controller.currentLongitude.value,
+                            ),
+                            zoom: 14.4746,
+                          ),
+                        ),
+                      );
+                    }
+                  }
+                } catch (e) {
+                  debugPrint('Error on map created: $e');
+                }
+              },
+              onTap: (LatLng position) {
+                debugPrint('Map tapped: ${position.latitude}, ${position.longitude}');
+              },
+            )),
 
-            /// Overlay Buttons - Clickable
+            // Overlay buttons
             Positioned(
               top: 16.h,
               right: 16.w,
               child: _buildOverlayButtons(controller),
             ),
 
-            /// Heatmap Info Badge (Optional) - Non-clickable
+            // Heatmap badge
             if (controller.heatmaps.isNotEmpty)
               Positioned(
                 bottom: 16.h,
@@ -186,104 +214,30 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildGoogleMap(HomeController controller) {
-    try {
-      return GoogleMap(
-        compassEnabled: true,
-        mapType: MapType.satellite,
-        initialCameraPosition: _initialPosition,
-        // Use the getter
-        myLocationEnabled: true,
-        myLocationButtonEnabled: true,
-        zoomControlsEnabled: true,
-        zoomGesturesEnabled: true,
-        scrollGesturesEnabled: true,
-        tiltGesturesEnabled: true,
-        rotateGesturesEnabled: true,
-        heatmaps: controller.heatmaps,
-        onMapCreated: (GoogleMapController mapController) async {
-          try {
-            if (!_controller.isCompleted) {
-              _controller.complete(mapController);
-
-              // Move camera to current location once we have it
-              if (controller.currentLatitude.value != 0.0 &&
-                  controller.currentLongitude.value != 0.0) {
-                await mapController.animateCamera(
-                  CameraUpdate.newCameraPosition(
-                    CameraPosition(
-                      target: LatLng(
-                        controller.currentLatitude.value,
-                        controller.currentLongitude.value,
-                      ),
-                      zoom: 14.4746,
-                    ),
-                  ),
-                );
-              }
-            }
-          } catch (e) {
-            debugPrint('Error on map created: $e');
-          }
-        },
-        onTap: (LatLng position) {
-          debugPrint(
-            'Map tapped at: ${position.latitude}, ${position.longitude}',
-          );
-        },
-      );
-    } catch (e) {
-      debugPrint('Error building Google Map: $e');
-      return Container(
-        color: Colors.grey[300],
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.error_outline, size: 48.sp, color: Colors.red),
-              SizedBox(height: 16.h),
-              Text(
-                'Error loading map',
-                style: TextStyle(fontSize: 14.sp, color: Colors.black87),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-  }
-
   Widget _buildOverlayButtons(HomeController controller) {
     try {
       return Row(
         children: [
           _buildOverlayButton(
             onTap: () {
-              try {
-                Get.dialog(
-                  ClickerDialog(
-                    onApply: (val) {
-                      try {
-                        controller.applyClickerFilter(val);
-                      } catch (e) {
-                        debugPrint('Error applying clicker filter: $e');
-                      }
-                    },
-                  ),
-                );
-              } catch (e) {
-                debugPrint('Error showing clicker dialog: $e');
-                Get.snackbar('Error', 'Failed to open clicker selection');
-              }
+              Get.dialog(
+                ClickerDialog(
+                  onApply: (val) {
+                    try {
+                      controller.applyClickerFilter(val);
+                    } catch (e) {
+                      debugPrint('Error applying clicker filter: $e');
+                    }
+                  },
+                ),
+              );
             },
             child: Row(
               children: [
-                Obx(
-                  () => Text(
-                    controller.clickerCount.value ?? 'Select Clicker',
-                    style: TextStyle(fontSize: 12.sp, color: Colors.black87),
-                  ),
-                ),
+                Obx(() => Text(
+                  controller.clickerCount.value ?? 'Select Clicker',
+                  style: TextStyle(fontSize: 12.sp, color: Colors.black87),
+                )),
                 Icon(Icons.arrow_drop_down, size: 24.sp),
               ],
             ),
@@ -291,23 +245,27 @@ class _HomeScreenState extends State<HomeScreen> {
           SizedBox(width: 8.w),
           _buildOverlayButton(
             onTap: () {
-              try {
-                Get.dialog(FilterDialog(onApply: controller.applyFilter));
-              } catch (e) {
-                debugPrint('Error showing filter dialog: $e');
-                Get.snackbar('Error', 'Failed to open filter');
-              }
+              Get.dialog(FilterDialog(onApply: controller.applyFilter));
             },
-            child: Row(
+            // ✅ filter active থাকলে dot দেখাবে
+            child: Obx(() => Row(
               children: [
-                Text(
-                  'Filter',
-                  style: TextStyle(fontSize: 12.sp, color: Colors.black87),
-                ),
+                if (controller.isDateFilterActive.value)
+                  Container(
+                    width: 8.w,
+                    height: 8.h,
+                    margin: EdgeInsets.only(right: 4.w),
+                    decoration: const BoxDecoration(
+                      color: Colors.blue,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                Text('Filter',
+                    style: TextStyle(fontSize: 12.sp, color: Colors.black87)),
                 SizedBox(width: 4.w),
                 Icon(Icons.filter_alt, size: 16.sp),
               ],
-            ),
+            )),
           ),
         ],
       );
@@ -343,44 +301,34 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       );
     } catch (e) {
-      debugPrint('Error building heatmap info badge: $e');
       return const SizedBox.shrink();
     }
   }
 
-  Widget _buildOverlayButton({
-    required VoidCallback onTap,
-    required Widget child,
-  }) {
-    try {
-      return GestureDetector(
-        onTap: onTap,
-        child: Container(
-          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.9),
-            borderRadius: BorderRadius.circular(8.r),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 4,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: child,
+  Widget _buildOverlayButton({required VoidCallback onTap, required Widget child}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.9),
+          borderRadius: BorderRadius.circular(8.r),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
-      );
-    } catch (e) {
-      debugPrint('Error building overlay button: $e');
-      return const SizedBox.shrink();
-    }
+        child: child,
+      ),
+    );
   }
 
   Widget _buildActionList(HomeController controller) {
     try {
-      bool isLoggedIn =
-          LocalStorage.token != null && LocalStorage.token!.isNotEmpty;
+      bool isLoggedIn = LocalStorage.token != null && LocalStorage.token!.isNotEmpty;
 
       return Column(
         children: [
@@ -388,13 +336,9 @@ class _HomeScreenState extends State<HomeScreen> {
             imageSrc: AppIcons.clicker,
             title: 'Clicker',
             onTap: () {
-              debugPrint(
-                "Lat is : =============================${LocalStorage.lat.toString()}",
-              );
               try {
                 Get.to(() => ClickerScreen(), arguments: controller);
               } catch (e) {
-                debugPrint('Error navigating to Clicker: $e');
                 Get.snackbar('Error', 'Failed to open Clicker');
               }
             },
@@ -412,7 +356,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 try {
                   Get.to(() => MyPostScreen());
                 } catch (e) {
-                  debugPrint('Error navigating to My Post: $e');
                   Get.snackbar('Error', 'Failed to open My Post');
                 }
               },
@@ -424,26 +367,22 @@ class _HomeScreenState extends State<HomeScreen> {
                 try {
                   Get.to(() => MyFriendScreen());
                 } catch (e) {
-                  debugPrint('Error navigating to My Friend: $e');
                   Get.snackbar('Error', 'Failed to open My Friend');
                 }
               },
             ),
-            Obx(
-              () => Item(
-                imageSrc: AppIcons.friend,
-                title: 'Friend Request',
-                badgeText:pendingRequests.length.toString(),
-                onTap: () {
-                  try {
-                    Get.to(() => FriendRequestScreen());
-                  } catch (e) {
-                    debugPrint('Error navigating to Friend Request: $e');
-                    Get.snackbar('Error', 'Failed to open Friend Request');
-                  }
-                },
-              ),
-            ),
+            Obx(() => Item(
+              imageSrc: AppIcons.friend,
+              title: 'Friend Request',
+              badgeText: pendingRequests.length.toString(),
+              onTap: () {
+                try {
+                  Get.to(() => FriendRequestScreen());
+                } catch (e) {
+                  Get.snackbar('Error', 'Failed to open Friend Request');
+                }
+              },
+            )),
           ],
         ],
       );
@@ -455,17 +394,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _handleLocationAndNavigate() async {
     try {
-      // Always show confirmation dialog first
       _showConfirmationDialog();
     } catch (e) {
       debugPrint('Error handling location: $e');
-      Get.snackbar(
-        'Permission Error',
-        'Failed to check location permission',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red.withOpacity(0.7),
-        colorText: Colors.white,
-      );
     }
   }
 
@@ -474,21 +405,15 @@ class _HomeScreenState extends State<HomeScreen> {
       Get.dialog(
         AlertDialog(
           backgroundColor: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8.0),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               const Text(
                 'By Enabling Location, Your Nearby Activity May Be Visible To Others, '
-                'And Your Location Data Will Be Stored Temporarily.',
+                    'And Your Location Data Will Be Stored Temporarily.',
                 textAlign: TextAlign.start,
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  height: 1.5,
-                ),
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, height: 1.5),
               ),
               const SizedBox(height: 24),
               Row(
@@ -496,9 +421,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   Expanded(
                     child: OutlinedButton(
                       onPressed: () => Get.back(),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.black,
-                      ),
+                      style: OutlinedButton.styleFrom(foregroundColor: Colors.black),
                       child: const Text('Back'),
                     ),
                   ),
@@ -507,109 +430,50 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: ElevatedButton(
                       onPressed: () async {
                         try {
-                          Get.back(); // Close dialog
-
-                          // Show loading
+                          Get.back();
                           Get.dialog(
-                            const Center(
-                              child: CircularProgressIndicator(
-                                color: Colors.blue,
-                              ),
-                            ),
+                            const Center(child: CircularProgressIndicator(color: Colors.blue)),
                             barrierDismissible: false,
                           );
 
-                          // Check permission status
                           var status = await Permission.location.status;
-
-                          // Request if not granted
                           if (!status.isGranted) {
                             status = await Permission.location.request();
                           }
 
                           if (status.isGranted) {
-                            try {
-                              // Check if location services are enabled
-                              bool serviceEnabled =
-                                  await Geolocator.isLocationServiceEnabled();
-
-                              if (!serviceEnabled) {
-                                Get.back(); // Close loading
-
-                                Get.snackbar(
-                                  'GPS Disabled',
-                                  'Please enable GPS/Location services',
-                                  snackPosition: SnackPosition.BOTTOM,
-                                  backgroundColor: Colors.orange.withOpacity(
-                                    0.7,
-                                  ),
-                                  colorText: Colors.white,
-                                );
-                                return;
-                              }
-
-                              // Fetch current location
-                              Position position =
-                                  await Geolocator.getCurrentPosition(
-                                    desiredAccuracy: LocationAccuracy.high,
-                                  );
-
-                              // Close loading
+                            bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+                            if (!serviceEnabled) {
                               Get.back();
-
-                              // Save coordinates to LocalStorage
-                              LocalStorage.lat = position.latitude;
-                              LocalStorage.long = position.longitude;
-
-                              debugPrint(
-                                "Location Enabled - Lat: ${position.latitude}, Lng: ${position.longitude}",
-                              );
-
-                              // Navigate to Chat Nearby Screen
-                              Get.to(() => const ChatNearbyScreen());
-                            } catch (e) {
-                              Get.back(); // Close loading
-
-                              debugPrint("Location fetch error: $e");
-
-                              Get.snackbar(
-                                'Location Error',
-                                'Unable to get your location. Please enable GPS and try again.',
-                                snackPosition: SnackPosition.BOTTOM,
-                                backgroundColor: Colors.orange.withOpacity(0.7),
-                                colorText: Colors.white,
-                              );
+                              Get.snackbar('GPS Disabled', 'Please enable GPS/Location services',
+                                  snackPosition: SnackPosition.BOTTOM,
+                                  backgroundColor: Colors.orange.withOpacity(0.7),
+                                  colorText: Colors.white);
+                              return;
                             }
+
+                            Position position = await Geolocator.getCurrentPosition(
+                                desiredAccuracy: LocationAccuracy.high);
+                            Get.back();
+                            LocalStorage.lat = position.latitude;
+                            LocalStorage.long = position.longitude;
+                            Get.to(() => const ChatNearbyScreen());
                           } else {
-                            Get.back(); // Close loading
-                            Get.snackbar(
-                              'Permission Denied',
-                              'Location permission is required.',
-                            );
-
-                            if (status.isPermanentlyDenied) {
-                              await openAppSettings();
-                            }
+                            Get.back();
+                            Get.snackbar('Permission Denied', 'Location permission is required.');
+                            if (status.isPermanentlyDenied) await openAppSettings();
                           }
                         } catch (e) {
                           debugPrint('Error requesting permission: $e');
-                          Get.back(); // Close loading if open
-                          Get.snackbar(
-                            'Error',
-                            'Failed to request location permission',
-                            snackPosition: SnackPosition.BOTTOM,
-                            backgroundColor: Colors.red.withOpacity(0.7),
-                            colorText: Colors.white,
-                          );
+                          Get.back();
+                          Get.snackbar('Error', 'Failed to request location permission',
+                              snackPosition: SnackPosition.BOTTOM,
+                              backgroundColor: Colors.red.withOpacity(0.7),
+                              colorText: Colors.white);
                         }
                       },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primaryColor,
-                      ),
-                      child: const Text(
-                        'OK',
-                        style: TextStyle(color: Colors.white),
-                      ),
+                      style: ElevatedButton.styleFrom(backgroundColor: AppColors.primaryColor),
+                      child: const Text('OK', style: TextStyle(color: Colors.white)),
                     ),
                   ),
                 ],
@@ -626,7 +490,6 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void dispose() {
     try {
-      // Clean up if needed
       super.dispose();
     } catch (e) {
       debugPrint('Error in dispose: $e');

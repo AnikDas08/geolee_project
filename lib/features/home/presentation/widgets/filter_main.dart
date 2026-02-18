@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import '../controller/home_controller.dart';
 
 class FilterDialog extends StatefulWidget {
   final Function(String period, DateTime start, DateTime end) onApply;
@@ -12,56 +13,121 @@ class FilterDialog extends StatefulWidget {
   State<FilterDialog> createState() => _FilterDialogState();
 }
 
-class _FilterDialogState extends State<FilterDialog> {
-  String selectedPeriod = 'Last 24 Hours';
-  DateTime startDate = DateTime.now();
-  DateTime endDate = DateTime.now();
+class _FilterDialogState extends State<FilterDialog>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
 
-  final List<String> periods = [
+  // ─── Period Filter ───
+  final List<String> periodOptions = [
     'Last 24 Hours',
     'Last 7 Days',
+    'Last 15 Days',
     'Last 30 Days',
-    'Custom Range',
   ];
+  String? selectedPeriod;
 
-  Future<void> _selectDate(BuildContext context, bool isStartDate) async {
+  // ─── Custom Date Range ───
+  DateTime? pickedStartDate;
+  DateTime? pickedEndDate;
+
+  final HomeController controller = Get.find<HomeController>();
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+
+    // Restore existing filter state
+    if (controller.selectedPeriod.value.isNotEmpty &&
+        controller.selectedPeriod.value != 'Custom Range') {
+      selectedPeriod = controller.selectedPeriod.value;
+      _tabController.index = 0;
+    } else if (controller.selectedPeriod.value == 'Custom Range') {
+      pickedStartDate = controller.startDate.value;
+      pickedEndDate = controller.endDate.value;
+      _tabController.index = 1;
+    }
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _pickStartDate() async {
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: isStartDate ? startDate : endDate,
+      initialDate: pickedStartDate ?? DateTime.now(),
       firstDate: DateTime(2020),
-      lastDate: DateTime(2030),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: ColorScheme.light(
-              primary: Colors.blue,
-              onPrimary: Colors.white,
-              surface: Colors.white,
-              onSurface: Colors.black,
-            ),
-          ),
-          child: child!,
-        );
-      },
+      lastDate: DateTime.now(),
+      builder: (context, child) => Theme(
+        data: Theme.of(
+          context,
+        ).copyWith(colorScheme: const ColorScheme.light(primary: Colors.blue)),
+        child: child!,
+      ),
     );
-
     if (picked != null) {
       setState(() {
-        if (isStartDate) {
-          startDate = picked;
-        } else {
-          endDate = picked;
+        pickedStartDate = picked;
+        if (pickedEndDate != null && picked.isAfter(pickedEndDate!)) {
+          pickedEndDate = null;
         }
       });
+    }
+  }
+
+  Future<void> _pickEndDate() async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: pickedEndDate ?? (pickedStartDate ?? DateTime.now()),
+      firstDate: pickedStartDate ?? DateTime(2020),
+      lastDate: DateTime.now(),
+      builder: (context, child) => Theme(
+        data: Theme.of(
+          context,
+        ).copyWith(colorScheme: const ColorScheme.light(primary: Colors.blue)),
+        child: child!,
+      ),
+    );
+    if (picked != null) {
+      setState(() => pickedEndDate = picked);
+    }
+  }
+
+  void _applyFilter() {
+    if (_tabController.index == 0) {
+      // ─── Period filter ───
+      if (selectedPeriod == null) {
+        Get.snackbar(
+          'Notice',
+          'Please select a time period',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+        return;
+      }
+      controller.applyPeriodFilter(selectedPeriod!);
+      Get.back();
+    } else {
+      // ─── Custom date range ───
+      if (pickedStartDate == null || pickedEndDate == null) {
+        Get.snackbar(
+          'Notice',
+          'Please select both start and end date',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+        return;
+      }
+      widget.onApply('Custom Range', pickedStartDate!, pickedEndDate!);
+      Get.back();
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12.r),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
       child: Container(
         padding: EdgeInsets.all(20.w),
         decoration: BoxDecoration(
@@ -72,7 +138,7 @@ class _FilterDialogState extends State<FilterDialog> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Title
+            // ─── Title Row ───
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -84,138 +150,126 @@ class _FilterDialogState extends State<FilterDialog> {
                     color: Colors.black87,
                   ),
                 ),
-                IconButton(
-                  icon: Icon(Icons.close, size: 24.sp),
-                  onPressed: () => Get.back(),
-                  padding: EdgeInsets.zero,
-                  constraints: BoxConstraints(),
+                Row(
+                  children: [
+                    // Clear button — filter active থাকলে দেখাবে
+                    Obx(
+                      () => controller.isDateFilterActive.value
+                          ? GestureDetector(
+                              onTap: () {
+                                controller.clearDateFilter();
+                                Get.back();
+                              },
+                              child: Container(
+                                margin: EdgeInsets.only(right: 8.w),
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 15.w,
+                                  vertical: 6.h,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.red.shade500,
+                                  borderRadius: BorderRadius.circular(8.r),
+                                  // border: Border.all(color: Colors.blue),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+
+
+                                      Icons.close,
+                                      size: 14.sp,
+                                      color: Colors.white,
+                                    ),
+                                    SizedBox(width: 4.w),
+                                    Text(
+                                      'Clear',
+                                      style: TextStyle(
+                                        fontSize: 12.sp,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            )
+                          : const SizedBox.shrink(),
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.close, size: 24.sp),
+                      onPressed: () => Get.back(),
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                    ),
+                  ],
                 ),
               ],
             ),
-            SizedBox(height: 20.h),
 
-            // Active Period Dropdown
-            Text(
-              'Active Period',
-              style: TextStyle(
-                fontSize: 14.sp,
-                fontWeight: FontWeight.w500,
-                color: Colors.black87,
-              ),
-            ),
-            SizedBox(height: 8.h),
+            SizedBox(height: 16.h),
+
+            // ─── Tab Bar ───
             Container(
-              padding: EdgeInsets.symmetric(horizontal: 12.w),
               decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey.shade300),
-                borderRadius: BorderRadius.circular(8.r),
+                color: Colors.grey.shade100,
+                borderRadius: BorderRadius.circular(10.r),
               ),
-              child: DropdownButton<String>(
-                value: selectedPeriod,
-                isExpanded: true,
-                underline: SizedBox(),
-                icon: Icon(Icons.keyboard_arrow_down, size: 24.sp),
-                items: periods
-                    .map((period) => DropdownMenuItem(
-                  value: period,
-                  child: Text(
-                    period,
-                    style: TextStyle(fontSize: 14.sp),
+              child: TabBar(
+                controller: _tabController,
+                indicator: BoxDecoration(
+                  color: Colors.blue,
+                  borderRadius: BorderRadius.circular(10.r),
+                ),
+                indicatorSize: TabBarIndicatorSize.tab,
+                labelColor: Colors.white,
+                unselectedLabelColor: Colors.grey,
+                labelStyle: TextStyle(
+                  fontSize: 13.sp,
+                  fontWeight: FontWeight.w600,
+                ),
+                tabs: [
+                  Tab(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.access_time, size: 15.sp),
+                        SizedBox(width: 6.w),
+                        const Text('Active Period'),
+                      ],
+                    ),
                   ),
-                ))
-                    .toList(),
-                onChanged: (value) {
-                  setState(() {
-                    selectedPeriod = value!;
-                  });
-                },
+                  Tab(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.date_range, size: 15.sp),
+                        SizedBox(width: 6.w),
+                        const Text('Date Range'),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ),
-            SizedBox(height: 20.h),
-
-            // Start Date
-            selectedPeriod=="Custom Range"?
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Start Date',
-                      textAlign: TextAlign.start,
-                      style: TextStyle(
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.black87,
-                      ),
-                    ),
-                    SizedBox(height: 8.h),
-                    InkWell(
-                      onTap: () => _selectDate(context, true),
-                      child: Container(
-                        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.grey.shade300),
-                          borderRadius: BorderRadius.circular(8.r),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              DateFormat('dd MMM yyyy').format(startDate),
-                              style: TextStyle(fontSize: 14.sp, color: Colors.black87),
-                            ),
-                            Icon(Icons.calendar_today, size: 20.sp, color: Colors.grey),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ):SizedBox.shrink(),
 
             SizedBox(height: 20.h),
 
-
-
-
-            // End Date
-            Text(
-              'End Date',
-              style: TextStyle(
-                fontSize: 14.sp,
-                fontWeight: FontWeight.w500,
-                color: Colors.black87,
+            // ─── Tab Content ───
+            SizedBox(
+              height: 200.h,
+              child: TabBarView(
+                controller: _tabController,
+                children: [_buildPeriodTab(), _buildDateRangeTab()],
               ),
             ),
-            SizedBox(height: 8.h),
-            InkWell(
-              onTap: () => _selectDate(context, false),
-              child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey.shade300),
-                  borderRadius: BorderRadius.circular(8.r),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      DateFormat('dd MMM yyyy').format(endDate),
-                      style: TextStyle(fontSize: 14.sp, color: Colors.black87),
-                    ),
-                    Icon(Icons.calendar_today, size: 20.sp, color: Colors.grey),
-                  ],
-                ),
-              ),
-            ),
-            SizedBox(height: 30.h),
 
-            // Apply Button
+            SizedBox(height: 20.h),
+
+            // ─── Apply Button ───
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () {
-                  widget.onApply(selectedPeriod, startDate, endDate);
-                  Get.back();
-                },
+                onPressed: _applyFilter,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blue,
                   padding: EdgeInsets.symmetric(vertical: 14.h),
@@ -235,6 +289,136 @@ class _FilterDialogState extends State<FilterDialog> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  // ─── Tab 1: Period chip buttons ───
+  Widget _buildPeriodTab() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Select a time period',
+          style: TextStyle(
+            fontSize: 13.sp,
+            color: Colors.grey.shade600,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        SizedBox(height: 14.h),
+        Wrap(
+          spacing: 10.w,
+          runSpacing: 10.h,
+          children: periodOptions.map((period) {
+            final bool isSelected = selectedPeriod == period;
+            return GestureDetector(
+              onTap: () => setState(() => selectedPeriod = period),
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
+                decoration: BoxDecoration(
+                  color: isSelected ? Colors.blue : Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(24.r),
+                  border: Border.all(
+                    color: isSelected ? Colors.blue : Colors.grey.shade300,
+                  ),
+                ),
+                child: Text(
+                  period,
+                  style: TextStyle(
+                    fontSize: 13.sp,
+                    color: isSelected ? Colors.white : Colors.black87,
+                    fontWeight: isSelected
+                        ? FontWeight.w600
+                        : FontWeight.normal,
+                  ),
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+      ],
+    );
+  }
+
+  // ─── Tab 2: Custom date range pickers ───
+  Widget _buildDateRangeTab() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Select date range',
+          style: TextStyle(
+            fontSize: 13.sp,
+            color: Colors.grey.shade600,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        SizedBox(height: 12.h),
+
+        // Start Date
+        Text(
+          'Start Date',
+          style: TextStyle(
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w500,
+            color: Colors.black87,
+          ),
+        ),
+        SizedBox(height: 8.h),
+        InkWell(onTap: _pickStartDate, child: _buildDateField(pickedStartDate)),
+
+        SizedBox(height: 12.h),
+
+        // End Date
+        Text(
+          'End Date',
+          style: TextStyle(
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w500,
+            color: Colors.black87,
+          ),
+        ),
+        SizedBox(height: 8.h),
+        InkWell(
+          onTap: pickedStartDate != null ? _pickEndDate : null,
+          child: Opacity(
+            opacity: pickedStartDate != null ? 1.0 : 0.4,
+            child: _buildDateField(pickedEndDate),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDateField(DateTime? date) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
+      decoration: BoxDecoration(
+        border: Border.all(
+          color: date != null ? Colors.blue : Colors.grey.shade300,
+          width: date != null ? 1.5 : 1.0,
+        ),
+        borderRadius: BorderRadius.circular(8.r),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            date != null
+                ? DateFormat('dd MMM yyyy').format(date)
+                : 'Select date',
+            style: TextStyle(
+              fontSize: 14.sp,
+              color: date != null ? Colors.black87 : Colors.grey,
+            ),
+          ),
+          Icon(
+            Icons.calendar_today,
+            size: 20.sp,
+            color: date != null ? Colors.blue : Colors.grey,
+          ),
+        ],
       ),
     );
   }

@@ -9,6 +9,7 @@ import 'package:giolee78/component/text/common_text.dart';
 import 'package:giolee78/component/text_field/common_text_field.dart';
 import 'package:giolee78/utils/constants/app_colors.dart';
 import 'package:giolee78/utils/constants/app_icons.dart';
+import 'package:giolee78/utils/helpers/other_helper.dart';
 
 import '../../../../config/route/app_routes.dart';
 import '../controller/create_add_controller.dart';
@@ -21,7 +22,6 @@ class CreateAdsScreen extends StatefulWidget {
 }
 
 class _CreateAdsScreenState extends State<CreateAdsScreen> {
-
   final CreateAdsController controller = Get.put(CreateAdsController());
 
   @override
@@ -30,9 +30,9 @@ class _CreateAdsScreenState extends State<CreateAdsScreen> {
     super.initState();
     controller.fetchPlans();
   }
+
   @override
   Widget build(BuildContext context) {
-
     return PopScope(
       canPop: false,
       onPopInvoked: (didPop) {
@@ -46,11 +46,10 @@ class _CreateAdsScreenState extends State<CreateAdsScreen> {
           elevation: 0,
           centerTitle: true,
           leading: GestureDetector(
-            onTap:(){
+            onTap: () {
               Get.offAllNamed(AppRoutes.homeNav);
             },
-              child: Icon(
-                  Icons.arrow_back_ios)
+            child: Icon(Icons.arrow_back_ios),
           ),
           title: const CommonText(
             text: 'Create Ads',
@@ -113,8 +112,7 @@ class _CreateAdsScreenState extends State<CreateAdsScreen> {
                       SizedBox(height: 6.h),
                       CommonTextField(
                         controller: controller.descriptionController,
-                        hintText:
-                        'Satisfy Your Cravings With Delicious Fast Food, Where Every Bite Is Packed With Flavor...',
+                        hintText: 'Enter your post description',
                         maxLines: 3,
                       ),
                       SizedBox(height: 14.h),
@@ -132,19 +130,19 @@ class _CreateAdsScreenState extends State<CreateAdsScreen> {
                       _buildLabel('Website Link'),
                       SizedBox(height: 6.h),
                       CommonTextField(
+                        validator: OtherHelper.urlValidator,
                         controller: controller.websiteLinkController,
-                        hintText: 'www.website.com/restaurant',
+                        hintText: ' e.g https//:www.website.com',
                       ),
                       SizedBox(height: 20.h),
 
                       // --- Pricing Plan Selection ---
                       _buildLabel('Select Pricing Plan'),
                       SizedBox(height: 10.h),
-                     _buildPricingCards(controller),
+                      _buildPricingCards(controller),
                       SizedBox(height: 16.h),
 
                       // --- Ad Start Date (shown after selection) ---
-
                       Obx(() {
                         if (controller.selectedPricingPlan.value.isNotEmpty) {
                           return Column(
@@ -180,17 +178,22 @@ class _CreateAdsScreenState extends State<CreateAdsScreen> {
                       }),
 
                       // --- Submit Button ---
+                      Obx(
+                        () => CommonButton(
 
-                      CommonButton(
-                        onTap: () => controller.createAds(),
-                        titleText: 'Submit',
-                        buttonColor: AppColors.primaryColor,
-                        titleColor: AppColors.white,
-                        borderColor: AppColors.primaryColor,
-                        buttonHeight: 44.h,
-                        buttonRadius: 8.r,
-                        titleSize: 16,
+                          isLoading: controller.isLoading.value,
+                          onTap: () => controller.createAds(),
+                          titleText: 'Submit',
+                          buttonColor: AppColors.primaryColor,
+                          titleColor: AppColors.white,
+                          borderColor: AppColors.primaryColor,
+                          buttonHeight: 44.h,
+                          buttonRadius: 8.r,
+                          titleSize: 16,
+                        ),
                       ),
+
+                      SizedBox(height: 20.h),
                     ],
                   ),
                 ),
@@ -276,7 +279,10 @@ class _CreateAdsScreenState extends State<CreateAdsScreen> {
                           children: [
                             const Text(
                               'Ad Price:',
-                              style: TextStyle(fontSize: 14, color: Colors.black54),
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.black54,
+                              ),
                             ),
                             const SizedBox(height: 4),
                             Text(
@@ -301,7 +307,6 @@ class _CreateAdsScreenState extends State<CreateAdsScreen> {
     });
   }
 
-
   Widget _buildselectedImage({
     required BuildContext context,
     required String imagePath,
@@ -313,9 +318,7 @@ class _CreateAdsScreenState extends State<CreateAdsScreen> {
         child: Container(
           height: 120.h,
           width: double.infinity,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12.r),
-          ),
+          decoration: BoxDecoration(borderRadius: BorderRadius.circular(12.r)),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(12.r),
             child: Image.file(

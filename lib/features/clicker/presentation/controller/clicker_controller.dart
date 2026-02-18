@@ -11,6 +11,7 @@ import 'package:giolee78/services/storage/storage_services.dart';
 import 'package:giolee78/utils/app_utils.dart';
 import '../../../../config/api/api_end_point.dart';
 import '../../../friend/data/post_model_by_id.dart';
+import '../../../home/presentation/controller/home_controller.dart';
 import '../../data/addbanner_model.dart';
 
 enum FriendStatus { none, requested, friends }
@@ -58,6 +59,7 @@ class ClickerController extends GetxController {
   /// ================= Friend Status
   var friendStatus = FriendStatus.none.obs;
   var pendingRequestId = ''.obs;
+
 
   @override
   void onInit() {
@@ -243,6 +245,8 @@ class ClickerController extends GetxController {
       isLocationLoading.value = false;
     }
   }
+
+
 
   // ================= Device ID
   Future<String> _getUniqueDeviceId() async {

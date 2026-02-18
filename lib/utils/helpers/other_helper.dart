@@ -13,6 +13,26 @@ class OtherHelper {
   static RegExp passRegExp = RegExp(r'(?=.*[a-z])(?=.*[0-9])');
   static RegExp phoneRegexp = RegExp(r'^\+?[0-9]{7,15}$');
 
+  static final RegExp urlRegexp =
+  RegExp(r'^(https?:\/\/)(([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,})(\/\S*)?$');
+
+  static String? urlValidator( value) {
+    if (value == null || value.trim().isEmpty) {
+      return "Website link is required";
+    }
+
+    if (!value.startsWith("http://") && !value.startsWith("https://")) {
+      return "URL must start with http:// or https://";
+    }
+
+    if (!urlRegexp.hasMatch(value)) {
+      return "Enter a valid website link (e.g., https://example.com)";
+    }
+
+    return null;
+  }
+
+
   static String? validator(value) {
     if (value.isEmpty) {
       return AppString.thisFieldIsRequired;

@@ -171,7 +171,7 @@ class CreateAdsController extends GetxController {
     }
   }
 
-  /// ---------------- CREATE ADS + PAYMENT ----------------
+  // ---------------- CREATE ADS + PAYMENT ----------------
 
   Future<void> createAds() async {
     if (!_validate()) return;
@@ -197,24 +197,30 @@ class CreateAdsController extends GetxController {
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
+
+        isLoading.value=false;
         final res = response.data;
 
-        if (res != null &&
-            res['data'] != null &&
-            res['data']['url'] != null) {
+        if (res != null && res['data'] != null && res['data']['url'] != null) {
+
           final paymentUrl = res['data']['url'];
 
 
           Get.to(() => StripeWebViewPage(checkoutUrl: paymentUrl));
 
         } else {
+
           _showSuccessPopup();
         }
       } else {
-        Get.snackbar("Error", response.message ?? "Something went wrong");
+        isLoading.value=false;
+        // Get.snackbar("Error", response.message ?? "Something went wrong");
+        debugPrint("Create ads error: ${response.message}");
       }
     } catch (e) {
-      Get.snackbar("Error", "Failed to create ad: ${e.toString()}");
+      isLoading.value=false;
+      // Get.snackbar("Error", "Failed to create ad: ${e.toString()}");
+
       debugPrint("Create ads error: $e");
     } finally {
       isLoading.value = false;

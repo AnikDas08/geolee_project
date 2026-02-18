@@ -6,6 +6,8 @@ import 'package:giolee78/config/api/api_end_point.dart';
 import 'package:giolee78/services/api/api_service.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../../home/presentation/controller/home_controller.dart';
+
 class PostController extends GetxController {
   @override
   void onInit() {
@@ -23,7 +25,7 @@ class PostController extends GetxController {
   // Form controllers
   final description = TextEditingController();
 
-  // ✅ FIXED: Empty initial value - no button selected by default
+
   final selectedPricingOption = ''.obs;
 
   final selectedPriorityLevel = ''.obs;
@@ -35,6 +37,7 @@ class PostController extends GetxController {
   final ImagePicker _picker = ImagePicker();
 
   // ✅ This method now works for all 4 options
+
   void selectPricingOption(String option) {
     selectedPricingOption.value = option;
     print('Selected: $option'); // Debug print
@@ -92,6 +95,9 @@ class PostController extends GetxController {
     isLoading.value = true;
 
     try {
+      final HomeController _homeController = Get.find<HomeController>();
+      await _homeController.getCurrentLocationAndUpdateProfile();
+
       List<MultipartFile> imageFiles = [];
       for (var file in selectedImages) {
         imageFiles.add(
@@ -104,7 +110,8 @@ class PostController extends GetxController {
 
       if (imageFiles.isEmpty) {
         Get.snackbar(
-            "Field Missing", "Please Select an image",
+          "Field Missing",
+          "Please Select an image",
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.red,
           colorText: Colors.white,

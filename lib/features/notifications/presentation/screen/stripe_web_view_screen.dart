@@ -11,64 +11,72 @@ class StripeWebViewPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final webController = WebViewController()
+      ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..setNavigationDelegate(
+        NavigationDelegate(
+          onNavigationRequest: (request) {
+            if (request.url.contains("success")) {
+              // ✅ Navigate after build completes
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                Get.offAll(() => HomeNav());
+                Get.snackbar(
+                  "Success",
+                  "Payment successful",
+                  backgroundColor: AppColors.success,
+                  colorText: AppColors.white,
+                  snackPosition: SnackPosition.BOTTOM,
+                  duration: const Duration(seconds: 2),
+                );
+              });
+              return NavigationDecision.prevent;
+            } else if (request.url.contains("cancel")) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                Get.offAll(() => NotificationScreen());
+                Get.snackbar(
+                  "Cancel",
+                  "Payment cancelled",
+                  backgroundColor: AppColors.cancel,
+                  colorText: AppColors.white,
+                  snackPosition: SnackPosition.BOTTOM,
+                  duration: const Duration(seconds: 2),
+                );
+              });
+              return NavigationDecision.prevent;
+            }
+            return NavigationDecision.navigate;
+          },
+          onPageStarted: (_) {},
+          onPageFinished: (url) {
+            if (url.contains("success")) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                Get.offAll(() => HomeNav());
+              });
+            } else if (url.contains("cancel")) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                Get.offAll(() => NotificationScreen());
+              });
+            }
+          },
+          onWebResourceError: (error) {
+            // Optional: show error snackbar
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              Get.snackbar(
+                "Error",
+                "Failed to load page",
+                backgroundColor: AppColors.cancel,
+                colorText: AppColors.white,
+                snackPosition: SnackPosition.BOTTOM,
+              );
+            });
+          },
+        ),
+      )
+      ..loadRequest(Uri.parse(checkoutUrl));
+
     return Scaffold(
       body: SafeArea(
-        child: WebViewWidget(
-          controller: WebViewController()
-            ..setJavaScriptMode(JavaScriptMode.unrestricted)
-            ..setNavigationDelegate(
-              NavigationDelegate(
-                onNavigationRequest: (request) {
-                  if (request.url.contains("success")) {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(builder: (context) => HomeNav()),
-                    );
-                    Get.snackbar(
-                      "Success",
-                      "Payment successful",
-                      backgroundColor: AppColors.success,
-                      colorText: AppColors.white,
-                    );
-                    return NavigationDecision.prevent;
-                  } else if (request.url.contains("cancel")) {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => NotificationScreen(),
-                      ),
-                    );
-                    Get.snackbar(
-                      "Cancel",
-                      "Payment cancelled",
-                      backgroundColor: AppColors.cancel,
-                      colorText: AppColors.white,
-                    );
-                    return NavigationDecision.navigate;
-                  }
-                  return NavigationDecision.navigate;
-                },
-                onPageStarted: (_) {},
-                onPageFinished: (url) {
-                  if (url.contains("success")) {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(builder: (context) => HomeNav()),
-                    );
-                  } else if (url.contains("cancel")) {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => NotificationScreen(),
-                      ),
-                    );
-                  }
-                },
-                onWebResourceError: (error) {},
-              ),
-            )
-            ..loadRequest(Uri.parse(checkoutUrl)),
-        ),
+        child: WebViewWidget(controller: webController),
       ),
     );
   }
