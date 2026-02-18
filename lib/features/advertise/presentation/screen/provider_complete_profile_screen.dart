@@ -138,7 +138,7 @@ class ServiceProviderInfoScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                     CommonTextField(
-                      validator: OtherHelper.phoneValidator,
+                      validator: OtherHelper.phoneNumberValidator,
                       controller: controller.phoneNumberController,
                       hintText: 'Phone Number',
                     ),

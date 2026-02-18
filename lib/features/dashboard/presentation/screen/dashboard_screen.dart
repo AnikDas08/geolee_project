@@ -110,7 +110,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           onTap: () {
             _providerProfileViewController.getAdvertiserData();
             print(
-              "My Role Is :===========================${LocalStorage.myRole.toString()}",
+              "My Role Is :===========================${LocalStorage.role.toString()}",
             );
             Get.to(() => const DashBoardProfile());
           },

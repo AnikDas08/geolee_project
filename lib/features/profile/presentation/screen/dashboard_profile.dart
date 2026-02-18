@@ -59,7 +59,7 @@ class DashBoardProfile extends StatelessWidget {
                 Get.to(() => const ChangePasswordScreen());
               },
             ),
-            if (LocalStorage.myRole == UserType.advertiser.name)
+            if (LocalStorage.role == "advertise")
               ProfileItemData(
                 imageSrc: AppIcons.edit,
                 title: 'Ads History',
@@ -117,7 +117,10 @@ class DashBoardProfile extends StatelessWidget {
                 padding: EdgeInsets.symmetric(horizontal: 20.w),
                 child: Column(
                   children: [
+
                     /// User Profile Image here
+
+
                     Center(
                       child: GetBuilder<ProviderProfileViewController>(
                         builder: (controller) {
@@ -210,11 +213,11 @@ class DashBoardProfile extends StatelessWidget {
                         },
                       ),*/
 
-                    if (LocalStorage.myRole != "user")
+                    if (LocalStorage.role != "user")
                       CommonButton(
                         titleText: "Become a User",
                         onTap: () {
-                          print("My Role Is :===========================${LocalStorage.myRole.toString()}");
+                          print("My Role Is :===========================${LocalStorage.role.toString()}");
 
                           successPopUps(
                             message:

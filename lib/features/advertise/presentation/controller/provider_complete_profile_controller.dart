@@ -146,7 +146,10 @@ class ServiceProviderController extends GetxController {
 
 
 
-        await LocalStorage.setString(LocalStorageKeys.token, "");
+        // await LocalStorage.setString(LocalStorageKeys.token, "");
+
+        await LocalStorage.setString(LocalStorageKeys.role,"advertise");
+
         Get.offAll(ProviderVerifyUser());
         startTimer();
       } else {

@@ -270,11 +270,6 @@ class ProfileController extends GetxController {
     }
   }
 
-  Future<void> changeRole(String newRole) async {
-    LocalStorage.myRole = newRole;
-    await LocalStorage.setString(LocalStorageKeys.myRole, newRole);
-    update();
-  }
 
   Future<void> deleteAccount() async {
     if (userId.isEmpty) return;

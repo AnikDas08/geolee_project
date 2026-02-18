@@ -106,7 +106,7 @@ class MyProfileController extends GetxController {
         LocalStorage.userId = data.id;
         LocalStorage.myName = data.name;
         LocalStorage.myEmail = data.email;
-        LocalStorage.myRole = data.role;
+        LocalStorage.role = data.role;
         LocalStorage.myImage = data.image;
         LocalStorage.bio = data.bio.isNotEmpty ? data.bio : "Bio Not Set Yet";
         LocalStorage.gender = data.gender;

@@ -13,6 +13,7 @@ import 'dart:io';
 
 class EditPost extends StatefulWidget {
   final String? postId;
+
   const EditPost({super.key, this.postId});
 
   @override
@@ -30,6 +31,7 @@ class _EditPostState extends State<EditPost> {
     debugPrint("📌 Post ID from widget: ${widget.postId}");
 
     // ✅ Initialize controller with postId after widget is ready
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (widget.postId != null && widget.postId!.isNotEmpty) {
         editPostControllers.initialize(widget.postId!);
@@ -53,7 +55,8 @@ class _EditPostState extends State<EditPost> {
           backgroundColor: AppColors.background,
           body: Obx(() {
             // Show loading while fetching post data
-            if (controller.isLoading.value && controller.mySinglePost.value == null) {
+            if (controller.isLoading.value &&
+                controller.mySinglePost.value == null) {
               return const Center(child: CircularProgressIndicator());
             }
 
@@ -99,16 +102,19 @@ class _EditPostState extends State<EditPost> {
                       ),
                       SizedBox(height: 6.h),
                       Obx(
-                            () => Column(
+                        () => Column(
                           children: [
+
                             // First Row
                             Row(
                               children: [
                                 Expanded(
                                   child: _buildPricingOption(
                                     title: "Great Vibes",
-                                    isSelected: controller
-                                        .selectedPricingOption.value ==
+                                    isSelected:
+                                        controller
+                                            .selectedPricingOption
+                                            .value ==
                                         'Great Vibes',
                                     onTap: () => controller.selectPricingOption(
                                       'Great Vibes',
@@ -119,8 +125,10 @@ class _EditPostState extends State<EditPost> {
                                 Expanded(
                                   child: _buildPricingOption(
                                     title: "Off Vibes",
-                                    isSelected: controller
-                                        .selectedPricingOption.value ==
+                                    isSelected:
+                                        controller
+                                            .selectedPricingOption
+                                            .value ==
                                         'Off Vibes',
                                     onTap: () => controller.selectPricingOption(
                                       'Off Vibes',
@@ -136,8 +144,10 @@ class _EditPostState extends State<EditPost> {
                                 Expanded(
                                   child: _buildPricingOption(
                                     title: "Charming Gentleman",
-                                    isSelected: controller
-                                        .selectedPricingOption.value ==
+                                    isSelected:
+                                        controller
+                                            .selectedPricingOption
+                                            .value ==
                                         'Charming Gentleman',
                                     onTap: () => controller.selectPricingOption(
                                       'Charming Gentleman',
@@ -148,8 +158,10 @@ class _EditPostState extends State<EditPost> {
                                 Expanded(
                                   child: _buildPricingOption(
                                     title: "Lovely Lady",
-                                    isSelected: controller
-                                        .selectedPricingOption.value ==
+                                    isSelected:
+                                        controller
+                                            .selectedPricingOption
+                                            .value ==
                                         'Lovely Lady',
                                     onTap: () => controller.selectPricingOption(
                                       'Lovely Lady',
@@ -171,7 +183,7 @@ class _EditPostState extends State<EditPost> {
                       ),
                       SizedBox(height: 8.h),
                       Obx(
-                            () => _buildDropdown(
+                        () => _buildDropdown(
                           value: controller.selectedPriorityLevel.value.isEmpty
                               ? null
                               : controller.selectedPriorityLevel.value,
@@ -282,7 +294,8 @@ class _EditPostState extends State<EditPost> {
               final newIndex = index - existingImages.length;
               return _buildNewImageThumbnail(
                 file: newImages[newIndex],
-                onRemove: () => editPostControllers.removeImageAtIndex(newIndex),
+                onRemove: () =>
+                    editPostControllers.removeImageAtIndex(newIndex),
               );
             }
           },
@@ -514,17 +527,17 @@ class _EditPostState extends State<EditPost> {
                 items: items.isEmpty
                     ? null
                     : items.map((String item) {
-                  return DropdownMenuItem<String>(
-                    value: item,
-                    child: Text(
-                      item,
-                      style: TextStyle(
-                        fontSize: 14.sp,
-                        color: Colors.black,
-                      ),
-                    ),
-                  );
-                }).toList(),
+                        return DropdownMenuItem<String>(
+                          value: item,
+                          child: Text(
+                            item,
+                            style: TextStyle(
+                              fontSize: 14.sp,
+                              color: Colors.black,
+                            ),
+                          ),
+                        );
+                      }).toList(),
                 onChanged: items.isEmpty ? null : onChanged,
               ),
             ),

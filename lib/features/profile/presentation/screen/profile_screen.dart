@@ -169,7 +169,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       right: 25,
                       color: AppColors.secondaryText,
                     ),
-                    if (LocalStorage.myRole == UserType.user.name)
+                    if (LocalStorage.role == "user")
                       CommonButton(
                         titleText: 'Public',
                         buttonWidth: 80.w,
@@ -199,6 +199,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     SizedBox(height: 20.h),
 
                       if(LocalStorage.role=="user")
+
                       CommonButton(
                         titleText: "Advertise with Us",
                         onTap: () async{
@@ -212,7 +213,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             await Get.to(()=>ServiceProviderInfoScreen());
                           }else{
                             // Update LocalStorage properly
-                           await LocalStorage.setString(LocalStorageKeys.role, "advertise");
+                           await LocalStorage.setString(LocalStorageKeys.role,"advertise");
 
                             // Navigate to HomeNav after updating role
                             Get.offAll(()=>HomeNav());
