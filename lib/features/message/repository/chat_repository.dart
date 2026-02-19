@@ -1,12 +1,15 @@
+import 'package:giolee78/utils/log/app_log.dart';
+
 import '../../../services/api/api_service.dart';
 import '../../../config/api/api_end_point.dart';
 import '../data/model/chat_list_model.dart';
 
 Future<List<ChatModel>> chatRepository(int page, String value) async {
-  String url = "${ApiEndPoint.baseUrl}${ApiEndPoint.chatRoom}?page=$page";
+  appLog("naimul");
+  String url = "${ApiEndPoint.chatRoom}?page=$page";
 
   if (value.isNotEmpty) {
-    url += "&search=$value";
+    url += "&searchTerm=$value";
   }
   final response = await ApiService.get(url);
 

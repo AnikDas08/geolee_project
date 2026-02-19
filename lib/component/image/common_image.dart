@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:giolee78/config/api/api_end_point.dart';
 import '../../../utils/constants/app_images.dart';
 import '../../../utils/log/error_log.dart';
 
@@ -52,7 +53,9 @@ class CommonImage extends StatelessWidget {
     return CachedNetworkImage(
       height: size ?? height,
       width: size ?? width,
-      imageUrl: imageSrc,
+      imageUrl: imageSrc.startsWith('http')
+          ? imageSrc
+          : ApiEndPoint.imageUrl + imageSrc,
       fit: fill,
       imageBuilder: (context, imageProvider) => Container(
         decoration: BoxDecoration(

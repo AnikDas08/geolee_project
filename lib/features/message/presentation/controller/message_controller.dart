@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:giolee78/config/api/api_end_point.dart';
+import 'package:giolee78/services/api/api_response_model.dart';
+import 'package:giolee78/services/api/api_service.dart';
 import 'package:giolee78/services/socket/socket_service.dart';
+import 'package:giolee78/utils/log/app_log.dart';
 import 'package:image_picker/image_picker.dart';
-
 
 class MessageController extends GetxController {
   /// Text Controller
@@ -64,8 +67,8 @@ class MessageController extends GetxController {
       image = args['image'] ?? '';
       isActive = args['isActive'] ?? true;
 
-      print("chat id 😍😍😍😍 $chatId");
-      print("chat room id 😍😍😍😍 $chatRoomId");
+      appLog("chat id 😍😍😍😍 $chatId");
+      appLog("chat room id 😍😍😍😍 $chatRoomId");
     }
 
     // Load static messages
@@ -73,63 +76,22 @@ class MessageController extends GetxController {
   }
 
   /// Load Messages (Static Data)
-  void loadMessages() {
+  void loadMessages() async {
     isLoading = true;
     update();
 
-    // Demo service info for banner
-    serviceTitle = 'House Cleaning Service';
-    serviceImage =
-        'https://images.pexels.com/photos/4239097/pexels-photo-4239097.jpeg';
-    price = 120;
-    clientStatus = 'RUNNING';
-    postId = 'demo-post-1';
+    final String url = "${ApiEndPoint.messages}/$chatId";
 
-    messages = [
-      ChatMessage(
-        id: '1',
-        senderId: 'other_user',
-        senderImage:
-            'https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg',
-        message: 'Hi, I saw your service. Are you available tomorrow?',
-        timestamp: DateTime.now().subtract(const Duration(minutes: 25)),
-        isCurrentUser: false,
-      ),
-      ChatMessage(
-        id: '2',
-        senderId: currentUserId,
-        senderImage: '',
-        message: 'Yes, I am available after 3 PM.',
-        timestamp: DateTime.now().subtract(const Duration(minutes: 20)),
-        isCurrentUser: true,
-      ),
-      ChatMessage(
-        id: '3',
-        senderId: 'other_user',
-        senderImage:
-            'https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg',
-        message: 'Great! Can you also bring your own equipment?',
-        timestamp: DateTime.now().subtract(const Duration(minutes: 15)),
-        isCurrentUser: false,
-      ),
-      ChatMessage(
-        id: '4',
-        senderId: currentUserId,
-        senderImage: '',
-        message: 'Sure, I will bring everything needed.',
-        timestamp: DateTime.now().subtract(const Duration(minutes: 10)),
-        isCurrentUser: true,
-      ),
-      ChatMessage(
-        id: '5',
-        senderId: 'other_user',
-        senderImage:
-            'https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg',
-        message: 'Perfect, see you then!',
-        timestamp: DateTime.now().subtract(const Duration(minutes: 5)),
-        isCurrentUser: false,
-      ),
-    ];
+    final response = await ApiService.get(url);
+
+    if (response.statusCode == 200) {
+      final data = response.data['data'];
+
+      for (var json in data) {
+        final message = ChatMessage.fromJson(json);
+        messages.add(message);
+      }
+    }
 
     isLoading = false;
     update();
@@ -137,19 +99,41 @@ class MessageController extends GetxController {
   }
 
   /// Send Text Message
-  void sendMessage() {
-    if (messageController.text.trim().isEmpty) return;
+  void sendMessage() async {
+    if (messageController.text.trim().isNotEmpty) {
+      //
+      // final newMessage = ChatMessage(
+      //   id: chatId,
+      //   senderId: currentUserId,
+      //   senderImage: '',
+      //   message: messageController.text.trim(),
+      //   isCurrentUser: true,
+      //   chatId: '',
+      //   senderName: '',
+      //   type: '',
+      //   seenBy: [],
+      //   isDeleted: false,
+      //   createdAt:DateTime.now().toUtc(),
+      //   updatedAt:DateTime.now().toUtc(),
+      //   isSeen:true,
+      // );
+      //
+      final body = {
+        "chat": chatId,
+        "text": messageController.text.trim(),
+        "type": "text",
+      };
 
-    final newMessage = ChatMessage(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      senderId: currentUserId,
-      senderImage: '',
-      message: messageController.text.trim(),
-      timestamp: DateTime.now(),
-      isCurrentUser: true,
-    );
+      final url = ApiEndPoint.createMessage;
 
-    messages.add(newMessage);
+      ApiResponseModel response = await ApiService.post(url, body: body);
+
+      if (response.statusCode == 200) {
+        debugPrint("========================${response.message}");
+      }
+    }
+
+    // messages.add(newMessage);
     messageController.clear();
     update();
     _scrollToBottom();
@@ -203,20 +187,20 @@ class MessageController extends GetxController {
   Future<void> _sendImageMessage(String imagePath) async {
     isUploadingImage = true;
 
-    // Add uploading message
-    final uploadingMessage = ChatMessage(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      senderId: currentUserId,
-      senderImage: '',
-      message: '[Image]',
-      imageUrl: imagePath,
-      timestamp: DateTime.now(),
-      isCurrentUser: true,
-      isImage: true,
-      isUploading: true,
-    );
+    // // Add uploading message
+    // final uploadingMessage = ChatMessage(
+    //   id: DateTime.now().millisecondsSinceEpoch.toString(),
+    //   senderId: currentUserId,
+    //   senderImage: '',
+    //   message: '[Image]',
+    //   imageUrl: imagePath,
+    //   timestamp: DateTime.now(),
+    //   isCurrentUser: true,
+    //   isImage: true,
+    //   isUploading: true,
+    // );
 
-    messages.add(uploadingMessage);
+    // messages.add(uploadingMessage);
     update();
     _scrollToBottom();
 
@@ -225,19 +209,19 @@ class MessageController extends GetxController {
 
     // Remove uploading message and add final message
     messages.removeLast();
+    //
+    // final finalMessage = ChatMessage(
+    //   id: DateTime.now().millisecondsSinceEpoch.toString(),
+    //   senderId: currentUserId,
+    //   senderImage: '',
+    //   message: '[Image]',
+    //   imageUrl: imagePath,
+    //   timestamp: DateTime.now(),
+    //   isCurrentUser: true,
+    //   isImage: true,
+    // );
 
-    final finalMessage = ChatMessage(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      senderId: currentUserId,
-      senderImage: '',
-      message: '[Image]',
-      imageUrl: imagePath,
-      timestamp: DateTime.now(),
-      isCurrentUser: true,
-      isImage: true,
-    );
-
-    messages.add(finalMessage);
+    // messages.add(finalMessage);
     isUploadingImage = false;
     update();
     _scrollToBottom();
@@ -298,26 +282,64 @@ class MessageController extends GetxController {
 // ============================================
 class ChatMessage {
   final String id;
+  final String chatId;
   final String senderId;
+  final String senderName;
   final String senderImage;
+  final String type; // text / image / etc
   final String message;
-  final String? imageUrl;
-  final DateTime timestamp;
+  final List<String> seenBy;
+  final bool isDeleted;
+  final DateTime createdAt;
+  final DateTime updatedAt;
   final bool isCurrentUser;
+  final bool isSeen;
+
+  // UI helper fields
+  final String? imageUrl;
   final bool isImage;
   final bool isUploading;
   final bool isNotice;
 
   ChatMessage({
     required this.id,
+    required this.chatId,
     required this.senderId,
+    required this.senderName,
     required this.senderImage,
+    required this.type,
     required this.message,
-    this.imageUrl,
-    required this.timestamp,
+    required this.seenBy,
+    required this.isDeleted,
+    required this.createdAt,
+    required this.updatedAt,
     required this.isCurrentUser,
+    required this.isSeen,
+    this.imageUrl,
     this.isImage = false,
     this.isUploading = false,
     this.isNotice = false,
   });
+
+  factory ChatMessage.fromJson(Map<String, dynamic> json) {
+    return ChatMessage(
+      id: json['_id'] ?? '',
+      chatId: json['chat'] ?? '',
+      senderId: json['sender']?['_id'] ?? '',
+      senderName: json['sender']?['name'] ?? '',
+      senderImage: json['sender']?['image'] ?? '',
+      type: json['type'] ?? 'text',
+      message: json['content'] ?? '',
+      seenBy: List<String>.from(json['seenBy'] ?? []),
+      isDeleted: json['isDeleted'] ?? false,
+      createdAt: DateTime.parse(json['createdAt']),
+      updatedAt: DateTime.parse(json['updatedAt']),
+      isCurrentUser: json['isMyMessage'] ?? false,
+      isSeen: json['isSeen'] ?? false,
+
+      // UI helpers auto derive
+      imageUrl: json['type'] == 'image' ? json['content'] : null,
+      isImage: json['type'] == 'image',
+    );
+  }
 }

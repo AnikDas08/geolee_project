@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:giolee78/utils/log/app_log.dart';
 import '../../data/model/chat_list_model.dart';
 import '../../repository/chat_repository.dart';
 import '../../../../services/socket/socket_service.dart';
@@ -40,7 +41,9 @@ class ChatController extends GetxController {
     update();
   }
 
-  void searchChats(v) {}
+  void searchChats(v) {
+    getChatRepos(showLoading: false);
+  }
 
   /// Chat More data Loading function
   void moreChats() {
@@ -55,11 +58,9 @@ class ChatController extends GetxController {
           page,
           searchController.text.trim(),
         );
-        if (list.isEmpty) {
-          hasNoData = true;
-        } else {
-          singleChats.addAll(list);
-        }
+
+        singleChats.addAll(list);
+
         isLoadingMore = false;
         update();
       }
@@ -67,22 +68,27 @@ class ChatController extends GetxController {
   }
 
   /// Chat data Loading function
-  Future<void> getChatRepos() async {
-    if (isLoading || hasNoData) return;
-    isLoading = true;
-    update();
-
+  Future<void> getChatRepos({bool showLoading = true}) async {
+    appLog('naimul');
+    if (showLoading) {
+      isLoading = true;
+      update();
+    }
     page++;
+    if (!showLoading) {
+      page = 1;
+    }
     final List<ChatModel> list = await chatRepository(
       page,
       searchController.text.trim(),
     );
-    if (list.isEmpty) {
-      hasNoData = true;
-    } else {
-      singleChats.addAll(list);
-      filteredChats = chats;
+
+    if (!showLoading) {
+      singleChats.clear();
     }
+
+    singleChats.addAll(list);
+
     isLoading = false;
     update();
   }
@@ -115,7 +121,9 @@ class ChatController extends GetxController {
   void markChatAsSeen(String chatId) {
     final index = singleChats.indexWhere((chat) => chat.id == chatId);
     if (index != -1) {
-      chats[index] = ChatModel(
+
+
+      singleChats[index] = ChatModel(
         id: chats[index].id,
         participant: chats[index].participant,
         latestMessage: chats[index].latestMessage,

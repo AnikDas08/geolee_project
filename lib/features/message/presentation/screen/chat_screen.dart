@@ -14,8 +14,22 @@ import '../../../../../../utils/constants/app_string.dart';
 import '../../../../../../utils/constants/app_colors.dart';
 import '../widgets/chat_list_item.dart';
 
-class ChatListScreen extends StatelessWidget {
+class ChatListScreen extends StatefulWidget {
   const ChatListScreen({super.key});
+
+  @override
+  State<ChatListScreen> createState() => _ChatListScreenState();
+}
+
+class _ChatListScreenState extends State<ChatListScreen> {
+  final con = ChatController.instance;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    con.getChatRepos();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -197,90 +211,30 @@ class ChatListScreen extends StatelessWidget {
                       child: TabBarView(
                         children: [
                           /// Chat Tab
-                          switch (controller.status) {
-                            Status.loading => const CommonLoader(),
-                            Status.error => SizedBox(
-                              height: Get.height,
-                              width: Get.width,
-                              child: Center(
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    CommonImage(
-                                      imageSrc: "assets/images/noData.png",
-                                      height: 100.h,
-                                      width: 100.w,
-                                    ),
-                                    SizedBox(height: 20.h),
-                                    CommonText(
-                                      text: "No Chat List Found",
-                                      fontSize: 24.sp,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            Status.completed =>
-                              controller.singleChats.isEmpty
-                                  ? Center(
-                                      child: Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Icon(
-                                            Icons.search_off,
-                                            size: 60.sp,
-                                            color: Colors.grey[400],
-                                          ),
-                                          SizedBox(height: 16.h),
-                                          CommonText(
-                                            text: "No results found",
-                                            fontSize: 18.sp,
-                                            fontWeight: FontWeight.w500,
-                                            color: Colors.grey,
-                                          ),
-                                          SizedBox(height: 8.h),
-                                          CommonText(
-                                            text:
-                                                "Try searching with different keywords",
-                                            fontSize: 14.sp,
-                                            color: Colors.grey,
-                                          ),
-                                        ],
-                                      ),
-                                    )
-                                  : ListView.builder(
-                                      itemCount: controller.singleChats.length,
-                                      padding: EdgeInsets.only(top: 16.h),
-                                      itemBuilder: (context, index) {
-                                        final ChatModel item =
-                                            controller.singleChats[index];
-                                        return GestureDetector(
-                                          onTap: () {
-                                            controller.markChatAsSeen(item.id);
-
-                                            Get.toNamed(
-                                              AppRoutes.message,
-                                              parameters: {
-                                                "chatId": item.id,
-                                                "name":
-                                                    item.participant.fullName,
-                                                "image": item.participant.image,
-                                              },
-                                              arguments: {
-                                                "chatId": item.id,
-                                                "name":
-                                                    item.participant.fullName,
-                                                "image": item.participant.image,
-                                              },
-                                            );
+                          controller.isLoading
+                              ? const CommonLoader()
+                              : ListView.builder(
+                                  itemCount: controller.singleChats.length,
+                                  padding: EdgeInsets.only(top: 16.h),
+                                  itemBuilder: (context, index) {
+                                    final ChatModel item =
+                                        controller.singleChats[index];
+                                    return GestureDetector(
+                                      onTap: () {
+                                        // controller.markChatAsSeen(item.id);
+                                        Get.toNamed(
+                                          AppRoutes.message,
+                                          parameters: {
+                                            "chatId": item.id,
+                                            "name": item.participant.fullName,
+                                            "image": item.participant.image,
                                           },
-                                          child: chatListItem(item: item),
                                         );
                                       },
-                                    ),
-                          },
+                                      child: chatListItem(item: item),
+                                    );
+                                  },
+                                ),
 
                           /// Group Tab (CORRECTED NAVIGATION HERE)
                           switch (controller.status) {

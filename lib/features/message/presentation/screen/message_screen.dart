@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:giolee78/utils/constants/app_images.dart';
 import 'package:intl/intl.dart';
 import '../../../../utils/constants/app_colors.dart';
 import '../controller/message_controller.dart';
@@ -21,7 +22,10 @@ class _MessageScreenState extends State<MessageScreen> {
     return imagePath;
   }
 
-  void _showAttachmentPicker(BuildContext context, MessageController controller) {
+  void _showAttachmentPicker(
+    BuildContext context,
+    MessageController controller,
+  ) {
     showModalBottomSheet(
       context: context,
       shape: RoundedRectangleBorder(
@@ -40,7 +44,10 @@ class _MessageScreenState extends State<MessageScreen> {
                       color: Colors.purple.shade50,
                       borderRadius: BorderRadius.circular(10.r),
                     ),
-                    child: const Icon(Icons.photo_library, color: Colors.purple),
+                    child: const Icon(
+                      Icons.photo_library,
+                      color: Colors.purple,
+                    ),
                   ),
                   title: const Text('Photo Library'),
                   onTap: () {
@@ -82,7 +89,10 @@ class _MessageScreenState extends State<MessageScreen> {
       controller.chatId = params['chatId'] ?? '';
       controller.name = params['name'] ?? '';
       controller.image = params['image'] ?? '';
+      controller.loadMessages() ;
     }
+
+
   }
 
   @override
@@ -90,7 +100,7 @@ class _MessageScreenState extends State<MessageScreen> {
     return GetBuilder<MessageController>(
       builder: (controller) {
         return WillPopScope(
-          onWillPop: ()async{
+          onWillPop: () async {
             Get.back();
             return true;
           },
@@ -113,7 +123,11 @@ class _MessageScreenState extends State<MessageScreen> {
                       CircleAvatar(
                         radius: 20.r,
                         backgroundImage: controller.image.isNotEmpty
-                            ? NetworkImage(_getImageUrl(controller.image))
+                            ? NetworkImage(
+                                _getImageUrl(
+                                  AppImages.baseurl + controller.image,
+                                ),
+                              )
                             : null,
                         child: controller.image.isEmpty
                             ? Icon(Icons.person, size: 20.sp)
@@ -129,10 +143,7 @@ class _MessageScreenState extends State<MessageScreen> {
                             decoration: BoxDecoration(
                               color: const Color(0xFF0FE16D),
                               shape: BoxShape.circle,
-                              border: Border.all(
-                                color: Colors.white,
-                                width: 2,
-                              ),
+                              border: Border.all(color: Colors.white, width: 2),
                             ),
                           ),
                         ),
@@ -184,96 +195,100 @@ class _MessageScreenState extends State<MessageScreen> {
             body: controller.isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : Column(
-              children: [
-                /// Messages List
-                Expanded(
-                  child: ListView.builder(
-                    controller: controller.scrollController,
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 16.w,
-                      vertical: 16.h,
-                    ),
-                    itemCount: controller.messages.length,
-                    itemBuilder: (context, index) {
-                      final message = controller.messages[index];
-                      return _buildMessageBubble(message);
-                    },
-                  ),
-                ),
-
-                /// Input Area
-                Container(
-                  color: Colors.white,
-                  padding: EdgeInsets.only(
-                    left: 16.w,
-                    right: 16.w,
-                    bottom: MediaQuery.of(context).padding.bottom + 16.h,
-                    top: 16.h,
-                  ),
-                  child: Row(
                     children: [
+                      /// Messages List
                       Expanded(
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: Colors.grey[100],
-                            borderRadius: BorderRadius.circular(24.r),
+                        child: ListView.builder(
+                          controller: controller.scrollController,
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 16.w,
+                            vertical: 16.h,
                           ),
-                          child: TextField(
-                            controller: controller.messageController,
-                            decoration: InputDecoration(
-                              hintText: "Write your message",
-                              hintStyle: TextStyle(
-                                fontSize: 14.sp,
-                                color: Colors.grey[400],
-                              ),
-                              border: InputBorder.none,
-                              contentPadding: EdgeInsets.symmetric(
-                                horizontal: 20.w,
-                                vertical: 12.h,
-                              ),
-                              suffixIcon: GestureDetector(
-                                onTap: () => _showAttachmentPicker(context, controller),
-                                child: Padding(
-                                  padding: EdgeInsets.all(8.w),
-                                  child: Icon(
-                                    Icons.attach_file,
-                                    color: Colors.grey[600],
-                                    size: 22.sp,
+                          itemCount: controller.messages.length,
+                          itemBuilder: (context, index) {
+                            final message = controller.messages[index];
+                            return _buildMessageBubble(message);
+                          },
+                        ),
+                      ),
+
+                      /// Input Area
+                      Container(
+                        color: Colors.white,
+                        padding: EdgeInsets.only(
+                          left: 16.w,
+                          right: 16.w,
+                          bottom: MediaQuery.of(context).padding.bottom + 16.h,
+                          top: 16.h,
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.grey[100],
+                                  borderRadius: BorderRadius.circular(24.r),
+                                ),
+                                child: TextField(
+                                  controller: controller.messageController,
+                                  decoration: InputDecoration(
+                                    hintText: "Write your message",
+                                    hintStyle: TextStyle(
+                                      fontSize: 14.sp,
+                                      color: Colors.grey[400],
+                                    ),
+                                    border: InputBorder.none,
+                                    contentPadding: EdgeInsets.symmetric(
+                                      horizontal: 20.w,
+                                      vertical: 12.h,
+                                    ),
+                                    suffixIcon: GestureDetector(
+                                      onTap: () => _showAttachmentPicker(
+                                        context,
+                                        controller,
+                                      ),
+                                      child: Padding(
+                                        padding: EdgeInsets.all(8.w),
+                                        child: Icon(
+                                          Icons.attach_file,
+                                          color: Colors.grey[600],
+                                          size: 22.sp,
+                                        ),
+                                      ),
+                                    ),
                                   ),
+                                  style: TextStyle(
+                                    fontSize: 14.sp,
+                                    color: Colors.black,
+                                  ),
+                                  onSubmitted: (value) =>
+                                      controller.sendMessage(),
                                 ),
                               ),
                             ),
-                            style: TextStyle(
-                              fontSize: 14.sp,
-                              color: Colors.black,
+                            SizedBox(width: 12.w),
+                            GestureDetector(
+                              onTap: controller.isUploadingImage
+                                  ? null
+                                  : controller.sendMessage,
+                              child: Container(
+                                padding: EdgeInsets.all(10.w),
+                                decoration: const BoxDecoration(
+                                  color: AppColors.primaryColor,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(
+                                  Icons.send,
+                                  color: Colors.white,
+                                  size: 20.sp,
+                                ),
+                              ),
                             ),
-                            onSubmitted: (value) => controller.sendMessage(),
-                          ),
-                        ),
-                      ),
-                      SizedBox(width: 12.w),
-                      GestureDetector(
-                        onTap: controller.isUploadingImage
-                            ? null
-                            : controller.sendMessage,
-                        child: Container(
-                          padding: EdgeInsets.all(10.w),
-                          decoration: const BoxDecoration(
-                            color: AppColors.primaryColor,
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            Icons.send,
-                            color: Colors.white,
-                            size: 20.sp,
-                          ),
+                          ],
                         ),
                       ),
                     ],
                   ),
-                ),
-              ],
-            ),
           ),
         );
       },
@@ -342,49 +357,48 @@ class _MessageScreenState extends State<MessageScreen> {
                   ),
                   child: message.isImage
                       ? Stack(
-                    children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(8.r),
-                        child: Image.file(
-                          File(message.imageUrl!),
-                          width: 200.w,
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                      if (message.isUploading)
-                        Positioned.fill(
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: Colors.black.withOpacity(0.5),
+                          children: [
+                            ClipRRect(
                               borderRadius: BorderRadius.circular(8.r),
-                            ),
-                            child: const Center(
-                              child: CircularProgressIndicator(
-                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                              child: Image.file(
+                                File(message.imageUrl!),
+                                width: 200.w,
+                                fit: BoxFit.cover,
                               ),
                             ),
+                            if (message.isUploading)
+                              Positioned.fill(
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.black.withOpacity(0.5),
+                                    borderRadius: BorderRadius.circular(8.r),
+                                  ),
+                                  child: const Center(
+                                    child: CircularProgressIndicator(
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                        Colors.white,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                          ],
+                        )
+                      : Text(
+                          message.message,
+                          style: TextStyle(
+                            color: message.isCurrentUser
+                                ? Colors.black
+                                : Colors.black87,
+                            fontSize: 14.sp,
+                            height: 1.4,
                           ),
                         ),
-                    ],
-                  )
-                      : Text(
-                    message.message,
-                    style: TextStyle(
-                      color: message.isCurrentUser
-                          ? Colors.black
-                          : Colors.black87,
-                      fontSize: 14.sp,
-                      height: 1.4,
-                    ),
-                  ),
                 ),
                 SizedBox(height: 4.h),
                 Text(
-                  timeFormat.format(message.timestamp),
-                  style: TextStyle(
-                    fontSize: 11.sp,
-                    color: Colors.grey[500],
-                  ),
+                  timeFormat.format(message.createdAt),
+                  style: TextStyle(fontSize: 11.sp, color: Colors.grey[500]),
                 ),
               ],
             ),

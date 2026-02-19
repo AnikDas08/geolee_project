@@ -366,7 +366,9 @@ class _HomeScreenState extends State<HomeScreen> {
             Obx(() => Item(
               imageSrc: AppIcons.friend,
               title: 'Friend Request',
-              badgeText: pendingRequests.length.toString(),
+              badgeText: pendingRequests.isEmpty
+                  ? null
+                  : pendingRequests.length.toString(),
               onTap: () {
                 try {
                   Get.to(() => FriendRequestScreen());
@@ -375,6 +377,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 }
               },
             )),
+
           ],
         ],
       );

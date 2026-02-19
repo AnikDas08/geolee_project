@@ -95,7 +95,8 @@ class ApiEndPoint {
   static const String helpSupport = "${baseUrl}help/support";
   static const String chats = "${baseUrl}chats";
   static const String chatRoom = "${baseUrl}chats/my-chats";
-  static const String messages = "${baseUrl}messages";
+  static const String messages = "${baseUrl}messages/chat";
+  static const String createMessage = "${baseUrl}messages/create";
   static const String servicePay = "${baseUrl}pay/booked-service";
   static const String myServiceHistory = "${baseUrl}pay/my-service-history";
   static const String updateRequest = "${baseUrl}pay/my-service-history/";

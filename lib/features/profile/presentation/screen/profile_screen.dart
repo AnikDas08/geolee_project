@@ -164,15 +164,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       color: AppColors.secondaryText,
                     ),
                     if (LocalStorage.role == "user")
-                      CommonButton(
-                        titleText: 'Public',
-                        buttonWidth: 80.w,
-                        titleSize: 12,
-                        buttonHeight: 32.h,
-                        borderWidth: 4,
-                        borderColor: AppColors.primaryColor2,
-                        buttonColor: AppColors.primaryColor2,
-                      ),
+                      // CommonButton(
+                      //   titleText: 'Public',
+                      //   buttonWidth: 80.w,
+                      //   titleSize: 12,
+                      //   buttonHeight: 32.h,
+                      //   borderWidth: 4,
+                      //   borderColor: AppColors.primaryColor2,
+                      //   buttonColor: AppColors.primaryColor2,
+                      // ),
 
                     16.height,
 
