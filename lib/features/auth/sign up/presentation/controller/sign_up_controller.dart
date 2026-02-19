@@ -75,7 +75,7 @@ class SignUpController extends GetxController {
   Future<void> selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: DateTime(2000, 1, 1),
+      initialDate: DateTime(2000),
       firstDate: DateTime(1950),
       lastDate: DateTime.now(),
       builder: (context, child) {
@@ -83,8 +83,6 @@ class SignUpController extends GetxController {
           data: Theme.of(context).copyWith(
             colorScheme: const ColorScheme.light(
               primary: AppColors.primaryColor,
-              onPrimary: AppColors.white,
-              onSurface: AppColors.black,
             ),
           ),
           child: child!,
@@ -97,30 +95,30 @@ class SignUpController extends GetxController {
     }
   }
 
-  onCountryChange(Country value) {
+  void onCountryChange(Country value) {
     countryCode = value.dialCode.toString();
   }
 
-  setSelectedRole(value) {
+  void setSelectedRole(value) {
     selectRole = value;
     update();
   }
 
-  openGallery() async {
+  Future<void> openGallery() async {
     image = await OtherHelper.openGallery();
     update();
   }
 
   ///============================================Sign Up
 
-  signUpUser(GlobalKey<FormState> signUpFormKey) async {
+  Future<void> signUpUser(GlobalKey<FormState> signUpFormKey) async {
     if (!signUpFormKey.currentState!.validate()) return;
 
     isLoading = true;
     update();
 
     try {
-      Map<String, String> body = {
+      final Map<String, String> body = {
         "name": nameController.text.trim(),
         "email": emailController.text.trim(),
         "password": passwordController.text.trim(),
@@ -128,7 +126,7 @@ class SignUpController extends GetxController {
 
       print("📤 Signing up user: ${body['email']}");
 
-      var response = await ApiService.post(ApiEndPoint.signUp, body: body);
+      final response = await ApiService.post(ApiEndPoint.signUp, body: body);
 
       print("📦 Sign Up Response: ${response.statusCode}");
       print("📦 Response Data: ${response.data}");
@@ -161,14 +159,14 @@ class SignUpController extends GetxController {
     try {
       debugPrint("📤 Verifying OTP for: ${emailController.text}");
 
-      Map<String, dynamic> body = {
+      final Map<String, dynamic> body = {
         "email": emailController.text.trim(),
         "oneTimeCode": int.parse(otpController.text.trim()),
       };
 
-      Map<String, String> header = {'Content-Type': "application/json"};
+      final Map<String, String> header = {'Content-Type': "application/json"};
 
-      var response = await ApiService.post(
+      final response = await ApiService.post(
         ApiEndPoint.verifyEmail,
         body: body,
         header: header,
@@ -178,13 +176,13 @@ class SignUpController extends GetxController {
       print("📦 Response Data: ${response.data}");
 
       if (response.statusCode == 200) {
-        var data = response.data;
+        final data = response.data;
 
         if (data['success'] == true) {
           // Stop timer
           _timer?.cancel();
 
-          String bearerToken = data['data']['accessToken'];
+          final String bearerToken = data['data']['accessToken'];
 
           Utils.successSnackBar("Success", "Email verified successfully");
 
@@ -218,10 +216,10 @@ class SignUpController extends GetxController {
     try {
       print("📤 Resending OTP to: ${emailController.text}");
 
-      Map<String, String> body = {"email": emailController.text.trim()};
+      final Map<String, String> body = {"email": emailController.text.trim()};
 
       // Try different possible endpoints
-      var response = await ApiService.post(ApiEndPoint.resendOtp, body: body);
+      final response = await ApiService.post(ApiEndPoint.resendOtp, body: body);
 
       print("📦 Resend OTP Response: ${response.statusCode}");
       print("📦 Response Data: ${response.data}");
@@ -250,13 +248,13 @@ class SignUpController extends GetxController {
       try {
         print("📤 Trying alternative resend method...");
 
-        Map<String, String> body = {
+        final Map<String, String> body = {
           "name": nameController.text.trim(),
           "email": emailController.text.trim(),
           "password": passwordController.text.trim(),
         };
 
-        var response = await ApiService.post(ApiEndPoint.signUp, body: body);
+        final response = await ApiService.post(ApiEndPoint.signUp, body: body);
 
         if (response.statusCode == 200 || response.statusCode == 201) {
           otpController.clear();
@@ -314,7 +312,7 @@ class SignUpController extends GetxController {
 
     if (dateController.text.isNotEmpty) {
       try {
-        DateTime parsedDate = DateFormat(
+        final DateTime parsedDate = DateFormat(
           'dd MMMM yyyy',
         ).parse(dateController.text.trim());
         formattedDob = parsedDate.toUtc().toIso8601String();
@@ -327,7 +325,7 @@ class SignUpController extends GetxController {
 
 
 
-    Map<String, String> body = {
+    final Map<String, String> body = {
       "gender": selectedGender!.toLowerCase(),
       "dob": formattedDob.isNotEmpty
           ? formattedDob
@@ -347,7 +345,6 @@ class SignUpController extends GetxController {
           ApiEndPoint.updateProfile,
           body: body,
           imagePath: image!,
-          imageName: "image",
           method: "PATCH",
         );
       } else {
@@ -455,7 +452,6 @@ class SignUpController extends GetxController {
           "Please enable location services in your device settings",
           backgroundColor: AppColors.red,
           colorText: AppColors.white,
-          duration: const Duration(seconds: 3),
         );
         return;
       }
@@ -496,7 +492,6 @@ class SignUpController extends GetxController {
         "Failed to get location. Please check your GPS and try again.",
         backgroundColor: AppColors.red,
         colorText: AppColors.white,
-        duration: const Duration(seconds: 3),
       );
     }
   }
@@ -506,7 +501,7 @@ class SignUpController extends GetxController {
     debugPrint("✅ Google Map Created Successfully");
   }
 
-  void confirmLocation() async {
+  Future<void> confirmLocation() async {
     try {
       debugPrint("🔵 confirmLocation called");
 
@@ -551,16 +546,16 @@ class SignUpController extends GetxController {
 
       try {
         debugPrint("🔍 Attempting reverse geocoding...");
-        List<Placemark> placemarks = await placemarkFromCoordinates(
+        final List<Placemark> placemarks = await placemarkFromCoordinates(
           center.latitude,
           center.longitude,
         );
 
         if (placemarks.isNotEmpty) {
-          Placemark place = placemarks[0];
+          final Placemark place = placemarks[0];
           debugPrint("📍 Placemark found: ${place.toString()}");
 
-          List<String> addressParts = [];
+          final List<String> addressParts = [];
 
           if (place.street != null && place.street!.isNotEmpty) {
             addressParts.add(place.street!);
@@ -605,7 +600,6 @@ class SignUpController extends GetxController {
           "Address details unavailable. Please ensure you have internet connection for full address.",
           backgroundColor: AppColors.secondary,
           colorText: AppColors.white,
-          duration: const Duration(seconds: 3),
         );
       }
 
@@ -646,7 +640,6 @@ class SignUpController extends GetxController {
         "Failed to confirm location: $e",
         backgroundColor: AppColors.red,
         colorText: AppColors.white,
-        duration: const Duration(seconds: 3),
       );
     }
   }

@@ -35,11 +35,10 @@ class _PrivacyPolicyScreenState extends State<PrivacyPolicyScreen> {
       appBar: AppBar(
         elevation: 0,
         centerTitle: true,
-        title: CommonText(
+        title: const CommonText(
           text: 'Privacy Policy',
           fontSize: 18,
           fontWeight: FontWeight.w600,
-          color: AppColor.black,
         ),
         backgroundColor: AppColor.white,
         // The image shows a default iOS-style back button
@@ -71,7 +70,7 @@ class _PrivacyPolicyScreenState extends State<PrivacyPolicyScreen> {
                   "body": Style(
                     fontSize: FontSize(14),
                     color: AppColor.textBody,
-                    lineHeight: LineHeight(1.5),
+                    lineHeight: const LineHeight(1.5),
                   ),
                   "h1": Style(
                     fontSize: FontSize(20),
@@ -99,7 +98,6 @@ class _PrivacyPolicyScreenState extends State<PrivacyPolicyScreen> {
       text: text,
       fontSize: 12,
       fontWeight: FontWeight.w600,
-      color: AppColor.black,
       maxLines: 2,
       textAlign: TextAlign.start,
     );
@@ -125,7 +123,6 @@ class _PrivacyPolicyScreenState extends State<PrivacyPolicyScreen> {
     return CommonText(
       text: text,
       fontSize: 14,
-      fontWeight: FontWeight.w400,
       color: Colors.grey,
       maxLines: 10,
       textAlign: TextAlign.start,

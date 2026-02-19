@@ -2,16 +2,12 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:giolee78/utils/app_utils.dart';
 import 'package:giolee78/utils/constants/app_colors.dart';
-import 'package:giolee78/utils/enum/enum.dart';
-import 'package:giolee78/utils/log/app_log.dart';
 import '../../../../../config/route/app_routes.dart';
 import '../../../../../services/api/api_service.dart';
 import '../../../../../config/api/api_end_point.dart';
 import '../../../../../services/storage/storage_keys.dart';
 import '../../../../../services/storage/storage_services.dart';
-import '../../../../ads/presentation/screen/history_ads_screen.dart';
 
 class SignInController extends GetxController {
   /// Sign in Button Loading variable
@@ -34,18 +30,18 @@ class SignInController extends GetxController {
     isLoading = true;
     update();
     try {
-      Map<String, String> body = {
+      final Map<String, String> body = {
         "email": emailController.text,
         "password": passwordController.text,
       };
 
-      var response = await ApiService.post(
+      final response = await ApiService.post(
         ApiEndPoint.signIn,
         body: body,
       ).timeout(const Duration(seconds: 30));
 
       if (response.statusCode == 200) {
-        var data = response.data;
+        final data = response.data;
 
         Get.snackbar(
           barBlur: 0.5,
@@ -87,16 +83,19 @@ class SignInController extends GetxController {
     isLoading = true;
     update();
     try {
-      var response = await ApiService.get(
+      final response = await ApiService.get(
         ApiEndPoint.profile,
       ).timeout(const Duration(seconds: 30));
 
       if (response.statusCode == 200) {
-        var data = response.data;
+        final data = response.data;
         LocalStorage.userId = data['data']?["_id"];
         LocalStorage.myImage = data['data']?["image"];
         LocalStorage.myName = data['data']?["name"];
         LocalStorage.myEmail = data['data']?["email"];
+        LocalStorage.bio=data['data']?['bio'];
+        LocalStorage.dateOfBirth=data['data']?['dob'];
+        LocalStorage.gender=data['data']?['gender'];
 
         LocalStorage.setBool(LocalStorageKeys.isLogIn, LocalStorage.isLogIn);
         LocalStorage.setString(LocalStorageKeys.userId, LocalStorage.userId);

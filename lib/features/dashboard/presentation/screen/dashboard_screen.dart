@@ -10,9 +10,7 @@ import '../../../../component/text/common_text.dart';
 import '../../../../services/storage/storage_services.dart';
 import '../../../../utils/constants/app_colors.dart';
 import '../../../../utils/constants/app_icons.dart';
-import '../../../../utils/constants/app_images.dart';
 import '../../../advertise/presentation/controller/provider_profile_view_controller.dart';
-import '../../../advertise/presentation/screen/provider_profile_view_screen.dart';
 import '../../../profile/presentation/screen/dashboard_profile.dart';
 import '../controller/dash_board_screen_controller.dart';
 
@@ -103,7 +101,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Widget _buildHeader() {
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         GestureDetector(
@@ -115,12 +112,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
             Get.to(() => const DashBoardProfile());
           },
           child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Container(
                 height: 40.w,
                 width: 40.w,
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   shape: BoxShape.circle,
                   color: AppColors.white,
                 ),
@@ -141,7 +137,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   CommonText(
                     text: _providerProfileViewController.businessName,
                     textAlign: TextAlign.left,
-                    fontSize: 16,
                     fontWeight: FontWeight.w600,
                     color: AppColors.textColorFirst,
                   ),
@@ -158,7 +153,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         text: 'Thomridge Cir. Shiloh, Hawaii',
                         textAlign: TextAlign.left,
                         fontSize: 12,
-                        fontWeight: FontWeight.w400,
                         color: AppColors.secondaryText,
                       ),
                     ],
@@ -250,7 +244,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   CommonText(
                     text: title,
                     textAlign: TextAlign.left,
-                    fontSize: 16,
                     fontWeight: FontWeight.w600,
                     color: AppColors.textColorFirst,
                   ),
@@ -259,7 +252,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     text: description,
                     textAlign: TextAlign.left,
                     fontSize: 12,
-                    fontWeight: FontWeight.w400,
                     color: AppColors.secondaryText,
                     maxLines: 3,
                   ),
@@ -286,19 +278,17 @@ class _StatsCard extends StatelessWidget {
       decoration: ShapeDecoration(
         color: Colors.white /* White-BG */,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        shadows: [
+        shadows: const [
           BoxShadow(
             color: Color(0x14000000),
             blurRadius: 4,
             offset: Offset(0, 2),
-            spreadRadius: 0,
           ),
         ],
       ),
       padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
 
         children: [
           CommonText(

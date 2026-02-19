@@ -76,9 +76,7 @@ class HomePost extends StatelessWidget {
                               text: userName,
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
-                              color: AppColors.black,
                               textAlign: TextAlign.start,
-                              maxLines: 1,
                             ),
                             SizedBox(height: 4.h),
                             Row(
@@ -117,8 +115,6 @@ class HomePost extends StatelessWidget {
                                     fontSize: 11,
                                     color: AppColors.secondaryText,
                                     textAlign: TextAlign.start,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
                               ],
@@ -158,7 +154,6 @@ class HomePost extends StatelessWidget {
             child: CommonText(
               text: description,
               fontSize: 12,
-              fontWeight: FontWeight.w400,
               color: AppColors.textColorFirst,
               textAlign: TextAlign.start,
               maxLines: 6,

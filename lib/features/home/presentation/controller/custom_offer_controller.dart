@@ -33,7 +33,7 @@ class CustomOfferController extends GetxController {
       );
 
       if (image != null) {
-        File file = File(image.path);
+        final File file = File(image.path);
         selectedFile.value = file;
         selectedFileName.value = image.name;
         selectedFileSize.value = await file.length();
@@ -68,7 +68,7 @@ class CustomOfferController extends GetxController {
       );
 
       if (image != null) {
-        File file = File(image.path);
+        final File file = File(image.path);
         selectedFile.value = file;
         selectedFileName.value = image.name;
         selectedFileSize.value = await file.length();
@@ -134,7 +134,7 @@ class CustomOfferController extends GetxController {
                   color: AppColors.primaryColor,
                   borderRadius: BorderRadius.circular(8.r),
                 ),
-                child: Icon(
+                child: const Icon(
                   Icons.photo_library,
                   color: AppColors.primaryColor,
                 ),
@@ -153,7 +153,7 @@ class CustomOfferController extends GetxController {
                   color: AppColors.primaryColor,
                   borderRadius: BorderRadius.circular(8.r),
                 ),
-                child: Icon(
+                child: const Icon(
                   Icons.camera_alt,
                   color: AppColors.primaryColor,
                 ),
@@ -168,8 +168,6 @@ class CustomOfferController extends GetxController {
           ],
         ),
       ),
-      isDismissible: true,
-      enableDrag: true,
     );
   }
 

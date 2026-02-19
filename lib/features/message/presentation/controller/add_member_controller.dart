@@ -58,7 +58,7 @@ class AddMemberController extends GetxController {
     fetchGroupData();
   }
 
-  void fetchGroupData() async {
+  Future<void> fetchGroupData() async {
     isLoading.value = true;
     // Simulate fetching both user list and current members
     await 1.seconds.delay();

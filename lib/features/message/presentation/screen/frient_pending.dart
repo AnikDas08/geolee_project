@@ -34,7 +34,6 @@ class PendingRequestScreen extends StatelessWidget {
                text: user.name,
                fontSize: 16.sp,
                fontWeight: FontWeight.w500,
-               color: AppColors.black,
              ),
            ],
          ),
@@ -96,7 +95,6 @@ class PendingRequestScreen extends StatelessWidget {
               text: 'Pending Request',
               fontSize: 20,
               fontWeight: FontWeight.w600,
-              color: AppColors.black,
             ),
           ),
           body: Obx(() {

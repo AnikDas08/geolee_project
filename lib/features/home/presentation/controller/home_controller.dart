@@ -7,6 +7,7 @@ import 'package:giolee78/config/api/api_end_point.dart';
 import 'package:giolee78/features/home/presentation/controller/home_nav_controller.dart';
 import 'package:giolee78/features/profile/presentation/controller/my_profile_controller.dart';
 import '../../../../services/api/api_service.dart';
+import '../../../../services/storage/storage_keys.dart';
 import '../../../../services/storage/storage_services.dart';
 import '../../../friend/data/friend_request_model.dart';
 import '../../data/data_model.dart';
@@ -53,15 +54,17 @@ class HomeController extends GetxController {
   final MyProfileController myProfileController = Get.put(MyProfileController());
 
   @override
-  void onInit() {
+  Future<void> onInit() async{
     super.onInit();
     try {
       argument = Get.arguments;
       Get.find<HomeNavController>().refresh();
       Get.find<MyProfileController>().refresh();
-      myProfileController.getUserData();
+     await myProfileController.getUserData();
 
-      if (LocalStorage.token != null && LocalStorage.token!.isNotEmpty) {
+      await getUserData();
+
+      if (LocalStorage.token.isNotEmpty) {
         getCurrentLocationAndUpdateProfile();
         fetchPosts();
         myProfileController.getUserData();
@@ -81,34 +84,34 @@ class HomeController extends GetxController {
     final clicker = clickerCount.value;
     if (clicker == "Great Vibes") {
       return HeatmapGradient([
-        HeatmapGradientColor(Colors.lightGreen, 0.1),
-        HeatmapGradientColor(Colors.green, 0.4),
+        const HeatmapGradientColor(Colors.lightGreen, 0.1),
+        const HeatmapGradientColor(Colors.green, 0.4),
         HeatmapGradientColor(Colors.green.shade700, 0.7),
         HeatmapGradientColor(Colors.green.shade900, 1.0),
       ]);
     } else if (clicker == "Off Vibes") {
       return HeatmapGradient([
         HeatmapGradientColor(Colors.orange.shade200, 0.1),
-        HeatmapGradientColor(Colors.orange, 0.4),
-        HeatmapGradientColor(Colors.deepOrange, 0.7),
+        const HeatmapGradientColor(Colors.orange, 0.4),
+        const HeatmapGradientColor(Colors.deepOrange, 0.7),
         HeatmapGradientColor(Colors.red.shade900, 1.0),
       ]);
     } else if (clicker == "Charming Gentleman") {
       return HeatmapGradient([
-        HeatmapGradientColor(Colors.lightBlue, 0.1),
-        HeatmapGradientColor(Colors.blue, 0.4),
-        HeatmapGradientColor(Colors.indigo, 0.7),
+        const HeatmapGradientColor(Colors.lightBlue, 0.1),
+        const HeatmapGradientColor(Colors.blue, 0.4),
+        const HeatmapGradientColor(Colors.indigo, 0.7),
         HeatmapGradientColor(Colors.purple.shade900, 1.0),
       ]);
     } else if (clicker == "Lovely Lady") {
       return HeatmapGradient([
         HeatmapGradientColor(Colors.pink.shade100, 0.1),
-        HeatmapGradientColor(Colors.pinkAccent, 0.4),
-        HeatmapGradientColor(Colors.pink, 0.7),
+        const HeatmapGradientColor(Colors.pinkAccent, 0.4),
+        const HeatmapGradientColor(Colors.pink, 0.7),
         HeatmapGradientColor(Colors.pink.shade900, 1.0),
       ]);
     } else {
-      return HeatmapGradient([
+      return const HeatmapGradient([
         HeatmapGradientColor(Colors.cyan, 0.1),
         HeatmapGradientColor(Colors.yellow, 0.4),
         HeatmapGradientColor(Colors.orange, 0.7),
@@ -129,7 +132,7 @@ class HomeController extends GetxController {
   Future<BitmapDescriptor> _createCountMarkerIcon(int count, Color bgColor) async {
     try {
       const double size = 60;
-      double fontSize = 22.sp;
+      final double fontSize = 22.sp;
 
       final ui.PictureRecorder recorder = ui.PictureRecorder();
       final Canvas canvas = Canvas(recorder);
@@ -171,20 +174,20 @@ class HomeController extends GetxController {
     try {
       markerList.clear();
 
-      Map<String, List<Post>> grouped = {};
+      final Map<String, List<Post>> grouped = {};
 
       for (var post in posts) {
         if (post.lat == 0 && post.long == 0) continue;
         if (post.lat < -90 || post.lat > 90 || post.long < -180 || post.long > 180) continue;
 
-        double roundedLat = (post.lat * 1000).roundToDouble() / 1000;
-        double roundedLng = (post.long * 1000).roundToDouble() / 1000;
-        String key = '${roundedLat}_$roundedLng';
+        final double roundedLat = (post.lat * 1000).roundToDouble() / 1000;
+        final double roundedLng = (post.long * 1000).roundToDouble() / 1000;
+        final String key = '${roundedLat}_$roundedLng';
         grouped.putIfAbsent(key, () => []).add(post);
       }
 
       final Color markerColor = _getMarkerColor();
-      List<Marker> newMarkers = [];
+      final List<Marker> newMarkers = [];
 
       for (var entry in grouped.entries) {
         final parts = entry.key.split('_');
@@ -223,15 +226,16 @@ class HomeController extends GetxController {
         return;
       }
 
-      List<WeightedLatLng> heatmapPoints = [];
+      final List<WeightedLatLng> heatmapPoints = [];
 
       for (var post in posts) {
         try {
           if (post.lat != 0 && post.long != 0) {
             if (post.lat >= -90 && post.lat <= 90 && post.long >= -180 && post.long <= 180) {
               double weight = 1.0;
-              if (post.clickerType == "Great Vibes") weight = 2.0;
-              else if (post.clickerType == "Off Vibes") weight = 1.5;
+              if (post.clickerType == "Great Vibes") {
+                weight = 2.0;
+              } else if (post.clickerType == "Off Vibes") weight = 1.5;
               else if (post.clickerType == "Charming Gentleman" || post.clickerType == "Lovely Leady") weight = 2.5;
 
               heatmapPoints.add(WeightedLatLng(LatLng(post.lat, post.long), weight: weight));
@@ -247,7 +251,7 @@ class HomeController extends GetxController {
           Heatmap(
             heatmapId: const HeatmapId("posts_activity"),
             data: heatmapPoints,
-            radius: HeatmapRadius.fromPixels(50),
+            radius: const HeatmapRadius.fromPixels(50),
             opacity: 0.8,
             gradient: _getHeatmapGradient(),
           )
@@ -329,7 +333,7 @@ class HomeController extends GetxController {
     }
   }
 
-  void applyClickerFilter(String? clickerType) async {
+  Future<void> applyClickerFilter(String? clickerType) async {
     try {
       clickerCount.value = clickerType;
       await fetchPostsWithFilter();
@@ -413,10 +417,43 @@ class HomeController extends GetxController {
       update();
     }
   }
+  Future<void> getUserData() async {
+    isLoading = true;
+    update();
+    try {
+      final response = await ApiService.get(
+        ApiEndPoint.profile,
+      ).timeout(const Duration(seconds: 30));
+
+      if (response.statusCode == 200) {
+        final data = response.data;
+        LocalStorage.userId = data['data']?["_id"];
+        LocalStorage.myImage = data['data']?["image"];
+        LocalStorage.myName = data['data']?["name"];
+        LocalStorage.myEmail = data['data']?["email"];
+        LocalStorage.bio=data['data']?['bio'];
+        LocalStorage.dateOfBirth=data['data']?['dob'];
+        LocalStorage.gender=data['data']?['gender'];
+
+        LocalStorage.setBool(LocalStorageKeys.isLogIn, LocalStorage.isLogIn);
+        LocalStorage.setString(LocalStorageKeys.userId, LocalStorage.userId);
+        LocalStorage.setString(LocalStorageKeys.myImage, LocalStorage.myImage);
+        LocalStorage.setString(LocalStorageKeys.myName, LocalStorage.myName);
+        LocalStorage.setString(LocalStorageKeys.myEmail, LocalStorage.myEmail);
+      } else {
+        Get.snackbar(response.statusCode.toString(), response.message);
+      }
+    } catch (e) {
+      Get.snackbar("Error", e.toString());
+    } finally {
+      isLoading = false;
+      update();
+    }
+  }
 
   Future<Position?> getCurrentLocation() async {
     try {
-      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      final bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) return null;
 
       LocationPermission permission = await Geolocator.checkPermission();
@@ -435,9 +472,9 @@ class HomeController extends GetxController {
 
   Future<String?> getAddressFromCoordinate(double lat, double lng) async {
     try {
-      List<Placemark> placemarks = await placemarkFromCoordinates(lat, lng);
+      final List<Placemark> placemarks = await placemarkFromCoordinates(lat, lng);
       if (placemarks.isNotEmpty) {
-        Placemark place = placemarks.first;
+        final Placemark place = placemarks.first;
         return "${place.street}, ${place.subLocality}, ${place.locality}, ${place.administrativeArea}, ${place.country}";
       }
       return null;
@@ -449,8 +486,8 @@ class HomeController extends GetxController {
 
   Future<void> updateProfile(double longitude, double latitude) async {
     try {
-      String? address = await getAddressFromCoordinate(latitude, longitude);
-      Map<String, dynamic> body = {
+      final String? address = await getAddressFromCoordinate(latitude, longitude);
+      final Map<String, dynamic> body = {
         "location": [longitude, latitude],
         "address": address ?? "Location Unavailable"
       };
@@ -466,7 +503,7 @@ class HomeController extends GetxController {
   Future<void> getCurrentLocationAndUpdateProfile() async {
     try {
       isLocationUpdating.value = true;
-      Position? position = await getCurrentLocation();
+      final Position? position = await getCurrentLocation();
       if (position != null) {
         currentLatitude.value = position.latitude;
         currentLongitude.value = position.longitude;

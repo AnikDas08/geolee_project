@@ -82,9 +82,8 @@ class _CommonTextFieldState extends State<CommonTextField> {
       decoration: ShapeDecoration(
         color: Colors.white /* Icon-White */,
         shape: RoundedRectangleBorder(
-          side: BorderSide(
-            width: 1,
-            color: const Color(0xFFDEE2E3) /* Disable */,
+          side: const BorderSide(
+            color: Color(0xFFDEE2E3) /* Disable */,
           ),
           borderRadius: BorderRadius.circular(widget.borderRadius),
         ),
@@ -131,7 +130,6 @@ class _CommonTextFieldState extends State<CommonTextField> {
           ),
           prefix: CommonText(
             text: widget.prefixText ?? "",
-            fontWeight: FontWeight.w400,
           ),
           suffixIcon: widget.isPassword
               ? GestureDetector(

@@ -24,10 +24,9 @@ class TermsOfServicesController extends GetxController {
   Future<void> loadTerms() async {
     try {
       isLoading.value = true;
-
       final response = await ApiService.get(ApiEndPoint.termsOfServices);
 
-      if (response.statusCode == 200) {
+      if (response.statusCode == 200 && response.data['data'] != null) {
         final model = DisclaimerResponse.fromJson(response.data['data']);
         termsAndConditionHtmlContent.value = model.content;
       }
@@ -43,12 +42,14 @@ class TermsOfServicesController extends GetxController {
       isLoading.value = true;
       final response = await ApiService.get(ApiEndPoint.privacyPolicies);
 
-      if (response.statusCode == 200) {
+      if (response.statusCode == 200 && response.data['data'] != null) {
         final model = DisclaimerResponse.fromJson(response.data['data']);
         privacyPolicyHtmlContent.value = model.content;
       }
     } catch (e) {
       debugPrint(e.toString());
+    } finally {
+      isLoading.value = false;
     }
   }
 }

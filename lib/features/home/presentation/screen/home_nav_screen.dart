@@ -3,13 +3,11 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:giolee78/features/home/presentation/controller/home_nav_controller.dart';
-import 'package:giolee78/services/storage/storage_keys.dart';
 
 import '../../../../component/image/common_image.dart';
 import '../../../../services/storage/storage_services.dart';
 import '../../../../utils/constants/app_colors.dart';
 import '../../../../utils/constants/app_icons.dart';
-import '../../../../utils/enum/enum.dart';
 import '../../../addpost/presentation/screen/add_post_screen.dart';
 import '../../../ads/presentation/screen/create_ads_screen.dart';
 import '../../../dashboard/presentation/screen/dashboard_screen.dart';
@@ -23,16 +21,16 @@ class HomeNav extends StatelessWidget {
 
   // Index 0: Home, Index 1: AddPost, Index 2: Chat
   final List<Widget> userScreens = [
-    HomeScreen(),
+    const HomeScreen(),
     AddPostScreen(),
-    ChatListScreen(),
+    const ChatListScreen(),
   ];
 
   // Index 0: Home (Shared), Index 1: CreateAds, Index 2: Dashboard
   final List<Widget> advertiseScreens = [
-    HomeScreen(),
-    CreateAdsScreen(),
-    DashboardScreen(),
+    const HomeScreen(),
+    const CreateAdsScreen(),
+    const DashboardScreen(),
   ];
 
   @override
@@ -59,7 +57,7 @@ class HomeNav extends StatelessWidget {
             elevation: 4,
             shape: const CircleBorder(),
             onPressed: () => controller.changeIndex(1), // Middle Button
-            child: Center(child: CommonImage(imageSrc: AppIcons.add)),
+            child: const Center(child: CommonImage(imageSrc: AppIcons.add)),
           ),
         );
       }),

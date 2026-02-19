@@ -2,11 +2,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:giolee78/config/api/api_end_point.dart';
 import 'package:giolee78/config/route/app_routes.dart';
-import 'package:giolee78/features/home/presentation/controller/home_controller.dart';
 import 'package:giolee78/features/profile/data/model/user_profile_model.dart';
 import 'package:giolee78/services/api/api_service.dart';
 import 'package:giolee78/services/storage/storage_keys.dart';
 import 'package:giolee78/services/storage/storage_services.dart';
+import 'package:intl/intl.dart';
 
 class MyProfileController extends GetxController {
   bool isLoading = false;
@@ -14,7 +14,6 @@ class MyProfileController extends GetxController {
 
   String _dateOfBirth = "";
   String _gender = "";
-
   // ================= USER DATA GETTERS =================
 
   String get userName =>
@@ -30,7 +29,13 @@ class MyProfileController extends GetxController {
 
   String get dateOfBirth {
     if (LocalStorage.dateOfBirth.isEmpty) return "Not Selected";
-    return LocalStorage.dateOfBirth.split('T').first;
+    try {
+      final utcDate = DateTime.parse(LocalStorage.dateOfBirth);
+      final localDate = utcDate.toLocal(); // UTC → User এর local time এ convert
+      return DateFormat('yyyy-MM-dd').format(localDate);
+    } catch (e) {
+      return LocalStorage.dateOfBirth.split('T').first;
+    }
   }
 
   String get gender =>

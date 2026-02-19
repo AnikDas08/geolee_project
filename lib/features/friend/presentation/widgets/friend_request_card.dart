@@ -30,7 +30,7 @@ class FriendRequestCard extends StatelessWidget {
   // Helper widget to display the actions or status
   Widget _buildActions(String status) {
     if (status == 'accepted') {
-      return CommonText(
+      return const CommonText(
         text: 'Friend Added', // <--- Text shown after accepting
         fontSize: 14,
         fontWeight: FontWeight.w600,
@@ -49,11 +49,8 @@ class FriendRequestCard extends StatelessWidget {
           child: CommonButton(
             onTap: onAccept,
             titleText: 'Accept',
-            buttonColor: AppColors.primaryColor,
-            titleColor: AppColors.white,
             buttonRadius: 6.r,
             titleSize: 12.sp,
-            borderColor: AppColors.primaryColor,
             buttonHeight: 32.h,
             buttonWidth: 90.w,
           ),
@@ -96,7 +93,6 @@ class FriendRequestCard extends StatelessWidget {
         ),
         padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             CircleAvatar(
               radius: 30.r,
@@ -120,18 +116,14 @@ class FriendRequestCard extends StatelessWidget {
                     text: userName,
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.black,
                     textAlign: TextAlign.start,
-                    maxLines: 1,
                   ),
                   SizedBox(height: 8.h),
                   CommonText(
                     text: timeAgo,
                     fontSize: 12,
-                    fontWeight: FontWeight.w400,
                     color: AppColors.secondaryText,
                     textAlign: TextAlign.start,
-                    maxLines: 1,
                   ),
                   SizedBox(height: 12.h),
                   // <--- ACTIONS/STATUS RENDERED HERE

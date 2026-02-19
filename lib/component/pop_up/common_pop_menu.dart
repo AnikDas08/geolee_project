@@ -93,7 +93,7 @@ class PopUpMenu extends StatelessWidget {
   }
 }
 
-logOutPopUp() {
+void logOutPopUp() {
   showDialog(
     context: Get.context!,
     builder: (context) {
@@ -124,7 +124,6 @@ logOutPopUp() {
                         child: CommonButton(
                           titleText: AppString.no,
                           borderWidth: 1.5,
-                          borderColor: AppColors.primaryColor,
                           buttonColor: AppColors.transparent,
                           titleColor: AppColors.primaryColor,
                           onTap: () => Get.back(),
@@ -152,7 +151,7 @@ logOutPopUp() {
   );
 }
 
-deletePopUp({
+void deletePopUp({
   required TextEditingController controller,
   required VoidCallback onTap,
   bool isLoading = false,
@@ -185,8 +184,6 @@ deletePopUp({
                     text: AppString.deleteAccountConfirmation,
                     fontSize: 20.sp,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.black,
-                    maxLines: 1,
                     bottom: 24.h,
                   ),
                 ),
@@ -196,7 +193,6 @@ deletePopUp({
 
                   fontSize: 16.sp,
                   fontWeight: FontWeight.w500,
-                  color: AppColors.black,
                   maxLines: 2,
                   bottom: 20.h,
                 ),
@@ -231,7 +227,6 @@ deletePopUp({
                     ? Expanded(
                   child: CommonButton(
                     titleText: AppString.delete,
-                    titleColor: AppColors.white,
                     buttonRadius: 4.r,
                     buttonHeight: 48.h,
                     onTap: () async {
@@ -248,7 +243,6 @@ deletePopUp({
                     opacity: 0.5, // Make it look disabled
                     child: CommonButton(
                       titleText: AppString.delete,
-                      titleColor: AppColors.white,
                       buttonRadius: 4.r,
                       buttonHeight: 48.h,
                       onTap: () {}, // No action when disabled
@@ -267,7 +261,7 @@ deletePopUp({
   });
 }
 
-logOutPopUps() {
+void logOutPopUps() {
   showDialog(
     context: Get.context!,
     builder: (context) {
@@ -289,7 +283,6 @@ logOutPopUps() {
                   child: CommonButton(
                     titleText: AppString.no,
                     borderWidth: 1.5,
-                    borderColor: AppColors.primaryColor,
                     buttonColor: AppColors.transparent,
                     titleColor: AppColors.primaryColor,
                     onTap: () {
@@ -316,7 +309,7 @@ logOutPopUps() {
   );
 }
 
-successPopUps({
+void successPopUps({
   String? title,
   required String message,
   required VoidCallback onTap,
@@ -332,19 +325,17 @@ successPopUps({
             borderRadius: BorderRadius.circular(20.r),
           ),
           contentPadding: EdgeInsets.all(12.sp),
-          icon: CommonImage(imageSrc: AppImages.success, size: 150),
+          icon: const CommonImage(imageSrc: AppImages.success, size: 150),
           title: title != null
               ? CommonText(
                   text: title,
                   maxLines: 3,
-                  fontWeight: FontWeight.w400,
                   fontSize: 16.sp,
                 )
               : null,
           content: CommonText(
             text: message,
             maxLines: 3,
-            fontWeight: FontWeight.w400,
             fontSize: 16.sp,
             left: 10.w,
             right: 10.w,

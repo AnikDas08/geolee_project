@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:giolee78/features/addpost/presentation/screen/my_post_screen.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:giolee78/features/home/presentation/controller/home_controller.dart';
@@ -9,7 +8,6 @@ import 'package:giolee78/features/profile/presentation/controller/post_controlle
 import '../../../../config/api/api_end_point.dart';
 import '../../../../services/api/api_response_model.dart';
 import '../../../../services/api/api_service.dart';
-import '../../../addpost/my_post_model.dart';
 
 class EditPostController extends GetxController {
   final titleController = TextEditingController();
@@ -245,9 +243,9 @@ class EditPostController extends GetxController {
     // Service Date
     if (data['serviceDate'] != null) {
       try {
-        String dateString = data['serviceDate'].toString();
+        final String dateString = data['serviceDate'].toString();
         if (dateString.isNotEmpty) {
-          DateTime date = DateTime.parse(dateString);
+          final DateTime date = DateTime.parse(dateString);
           selectDateController.text =
               "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}T00:00:00.000Z";
         }
@@ -273,7 +271,7 @@ class EditPostController extends GetxController {
 
     // Priority
     if (data['priority'] != null) {
-      String priority = data['priority'].toString().toLowerCase();
+      final String priority = data['priority'].toString().toLowerCase();
       selectedPriorityLevel.value = _capitalizeFirst(priority);
     }
   }
@@ -293,8 +291,8 @@ class EditPostController extends GetxController {
 
           for (var category in categoryList) {
             if (category is Map<String, dynamic>) {
-              String name = category['name']?.toString() ?? '';
-              String id = category['_id']?.toString() ?? '';
+              final String name = category['name']?.toString() ?? '';
+              final String id = category['_id']?.toString() ?? '';
               if (name.isNotEmpty && id.isNotEmpty) {
                 categories.add(name);
                 categoryMap[name] = id;
@@ -537,9 +535,9 @@ class EditPostController extends GetxController {
     try {
       isLoading.value = true;
 
-      String priorityValue = selectedPriorityLevel.value.toUpperCase();
-      String currentCategoryId = getCategoryId(selectedCategory.value);
-      String currentSubCategoryId = getSubCategoryId(selectedSubCategory.value);
+      final String priorityValue = selectedPriorityLevel.value.toUpperCase();
+      final String currentCategoryId = getCategoryId(selectedCategory.value);
+      final String currentSubCategoryId = getSubCategoryId(selectedSubCategory.value);
 
       final body = {
         'title': titleController.text.trim(),
@@ -573,7 +571,6 @@ class EditPostController extends GetxController {
           'posts/${postId.value}',
           method: 'PATCH',
           body: body,
-          imageName: 'image',
           imagePath: selectedImage.value!.path,
         );
       } else {

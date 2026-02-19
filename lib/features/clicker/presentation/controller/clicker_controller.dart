@@ -11,7 +11,6 @@ import 'package:giolee78/services/storage/storage_services.dart';
 import 'package:giolee78/utils/app_utils.dart';
 import '../../../../config/api/api_end_point.dart';
 import '../../../friend/data/post_model_by_id.dart';
-import '../../../home/presentation/controller/home_controller.dart';
 import '../../data/addbanner_model.dart';
 
 enum FriendStatus { none, requested, friends }
@@ -84,11 +83,11 @@ class ClickerController extends GetxController {
     try {
       isBannerLoading.value = true;
 
-      Position position = await Geolocator.getCurrentPosition(
+      final Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.low,
       );
 
-      String deviceId = await _getUniqueDeviceId();
+      final String deviceId = await _getUniqueDeviceId();
 
       final String url = "advertisements/nearby-active"
           "?lng=${position.longitude}"
@@ -112,12 +111,10 @@ class ClickerController extends GetxController {
   Future<void> getAllPosts({String? clickerType, bool isLoadMore = false}) async {
     try {
       if (isLoadMore) {
-        // Stop if already on last page
         if (currentPage.value >= totalPages.value) return;
         isLoadingMore.value = true;
         currentPage.value += 1;
       } else {
-        // Fresh load: reset everything
         isLoading.value = true;
         currentPage.value = 1;
         posts.clear();
@@ -125,13 +122,12 @@ class ClickerController extends GetxController {
       }
 
       String url = ApiEndPoint.getAllPost;
-      List<String> queryParams = [];
+      final List<String> queryParams = [];
 
-      // Pagination params
       queryParams.add("page=${currentPage.value}");
       queryParams.add("limit=10");
 
-      String filter = clickerType ?? selectedFilter;
+      final String filter = clickerType ?? selectedFilter;
       if (filter != 'All') queryParams.add("clickerType=$filter");
       if (LocalStorage.token.isEmpty) queryParams.add("privacy=public");
 
@@ -142,13 +138,15 @@ class ClickerController extends GetxController {
       if (response.statusCode == 200) {
         final AllPostModel responseData = AllPostModel.fromJson(response.data);
 
-        // Update total pages from pagination
         totalPages.value = responseData.pagination.totalPage;
 
+        final visiblePosts = responseData.data.where((post) {
+          return post.privacy == 'public';
+        }).toList();
         if (isLoadMore) {
-          posts.addAll(responseData.data); // Append on load more
+          posts.addAll(visiblePosts);
         } else {
-          posts.assignAll(responseData.data); // Replace on fresh load
+          posts.assignAll(visiblePosts);
         }
 
         _filterPosts();
@@ -209,7 +207,7 @@ class ClickerController extends GetxController {
     try {
       isLocationLoading.value = true;
 
-      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      final bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
         userAddress.value = "Location services disabled";
         return;
@@ -224,17 +222,17 @@ class ClickerController extends GetxController {
         }
       }
 
-      Position position = await Geolocator.getCurrentPosition(
+      final Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.low,
       );
 
-      List<Placemark> placemarks = await placemarkFromCoordinates(
+      final List<Placemark> placemarks = await placemarkFromCoordinates(
         position.latitude,
         position.longitude,
       );
 
       if (placemarks.isNotEmpty) {
-        Placemark place = placemarks[0];
+        final Placemark place = placemarks[0];
         userAddress.value =
             place.locality ?? place.subAdministrativeArea ?? "Unknown";
       }
@@ -250,12 +248,12 @@ class ClickerController extends GetxController {
 
   // ================= Device ID
   Future<String> _getUniqueDeviceId() async {
-    DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+    final DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
     if (Platform.isAndroid) {
-      AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
+      final AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
       return androidInfo.id;
     } else if (Platform.isIOS) {
-      IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
+      final IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
       return iosInfo.identifierForVendor ?? "unknown_ios_id";
     }
     return "unknown_device";
@@ -282,6 +280,11 @@ class ClickerController extends GetxController {
 
   void _filterPosts() {
     List<PostData> filtered = posts.toList();
+
+    filtered = filtered.where((post) {
+      if (post.privacy == 'public') return true;
+      return post.user.id == LocalStorage.userId;
+    }).toList();
 
     if (selectedFilter != 'All') {
       filtered = filtered

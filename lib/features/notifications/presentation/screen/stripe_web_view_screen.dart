@@ -32,7 +32,7 @@ class StripeWebViewPage extends StatelessWidget {
               return NavigationDecision.prevent;
             } else if (request.url.contains("cancel")) {
               WidgetsBinding.instance.addPostFrameCallback((_) {
-                Get.offAll(() => NotificationScreen());
+                Get.offAll(() => const NotificationScreen());
                 Get.snackbar(
                   "Cancel",
                   "Payment cancelled",
@@ -54,7 +54,7 @@ class StripeWebViewPage extends StatelessWidget {
               });
             } else if (url.contains("cancel")) {
               WidgetsBinding.instance.addPostFrameCallback((_) {
-                Get.offAll(() => NotificationScreen());
+                Get.offAll(() => const NotificationScreen());
               });
             }
           },

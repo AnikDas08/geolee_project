@@ -34,9 +34,9 @@ class HistoryAdsController extends GetxController {
 
     try {
       // All Ads
-      ApiResponseModel responseAll = await ApiService.get(ApiEndPoint.getAdvertisementMe);
+      final ApiResponseModel responseAll = await ApiService.get(ApiEndPoint.getAdvertisementMe);
       print('All Ads Response: ${responseAll.data}');  // << debug
-      if (responseAll.statusCode == 200 && responseAll.data != null) {
+      if (responseAll.statusCode == 200) {
         final List<dynamic> jsonList = responseAll.data['data'];
         allAds = jsonList.map((e) => Advertisement.fromJson(e)).toList();
         print('All Ads parsed: ${allAds.length}');  // << debug
@@ -44,9 +44,9 @@ class HistoryAdsController extends GetxController {
 
       // Active Ads
       final activeEndpoint = "${ApiEndPoint.getAdvertisementMe}?status=active";
-      ApiResponseModel responseActive = await ApiService.get(activeEndpoint);
+      final ApiResponseModel responseActive = await ApiService.get(activeEndpoint);
       print('Active Ads Response: ${responseActive.data}');  // << debug
-      if (responseActive.statusCode == 200 && responseActive.data != null) {
+      if (responseActive.statusCode == 200) {
         final List<dynamic> jsonList = responseActive.data['data'];
         activeAds = jsonList.map((e) => Advertisement.fromJson(e)).toList();
         print('Active Ads parsed: ${activeAds.length}');  // << debug

@@ -34,7 +34,7 @@ class StripePaymentWebViewScreen extends StatelessWidget {
 
                     // Get.toNamed(AppRoutes.homeNav);
 
-                    Get.to(() => CreateAdsScreen());
+                    Get.to(() => const CreateAdsScreen());
                     Get.snackbar(
                       AppString.cancel,
                       AppString.payment_cancel,
@@ -50,7 +50,7 @@ class StripePaymentWebViewScreen extends StatelessWidget {
                   if (url.contains("success")) {
                     Get.offAllNamed(AppRoutes.homeNav);
                   } else if (url.contains("cancel")) {
-                    Get.to(() => CreateAdsScreen());
+                    Get.to(() => const CreateAdsScreen());
                   }
                 },
                 onWebResourceError: (error) {},

@@ -38,7 +38,7 @@ class _CustomAppBarState extends State<CustomAppBar> {
   /// Same location logic as HomeDetails
   Future<void> _getCurrentLocationAndAddress() async {
     try {
-      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      final bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
         _updateLocationText("GPS Disabled");
         return;
@@ -53,21 +53,21 @@ class _CustomAppBarState extends State<CustomAppBar> {
         }
       }
 
-      Position position = await Geolocator.getCurrentPosition(
+      final Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
       ).timeout(const Duration(seconds: 10));
 
       try {
-        List<Placemark> placemarks = await placemarkFromCoordinates(
+        final List<Placemark> placemarks = await placemarkFromCoordinates(
           position.latitude,
           position.longitude,
         );
 
         if (placemarks.isNotEmpty && mounted) {
-          Placemark place = placemarks[0];
+          final Placemark place = placemarks[0];
 
           // Same Priority list: Road -> Area -> City -> State -> Country
-          List<String?> potentialFields = [
+          final List<String?> potentialFields = [
             place.thoroughfare,
             place.subLocality,
             place.locality,
@@ -75,7 +75,7 @@ class _CustomAppBarState extends State<CustomAppBar> {
             place.country,
           ];
 
-          List<String> finalParts = [];
+          final List<String> finalParts = [];
 
           // Stop at 3 fields to keep it consistent
           for (var field in potentialFields) {
@@ -113,7 +113,6 @@ class _CustomAppBarState extends State<CustomAppBar> {
   Widget build(BuildContext context) {
     return Material(
       color: AppColors.background,
-      elevation: 0,
       child: SafeArea(
         bottom: false,
         child: Container(
@@ -142,7 +141,6 @@ class _CustomAppBarState extends State<CustomAppBar> {
                                 ? ApiEndPoint.imageUrl + LocalStorage.myImage
                                 : "assets/images/profile.png",
                             size: 40,
-                            defaultImage: "assets/images/profile.png",
                           ),
                         ),
                       ),
@@ -157,7 +155,6 @@ class _CustomAppBarState extends State<CustomAppBar> {
                             text: (LocalStorage.myName.isNotEmpty && LocalStorage.token.isNotEmpty)
                                 ? LocalStorage.myName
                                 : "User",
-                            fontSize: 16,
                             color: AppColors.textColorFirst,
                             fontWeight: FontWeight.w600,
                           ),
@@ -166,7 +163,7 @@ class _CustomAppBarState extends State<CustomAppBar> {
                             displayLocation,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w400,
                               color: AppColors.secondaryText,
@@ -187,7 +184,7 @@ class _CustomAppBarState extends State<CustomAppBar> {
                     padding: const EdgeInsets.only(right: 4),
                     child: GestureDetector(
                       onTap: () => Get.toNamed(AppRoutes.notifications),
-                      child: CommonImage(
+                      child: const CommonImage(
                         imageSrc: AppIcons.notification,
                         size: 26,
                       ),

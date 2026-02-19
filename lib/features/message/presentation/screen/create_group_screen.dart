@@ -29,7 +29,6 @@ class CreateGroupScreen extends StatelessWidget {
               text: "Create Group",
               fontWeight: FontWeight.w600,
               fontSize: 18,
-              textAlign: TextAlign.center,
             ),
             centerTitle: true,
           ),
@@ -65,7 +64,7 @@ class CreateGroupScreen extends StatelessWidget {
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8.r),
-                      borderSide: BorderSide(
+                      borderSide: const BorderSide(
                         color: AppColors.primaryColor,
                         width: 1.5,
                       ),
@@ -92,7 +91,7 @@ class CreateGroupScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(8.r),
                   ),
                   child: DropdownButtonFormField<String>(
-                    value: controller.selectedPrivacyType,
+                    initialValue: controller.selectedPrivacyType,
                     items: controller.privacyTypes.map((String type) {
                       return DropdownMenuItem<String>(
                         value: type,
@@ -147,7 +146,7 @@ class CreateGroupScreen extends StatelessWidget {
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8.r),
-                      borderSide: BorderSide(
+                      borderSide: const BorderSide(
                         color: AppColors.primaryColor,
                         width: 1.5,
                       ),
@@ -351,14 +350,13 @@ class CreateGroupScreen extends StatelessWidget {
 
                             return ListTile(
                               contentPadding: EdgeInsets.symmetric(
-                                horizontal: 0,
                                 vertical: 4.h,
                               ),
                               leading: CircleAvatar(
                                 backgroundColor: AppColors.primaryColor.withOpacity(0.1),
                                 child: Text(
                                   member.name[0].toUpperCase(),
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     color: AppColors.primaryColor,
                                     fontWeight: FontWeight.w600,
                                   ),
@@ -372,7 +370,7 @@ class CreateGroupScreen extends StatelessWidget {
                                 ),
                               ),
                               trailing: isSelected
-                                  ? Icon(
+                                  ? const Icon(
                                 Icons.check_circle,
                                 color: AppColors.primaryColor,
                               )

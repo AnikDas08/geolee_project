@@ -6,7 +6,6 @@ import 'package:giolee78/component/image/common_image.dart';
 import 'package:giolee78/component/other_widgets/item.dart';
 import 'package:giolee78/component/pop_up/common_pop_menu.dart';
 import 'package:giolee78/component/text/common_text.dart';
-import 'package:giolee78/config/route/app_routes.dart';
 import 'package:giolee78/features/advertise/presentation/screen/provider_complete_profile_screen.dart';
 import 'package:giolee78/features/auth/change_password/presentation/screen/change_password_screen.dart';
 import 'package:giolee78/features/home/presentation/screen/home_nav_screen.dart';
@@ -20,7 +19,6 @@ import 'package:giolee78/services/storage/storage_services.dart';
 import 'package:giolee78/utils/constants/app_images.dart';
 import 'package:giolee78/utils/constants/app_icons.dart';
 import 'package:giolee78/utils/constants/app_colors.dart';
-import 'package:giolee78/utils/enum/enum.dart';
 import 'package:giolee78/utils/extensions/extension.dart';
 
 import '../../../../config/api/api_end_point.dart';
@@ -99,7 +97,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   onTap: () {
                     controller.deleteAccount();
                   },
-                  isLoading: false,
                 );
               },
             ),
@@ -151,18 +148,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     /// User Name here
                     CommonText(
                       text: LocalStorage.myName,
-                      fontSize: 16,
                       fontWeight: FontWeight.w600,
                       top: 16,
                       bottom: 8.h,
                     ),
                     CommonText(
-                      textAlign: TextAlign.center,
                       text: LocalStorage.bio.isNotEmpty
                           ? LocalStorage.bio
                           : "Bio Not Set Yet",
                       fontSize: 12,
-                      fontWeight: FontWeight.w400,
                       bottom: 20,
                       maxLines: 2,
                       left: 25,
@@ -251,11 +245,9 @@ void _showLogoutDialog() {
         fontSize: 20,
         fontWeight: FontWeight.w600,
       ),
-      content: CommonText(
+      content: const CommonText(
         text: 'Are you sure you want to log out?',
         fontSize: 20,
-        fontWeight: FontWeight.w400,
-        color: AppColors.black,
         maxLines: 2,
       ),
       actions: [
@@ -276,7 +268,6 @@ void _showLogoutDialog() {
                 titleText: 'Yes',
                 buttonColor: AppColors.red,
                 borderColor: AppColors.red,
-                titleColor: AppColors.white,
                 onTap: () {
                   LocalStorage.removeAllPrefData();
                 },

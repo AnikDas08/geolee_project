@@ -19,7 +19,7 @@ class GroupSettingsController extends GetxController {
     fetchGroupDetails();
   }
 
-  void fetchGroupDetails() async {
+  Future<void> fetchGroupDetails() async {
     isLoading.value = true;
     // Simulate network delay
     await 2.seconds.delay();

@@ -54,8 +54,8 @@ class NotificationItem extends StatelessWidget {
                 child: Container(
                   width: 8,
                   height: 8,
-                  margin:  EdgeInsets.only(right: 8),
-                  decoration:  BoxDecoration(
+                  margin:  const EdgeInsets.only(right: 8),
+                  decoration:  const BoxDecoration(
                     color: AppColors.primaryColor,
                     shape: BoxShape.circle,
                   ),
@@ -99,7 +99,6 @@ class NotificationItem extends StatelessWidget {
                   CommonText(
                     text: item.createdAt.checkTime,
                     fontSize: 11.sp,
-                    fontWeight: FontWeight.w400,
                     color: AppColors.black.withOpacity(0.6),
                   ),
                 ],

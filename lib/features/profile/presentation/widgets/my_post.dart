@@ -31,11 +31,11 @@ class PostCard extends StatelessWidget {
         children: [
           Container(
             width: 170.w,
-            padding: EdgeInsets.all(10),
+            padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(8),
-              boxShadow: [
+              boxShadow: const [
                 BoxShadow(
                   color: Colors.black26,
                   blurRadius: 2,
@@ -70,18 +70,11 @@ class PostCard extends StatelessWidget {
                 CommonText(
                   text: postData.title ?? 'No Title',
                   fontSize: 12,
-                  color: AppColors.primaryWork,
                   fontWeight: FontWeight.w600,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
                 ),
                 CommonText(
                   text: postData.category?.name ?? 'No Category',
                   fontSize: 12,
-                  color: AppColors.primaryWork,
-                  fontWeight: FontWeight.w400,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
@@ -150,7 +143,7 @@ class PostCard extends StatelessWidget {
                 });
               },
               child: Container(
-                padding: EdgeInsets.all(4),
+                padding: const EdgeInsets.all(4),
                 decoration: BoxDecoration(
                   color: Colors.black,
                   borderRadius: BorderRadius.only(

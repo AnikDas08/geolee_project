@@ -32,7 +32,7 @@ class PendingRequestController extends GetxController {
     fetchPendingRequests();
   }
 
-  void fetchPendingRequests() async {
+  Future<void> fetchPendingRequests() async {
     isLoading.value = true;
     // Simulate network delay
     await 1.seconds.delay();

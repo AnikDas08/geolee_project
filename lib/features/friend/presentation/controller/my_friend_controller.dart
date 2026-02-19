@@ -184,8 +184,8 @@ class MyFriendController extends GetxController {
         suggestedFriendList.clear();
       }
 
-      double lat = LocalStorage.lat ?? 0.0;
-      double lng = LocalStorage.long ?? 0.0;
+      final double lat = LocalStorage.lat ?? 0.0;
+      final double lng = LocalStorage.long ?? 0.0;
 
       if (lat == 0.0 || lng == 0.0) {
         nearbyChatError.value =
@@ -228,7 +228,7 @@ class MyFriendController extends GetxController {
         final List data = rawList as List;
         debugPrint("📋 Raw list count: ${data.length}");
 
-        List<SuggestedFriendUserModel> parsedList = [];
+        final List<SuggestedFriendUserModel> parsedList = [];
         for (int i = 0; i < data.length; i++) {
           try {
             final user = SuggestedFriendUserModel.fromJson(data[i]);

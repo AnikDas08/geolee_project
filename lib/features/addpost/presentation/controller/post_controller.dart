@@ -98,7 +98,7 @@ class PostController extends GetxController {
       final HomeController _homeController = Get.find<HomeController>();
       await _homeController.getCurrentLocationAndUpdateProfile();
 
-      List<MultipartFile> imageFiles = [];
+      final List<MultipartFile> imageFiles = [];
       for (var file in selectedImages) {
         imageFiles.add(
           await MultipartFile.fromFile(
@@ -119,7 +119,7 @@ class PostController extends GetxController {
         return;
       }
 
-      FormData formData = FormData.fromMap({
+      final FormData formData = FormData.fromMap({
         'description': description.text.trim(),
         'clickerType': selectedPricingOption.value,
         'privacy': selectedPriorityLevel.value.toLowerCase(),
@@ -133,7 +133,7 @@ class PostController extends GetxController {
 
       final url = "${ApiEndPoint.createPost}";
 
-      var response = await ApiService.post(url, body: formData);
+      final response = await ApiService.post(url, body: formData);
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         Get.snackbar(
@@ -205,7 +205,7 @@ class PostController extends GetxController {
       );
 
       if (image != null) {
-        File file = File(image.path);
+        final File file = File(image.path);
         selectedImages.add(file);
 
         Get.snackbar(

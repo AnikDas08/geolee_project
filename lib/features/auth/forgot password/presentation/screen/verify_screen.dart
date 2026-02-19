@@ -43,7 +43,7 @@ class _VerifyScreenState extends State<VerifyScreen> {
               key: formKey,
               child: Column(
                 children: [
-                  CommonImage(imageSrc: AppIcons.enterotp, size: 250),
+                  const CommonImage(imageSrc: AppIcons.enterotp, size: 250),
                   20.height,
                   const CommonText(
                     text: AppString.otpVerify,
@@ -58,7 +58,6 @@ class _VerifyScreenState extends State<VerifyScreen> {
                     child: CommonText(
                       text:
                           "${AppString.codeHasBeenSendTo} ${controller.emailController.text}",
-                      fontSize: 16,
 
                       bottom: 60,
                       maxLines: 2,
@@ -118,20 +117,16 @@ class _VerifyScreenState extends State<VerifyScreen> {
                   //     fontSize: 16,
                   //   ),
                   // ),
-                  Row(
+                  const Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       CommonText(
                         text: "Didn't get the code?",
-                        fontSize: 16,
                         bottom: 40,
                         maxLines: 3,
-                        fontWeight: FontWeight.w400,
-                        color: AppColors.textPrimary,
                       ),
                       CommonText(
                         text: "Resend",
-                        fontSize: 16,
                         bottom: 40,
                         fontWeight: FontWeight.w700,
                         maxLines: 3,

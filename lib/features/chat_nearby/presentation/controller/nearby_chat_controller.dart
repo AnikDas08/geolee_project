@@ -34,8 +34,8 @@ class NearbyChatController extends GetxController {
         nearbyChatList.clear();
       }
 
-      double lat = LocalStorage.lat ?? 0.0;
-      double lng = LocalStorage.long ?? 0.0;
+      final double lat = LocalStorage.lat ?? 0.0;
+      final double lng = LocalStorage.long ?? 0.0;
 
       if (lat == 0.0 || lng == 0.0) {
         nearbyChatError.value = "Location not available. Please enable location.";
@@ -53,7 +53,7 @@ class NearbyChatController extends GetxController {
           : isPaginationLoading.value = true;
       nearbyChatError.value = '';
 
-      ApiResponseModel response = await ApiService.get(url);
+      final ApiResponseModel response = await ApiService.get(url);
 
       debugPrint("📦 Full Response: ${response.data}");
       debugPrint("✅ Status: ${response.statusCode}");
@@ -79,7 +79,7 @@ class NearbyChatController extends GetxController {
         final List data = rawList as List;
         debugPrint("📋 Raw list count: ${data.length}");
 
-        List<NearbyChatUserModel> parsedList = [];
+        final List<NearbyChatUserModel> parsedList = [];
 
         for (int i = 0; i < data.length; i++) {
           try {

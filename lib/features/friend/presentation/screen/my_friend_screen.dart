@@ -10,9 +10,7 @@ import 'package:giolee78/features/friend/presentation/screen/view_friend_screen.
 import 'package:giolee78/utils/constants/app_colors.dart';
 import 'package:giolee78/utils/constants/app_images.dart';
 
-import '../../../../component/image/common_image.dart';
 import '../../../../services/storage/storage_services.dart';
-import '../../../../utils/constants/app_icons.dart';
 import '../../../../utils/enum/enum.dart';
 import '../controller/my_friend_controller.dart';
 
@@ -41,7 +39,6 @@ class MyFriendScreen extends StatelessWidget {
           text: 'My Friend',
           fontSize: 18,
           fontWeight: FontWeight.w600,
-          color: AppColors.black,
         ),
       ),
       body: SafeArea(
@@ -59,7 +56,6 @@ class MyFriendScreen extends StatelessWidget {
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
                 textAlign: TextAlign.start,
-                color: AppColors.black,
               ),
               SizedBox(height: 12.h),
               if (controller.suggestedFriendList.isNotEmpty) ...[
@@ -91,7 +87,6 @@ class MyFriendScreen extends StatelessWidget {
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
                 textAlign: TextAlign.start,
-                color: AppColors.black,
               ),
               SizedBox(height: 12.h),
 
@@ -102,7 +97,6 @@ class MyFriendScreen extends StatelessWidget {
                     child: CommonText(
                       text: 'No friends yet',
                       fontSize: 14,
-                      fontWeight: FontWeight.w400,
                       color: AppColors.secondaryText,
                     ),
                   ),
@@ -113,7 +107,7 @@ class MyFriendScreen extends StatelessWidget {
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: controller.myFriendsList.length,
                   itemBuilder: (context, index) {
-                    var data = controller.myFriendsList[index];
+                    final data = controller.myFriendsList[index];
                     final friend = data.friend;
                     return Padding(
                       padding: EdgeInsets.only(bottom: 10.h),
@@ -142,7 +136,6 @@ class _SearchField extends StatelessWidget {
   Widget build(BuildContext context) {
     return CommonTextField(
       hintText: 'Search friends...',
-      borderRadius: 8,
       paddingHorizontal: 14,
       paddingVertical: 12,
       prefixIcon: Padding(
@@ -188,15 +181,13 @@ class _SuggestedFriendCard extends StatelessWidget {
                   backgroundImage:
                       (avatar != null && avatar!.startsWith('http'))
                       ? NetworkImage(avatar!) as ImageProvider
-                      : AssetImage(AppImages.profileImage),
+                      : const AssetImage(AppImages.profileImage),
                 ),
                 SizedBox(width: 12.w),
                 CommonText(
                   text: userName,
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.black,
-                  maxLines: 1,
                 ),
               ],
             ),
@@ -308,27 +299,23 @@ class _FriendListItem extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Row(
-              mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 CircleAvatar(
                   radius: 22.r,
                   backgroundImage:
                       (avatar != null && avatar!.startsWith('http'))
                       ? NetworkImage(avatar!) as ImageProvider
-                      : AssetImage(AppImages.profileImage),
+                      : const AssetImage(AppImages.profileImage),
                 ),
                 SizedBox(width: 12.w),
                 CommonText(
                   text: userName,
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.black,
-                  maxLines: 1,
                 ),
               ],
             ),
             Row(
-              mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 GestureDetector(
                   onTap: () => Get.toNamed(AppRoutes.message),

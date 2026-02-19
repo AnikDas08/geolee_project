@@ -6,7 +6,6 @@ import 'package:giolee78/config/route/app_routes.dart';
 import '../../../../../component/button/common_button.dart';
 import '../../../../../component/image/common_image.dart';
 import '../../../../../component/text/common_text.dart';
-import '../../../../../utils/constants/app_colors.dart';
 
 class SuccessProfileDialogHere {
   static void show(
@@ -45,14 +44,12 @@ class SuccessProfileDialogHere {
                 fontSize: 16.sp,
                 fontWeight: FontWeight.bold,
                 color: Colors.black87,
-                textAlign: TextAlign.center,
                 maxLines: 3,
               ),
               SizedBox(height: 20.h),
               CommonButton(
                 titleText: "Go To Login",
                 buttonRadius: 10,
-                buttonColor: AppColors.primaryColor,
                 onTap: () {
                   Get.offAllNamed(AppRoutes.signIn);
                 },

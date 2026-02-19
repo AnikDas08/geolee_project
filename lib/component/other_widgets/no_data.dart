@@ -21,7 +21,6 @@ class NoData extends StatelessWidget {
           ),
           const CommonText(
             text: AppString.dataEmpty,
-            fontSize: 16,
             top: 8,
           )
         ],

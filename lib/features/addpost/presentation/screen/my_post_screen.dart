@@ -94,7 +94,6 @@ class _MyPostScreenState extends State<MyPostScreen> with WidgetsBindingObserver
                       if (postImages.isNotEmpty) {
                         Get.to(() => FullScreenImageView(
                           images: postImages,
-                          initialIndex: 0,
                         ));
                       }
                     },
@@ -104,8 +103,8 @@ class _MyPostScreenState extends State<MyPostScreen> with WidgetsBindingObserver
                   userName: data.user.name ?? "Unknown",
                   userAvatar: "${ApiEndPoint.imageUrl}${data.user.image}",
                   timeAgo: _formatPostTime(DateTime.parse(data.createdAt.toString())),
-                  location: data.address != null && data.address!.isNotEmpty
-                      ? data.address!.split(',')[0]
+                  location: data.address.isNotEmpty
+                      ? data.address.split(',')[0]
                       : "",
 
                   images: postImages, // <-- Corrected list passed here

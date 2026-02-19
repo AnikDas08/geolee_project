@@ -22,8 +22,8 @@ class EditPostScreen extends StatelessWidget {
           icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Get.back(),
         ),
-        title: Center(
-          child: const Text(
+        title: const Center(
+          child: Text(
             'Edit Post',
             style: TextStyle(
               color: Colors.black,
@@ -143,7 +143,7 @@ class EditPostScreen extends StatelessWidget {
                           decoration: BoxDecoration(
                             color: Colors.grey[200],
                             borderRadius: BorderRadius.circular(12),
-                            image: DecorationImage(
+                            image: const DecorationImage(
                               image: AssetImage(AppImages.noImage),
                               fit: BoxFit.cover,
                             ),
@@ -442,7 +442,7 @@ class EditPostScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              padding: EdgeInsets.all(10),
+              padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
                 color: isSelected ? const Color(0xffE6EEFB) : Colors.white,
                 borderRadius: BorderRadius.circular(30),

@@ -86,7 +86,7 @@ class Post {
     double longitude = 0.0;
 
     if (json['location'] != null && json['location']['coordinates'] != null) {
-      List<dynamic> coords = json['location']['coordinates'];
+      final List<dynamic> coords = json['location']['coordinates'];
       if (coords.length >= 2) {
         // GeoJSON format: [longitude, latitude]
         longitude = (coords[0] ?? 0).toDouble();

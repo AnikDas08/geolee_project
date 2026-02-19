@@ -54,7 +54,7 @@ class _ClickerDialogState extends State<ClickerDialog> {
                   icon: Icon(Icons.close, size: 24.sp),
                   onPressed: () => Get.back(),
                   padding: EdgeInsets.zero,
-                  constraints: BoxConstraints(),
+                  constraints: const BoxConstraints(),
                 ),
               ],
             ),

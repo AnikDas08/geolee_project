@@ -24,9 +24,6 @@ class EditProfileAllFiled extends StatelessWidget {
           controller: controller.nameController,
           validator: OtherHelper.validator,
           hintText: 'Shakir Ahmed',
-          keyboardType: TextInputType.text,
-          borderColor: AppColors.borderColor,
-          fillColor: AppColors.white,
           hintTextColor: AppColors.secondaryText,
           textColor: AppColors.black,
         ),
@@ -42,8 +39,6 @@ class EditProfileAllFiled extends StatelessWidget {
               'Skilled professionals offering reliable, on-demand services..',
           keyboardType: TextInputType.multiline,
           maxLines: 3,
-          borderColor: AppColors.borderColor,
-          fillColor: AppColors.white,
           hintTextColor: AppColors.secondaryText,
           textColor: AppColors.black,
         ),
@@ -57,11 +52,9 @@ class EditProfileAllFiled extends StatelessWidget {
           controller: controller.dateOfBirthController,
           hintText: 'Date of Birth',
           keyboardType: TextInputType.none,
-          borderColor: AppColors.borderColor,
-          fillColor: AppColors.white,
           hintTextColor: AppColors.secondaryText,
           textColor: AppColors.black,
-          suffixIcon: Icon(Icons.calendar_month,),
+          suffixIcon: const Icon(Icons.calendar_month,),
           onTap: () {
             controller.pickDateOfBirth();
           },
@@ -86,7 +79,6 @@ class EditProfileAllFiled extends StatelessWidget {
       text: text,
       fontSize: 14.sp,
       fontWeight: FontWeight.w500,
-      color: AppColors.black,
       textAlign: TextAlign.start,
     );
   }
@@ -110,17 +102,16 @@ class EditProfileAllFiled extends StatelessWidget {
       decoration: ShapeDecoration(
         color: AppColors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
-        shadows: [
+        shadows: const [
           BoxShadow(
             color: Color(0x19000000),
             blurRadius: 4,
             offset: Offset(0, 1),
-            spreadRadius: 0,
           ),
         ],
       ),
       child: DropdownButtonFormField<String>(
-        value: currentValue,
+        initialValue: currentValue,
         decoration: InputDecoration(
           hintText: 'Male',
           hintStyle: TextStyle(fontSize: 14.sp, color: AppColors.secondaryText),
@@ -130,15 +121,15 @@ class EditProfileAllFiled extends StatelessWidget {
           ),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8.r),
-            borderSide: BorderSide(color: AppColors.borderColor),
+            borderSide: const BorderSide(color: AppColors.borderColor),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8.r),
-            borderSide: BorderSide(color: AppColors.borderColor),
+            borderSide: const BorderSide(color: AppColors.borderColor),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8.r),
-            borderSide: BorderSide(color: AppColors.borderColor),
+            borderSide: const BorderSide(color: AppColors.borderColor),
           ),
         ),
         icon: Icon(
@@ -152,8 +143,6 @@ class EditProfileAllFiled extends StatelessWidget {
             child: CommonText(
               text: value,
               fontSize: 14.sp,
-              fontWeight: FontWeight.w400,
-              color: AppColors.black,
               textAlign: TextAlign.start,
             ),
           );

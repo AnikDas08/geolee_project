@@ -66,18 +66,15 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        CommonText(
+        const CommonText(
           text: 'Issue Title',
           fontSize: 14,
-          fontWeight: FontWeight.w400,
-          color: AppColors.black,
         ),
         SizedBox(height: 8.h),
         CommonTextField(
           controller: HelpSupportController.instance.titleController,
           borderRadius: 8.r,
           hintText: 'Enter your Issue Title',
-          textInputAction: TextInputAction.next,
           validator: (value) {
             if (value == null || value.isEmpty) {
               return AppString.thisFieldIsRequired;
@@ -94,11 +91,9 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        CommonText(
+        const CommonText(
           text: 'Description',
           fontSize: 14,
-          fontWeight: FontWeight.w400,
-          color: AppColors.black,
         ),
         SizedBox(height: 8.h),
         CommonTextField(
@@ -119,7 +114,6 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
     return GetBuilder<HelpSupportController>(
       builder: (controller) {
         return Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             InkWell(
               onTap: () {
@@ -134,31 +128,29 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
                 decoration: ShapeDecoration(
                   color: AppColors.white,
                   shape: RoundedRectangleBorder(
-                    side: BorderSide(width: 2, color: const Color(0xFFD1D5D6)),
+                    side: const BorderSide(width: 2, color: Color(0xFFD1D5D6)),
                     borderRadius: BorderRadius.circular(11),
                   ),
-                  shadows: [
+                  shadows: const [
                     BoxShadow(
                       color: Color(0x1E000000),
                       blurRadius: 50,
                       offset: Offset(20, 20),
-                      spreadRadius: 0,
                     ),
                   ],
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    CommonImage(
+                    const CommonImage(
                       imageSrc: AppIcons.attachment,
                       width: 24,
                       height: 24,
                     ),
                     8.width,
-                    CommonText(
+                    const CommonText(
                       text: 'Attach File',
                       fontSize: 14,
-                      fontWeight: FontWeight.w400,
                       color: AppColors.secondaryText,
                     ),
                   ],
@@ -193,12 +185,12 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
                             controller.update();
                           },
                           child: Container(
-                            padding: EdgeInsets.all(4),
-                            decoration: BoxDecoration(
+                            padding: const EdgeInsets.all(4),
+                            decoration: const BoxDecoration(
                               color: Colors.red,
                               shape: BoxShape.circle,
                             ),
-                            child: Icon(
+                            child: const Icon(
                               Icons.close,
                               color: Colors.white,
                               size: 20,

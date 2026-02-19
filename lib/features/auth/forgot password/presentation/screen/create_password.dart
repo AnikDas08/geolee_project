@@ -33,9 +33,8 @@ class CreatePassword extends StatelessWidget {
               child: Form(
                 key: formKey,
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    CommonImage(imageSrc: AppIcons.resetPassword, size: 250),
+                    const CommonImage(imageSrc: AppIcons.resetPassword, size: 250),
                     20.height,
                     const CommonText(
                       text: AppString.setNewPassword,

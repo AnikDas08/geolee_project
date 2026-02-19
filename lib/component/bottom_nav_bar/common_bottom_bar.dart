@@ -73,7 +73,7 @@ class _CommonBottomNavBarState extends State<CommonBottomNavBar> {
     );
   }
 
-  void onTap(int index) async {
+  Future<void> onTap(int index) async {
     appLog(widget.currentIndex, source: "common bottombar");
 
     if (index == 0) {

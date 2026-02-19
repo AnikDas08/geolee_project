@@ -28,7 +28,6 @@ class EditProfile extends StatelessWidget {
               text: 'Edit Profile',
               fontSize: 18.sp,
               fontWeight: FontWeight.w600,
-              color: AppColors.black,
             ),
           ),
 
@@ -58,12 +57,9 @@ class EditProfile extends StatelessWidget {
                         titleText: 'Update',
                         onTap: controller.editProfileRepo,
                         isLoading: controller.isLoading,
-                        buttonColor: AppColors.primaryColor,
-                        titleColor: AppColors.white,
                         buttonHeight: 56.h,
                         buttonRadius: 8.r,
                         titleSize: 16.sp,
-                        titleWeight: FontWeight.w600,
                       ),
 
                       32.height,
@@ -88,12 +84,11 @@ class EditProfile extends StatelessWidget {
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             border: Border.all(color: AppColors.white, width: 3.w),
-            boxShadow: [
+            boxShadow: const [
               BoxShadow(
                 color: Color(0x1A000000),
                 blurRadius: 8,
                 offset: Offset(0, 2),
-                spreadRadius: 0,
               ),
             ],
           ),

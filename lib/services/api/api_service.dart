@@ -9,7 +9,6 @@ import 'package:path_provider/path_provider.dart';
 import '../../config/api/api_end_point.dart';
 import '../../utils/constants/app_string.dart';
 import '../../utils/log/api_log.dart';
-import '../storage/storage_services.dart';
 import 'api_response_model.dart';
 
 class ApiService {
@@ -53,11 +52,11 @@ class ApiService {
     String imageName = 'image',
     String? imagePath,
   }) async {
-    FormData formData = FormData();
+    final FormData formData = FormData();
     if (imagePath != null && imagePath.isNotEmpty) {
-      File file = File(imagePath);
-      String extension = file.path.split('.').last.toLowerCase();
-      String? mimeType = lookupMimeType(imagePath);
+      final File file = File(imagePath);
+      final String extension = file.path.split('.').last.toLowerCase();
+      final String? mimeType = lookupMimeType(imagePath);
 
       formData.files.add(
         MapEntry(
@@ -90,15 +89,15 @@ class ApiService {
     String method = "POST",
     List files = const [],
   }) async {
-    FormData formData = FormData();
+    final FormData formData = FormData();
 
     for (var item in files) {
-      String imageName = item['name'] ?? "image";
-      String? imagePath = item['image'];
+      final String imageName = item['name'] ?? "image";
+      final String? imagePath = item['image'];
       if (imagePath != null && imagePath.isNotEmpty) {
-        File file = File(imagePath);
-        String extension = file.path.split('.').last.toLowerCase();
-        String? mimeType = lookupMimeType(imagePath);
+        final File file = File(imagePath);
+        final String extension = file.path.split('.').last.toLowerCase();
+        final String? mimeType = lookupMimeType(imagePath);
         formData.files.add(
           MapEntry(
             imageName,
@@ -175,13 +174,13 @@ class ApiService {
         ? Map<String, String>.from(body)
         : {};
 
-    FormData formData = FormData();
+    final FormData formData = FormData();
 
     // image
     if (imagePath != null && imagePath.isNotEmpty) {
-      File file = File(imagePath);
-      String extension = file.path.split('.').last.toLowerCase();
-      String? mimeType = lookupMimeType(imagePath);
+      final File file = File(imagePath);
+      final String extension = file.path.split('.').last.toLowerCase();
+      final String? mimeType = lookupMimeType(imagePath);
 
       formData.files.add(
         MapEntry(

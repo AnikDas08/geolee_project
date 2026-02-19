@@ -33,7 +33,6 @@ class AddMemberScreen extends StatelessWidget {
                 text: user.name,
                 fontSize: 16.sp,
                 fontWeight: FontWeight.w500,
-                color: AppColors.black,
               ),
             ],
           ),
@@ -66,7 +65,6 @@ class AddMemberScreen extends StatelessWidget {
               text: 'Add Member',
               fontSize: 20,
               fontWeight: FontWeight.w600,
-              color: AppColors.black,
             ),
           ),
           body: Obx(() {
@@ -152,7 +150,6 @@ class AddMemberScreen extends StatelessWidget {
                     text: 'Total Member (${controller.currentMembers.length})',
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.black,
                   ),
                 ),
 

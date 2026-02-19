@@ -96,12 +96,12 @@ class ChatNearbyScreen extends StatelessWidget {
                       ? Center(
                     child: Padding(
                       padding: EdgeInsets.all(16.h),
-                      child: CircularProgressIndicator(
+                      child: const CircularProgressIndicator(
                         color: AppColors.primaryColor,
                       ),
                     ),
                   )
-                      : SizedBox.shrink());
+                      : const SizedBox.shrink());
                 }
 
                 final user = controller.nearbyChatList[index];
@@ -120,7 +120,6 @@ class _ChatNearbyAppBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: AppColors.background,
-      elevation: 0,
       child: SafeArea(
         bottom: false,
         child: Container(
@@ -142,7 +141,6 @@ class _ChatNearbyAppBar extends StatelessWidget {
                     fontSize: 18.sp,
                     fontWeight: FontWeight.w600,
                     color: AppColors.textColorFirst,
-                    textAlign: TextAlign.center,
                   ),
                 ),
               ),
@@ -170,7 +168,6 @@ class _ChatNearbyAppBar extends StatelessWidget {
                         CommonText(
                           text: 'Clear Data',
                           fontSize: 14.sp,
-                          color: AppColors.black,
                         ),
                       ],
                     ),
@@ -207,7 +204,6 @@ class _NearbyUserCard extends StatelessWidget {
               color: Color(0x0C000000),
               blurRadius: 4,
               offset: Offset(0, 2),
-              spreadRadius: 0,
             ),
           ],
         ),
@@ -247,20 +243,16 @@ class _NearbyUserCard extends StatelessWidget {
                     text: nearbyChatUser.name,
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w500,
-                    color: AppColors.black,
                     textAlign: TextAlign.start,
-                    maxLines: 1,
                   ),
 
                   SizedBox(height: 4.h),
 
                   CommonText(
-                    text:"Within ${ nearbyChatUser.distance?.toStringAsFixed(2) ?? "0"} M",
+                    text:"Within ${ nearbyChatUser.distance?.toStringAsFixed(2) ?? "0"} KM",
                     fontSize: 12.sp,
-                    fontWeight: FontWeight.w400,
                     color: AppColors.primaryColor2,
                     textAlign: TextAlign.start,
-                    maxLines: 1,
                   ),
 
                 ],

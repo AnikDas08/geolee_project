@@ -110,7 +110,7 @@ class CreatePostController extends GetxController {
 
   String getFormattedDate(String dateString) {
     try {
-      DateTime date = DateTime.parse(dateString);
+      final DateTime date = DateTime.parse(dateString);
       return DateFormat('dd MMM yyyy').format(date);
     } catch (e) {
       return dateString;
@@ -119,8 +119,8 @@ class CreatePostController extends GetxController {
 
   String getTimeAgo(String dateString) {
     try {
-      DateTime date = DateTime.parse(dateString);
-      Duration difference = DateTime.now().difference(date);
+      final DateTime date = DateTime.parse(dateString);
+      final Duration difference = DateTime.now().difference(date);
 
       if (difference.inDays > 0) {
         return '${difference.inDays} day${difference.inDays > 1 ? 's' : ''} ago';

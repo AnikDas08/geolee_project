@@ -46,7 +46,6 @@ class CommonPhoneNumberTextFiled extends StatelessWidget {
         ),
       ),
       initialCountryCode: "BD",
-      disableLengthCheck: false,
     );
   }
 }

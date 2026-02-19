@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:giolee78/component/button/common_button.dart';
-import 'package:giolee78/component/text/common_text.dart';
 import 'package:giolee78/config/api/api_end_point.dart';
 import '../../../../utils/constants/app_images.dart';
 import '../controller/my_friend_controller.dart';
@@ -107,9 +106,9 @@ class FriendRequestScreen extends StatelessWidget {
                                 borderColor: Colors.transparent,
                                 buttonHeight: 36.h,
                                 titleText: 'Reject',
-                                buttonColor: Color(0xFFDEE2E3),
+                                buttonColor: const Color(0xFFDEE2E3),
                                 // Make Reject less prominent
-                                titleColor: Color(0xFF737373),
+                                titleColor: const Color(0xFF737373),
                                 onTap: () => controller.rejectFriendRequest(
                                   data.id,
                                   index,

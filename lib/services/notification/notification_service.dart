@@ -11,11 +11,11 @@ class NotificationService {
         .resolvePlatformSpecificImplementation<
             AndroidFlutterLocalNotificationsPlugin>()
         ?.requestNotificationsPermission();
-    var androidInitializationSettings =
+    final androidInitializationSettings =
         const AndroidInitializationSettings("@mipmap/ic_launcher");
-    var iosInitializationSettings = const DarwinInitializationSettings();
+    final iosInitializationSettings = const DarwinInitializationSettings();
 
-    var initializationSettings = InitializationSettings(
+    final initializationSettings = InitializationSettings(
         android: androidInitializationSettings, iOS: iosInitializationSettings);
 
     await flutterLocalNotificationsPlugin.initialize(initializationSettings,
@@ -27,23 +27,23 @@ class NotificationService {
 
   static Future<void> showNotification(dynamic message) async {
 
-    AndroidNotificationChannel channel = AndroidNotificationChannel(
+    final AndroidNotificationChannel channel = AndroidNotificationChannel(
         Random.secure().nextInt(10000).toString(),
         "High Importance Notification",
         importance: Importance.max);
 
-    AndroidNotificationDetails androidNotificationDetails =
+    final AndroidNotificationDetails androidNotificationDetails =
         AndroidNotificationDetails(channel.id, channel.name,
             channelDescription: "your channel Description",
             importance: Importance.high,
             priority: Priority.high,
             ticker: "ticker");
 
-    DarwinNotificationDetails darwinNotificationDetails =
+    final DarwinNotificationDetails darwinNotificationDetails =
         const DarwinNotificationDetails(
             presentAlert: true, presentBadge: true, presentSound: true);
 
-    NotificationDetails notificationDetails = NotificationDetails(
+    final NotificationDetails notificationDetails = NotificationDetails(
         android: androidNotificationDetails, iOS: darwinNotificationDetails);
 
     Future.delayed(Duration.zero, () {

@@ -24,7 +24,7 @@ class HelpSupportController extends GetxController {
   static HelpSupportController get instance => Get.put(HelpSupportController());
 
   /// Image picker here
-  pickImage() async {
+  Future<void> pickImage() async {
     final ImagePicker picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
@@ -34,7 +34,7 @@ class HelpSupportController extends GetxController {
   }
 
   /// Support Admin Api call here
-  supportAdminRepo() async {
+  Future<void> supportAdminRepo() async {
     // Get.toNamed(AppRoutes.homeNav);
     // return;
     // // Validate inputs
@@ -56,14 +56,13 @@ class HelpSupportController extends GetxController {
     status = Status.loading;
     update();
 
-    var response = await ApiService.multipart(
+    final response = await ApiService.multipart(
       ApiEndPoint.support,
       body: {
         "title": titleController.text.trim(),
         "message": messageController.text.trim(),
       },
       imagePath: image?.path,
-      imageName: 'image',
     );
 
     if (response.statusCode == 200) {

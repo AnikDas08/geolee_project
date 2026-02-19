@@ -67,8 +67,8 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   /// 📍 Service + Permission check
   Future<void> _checkLocationStatus() async {
     try {
-      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-      LocationPermission permission = await Geolocator.checkPermission();
+      final bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      final LocationPermission permission = await Geolocator.checkPermission();
 
       if (!mounted) return;
 
@@ -111,10 +111,10 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   /// ✅ Enable location - Shows permission dialog
   Future<void> _enableLocation() async {
     // Step 1: Check if service is enabled
-    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    final bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
 
     if (!serviceEnabled) {
-      bool? open = await _showLocationServiceDialog();
+      final bool? open = await _showLocationServiceDialog();
       if (open == true) {
         await Geolocator.openLocationSettings();
         // Wait a bit for user to enable location
@@ -159,7 +159,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       await _checkLocationStatus(); // Update toggle state
 
       // 🔥 SAVE LOCATION immediately after enabling
-      bool saved = await _saveCurrentLocation();
+      final bool saved = await _saveCurrentLocation();
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -177,7 +177,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
 
   /// ❌ Disable (manual only)
   Future<void> _disableLocation() async {
-    bool? goToSettings = await showDialog<bool>(
+    final bool? goToSettings = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Disable Location'),
@@ -211,7 +211,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     try {
       debugPrint("📍 Fetching current location...");
 
-      Position position = await Geolocator.getCurrentPosition(
+      final Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
         timeLimit: const Duration(seconds: 10), // Add timeout
       );
@@ -273,7 +273,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   }
 
   Future<void> _showPermissionDeniedDialog() async {
-    bool? openSettings = await showDialog<bool>(
+    final bool? openSettings = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
@@ -317,13 +317,11 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                 text: AppString.onboardingTitle,
                 fontSize: 16.sp,
                 fontWeight: FontWeight.w600,
-                textAlign: TextAlign.center,
               ),
               10.height,
               CommonText(
                 text: AppString.onboardingSubText,
                 fontSize: 14.sp,
-                textAlign: TextAlign.center,
               ),
               20.height,
               _buildLocationPermissionSection(),
@@ -335,8 +333,8 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                 titleSize: 18.sp,
                 onTap: () async {
                   // Get current saved location
-                  String? lat = await LocalStorage.lat.toString();
-                  String? log = await LocalStorage.long.toString();
+                  final String? lat = await LocalStorage.lat.toString();
+                  final String? log = await LocalStorage.long.toString();
 
                   debugPrint("🚀 Navigation - Location -> Lat: $lat, Long: $log");
 

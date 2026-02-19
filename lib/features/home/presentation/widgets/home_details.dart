@@ -35,7 +35,7 @@ class _HomeDetailsState extends State<HomeDetails> {
 
   Future<void> _getCurrentLocationAndAddress() async {
     try {
-      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      final bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
         _updateLocationText("GPS Disabled");
         return;
@@ -50,21 +50,21 @@ class _HomeDetailsState extends State<HomeDetails> {
         }
       }
 
-      Position position = await Geolocator.getCurrentPosition(
+      final Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
       ).timeout(const Duration(seconds: 10));
 
       try {
-        List<Placemark> placemarks = await placemarkFromCoordinates(
+        final List<Placemark> placemarks = await placemarkFromCoordinates(
           position.latitude,
           position.longitude,
         );
 
         if (placemarks.isNotEmpty && mounted) {
-          Placemark place = placemarks[0];
+          final Placemark place = placemarks[0];
 
           // Priority list of fields from most specific to least specific
-          List<String?> potentialFields = [
+          final List<String?> potentialFields = [
             place.thoroughfare,      // Road
             place.subLocality,       // Area/Neighborhood
             place.locality,          // City
@@ -72,7 +72,7 @@ class _HomeDetailsState extends State<HomeDetails> {
             place.country,           // Country
           ];
 
-          List<String> finalParts = [];
+          final List<String> finalParts = [];
 
           // Logic: Check each field, add if not empty, stop when we have 3
           for (var field in potentialFields) {
@@ -133,7 +133,6 @@ class _HomeDetailsState extends State<HomeDetails> {
                                 ? ApiEndPoint.imageUrl + controller.userImage
                                 : "assets/images/profile.png",
                             size: 40,
-                            defaultImage: "assets/images/profile.png",
                           ),
                         ),
                       ),
@@ -145,20 +144,19 @@ class _HomeDetailsState extends State<HomeDetails> {
                         children: [
                           CommonText(
                             text: controller.userName.isNotEmpty ? controller.userName : "Guest",
-                            fontSize: 16,
                             color: AppColors.textColorFirst,
                             fontWeight: FontWeight.w600,
                           ),
                           Row(
                             children: [
-                              CommonImage(imageSrc: AppIcons.location, size: 14),
+                              const CommonImage(imageSrc: AppIcons.location, size: 14),
                               8.width,
                               Expanded(
                                 child: Text(
                                   displayLocation,
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w400,
                                     color: AppColors.secondaryText,
@@ -182,7 +180,7 @@ class _HomeDetailsState extends State<HomeDetails> {
                     padding: const EdgeInsets.only(right: 10),
                     child: GestureDetector(
                       onTap: () => Get.toNamed(AppRoutes.notifications),
-                      child: CommonImage(imageSrc: AppIcons.notification, size: 28),
+                      child: const CommonImage(imageSrc: AppIcons.notification, size: 28),
                     ),
                   ),
                   if (widget.notificationCount > 0)

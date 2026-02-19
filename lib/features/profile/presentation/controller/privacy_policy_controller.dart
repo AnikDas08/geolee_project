@@ -17,11 +17,11 @@ class PrivacyPolicyController extends GetxController {
   static PrivacyPolicyController get instance =>
       Get.put(PrivacyPolicyController());
 
-  getPrivacyPolicyRepo() async {
+  Future<void> getPrivacyPolicyRepo() async {
     status = Status.loading;
     update();
 
-    var response = await ApiService.get(ApiEndPoint.privacyPolicies);
+    final response = await ApiService.get(ApiEndPoint.privacyPolicies);
 
     if (response.statusCode == 200) {
       data = HtmlModel.fromJson(response.data['data']);

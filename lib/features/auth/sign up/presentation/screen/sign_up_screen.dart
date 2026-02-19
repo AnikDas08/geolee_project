@@ -19,7 +19,7 @@ class SignUpScreen extends StatelessWidget {
     final signUpFormKey = GlobalKey<FormState>();
     return Scaffold(
       /// App Bar Section Starts Here
-      appBar: AppBar(leading: SizedBox()),
+      appBar: AppBar(leading: const SizedBox()),
 
       /// Body Section Starts Here
       body: GetBuilder<SignUpController>(
@@ -50,12 +50,10 @@ class SignUpScreen extends StatelessWidget {
                     isLoading: controller.isLoading,
                     onTap: () => controller.signUpUser(signUpFormKey),
                   ),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
 
-                  CommonText(
+                  const CommonText(
                     text: "Or Sign Up With",
-                    fontSize: 16,
-                    fontWeight: FontWeight.w400,
                     color: Colors.grey,
                   ),
 
@@ -69,9 +67,8 @@ class SignUpScreen extends StatelessWidget {
                           width: double.infinity,
                           decoration: ShapeDecoration(
                             shape: RoundedRectangleBorder(
-                              side: BorderSide(
-                                width: 1,
-                                color: const Color(
+                              side: const BorderSide(
+                                color: Color(
                                   0xFFD1D5D6,
                                 ) /* Disable-Color */,
                               ),
@@ -109,9 +106,8 @@ class SignUpScreen extends StatelessWidget {
                           width: double.infinity,
                           decoration: ShapeDecoration(
                             shape: RoundedRectangleBorder(
-                              side: BorderSide(
-                                width: 1,
-                                color: const Color(
+                              side: const BorderSide(
+                                color: Color(
                                   0xFFD1D5D6,
                                 ) /* Disable-Color */,
                               ),
@@ -144,7 +140,7 @@ class SignUpScreen extends StatelessWidget {
                       ),
                     ],
                   ),
-                  SizedBox(height: 1),
+                  const SizedBox(height: 1),
 
                   ///  Sign In Instruction here
                 ],
@@ -156,7 +152,7 @@ class SignUpScreen extends StatelessWidget {
       bottomNavigationBar: SafeArea(
         child: SizedBox(
           height: 60.h,
-          child: Column(children: [const AlreadyAccountRichText()]),
+          child: const Column(children: [AlreadyAccountRichText()]),
         ),
       ),
     );

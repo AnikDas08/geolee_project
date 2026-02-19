@@ -8,7 +8,6 @@ import 'package:giolee78/component/button/common_button.dart';
 import 'package:giolee78/component/text/common_text.dart';
 import 'package:giolee78/component/text_field/common_text_field.dart';
 import '../controller/change_password_controller.dart';
-import 'package:giolee78/utils/constants/app_colors.dart';
 import 'package:giolee78/utils/constants/app_string.dart';
 import 'package:giolee78/utils/helpers/other_helper.dart';
 
@@ -27,15 +26,13 @@ class ChangePasswordScreen extends StatelessWidget {
               child: Form(
                 key: controller.formKey,
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    CommonImage(imageSrc: AppIcons.changePassword, size: 200),
+                    const CommonImage(imageSrc: AppIcons.changePassword, size: 200),
                     40.height,
                     const CommonText(
                       text: AppString.changePassword,
                       fontSize: 24,
                       fontWeight: FontWeight.w700,
-                      color: AppColors.black,
                       bottom: 40,
                     ),
 

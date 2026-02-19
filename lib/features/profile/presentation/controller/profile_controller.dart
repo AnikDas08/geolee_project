@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:giolee78/features/profile/presentation/controller/my_profile_controller.dart';
 import 'package:giolee78/services/api/api_response_model.dart';
@@ -94,33 +93,33 @@ class ProfileController extends GetxController {
     try {
       final ImageSource? source = await showModalBottomSheet<ImageSource>(
         context: Get.context!,
-        shape: RoundedRectangleBorder(
+        shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
         ),
         builder: (context) => Container(
-          padding: EdgeInsets.all(20),
+          padding: const EdgeInsets.all(20),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
+              const Text(
                 'Choose Image Source',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               ListTile(
-                leading: Icon(Icons.camera_alt, color: Colors.blue),
-                title: Text('Camera'),
+                leading: const Icon(Icons.camera_alt, color: Colors.blue),
+                title: const Text('Camera'),
                 onTap: () => Navigator.pop(context, ImageSource.camera),
               ),
               ListTile(
-                leading: Icon(Icons.photo_library, color: Colors.green),
-                title: Text('Gallery'),
+                leading: const Icon(Icons.photo_library, color: Colors.green),
+                title: const Text('Gallery'),
                 onTap: () => Navigator.pop(context, ImageSource.gallery),
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: Text('Cancel'),
+                child: const Text('Cancel'),
               ),
             ],
           ),
@@ -129,7 +128,7 @@ class ProfileController extends GetxController {
 
       if (source == null) return;
 
-      bool permissionGranted = await _requestImagePermission(source);
+      final bool permissionGranted = await _requestImagePermission(source);
       if (!permissionGranted) {
         Get.snackbar(
           'Permission Required',
@@ -157,9 +156,9 @@ class ProfileController extends GetxController {
 
   /// Pick date of birth
   Future<void> pickDateOfBirth() async {
-    DateTime? pickedDate = await showDatePicker(
+    final DateTime? pickedDate = await showDatePicker(
       context: Get.context!,
-      initialDate: DateTime(2000, 1, 1),
+      initialDate: DateTime(2000),
       firstDate: DateTime(1950),
       lastDate: DateTime.now(),
     );
@@ -186,7 +185,7 @@ class ProfileController extends GetxController {
     update();
 
     try {
-      DateTime? dobDate = DateTime.tryParse(dateOfBirthController.text.trim());
+      final DateTime? dobDate = DateTime.tryParse(dateOfBirthController.text.trim());
       if (dobDate == null) {
         Utils.errorSnackBar("Error", "Invalid Date of Birth");
         isLoading = false;
@@ -194,25 +193,24 @@ class ProfileController extends GetxController {
         return;
       }
 
-      String formattedDob = dobDate.toUtc().toIso8601String();
+      final String formattedDob = dobDate.toUtc().toIso8601String();
 
-      Map<String, String> body = {
+      final Map<String, String> body = {
         "name": nameController.text.trim(),
         "bio": aboutController.text.trim(),
         "dob": formattedDob,
         "gender": genderController.text.trim(),
       };
 
-      var response = await ApiService.multipart(
+      final response = await ApiService.multipart(
         ApiEndPoint.updateProfile,
         method: "PATCH",
         body: body,
-        imageName: 'image',
         imagePath: selectedImage?.path,
       );
 
       if (response.statusCode == 200) {
-        var data = response.data;
+        final data = response.data;
         LocalStorage.myName = data['data']?["name"] ?? LocalStorage.myName;
         LocalStorage.myImage = data['data']?["image"] ?? LocalStorage.myImage;
         LocalStorage.bio = data['data']?['bio'] ?? LocalStorage.bio;
@@ -237,7 +235,7 @@ class ProfileController extends GetxController {
           Get.find<HomeNavController>().update();
         }
         Get.back();
-        await Utils.successSnackBar("Success","Profile Updated Successfully");
+         Utils.successSnackBar("Success","Profile Updated Successfully");
 
       } else {
         Utils.errorSnackBar("Error", response.data['message'] ?? "Failed to update profile");
@@ -256,9 +254,9 @@ class ProfileController extends GetxController {
 
   Future<String?> getUserDataForRole() async {
     try {
-      var response = await ApiService.get(ApiEndPoint.profile).timeout(const Duration(seconds: 30));
+      final response = await ApiService.get(ApiEndPoint.profile).timeout(const Duration(seconds: 30));
       if (response.statusCode == 200) {
-        var data = response.data;
+        final data = response.data;
         advToken = data['data']?['advertiser']?.toString() ?? "";
         isVerified = data['data']?['isVerified']??false;
         userId = data['data']?['_id']?.toString() ?? "";
@@ -276,7 +274,7 @@ class ProfileController extends GetxController {
     isLoading = true;
     update();
     try {
-      ApiResponseModel response = await ApiService.delete(ApiEndPoint.deleteAccount);
+      final ApiResponseModel response = await ApiService.delete(ApiEndPoint.deleteAccount);
       if (response.statusCode == 200) {
         LocalStorage.removeAllPrefData();
         Get.offAllNamed(AppRoutes.signIn);

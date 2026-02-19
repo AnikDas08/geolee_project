@@ -55,7 +55,7 @@ class GroupSettingsScreen extends StatelessWidget {
   }
 
   void _showEditGroupNameDialog(GroupSettingsController controller) {
-    TextEditingController textController = TextEditingController(text: controller.groupName.value);
+    final TextEditingController textController = TextEditingController(text: controller.groupName.value);
     Get.defaultDialog(
       title: "Edit Group Name",
       content: Padding(
@@ -103,7 +103,6 @@ class GroupSettingsScreen extends StatelessWidget {
               text: 'Settings',
               fontSize: 20,
               fontWeight: FontWeight.w600,
-              color: AppColors.black,
             ),
           ),
           body: Obx(() {
@@ -113,7 +112,6 @@ class GroupSettingsScreen extends StatelessWidget {
             return SingleChildScrollView(
               padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   // --- Group Avatar Section (MODIFIED FOR IMAGE PICKER) ---
                   GestureDetector( // Make the whole avatar area tappable
@@ -185,7 +183,6 @@ class GroupSettingsScreen extends StatelessWidget {
                           text: controller.groupName.value,
                           fontSize: 18.sp,
                           fontWeight: FontWeight.w600,
-                          color: AppColors.black,
                         ),
                         SizedBox(width: 4.w),
                         Icon(Icons.edit, size: 16.sp, color: Colors.grey.shade600),
@@ -199,7 +196,6 @@ class GroupSettingsScreen extends StatelessWidget {
                   CommonText(
                     text: '${controller.memberCount.value} Member',
                     fontSize: 14.sp,
-                    fontWeight: FontWeight.w400,
                     color: AppColors.secondaryText,
                   ),
 

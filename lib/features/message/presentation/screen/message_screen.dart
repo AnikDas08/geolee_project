@@ -40,7 +40,7 @@ class _MessageScreenState extends State<MessageScreen> {
                       color: Colors.purple.shade50,
                       borderRadius: BorderRadius.circular(10.r),
                     ),
-                    child: Icon(Icons.photo_library, color: Colors.purple),
+                    child: const Icon(Icons.photo_library, color: Colors.purple),
                   ),
                   title: const Text('Photo Library'),
                   onTap: () {
@@ -55,7 +55,7 @@ class _MessageScreenState extends State<MessageScreen> {
                       color: Colors.blue.shade50,
                       borderRadius: BorderRadius.circular(10.r),
                     ),
-                    child: Icon(Icons.photo_camera, color: Colors.blue),
+                    child: const Icon(Icons.photo_camera, color: Colors.blue),
                   ),
                   title: const Text('Camera'),
                   onTap: () {
@@ -258,7 +258,7 @@ class _MessageScreenState extends State<MessageScreen> {
                             : controller.sendMessage,
                         child: Container(
                           padding: EdgeInsets.all(10.w),
-                          decoration: BoxDecoration(
+                          decoration: const BoxDecoration(
                             color: AppColors.primaryColor,
                             shape: BoxShape.circle,
                           ),
@@ -316,7 +316,7 @@ class _MessageScreenState extends State<MessageScreen> {
                   constraints: BoxConstraints(maxWidth: 250.w),
                   decoration: BoxDecoration(
                     color: message.isCurrentUser
-                        ? Color(0xFFFFEBEE)
+                        ? const Color(0xFFFFEBEE)
                         : Colors.white,
                     borderRadius: BorderRadius.only(
                       topLeft: Radius.circular(16.r),

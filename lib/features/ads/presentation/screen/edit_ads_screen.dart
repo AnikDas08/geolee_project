@@ -39,7 +39,6 @@ class EditAdsScreen extends StatelessWidget {
             text: 'Edit Ads',
             fontSize: 18,
             fontWeight: FontWeight.w600,
-            color: AppColors.black,
           ),
           backgroundColor: AppColors.background,
         ),
@@ -147,8 +146,6 @@ class EditAdsScreen extends StatelessWidget {
                       titleText: controller.isLoading.value
                           ? 'Updating...'
                           : 'Update Ads',
-                      buttonColor: AppColors.primaryColor,
-                      titleColor: AppColors.white,
                       buttonHeight: 44.h,
                       buttonRadius: 8.r,
                     ),
@@ -167,13 +164,13 @@ class EditAdsScreen extends StatelessWidget {
     required String imagePath,
     required VoidCallback onTap,
   }) {
-    bool isNetworkImage =
+    final bool isNetworkImage =
         imagePath.isNotEmpty &&
         !imagePath.startsWith('/') &&
         !imagePath.contains('file://');
 
     // Build the full URL for network images
-    String imageUrl = isNetworkImage
+    final String imageUrl = isNetworkImage
         ? (imagePath.startsWith('http')
               ? imagePath
               : '${ApiEndPoint.imageUrl}$imagePath')
@@ -196,7 +193,7 @@ class EditAdsScreen extends StatelessWidget {
               ? Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    CommonImage(imageSrc: AppIcons.upload2),
+                    const CommonImage(imageSrc: AppIcons.upload2),
                     SizedBox(height: 10.h),
                     CommonText(
                       text: 'Upload Cover Image',
@@ -272,7 +269,6 @@ class EditAdsScreen extends StatelessWidget {
               Radio<String>(
                 value: selectedPlan.name,
                 groupValue: controller.selectedPricingPlan.value,
-                onChanged: null, // read-only
               ),
               SizedBox(width: 12.w),
               Text(
@@ -297,7 +293,6 @@ class EditAdsScreen extends StatelessWidget {
         text: text,
         fontSize: 12,
         fontWeight: FontWeight.w500,
-        color: AppColors.black,
       ),
     );
   }

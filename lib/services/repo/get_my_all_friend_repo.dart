@@ -7,9 +7,9 @@ import 'package:giolee78/services/api/api_service.dart';
 
 class GetMyAllFriendsRepo {
  Future<List<MyFriendsData>> getFriendList()async{
-   List<MyFriendsData> myFriendsList =[];
+   final List<MyFriendsData> myFriendsList =[];
     try{
-      ApiResponseModel response = await ApiService.get(ApiEndPoint.getMyAllFriend);
+      final ApiResponseModel response = await ApiService.get(ApiEndPoint.getMyAllFriend);
       if (response.statusCode == 200) {
         if(response.data["data"] is List) {
           for (var item in response.data["data"]) {

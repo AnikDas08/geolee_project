@@ -8,7 +8,6 @@ import 'package:giolee78/config/api/api_end_point.dart';
 import 'package:giolee78/services/api/api_response_model.dart';
 import 'package:giolee78/services/api/api_service.dart';
 import '../../../../component/pop_up/common_pop_menu.dart';
-import '../../../../config/route/app_routes.dart';
 import '../../data/plan_model.dart';
 import '../../data/single_ads_model.dart';
 
@@ -56,12 +55,12 @@ class UpdateAdsController extends GetxController {
       final endpoint = "${ApiEndPoint.getAdvertisementById}$adsId";
       print("🌐 Fetching ad from: $endpoint");
 
-      ApiResponseModel response = await ApiService.get(endpoint);
+      final ApiResponseModel response = await ApiService.get(endpoint);
 
       print("📦 Response Status: ${response.statusCode}");
       print("📦 Response Data: ${response.data}");
 
-      if (response.statusCode == 200 && response.data != null) {
+      if (response.statusCode == 200) {
         ad = SingleAdvertisement.fromJson(response.data['data']);
 
         print("✅ Ad loaded: ${ad?.title}");
@@ -102,9 +101,9 @@ class UpdateAdsController extends GetxController {
         // Handle image
         print("🖼️ Raw image: ${ad?.image}");
 
-        if (ad?.image != null && ad!.image!.isNotEmpty) {
+        if (ad?.image != null && ad!.image.isNotEmpty) {
           // Store only the image path/filename, not the full URL
-          coverImagePath.value = ad!.image!;
+          coverImagePath.value = ad!.image;
           print("🖼️ Image Path: ${coverImagePath.value}");
         } else {
           print("❌ No image found!");
@@ -112,8 +111,8 @@ class UpdateAdsController extends GetxController {
 
         // Handle plan
         print("💰 Raw plan: ${ad?.plan}");
-        if (ad?.plan != null && ad!.plan!.isNotEmpty) {
-          selectedPricingPlan.value = ad!.plan!.toLowerCase().trim();
+        if (ad?.plan != null && ad!.plan.isNotEmpty) {
+          selectedPricingPlan.value = ad!.plan.toLowerCase().trim();
           print("💰 Selected Plan: ${selectedPricingPlan.value}");
         }
       } else {
@@ -229,7 +228,7 @@ class UpdateAdsController extends GetxController {
   }
 
   String getIsoEndDate() {
-    int daysToAdd = selectedPricingPlan.value.toLowerCase() == 'weekly' ? 7 : 30;
+    final int daysToAdd = selectedPricingPlan.value.toLowerCase() == 'weekly' ? 7 : 30;
     final selectedDate = _parseUiDate();
     final dateTime = DateTime(
       selectedDate.year,
@@ -239,7 +238,7 @@ class UpdateAdsController extends GetxController {
       DateTime.now().minute,
       DateTime.now().second,
     );
-    DateTime endDate = dateTime.add(Duration(days: daysToAdd));
+    final DateTime endDate = dateTime.add(Duration(days: daysToAdd));
     return _formatIsoDateTime(endDate);
   }
 
@@ -283,11 +282,11 @@ class UpdateAdsController extends GetxController {
   Future<void> fetchPlans() async {
     try {
       isPlansLoading.value = true;
-      ApiResponseModel response = await ApiService.get(ApiEndPoint.getPlans);
+      final ApiResponseModel response = await ApiService.get(ApiEndPoint.getPlans);
 
-      if (response.statusCode == 200 && response.data != null) {
+      if (response.statusCode == 200) {
         final Map<String, dynamic> res = response.data as Map<String, dynamic>;
-        List<dynamic> dataList = res['data'] ?? [];
+        final List<dynamic> dataList = res['data'] ?? [];
 
         plans.value = dataList.map((e) => PlanModel.fromJson(e)).toList();
 
@@ -319,11 +318,10 @@ class UpdateAdsController extends GetxController {
       print("🖼️ Image path: ${coverImagePath.value}");
 
       // যদি image path local file path না হয়, শুধু text body পাঠাও
-      bool isLocalImage = File(coverImagePath.value).existsSync();
+      final bool isLocalImage = File(coverImagePath.value).existsSync();
 
-      ApiResponseModel response = await ApiService.multipartUpdate(
+      final ApiResponseModel response = await ApiService.multipartUpdate(
         ApiEndPoint.updateAdvertisementById + adsId,
-        method: "PATCH",
         body: {
           "title": titleController.text.trim(),
           "description": descriptionController.text.trim(),
@@ -332,7 +330,6 @@ class UpdateAdsController extends GetxController {
           "longitude": "90.4125181",
           "websiteUrl": websiteLinkController.text.trim(),
         },
-        imageName: 'image',
         imagePath: isLocalImage ? coverImagePath.value : null,
       );
 

@@ -32,7 +32,7 @@ class AddPostScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  CustomAppBar(title: "Create Clicker", showBackButton: true,onBackTap: (){
+                  CustomAppBar(title: "Create Clicker",onBackTap: (){
                     Get.offAllNamed(AppRoutes.homeNav);
                   },),
                   SizedBox(height: 20.h),
@@ -41,7 +41,6 @@ class AddPostScreen extends StatelessWidget {
                   CommonText(
                     text: "Upload Images",
                     fontSize: 14.sp,
-                    fontWeight: FontWeight.w400,
                   ),
                   SizedBox(height: 10.h),
                   Obx(() => _buildImageUploadSection(context)),
@@ -51,7 +50,6 @@ class AddPostScreen extends StatelessWidget {
                   CommonText(
                     text: "Description",
                     fontSize: 14.sp,
-                    fontWeight: FontWeight.w400,
                   ),
                   SizedBox(height: 5.h),
                   _buildTextField(
@@ -65,7 +63,6 @@ class AddPostScreen extends StatelessWidget {
                   CommonText(
                     text: "Select Clicker",
                     fontSize: 14.sp,
-                    fontWeight: FontWeight.w400,
                   ),
                   SizedBox(height: 6.h),
                   Obx(
@@ -143,8 +140,6 @@ class AddPostScreen extends StatelessWidget {
                   Obx(() {
                     return CommonButton(
                       titleText: controller.isLoading.value ? "Posting..." : "CLICKER COUNT",
-                      buttonColor: AppColors.primaryColor,
-                      buttonRadius: 8,
                       onTap: () => controller.createPost(),
                     );
                   }),
@@ -203,7 +198,7 @@ class AddPostScreen extends StatelessWidget {
       BuildContext context, List<File> images, int max) {
     // Add an empty spot if we haven't reached the max limit
     int itemCount = images.length;
-    bool showEmptySlot = images.length < max;
+    final bool showEmptySlot = images.length < max;
     if (showEmptySlot) {
       itemCount += 1; // For the "Add More" slot
     }
@@ -214,7 +209,6 @@ class AddPostScreen extends StatelessWidget {
         CommonText(
           text: "Selected: (${images.length}/$max)",
           fontSize: 12.sp,
-          fontWeight: FontWeight.w400,
           color: AppColors.textSecond,
         ),
         SizedBox(height: 8.h),
@@ -226,7 +220,6 @@ class AddPostScreen extends StatelessWidget {
             crossAxisCount: 4,
             crossAxisSpacing: 10.w,
             mainAxisSpacing: 10.h,
-            childAspectRatio: 1.0,
           ),
           itemBuilder: (context, index) {
             if (index < images.length) {
@@ -294,7 +287,6 @@ class AddPostScreen extends StatelessWidget {
         radius: Radius.circular(8.r),
         dashPattern: const [6, 3],
         color: AppColors.textSecond,
-        strokeWidth: 1,
         child: Container(
           decoration: BoxDecoration(
             color: Colors.grey.shade100,
@@ -317,7 +309,7 @@ class AddPostScreen extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8.r),
-        border: Border.all(color: Colors.grey[300]!, width: 1),
+        border: Border.all(color: Colors.grey[300]!),
       ),
       child: Stack(
         children: [
@@ -364,7 +356,6 @@ class AddPostScreen extends StatelessWidget {
         decoration: BoxDecoration(
           border: Border.all(
             color: Colors.grey[300]!,
-            style: BorderStyle.solid,
           ),
           borderRadius: BorderRadius.circular(12.r),
         ),
@@ -494,7 +485,6 @@ class AddPostScreen extends StatelessWidget {
         decoration: ShapeDecoration(
           shape: RoundedRectangleBorder(
             side: BorderSide(
-              width: 1,
               color: isSelected ? AppColors.primaryColor : Colors.grey[300]!,
             ),
             borderRadius: BorderRadius.circular(4),

@@ -74,7 +74,7 @@ class _FullScreenImageViewState extends State<FullScreenImageView> {
             right: 20.w,
             child: IconButton(onPressed: (){
               Get.back();
-            }, icon: Icon(
+            }, icon: const Icon(
               size: 30,
               Icons.cancel_rounded,color: Colors.grey,)),
           ),

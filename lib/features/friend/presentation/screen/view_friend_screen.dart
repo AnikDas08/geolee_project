@@ -6,7 +6,6 @@ import 'package:giolee78/component/image/common_image.dart';
 import 'package:giolee78/component/text/common_text.dart';
 import 'package:giolee78/config/api/api_end_point.dart';
 import 'package:giolee78/config/route/app_routes.dart';
-import 'package:giolee78/features/addpost/presentation/widgets/my_post_card.dart';
 import 'package:giolee78/features/clicker/presentation/controller/clicker_controller.dart';
 import 'package:giolee78/services/storage/storage_services.dart';
 import 'package:giolee78/utils/constants/app_colors.dart';
@@ -14,7 +13,6 @@ import 'package:giolee78/utils/constants/app_icons.dart';
 import 'package:giolee78/utils/extensions/extension.dart';
 import 'package:intl/intl.dart';
 
-import '../../../../utils/app_utils.dart';
 import '../../../addpost/presentation/widgets/full_screen_view_image.dart';
 import '../../../clicker/presentation/widget/common_post_card.dart';
 
@@ -125,7 +123,6 @@ class _ViewFriendScreenState extends State<ViewFriendScreen> {
                         if (postImages.isNotEmpty) {
                           Get.to(() => FullScreenImageView(
                             images: postImages,
-                            initialIndex: 0, // যেই image এ tap করছো
                           ));
                         }
                       },
@@ -138,8 +135,8 @@ class _ViewFriendScreenState extends State<ViewFriendScreen> {
                       userName: data.user.name,
                       userAvatar: "${ApiEndPoint.imageUrl}${data.user.image}",
                       timeAgo: _formatPostTime(DateTime.parse(data.createdAt.toString())),
-                      location: data.address != null && data.address!.isNotEmpty
-                          ? data.address!.split(',')[0]
+                      location: data.address.isNotEmpty
+                          ? data.address.split(',')[0]
                           : "",
                       images: data.photos.isNotEmpty
                           ? data.photos
@@ -187,7 +184,6 @@ class _ViewFriendScreenState extends State<ViewFriendScreen> {
           /// NAME
           CommonText(
             text: user?.name ?? "User Name",
-            fontSize: 16,
             fontWeight: FontWeight.w600,
             top: 16,
           ),
@@ -196,7 +192,6 @@ class _ViewFriendScreenState extends State<ViewFriendScreen> {
           CommonText(
             text: user?.bio ?? "No bio available",
             fontSize: 13,
-            fontWeight: FontWeight.w400,
             bottom: 4,
             left: 40,
             right: 40,
@@ -216,17 +211,15 @@ class _ViewFriendScreenState extends State<ViewFriendScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              CommonImage(imageSrc: AppIcons.location, size: 12),
+              const CommonImage(imageSrc: AppIcons.location, size: 12),
               SizedBox(width: 8.w),
 
               /// 👇 IMPORTANT PART
               Flexible(
                 child: CommonText(
                   maxLines: 4,
-                  textAlign: TextAlign.center,
                   text: user?.address ?? "Address not available",
                   fontSize: 13,
-                  fontWeight: FontWeight.w400,
                   color: AppColors.secondaryText,
                 ),
               ),
@@ -331,13 +324,9 @@ class _ViewFriendScreenState extends State<ViewFriendScreen> {
           height: 32.h,
           width: 90.w,
           child: CommonButton(
-            onTap: null,
             titleText: 'Accept',
-            buttonColor: AppColors.primaryColor,
-            titleColor: AppColors.white,
             buttonRadius: 6.r,
             titleSize: 14.sp,
-            borderColor: AppColors.primaryColor,
             buttonHeight: 32.h,
             buttonWidth: 90.w,
           ),
@@ -347,7 +336,6 @@ class _ViewFriendScreenState extends State<ViewFriendScreen> {
           height: 32.h,
           width: 90.w,
           child: CommonButton(
-            onTap: null,
             titleText: 'Reject',
             buttonColor: const Color(0xFFDEE2E3),
             titleColor: AppColors.secondaryText,

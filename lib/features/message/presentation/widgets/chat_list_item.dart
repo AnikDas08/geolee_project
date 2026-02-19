@@ -28,7 +28,7 @@ String _formatTime(DateTime dateTime) {
 
 Widget chatListItem({required ChatModel item}) {
   // Determine if this chat has unseen messages
-  final bool hasUnseenMessages = !item.isSeen || item.unreadCount > 0;
+  final bool hasUnseenMessages = item.unreadCount > 0;
 
   // Background color based on seen status
   final Color backgroundColor = hasUnseenMessages
@@ -41,12 +41,11 @@ Widget chatListItem({required ChatModel item}) {
     decoration: ShapeDecoration(
       color: backgroundColor,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      shadows: [
+      shadows: const [
         BoxShadow(
           color: Color(0x11000000),
           blurRadius: 2,
           offset: Offset(0, 2),
-          spreadRadius: 0,
         ),
       ],
     ),
@@ -66,15 +65,15 @@ Widget chatListItem({required ChatModel item}) {
                     ),
                   ),
                 ),
-                if (item.status)
+                if (item.isOnline)
                   Positioned(
                     bottom: 6,
                     right: 2,
                     child: Container(
                       width: 10,
                       height: 10,
-                      decoration: ShapeDecoration(
-                        color: const Color(0xFF0FE16D),
+                      decoration: const ShapeDecoration(
+                        color: Color(0xFF0FE16D),
                         shape: OvalBorder(),
                       ),
                     ),
@@ -111,7 +110,6 @@ Widget chatListItem({required ChatModel item}) {
                           color: hasUnseenMessages
                               ? Colors.black87
                               : AppColors.secondaryText,
-                          maxLines: 1,
                           //textOverflow: TextOverflow.ellipsis,
                         ),
                       ],

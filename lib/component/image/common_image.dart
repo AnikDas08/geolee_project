@@ -28,7 +28,7 @@ class CommonImage extends StatelessWidget {
     super.key,
   });
 
-  checkImageType() {}
+  void checkImageType() {}
 
   @override
   Widget build(BuildContext context) {

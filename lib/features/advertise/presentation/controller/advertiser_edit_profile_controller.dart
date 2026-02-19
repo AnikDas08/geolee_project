@@ -5,7 +5,6 @@ import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import '../../../../config/api/api_end_point.dart';
-import '../../../../config/route/app_routes.dart';
 import '../../../../services/api/api_service.dart';
 import '../../../../services/storage/storage_keys.dart';
 import '../../../../services/storage/storage_services.dart';
@@ -60,7 +59,7 @@ class AdvertiserEditProfileController extends GetxController {
       print("📦 Response Status: ${response.statusCode}");
       print("📦 Response Data: ${response.data}");
 
-      if (response.statusCode == 200 && response.data != null) {
+      if (response.statusCode == 200) {
         final advertiserData = response.data['data'] ?? {};
 
 
@@ -190,7 +189,7 @@ class AdvertiserEditProfileController extends GetxController {
 
       if (source == null) return;
 
-      bool permissionGranted = await _requestImagePermission(source);
+      final bool permissionGranted = await _requestImagePermission(source);
       if (!permissionGranted) {
         Get.snackbar(
           'Permission Required',
@@ -233,7 +232,6 @@ class AdvertiserEditProfileController extends GetxController {
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
         colorText: Colors.white,
-        duration: const Duration(seconds: 3),
       );
     }
   }
@@ -256,7 +254,7 @@ class AdvertiserEditProfileController extends GetxController {
     try {
       print("📤 Updating advertiser profile...");
 
-      Map<String, String> body = {
+      final Map<String, String> body = {
         "businessName": businessNameController.text.trim(),
         "businessType": businessTypeController.text.trim(),
         "licenseNumber": businessLicenceController.text.trim(),
@@ -267,11 +265,9 @@ class AdvertiserEditProfileController extends GetxController {
       print("📦 Update Body: $body");
       print("🖼️ Image Path: ${selectedImage?.path}");
 
-      var response = await ApiService.multipartUpdate(
+      final response = await ApiService.multipartUpdate(
         ApiEndPoint.advertiserUpdate,
-        method: "PATCH",
         body: body,
-        imageName: 'image',
         imagePath: selectedImage?.path,
       );
 
@@ -298,7 +294,7 @@ class AdvertiserEditProfileController extends GetxController {
 
         print("✅ Profile updated successfully");
 
-        Get.to(DashBoardProfile());
+        Get.to(const DashBoardProfile());
       } else {
         Utils.errorSnackBar(
           response.statusCode.toString(),

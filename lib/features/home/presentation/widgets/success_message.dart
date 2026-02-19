@@ -3,7 +3,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../component/button/common_button.dart';
 import '../../../../component/image/common_image.dart';
 import '../../../../component/text/common_text.dart';
-import '../../../../utils/constants/app_colors.dart';
 
 class SuccessCustomOffer {
   static void show(
@@ -43,14 +42,12 @@ class SuccessCustomOffer {
                 fontSize: 16.sp,
                 fontWeight: FontWeight.bold,
                 color: Colors.black87,
-                textAlign: TextAlign.center,
                 maxLines: 3,
               ),
               SizedBox(height: 20.h),
               CommonButton(
                 titleText: "Got it",
                 buttonRadius: 10,
-                buttonColor: AppColors.primaryColor,
                 onTap: () {
                   Navigator.pop(context); // Close current dialog
                 },

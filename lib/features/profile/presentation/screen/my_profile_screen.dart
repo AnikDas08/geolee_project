@@ -42,7 +42,7 @@ class MyProfileScreen extends StatelessWidget {
           ),
           body: SafeArea(
             child: controller.isLoading
-                ? Center(
+                ? const Center(
               child: CircularProgressIndicator(
                 color: AppColors.primaryColor,
               ),
@@ -64,7 +64,6 @@ class MyProfileScreen extends StatelessWidget {
                       text: controller.userName,
                       fontSize: 18.sp,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.black,
                     ),
 
                     32.height,
@@ -101,12 +100,11 @@ class MyProfileScreen extends StatelessWidget {
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         border: Border.all(color: AppColors.white, width: 4.w),
-        boxShadow: [
+        boxShadow: const [
           BoxShadow(
             color: Color(0x1A000000),
             blurRadius: 8,
             offset: Offset(0, 2),
-            spreadRadius: 0,
           ),
         ],
       ),
@@ -140,7 +138,6 @@ class MyProfileScreen extends StatelessWidget {
             text: 'About',
             fontSize: 16.sp,
             fontWeight: FontWeight.w600,
-            color: AppColors.black,
             textAlign: TextAlign.start,
           ),
         ),
@@ -151,7 +148,6 @@ class MyProfileScreen extends StatelessWidget {
           child: CommonText(
             text: controller.bio,
             fontSize: 14.sp,
-            fontWeight: FontWeight.w400,
             color: AppColors.secondaryText,
             textAlign: TextAlign.start,
             maxLines: 10,
@@ -185,15 +181,12 @@ class MyProfileScreen extends StatelessWidget {
         CommonText(
           text: label,
           fontSize: 14.sp,
-          fontWeight: FontWeight.w400,
-          color: AppColors.black,
           textAlign: TextAlign.start,
         ),
         Flexible(
           child: CommonText(
             text: value.isNotEmpty ? value : 'Not Set',
             fontSize: 14.sp,
-            fontWeight: FontWeight.w400,
             color: AppColors.secondaryText,
             textAlign: TextAlign.end,
             maxLines: 2,
@@ -208,12 +201,9 @@ class MyProfileScreen extends StatelessWidget {
     return CommonButton(
       titleText: 'Edit Profile',
       onTap: controller.navigateToEditProfile,
-      buttonColor: AppColors.primaryColor,
-      titleColor: AppColors.white,
       buttonHeight: 56.h,
       buttonRadius: 8.r,
       titleSize: 16.sp,
-      titleWeight: FontWeight.w600,
     );
   }
 }

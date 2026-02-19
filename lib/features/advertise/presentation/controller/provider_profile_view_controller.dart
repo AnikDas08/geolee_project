@@ -11,8 +11,8 @@ class ProviderProfileViewController extends GetxController {
   bool isLoading = false;
   UserProfileModel? profileModel;
 
-  String _dateOfBirth = "";
-  String _gender = "";
+  final String _dateOfBirth = "";
+  final String _gender = "";
   String localAddress='';
 
 
@@ -59,7 +59,7 @@ class ProviderProfileViewController extends GetxController {
   String get businessType => LocalStorage.businessType;
   String get phone => LocalStorage.phone;
   String get businessLicenceNumber => LocalStorage.businessLicenceNumber;
-  String get advertiserBion => LocalStorage.advertiserBio?.isNotEmpty ?? false ? LocalStorage.advertiserBio! : "Bio Not Set Yet";
+  String get advertiserBion => LocalStorage.advertiserBio.isNotEmpty ?? false ? LocalStorage.advertiserBio : "Bio Not Set Yet";
 
 
 
@@ -74,7 +74,7 @@ class ProviderProfileViewController extends GetxController {
   // ================= NAVIGATION =================
 
   void navigateToEditProfile() {
-    Get.to(AdvertiserEditProfileScreen());
+    Get.to(const AdvertiserEditProfileScreen());
   }
 
   void goBack() {

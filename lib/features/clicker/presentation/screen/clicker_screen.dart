@@ -188,6 +188,7 @@ class _ClickerScreenState extends State<ClickerScreen> {
                 SizedBox(height: 16.h),
 
                 // ── Posts List ──────────────────────────────────────────
+
                 controller.filteredPosts.isEmpty
                     ? _buildEmptyState()
                     : ListView.separated(
@@ -209,7 +210,6 @@ class _ClickerScreenState extends State<ClickerScreen> {
                                 Get.to(
                                   () => FullScreenImageView(
                                     images: postImages,
-                                    initialIndex: 0,
                                   ),
                                 );
                               }
@@ -274,6 +274,7 @@ class _ClickerScreenState extends State<ClickerScreen> {
     );
   }
 
+
   Widget _buildEmptyState() {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 60.h),
@@ -310,7 +311,7 @@ class _ClickerScreenState extends State<ClickerScreen> {
               style: const TextStyle(color: Colors.black, fontSize: 14),
             ),
             const SizedBox(width: 8),
-            CommonImage(imageSrc: AppIcons.filter, height: 18, width: 18),
+            const CommonImage(imageSrc: AppIcons.filter, height: 18, width: 18),
           ],
         ),
       ),

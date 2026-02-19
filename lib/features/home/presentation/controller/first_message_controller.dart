@@ -69,7 +69,7 @@ class FirstMessageController extends GetxController {
       debugPrint("service id 😍😍😍😍 $serviceId");
 
       // Get initial message if exists
-      String initialMessage = args['initialMessage'] ?? '';
+      final String initialMessage = args['initialMessage'] ?? '';
       if (initialMessage.isNotEmpty) {
         messageController.text = initialMessage;
       }
@@ -103,16 +103,16 @@ class FirstMessageController extends GetxController {
     update();
 
     try {
-      var response = await ApiService.get("/message/$chatId");
+      final response = await ApiService.get("/message/$chatId");
 
       if (response.statusCode == 200) {
-        var data = response.data['data'];
+        final data = response.data['data'];
         //clientStatus = await data["service"]["bookingStatus"];
 
         messages.clear();
 
         // Create a temporary list to hold all messages
-        List<ChatMessageModel> tempMessages = [];
+        final List<ChatMessageModel> tempMessages = [];
 
         for (var messageData in data) {
           tempMessages.add(
@@ -122,7 +122,6 @@ class FirstMessageController extends GetxController {
               image: messageData['sender']['image'] ?? '',
               messageImage: messageData['image'],
               clientStatus: messageData["service"]["title"],
-              isNotice: false,
               isMe: LocalStorage.userId == messageData['sender']['_id'],
 
             ),
@@ -164,9 +163,9 @@ class FirstMessageController extends GetxController {
     }
   }
 
-  void getCard() async {
+  Future<void> getCard() async {
     try {
-      var response = await ApiService.get("/posts/$serviceId");
+      final response = await ApiService.get("/posts/$serviceId");
 
       if (response.statusCode == 200) {
         final viewPostResponse = ViewPostResponseModel.fromJson(response.data);
@@ -251,7 +250,7 @@ class FirstMessageController extends GetxController {
     scrollToBottom(); // Scroll to show uploading message
 
     try {
-      FormData formData = FormData.fromMap({
+      final FormData formData = FormData.fromMap({
         'chatId': chatRoomId,
         'service': serviceId,
         'image': await MultipartFile.fromFile(
@@ -266,7 +265,7 @@ class FirstMessageController extends GetxController {
       messages.removeLast();
 
       if (response.statusCode == 200) {
-        var messageData = response.data['data'];
+        final messageData = response.data['data'];
         // Add actual message at BOTTOM
         messages.add(
           ChatMessageModel(
@@ -275,7 +274,6 @@ class FirstMessageController extends GetxController {
             image: LocalStorage.myImage,
             messageImage: messageData['image'],
             isMe: true,
-            isUploading: false,
           ),
         );
 
@@ -347,7 +345,7 @@ class FirstMessageController extends GetxController {
     debugPrint("chat room id 😍😍😍😍 $chatRoomId");
     debugPrint("service id 😍😍😍😍 $serviceId");
 
-    var body = {
+    final body = {
       "chatId": chatRoomId,
       "text": messageController.text,
       "service": serviceId,
@@ -371,7 +369,7 @@ class FirstMessageController extends GetxController {
     }
   }
 
-  listenMessage(String chatId) async {
+  Future<void> listenMessage(String chatId) async {
     SocketServices.on('getMessage::$chatId', (data) {
       // Add new message at BOTTOM
       messages.add(

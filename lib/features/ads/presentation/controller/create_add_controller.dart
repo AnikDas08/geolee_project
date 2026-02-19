@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
@@ -143,12 +142,12 @@ class CreateAdsController extends GetxController {
       isPlansLoading.value = true;
       debugPrint("🔍 Fetching plans from: ${ApiEndPoint.getPlans}");
 
-      ApiResponseModel response = await ApiService.get(ApiEndPoint.getPlans);
+      final ApiResponseModel response = await ApiService.get(ApiEndPoint.getPlans);
 
       debugPrint("📊 Response Status: ${response.statusCode}");
       debugPrint("📦 Response Data: ${response.data}");
 
-      if (response.statusCode == 200 && response.data != null) {
+      if (response.statusCode == 200) {
         final res = response.data as Map<String, dynamic>;
         plans.value =
             (res['data'] as List).map((e) => PlanModel.fromJson(e)).toList();
@@ -179,7 +178,7 @@ class CreateAdsController extends GetxController {
     try {
       isLoading.value = true;
 
-      ApiResponseModel response = await ApiService.multipartUpdate(
+      final ApiResponseModel response = await ApiService.multipartUpdate(
         ApiEndPoint.createAds,
         method: "POST",
         body: {
@@ -192,7 +191,6 @@ class CreateAdsController extends GetxController {
           "startAt": getIsoStartDate(),
           "plan": planId,
         },
-        imageName: 'image',
         imagePath: coverImagePath.value,
       );
 
@@ -201,7 +199,7 @@ class CreateAdsController extends GetxController {
         isLoading.value=false;
         final res = response.data;
 
-        if (res != null && res['data'] != null && res['data']['url'] != null) {
+        if (res['data'] != null && res['data']['url'] != null) {
 
           final paymentUrl = res['data']['url'];
 

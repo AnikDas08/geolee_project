@@ -35,7 +35,7 @@ class ProviderVerifyUser extends StatelessWidget {
           padding: EdgeInsets.symmetric(vertical: 24.h, horizontal: 20.w),
           child: Column(
             children: [
-              CommonImage(imageSrc: AppIcons.enterotp, size: 250),
+              const CommonImage(imageSrc: AppIcons.enterotp, size: 250),
               20.height,
               const CommonText(
                 text: AppString.otpVerify,

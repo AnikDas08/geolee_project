@@ -49,14 +49,12 @@ class _CreateAdsScreenState extends State<CreateAdsScreen> {
             onTap: () {
               Get.offAllNamed(AppRoutes.homeNav);
             },
-            child: Icon(Icons.arrow_back_ios),
+            child: const Icon(Icons.arrow_back_ios),
           ),
           title: const CommonText(
             text: 'Create Ads',
             fontSize: 18,
             fontWeight: FontWeight.w600,
-            color: AppColors.black,
-            textAlign: TextAlign.center,
           ),
           backgroundColor: AppColors.background,
         ),
@@ -184,9 +182,6 @@ class _CreateAdsScreenState extends State<CreateAdsScreen> {
                           isLoading: controller.isLoading.value,
                           onTap: () => controller.createAds(),
                           titleText: 'Submit',
-                          buttonColor: AppColors.primaryColor,
-                          titleColor: AppColors.white,
-                          borderColor: AppColors.primaryColor,
                           buttonHeight: 44.h,
                           buttonRadius: 8.r,
                           titleSize: 16,
@@ -222,7 +217,7 @@ class _CreateAdsScreenState extends State<CreateAdsScreen> {
       if (controller.plans.isEmpty) {
         return Center(
           child: Padding(
-            padding: EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(16.0),
             child: Column(
               children: [
                 const Text(
@@ -340,14 +335,13 @@ class _CreateAdsScreenState extends State<CreateAdsScreen> {
         decoration: BoxDecoration(
           border: Border.all(
             color: Colors.grey[300]!,
-            style: BorderStyle.solid,
           ),
           borderRadius: BorderRadius.circular(12.r),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            CommonImage(imageSrc: AppIcons.upload2),
+            const CommonImage(imageSrc: AppIcons.upload2),
             SizedBox(height: 12.h),
             CommonText(
               text: 'Upload Cover Image',
@@ -366,7 +360,6 @@ class _CreateAdsScreenState extends State<CreateAdsScreen> {
       text: text,
       fontSize: 12,
       fontWeight: FontWeight.w500,
-      color: AppColors.black,
       textAlign: TextAlign.left,
     );
   }

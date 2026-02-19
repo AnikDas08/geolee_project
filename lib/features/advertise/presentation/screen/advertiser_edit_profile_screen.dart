@@ -31,7 +31,6 @@ class AdvertiserEditProfileScreen extends StatelessWidget {
               text: 'Edit Profile',
               fontSize: 18.sp,
               fontWeight: FontWeight.w600,
-              color: AppColors.black,
             ),
           ),
 
@@ -43,7 +42,6 @@ class AdvertiserEditProfileScreen extends StatelessWidget {
                 child: Form(
                   key: controller.formKey,
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       20.height,
 
@@ -62,9 +60,6 @@ class AdvertiserEditProfileScreen extends StatelessWidget {
                         controller: controller.businessNameController,
                         validator: OtherHelper.validator,
                         hintText: 'Shakir Ahmed',
-                        keyboardType: TextInputType.text,
-                        borderColor: AppColors.borderColor,
-                        fillColor: AppColors.white,
                         hintTextColor: AppColors.secondaryText,
                         textColor: AppColors.black,
                       ),
@@ -82,9 +77,6 @@ class AdvertiserEditProfileScreen extends StatelessWidget {
                         validator: OtherHelper.validator,
                         maxLines: 4,
                         hintText: 'Skilled professionals offering reliable, on-demand services to meet your everyday needs quickly and efficiently.',
-                        keyboardType: TextInputType.text,
-                        borderColor: AppColors.borderColor,
-                        fillColor: AppColors.white,
                         hintTextColor: AppColors.secondaryText,
                         textColor: AppColors.black,
                       ),
@@ -101,9 +93,6 @@ class AdvertiserEditProfileScreen extends StatelessWidget {
                         controller: controller.phoneNumberController,
                         validator: OtherHelper.phoneNumberValidator,
                         hintText: '01787000000',
-                        keyboardType: TextInputType.text,
-                        borderColor: AppColors.borderColor,
-                        fillColor: AppColors.white,
                         hintTextColor: AppColors.secondaryText,
                         textColor: AppColors.black,
                       ),
@@ -119,9 +108,6 @@ class AdvertiserEditProfileScreen extends StatelessWidget {
                         controller: controller.businessLicenceController,
                         validator: OtherHelper.validator,
                         hintText: '511256015',
-                        keyboardType: TextInputType.text,
-                        borderColor: AppColors.borderColor,
-                        fillColor: AppColors.white,
                         hintTextColor: AppColors.secondaryText,
                         textColor: AppColors.black,
                       ),
@@ -140,9 +126,6 @@ class AdvertiserEditProfileScreen extends StatelessWidget {
                         controller: controller.businessTypeController,
                         validator: OtherHelper.validator,
                         hintText: 'Restaurant',
-                        keyboardType: TextInputType.text,
-                        borderColor: AppColors.borderColor,
-                        fillColor: AppColors.white,
                         hintTextColor: AppColors.secondaryText,
                         textColor: AppColors.black,
                       ),
@@ -157,12 +140,9 @@ class AdvertiserEditProfileScreen extends StatelessWidget {
                         titleText: 'Update',
                         onTap: controller.editProfileRepo,
                         isLoading: controller.isLoading,
-                        buttonColor: AppColors.primaryColor,
-                        titleColor: AppColors.white,
                         buttonHeight: 56.h,
                         buttonRadius: 8.r,
                         titleSize: 16.sp,
-                        titleWeight: FontWeight.w600,
                       ),
 
                       32.height,
@@ -187,12 +167,11 @@ class AdvertiserEditProfileScreen extends StatelessWidget {
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             border: Border.all(color: AppColors.white, width: 3.w),
-            boxShadow: [
+            boxShadow: const [
               BoxShadow(
                 color: Color(0x1A000000),
                 blurRadius: 8,
                 offset: Offset(0, 2),
-                spreadRadius: 0,
               ),
             ],
           ),
@@ -229,7 +208,6 @@ class AdvertiserEditProfileScreen extends StatelessWidget {
       text: text,
       fontSize: 14.sp,
       fontWeight: FontWeight.w500,
-      color: AppColors.black,
       textAlign: TextAlign.start,
     );
   }

@@ -35,7 +35,7 @@ class _CompleteProfileState extends State<CompleteProfile> {
           ),
           onPressed: () => Get.back(),
         ),
-        title: CommonText(
+        title: const CommonText(
           text: 'Complete Your Profile',
           fontSize: 24,
           fontWeight: FontWeight.w700,
@@ -114,11 +114,10 @@ class _CompleteProfileState extends State<CompleteProfile> {
               SizedBox(height: 32.h),
 
               // Bio Field
-              CommonText(
+              const CommonText(
                 text: 'Bio',
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
-                color: AppColors.black,
                 textAlign: TextAlign.left,
                 bottom: 8,
               ),
@@ -126,7 +125,6 @@ class _CompleteProfileState extends State<CompleteProfile> {
                 controller: controller.bioController,
                 hintText:
                     'Type...',
-                fillColor: AppColors.white,
                 hintTextColor: Colors.grey,
                 textColor: AppColors.black,
                 maxLines: 2,
@@ -137,7 +135,6 @@ class _CompleteProfileState extends State<CompleteProfile> {
                 text: 'Age',
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
-                color: AppColors.black,
                 textAlign: TextAlign.left,
                 bottom: 8,
                 top: 8.h,
@@ -145,7 +142,6 @@ class _CompleteProfileState extends State<CompleteProfile> {
               CommonTextField(
                 controller: controller.ageController,
                 hintText: 'Type your age',
-                fillColor: AppColors.white,
                 hintTextColor: AppColors.grey,
                 textColor: AppColors.black,
               ),
@@ -157,7 +153,6 @@ class _CompleteProfileState extends State<CompleteProfile> {
                 text: 'Gender',
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
-                color: AppColors.black,
                 textAlign: TextAlign.left,
                 bottom: 8,
                 top: 8.h,
@@ -166,17 +161,16 @@ class _CompleteProfileState extends State<CompleteProfile> {
                 decoration: BoxDecoration(
                   color: AppColors.white,
                   borderRadius: BorderRadius.circular(8.r),
-                  boxShadow: [
+                  boxShadow: const [
                     BoxShadow(
-                      color: const Color(0x19000000),
+                      color: Color(0x19000000),
                       blurRadius: 4,
-                      offset: const Offset(0, 1),
-                      spreadRadius: 0,
+                      offset: Offset(0, 1),
                     ),
                   ],
                 ),
                 child: DropdownButtonFormField<String>(
-                  value: controller.selectedGender,
+                  initialValue: controller.selectedGender,
                   decoration: InputDecoration(
                     contentPadding: EdgeInsets.symmetric(
                       horizontal: 16.w,
@@ -217,7 +211,7 @@ class _CompleteProfileState extends State<CompleteProfile> {
                     controller.selectedGender = newValue!;
                     controller.update();
                   },
-                  hint: Text("Select Gender", style: TextStyle(color: AppColors.grey)),
+                  hint: const Text("Select Gender", style: TextStyle(color: AppColors.grey)),
                 ),
               ),
 
@@ -232,7 +226,6 @@ class _CompleteProfileState extends State<CompleteProfile> {
                 },
                 buttonHeight: 48.h,
                 titleSize: 16,
-                titleWeight: FontWeight.w600,
               ),
 
               SizedBox(height: 24.h),
@@ -249,14 +242,13 @@ class _CompleteProfileState extends State<CompleteProfile> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
         spacing: 4,
         children: [
           Container(
             width: 10,
             height: 10,
             clipBehavior: Clip.antiAlias,
-            decoration: BoxDecoration(),
+            decoration: const BoxDecoration(),
             child: Stack(
               children: [
                 Positioned(
@@ -266,18 +258,18 @@ class _CompleteProfileState extends State<CompleteProfile> {
                     width: 10,
                     height: 10,
                     clipBehavior: Clip.antiAlias,
-                    decoration: BoxDecoration(),
-                    child: Stack(),
+                    decoration: const BoxDecoration(),
+                    child: const Stack(),
                   ),
                 ),
               ],
             ),
           ),
-          Text(
+          const Text(
             'Public',
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: const Color(0xFF373737) /* Primary-Text */,
+              color: Color(0xFF373737) /* Primary-Text */,
               fontSize: 12,
               fontFamily: 'Poppins',
               fontWeight: FontWeight.w400,
@@ -286,13 +278,13 @@ class _CompleteProfileState extends State<CompleteProfile> {
           ),
           Container(
             transform: Matrix4.identity()
-              ..translate(0.0, 0.0)
+              ..translate(0.0)
               ..rotateZ(-1.57),
             width: 29.01,
             height: 16,
             clipBehavior: Clip.antiAlias,
-            decoration: BoxDecoration(),
-            child: Stack(),
+            decoration: const BoxDecoration(),
+            child: const Stack(),
           ),
         ],
       ),

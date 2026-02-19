@@ -12,7 +12,6 @@ import 'package:giolee78/features/advertise/presentation/screen/provider_profile
 import 'package:giolee78/features/auth/change_password/presentation/screen/change_password_screen.dart';
 import 'package:giolee78/features/profile/presentation/controller/profile_controller.dart';
 import 'package:giolee78/features/profile/presentation/screen/help_support_screen.dart';
-import 'package:giolee78/features/profile/presentation/screen/my_profile_screen.dart';
 import 'package:giolee78/features/profile/presentation/screen/privacy_policy_screen.dart';
 import 'package:giolee78/features/profile/presentation/screen/terms_of_services_screen.dart';
 import 'package:giolee78/services/storage/storage_keys.dart';
@@ -97,7 +96,6 @@ class DashBoardProfile extends StatelessWidget {
                   onTap: () {
                     controller.deleteAccount();
                   },
-                  isLoading: false,
                 );
               },
             ),
@@ -146,7 +144,6 @@ class DashBoardProfile extends StatelessWidget {
                     /// User Name here
                     CommonText(
                       text: LocalStorage.businessName,
-                      fontSize: 16,
                       fontWeight: FontWeight.w600,
                       top: 16,
                       bottom: 8.h,
@@ -155,7 +152,6 @@ class DashBoardProfile extends StatelessWidget {
                       text:
                       LocalStorage.advertiserBio,
                       fontSize: 12,
-                      fontWeight: FontWeight.w400,
                       bottom: 20,
                       maxLines: 2,
                       left: 25,
@@ -261,11 +257,9 @@ void _showLogoutDialog() {
         fontSize: 20,
         fontWeight: FontWeight.w600,
       ),
-      content: CommonText(
+      content: const CommonText(
         text: 'Are you sure you want to log out?',
         fontSize: 20,
-        fontWeight: FontWeight.w400,
-        color: AppColors.black,
         maxLines: 2,
       ),
       actions: [
@@ -286,7 +280,6 @@ void _showLogoutDialog() {
                 titleText: 'Yes',
                 buttonColor: AppColors.red,
                 borderColor: AppColors.red,
-                titleColor: AppColors.white,
                 onTap: () {
                   LocalStorage.removeAllPrefData();
                 },

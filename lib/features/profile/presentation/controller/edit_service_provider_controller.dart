@@ -34,7 +34,7 @@ class EditProfileController extends GetxController {
     stateController.text = 'California';
     cityController.text = 'Bakersfield';
     skills.value = ['Electrician', 'House', 'Wiring'];
-    dateOfBirth.value = DateTime(2000, 1, 1);
+    dateOfBirth.value = DateTime(2000);
   }
 
   // @override
@@ -160,7 +160,7 @@ class EditProfileController extends GetxController {
   Future<void> pickDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: dateOfBirth.value ?? DateTime(2000, 1, 1),
+      initialDate: dateOfBirth.value ?? DateTime(2000),
       firstDate: DateTime(1950),
       lastDate: DateTime.now(),
       builder: (context, child) {

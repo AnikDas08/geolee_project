@@ -3,15 +3,15 @@ import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 
 class LocationService {
-  static inti() async {
-    bool isEnabled = await checkLocationEnabled();
+  static Future<void> inti() async {
+    final bool isEnabled = await checkLocationEnabled();
     if (isEnabled) {
       locationPermission();
     }
   }
 
   static Future<bool> checkLocationEnabled() async {
-    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    final bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
 
     if (kDebugMode) {
       print(serviceEnabled);
@@ -48,7 +48,7 @@ class LocationService {
         isEnabled = await Geolocator.openLocationSettings();
       }
       if (isEnabled) {
-        bool isPermission = await locationPermission();
+        final bool isPermission = await locationPermission();
         if (isPermission) {
           positions = await Geolocator.getCurrentPosition();
           print(positions);
@@ -69,9 +69,9 @@ class LocationService {
         isEnabled = await Geolocator.openLocationSettings();
       }
       if (isEnabled) {
-        bool isPermission = await locationPermission();
+        final bool isPermission = await locationPermission();
         if (isPermission) {
-          List<Location> locations = await locationFromAddress(address);
+          final List<Location> locations = await locationFromAddress(address);
           if (kDebugMode) {
             print(locations.first.longitude);
           }
@@ -93,9 +93,9 @@ class LocationService {
         isEnabled = await Geolocator.openLocationSettings();
       }
       if (isEnabled) {
-        bool isPermission = await locationPermission();
+        final bool isPermission = await locationPermission();
         if (isPermission) {
-          List<Placemark> placeMarks = await placemarkFromCoordinates(
+          final List<Placemark> placeMarks = await placemarkFromCoordinates(
             lat,
             long,
           );

@@ -36,7 +36,6 @@ class ChatNearbyProfileScreen extends StatelessWidget {
         child: SingleChildScrollView(
           padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 16.h),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               _ProfileHeader(),
               SizedBox(height: 24.h),
@@ -67,7 +66,6 @@ class _ChatNearbyProfileAppBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: AppColors.background,
-      elevation: 0,
       child: SafeArea(
         bottom: false,
         child: Container(
@@ -116,17 +114,15 @@ class _ProfileHeader extends StatelessWidget {
             ),
           ),
         ),
-        CommonText(
+        const CommonText(
           text: 'Dianne Russell',
-          fontSize: 16,
           fontWeight: FontWeight.w600,
           top: 16,
         ),
-        CommonText(
+        const CommonText(
           text:
               'Exploring One City At A Time\nCapturing Stories Beyond Borders',
           fontSize: 13,
-          fontWeight: FontWeight.w400,
           color: AppColors.secondaryText,
           maxLines: 2,
           left: 40,
@@ -134,7 +130,7 @@ class _ProfileHeader extends StatelessWidget {
           top: 4,
         ),
         SizedBox(height: 8.h),
-        CommonText(
+        const CommonText(
           text: 'Within 400 M',
           fontSize: 12,
           fontWeight: FontWeight.w500,
@@ -150,7 +146,6 @@ class _ProfileHeader extends StatelessWidget {
             const CommonText(
               text: 'Thornridge Cir. Shiloh, Hawaii',
               fontSize: 13,
-              fontWeight: FontWeight.w400,
               color: AppColors.secondaryText,
             ),
           ],
@@ -183,7 +178,6 @@ class _GreetingsInput extends StatelessWidget {
           maxLines: 6,
           paddingHorizontal: 12,
           paddingVertical: 12,
-          borderRadius: 8,
         ),
       ],
     );

@@ -31,9 +31,8 @@ class ForgotPasswordScreen extends StatelessWidget {
             child: Form(
               key: formKey,
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  CommonImage(imageSrc: AppIcons.forgotPassword, size: 250),
+                  const CommonImage(imageSrc: AppIcons.forgotPassword, size: 250),
                   20.height,
                   const CommonText(
                     text: AppString.forgotPassword,
@@ -44,8 +43,6 @@ class ForgotPasswordScreen extends StatelessWidget {
                   ),
                   const CommonText(
                     text: AppString.forgotPasswordsubtitle,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w400,
                     maxLines: 2,
                     color: AppColors.secondaryText,
                   ),

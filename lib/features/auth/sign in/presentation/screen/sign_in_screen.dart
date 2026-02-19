@@ -40,7 +40,6 @@ class SignInScreen extends StatelessWidget {
               child: const CommonText(
                 text: 'Skip', // Using a literal string for the skip text
                 color: AppColors.primaryColor,
-                fontSize: 16,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -56,11 +55,10 @@ class SignInScreen extends StatelessWidget {
             child: Form(
               key: formKey,
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   /// Log In Instruction here
-                  CommonImage(imageSrc: AppImages.logo, size: 110).center,
+                  const CommonImage(imageSrc: AppImages.logo, size: 110).center,
                   20.height,
 
                   /// Account Email Input here
@@ -94,7 +92,6 @@ class SignInScreen extends StatelessWidget {
                         top: 10,
                         bottom: 30,
                         color: AppColors.primaryColor,
-                        fontSize: 16,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -110,13 +107,10 @@ class SignInScreen extends StatelessWidget {
                   ),
                   30.height,
 
-                  Center(
+                  const Center(
                     child: CommonText(
                       text: "Or Sign In With",
-                      fontSize: 16,
-                      fontWeight: FontWeight.w400,
                       color: Colors.grey,
-                      textAlign: TextAlign.center,
                     ),
                   ),
 
@@ -218,7 +212,7 @@ class SignInScreen extends StatelessWidget {
       bottomNavigationBar: SafeArea(
         child: SizedBox(
           height: 60.h,
-          child: Column(children: [const DoNotHaveAccount()]),
+          child: const Column(children: [DoNotHaveAccount()]),
         ),
       ),
     );

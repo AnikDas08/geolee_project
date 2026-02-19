@@ -78,15 +78,15 @@ class CommonPostCards extends StatelessWidget {
                         text: userName,
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
-                        color: AppColors.black,
-                        maxLines: 1,
                       ),
                       SizedBox(height: 4.h),
                       Row(
                         children: [
-                          Icon(Icons.access_time,
-                              size: 12.sp,
-                              color: AppColors.secondaryText),
+                          Icon(
+                            Icons.access_time,
+                            size: 12.sp,
+                            color: AppColors.secondaryText,
+                          ),
                           SizedBox(width: 4.w),
                           CommonText(
                             text: timeAgo,
@@ -103,9 +103,11 @@ class CommonPostCards extends StatelessWidget {
                             ),
                           ),
                           SizedBox(width: 6.w),
-                          Icon(Icons.location_on_outlined,
-                              size: 12.sp,
-                              color: AppColors.secondaryText),
+                          Icon(
+                            Icons.location_on_outlined,
+                            size: 12.sp,
+                            color: AppColors.secondaryText,
+                          ),
                           SizedBox(width: 4.w),
                           Expanded(
                             child: Row(
@@ -114,14 +116,13 @@ class CommonPostCards extends StatelessWidget {
                                   text: location,
                                   fontSize: 11,
                                   color: AppColors.secondaryText,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
                                 ),
                                 SizedBox(width: 30.w),
                                 Expanded(
                                   child: CommonImage(
-                                      size: 12,
-                                      imageSrc: privacyImage),
+                                    size: 12,
+                                    imageSrc: privacyImage,
+                                  ),
                                 ),
                               ],
                             ),
@@ -138,10 +139,7 @@ class CommonPostCards extends StatelessWidget {
           /// ================= Image Slider
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 12.w),
-            child: _PostImageSlider(
-              images: images,
-              onTapPhoto: onTapPhoto,
-            ),
+            child: _PostImageSlider(images: images, onTapPhoto: onTapPhoto),
           ),
 
           /// ================= Clicker Type
@@ -178,10 +176,7 @@ class _PostImageSlider extends StatefulWidget {
   final List<String> images;
   final VoidCallback onTapPhoto;
 
-  const _PostImageSlider({
-    required this.images,
-    required this.onTapPhoto,
-  });
+  const _PostImageSlider({required this.images, required this.onTapPhoto});
 
   @override
   State<_PostImageSlider> createState() => _PostImageSliderState();
@@ -225,47 +220,40 @@ class _PostImageSliderState extends State<_PostImageSlider> {
             padding: EdgeInsets.only(top: 10.h),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(
-                widget.images.length,
-                    (index) {
-                  final isActive = currentIndex == index;
+              children: List.generate(widget.images.length, (index) {
+                final isActive = currentIndex == index;
 
-                  return AnimatedContainer(
-                    duration: const Duration(milliseconds: 350),
-                    curve: Curves.easeOutCubic,
-                    margin: EdgeInsets.symmetric(horizontal: 4.w),
-                    height: 6.h,
-                    width: isActive ? 26.w : 8.w,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20.r),
-                      gradient: isActive
-                          ? const LinearGradient(
-                        colors: [
-                          Color(0xFFFF0000),
-                          Color(0xFFF43C3C),
-                        ],
-                      )
-                          : null,
-                      color: isActive
-                          ? null
-                          : Colors.grey.withOpacity(0.35),
-                      boxShadow: isActive
-                          ? [
-                        BoxShadow(
-                          color: Color(0xFFF66666),
+                return AnimatedContainer(
+                  duration: const Duration(milliseconds: 350),
+                  curve: Curves.easeOutCubic,
+                  margin: EdgeInsets.symmetric(horizontal: 4.w),
+                  height: 6.h,
+                  width: isActive ? 26.w : 8.w,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20.r),
+                    gradient: isActive
+                        ? const LinearGradient(
+                            colors: [Color(0xFFFF0000), Color(0xFFF43C3C)],
+                          )
+                        : null,
+                    color: isActive
+                        ? null
+                        : Colors.grey.withValues(alpha: 0.35),
+                    boxShadow: isActive
+                        ? [
+                            BoxShadow(
+                              color: const Color(0xFFF66666),
 
-                          blurRadius: 6.r,
-                          offset: const Offset(0, 2),
-                        )
-                      ]
-                          : [],
-                    ),
-                  );
-                },
-              ),
+                              blurRadius: 6.r,
+                              offset: const Offset(0, 2),
+                            ),
+                          ]
+                        : [],
+                  ),
+                );
+              }),
             ),
           ),
-
       ],
     );
   }

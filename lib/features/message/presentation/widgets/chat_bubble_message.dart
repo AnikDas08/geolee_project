@@ -181,7 +181,7 @@ class ChatBubbleMessage extends StatelessWidget {
                                         SizedBox(
                                           width: 30.w,
                                           height: 30.h,
-                                          child: CircularProgressIndicator(
+                                          child: const CircularProgressIndicator(
                                             color: Colors.white,
                                             strokeWidth: 3,
                                           ),

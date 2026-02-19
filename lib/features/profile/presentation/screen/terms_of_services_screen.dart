@@ -27,11 +27,10 @@ class _TermsOfServicesScreenState extends State<TermsOfServicesScreen> {
       appBar: AppBar(
         elevation: 0,
         centerTitle: true,
-        title: CommonText(
+        title: const CommonText(
           text: 'Terms & Condition',
           fontSize: 18,
           fontWeight: FontWeight.w600,
-          color: AppColor.black,
         ),
         backgroundColor: AppColor.white,
         leading: IconButton(
@@ -54,13 +53,12 @@ class _TermsOfServicesScreenState extends State<TermsOfServicesScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               /// TITLE
-              Center(
+              const Center(
                 child: CommonText(
                   text: 'Welcome To Clicker Count App!',
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
                   color: Colors.red,
-                  textAlign: TextAlign.center,
                 ),
               ),
 
@@ -73,7 +71,7 @@ class _TermsOfServicesScreenState extends State<TermsOfServicesScreen> {
                   "body": Style(
                     fontSize: FontSize(14),
                     color: AppColor.textBody,
-                    lineHeight: LineHeight(1.5),
+                    lineHeight: const LineHeight(1.5),
                   ),
                   "h1": Style(
                     fontSize: FontSize(20),

@@ -20,14 +20,13 @@ class SearchFriendScreen extends StatelessWidget {
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.black),
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.pop(context),
         ),
         title: CommonText(
           text: "Search Friend",
           fontWeight: FontWeight.w600,
           fontSize: 18.sp,
-          color: Colors.black,
         ),
         centerTitle: true,
       ),
@@ -77,9 +76,8 @@ class SearchFriendScreen extends StatelessWidget {
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8.r),
-                      borderSide: BorderSide(
+                      borderSide: const BorderSide(
                         color: AppColors.primaryColor,
-                        width: 1,
                       ),
                     ),
                     contentPadding: EdgeInsets.symmetric(
@@ -94,7 +92,7 @@ class SearchFriendScreen extends StatelessWidget {
                 /// User List
                 Expanded(
                   child: controller.isLoading
-                      ? Center(child: CircularProgressIndicator())
+                      ? const Center(child: CircularProgressIndicator())
                       : controller.filteredUsers.isEmpty
                       ? Center(
                     child: Column(
@@ -158,7 +156,6 @@ class SearchFriendScreen extends StatelessWidget {
                                   text: user.name,
                                   fontWeight: FontWeight.w500,
                                   fontSize: 16.sp,
-                                  color: Colors.black,
                                 ),
                               ],
                             ),

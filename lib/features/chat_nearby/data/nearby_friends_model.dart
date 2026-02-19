@@ -22,7 +22,7 @@ class NearbyChatResponseModel {
     );
   }
 
-  operator [](int other) {}
+  void operator [](int other) {}
 }
 
 

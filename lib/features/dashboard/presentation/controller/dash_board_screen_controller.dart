@@ -1,6 +1,5 @@
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
-import 'package:giolee78/features/advertise/presentation/controller/provider_profile_view_controller.dart';
 import 'package:giolee78/services/api/api_response_model.dart';
 import 'package:giolee78/services/api/api_service.dart';
 
@@ -33,14 +32,14 @@ class DashBoardScreenController extends GetxController {
 
       debugPrint("📊 Fetching advertisement overview...");
 
-      ApiResponseModel response = await ApiService.get(
+      final ApiResponseModel response = await ApiService.get(
         ApiEndPoint.advertisementsOverviewMe,
       );
 
       debugPrint("📊 Response status: ${response.statusCode}");
       debugPrint("📊 Response data: ${response.data}");
 
-      if (response.statusCode == 200 && response.data != null) {
+      if (response.statusCode == 200) {
         final result = AdvertisementOverviewResponse.fromJson(
           response.data as Map<String, dynamic>,
         );
@@ -68,11 +67,11 @@ class DashBoardScreenController extends GetxController {
     try {
       final activeEndpoint = "${ApiEndPoint.getAdvertisementMe}?status=active";
 
-      ApiResponseModel responseActive = await ApiService.get(activeEndpoint);
+      final ApiResponseModel responseActive = await ApiService.get(activeEndpoint);
 
       debugPrint('📢 Active Ads Response: ${responseActive.data}');
 
-      if (responseActive.statusCode == 200 && responseActive.data != null) {
+      if (responseActive.statusCode == 200) {
         debugPrint("${responseActive.data}");
 
         final List<dynamic> jsonList = responseActive.data['data'];

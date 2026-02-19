@@ -13,7 +13,6 @@ import 'package:giolee78/features/clicker/presentation/screen/clicker_screen.dar
 import 'package:giolee78/features/friend/presentation/screen/friend_request_screen.dart';
 import 'package:giolee78/features/friend/presentation/screen/my_friend_screen.dart';
 import 'package:giolee78/features/addpost/presentation/screen/my_post_screen.dart';
-import 'package:giolee78/features/home/presentation/controller/home_nav_controller.dart';
 import 'package:giolee78/features/notifications/presentation/controller/notifications_controller.dart';
 import 'package:giolee78/utils/constants/app_icons.dart';
 import 'package:giolee78/utils/constants/app_colors.dart';
@@ -132,7 +131,7 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            CircularProgressIndicator(color: AppColors.primaryColor),
+            const CircularProgressIndicator(color: AppColors.primaryColor),
             SizedBox(height: 16.h),
             Text('Loading map data...',
                 style: TextStyle(fontSize: 14.sp, color: Colors.grey[600])),
@@ -153,16 +152,9 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             // ✅ Obx দিয়ে GoogleMap wrap — markerList বদলালেই map instantly update হবে
             Obx(() => GoogleMap(
-              compassEnabled: true,
               mapType: MapType.satellite,
               initialCameraPosition: _initialPosition,
               myLocationEnabled: true,
-              myLocationButtonEnabled: true,
-              zoomControlsEnabled: true,
-              zoomGesturesEnabled: true,
-              scrollGesturesEnabled: true,
-              tiltGesturesEnabled: true,
-              rotateGesturesEnabled: true,
               heatmaps: controller.heatmaps,
               // ✅ RxList কে Set এ convert করে pass করা হচ্ছে
               markers: Set<Marker>.from(controller.markerList),
@@ -328,7 +320,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildActionList(HomeController controller) {
     try {
-      bool isLoggedIn = LocalStorage.token != null && LocalStorage.token!.isNotEmpty;
+      final bool isLoggedIn = LocalStorage.token.isNotEmpty;
 
       return Column(
         children: [
@@ -337,7 +329,7 @@ class _HomeScreenState extends State<HomeScreen> {
             title: 'Clicker',
             onTap: () {
               try {
-                Get.to(() => ClickerScreen(), arguments: controller);
+                Get.to(() => const ClickerScreen(), arguments: controller);
               } catch (e) {
                 Get.snackbar('Error', 'Failed to open Clicker');
               }
@@ -354,7 +346,7 @@ class _HomeScreenState extends State<HomeScreen> {
               title: 'My Post',
               onTap: () {
                 try {
-                  Get.to(() => MyPostScreen());
+                  Get.to(() => const MyPostScreen());
                 } catch (e) {
                   Get.snackbar('Error', 'Failed to open My Post');
                 }
@@ -365,7 +357,7 @@ class _HomeScreenState extends State<HomeScreen> {
               title: 'My Friend',
               onTap: () {
                 try {
-                  Get.to(() => MyFriendScreen());
+                  Get.to(() => const MyFriendScreen());
                 } catch (e) {
                   Get.snackbar('Error', 'Failed to open My Friend');
                 }
@@ -392,7 +384,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  void _handleLocationAndNavigate() async {
+  Future<void> _handleLocationAndNavigate() async {
     try {
       _showConfirmationDialog();
     } catch (e) {
@@ -442,7 +434,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           }
 
                           if (status.isGranted) {
-                            bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+                            final bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
                             if (!serviceEnabled) {
                               Get.back();
                               Get.snackbar('GPS Disabled', 'Please enable GPS/Location services',
@@ -452,7 +444,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               return;
                             }
 
-                            Position position = await Geolocator.getCurrentPosition(
+                            final Position position = await Geolocator.getCurrentPosition(
                                 desiredAccuracy: LocationAccuracy.high);
                             Get.back();
                             LocalStorage.lat = position.latitude;

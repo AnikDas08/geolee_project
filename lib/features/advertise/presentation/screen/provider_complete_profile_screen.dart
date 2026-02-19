@@ -5,7 +5,6 @@ import 'package:giolee78/component/button/common_button.dart';
 import 'package:giolee78/component/image/common_image.dart';
 import 'package:giolee78/component/text_field/common_text_field.dart';
 import 'package:giolee78/utils/constants/app_colors.dart';
-import 'package:giolee78/utils/constants/app_images.dart';
 import 'package:giolee78/utils/helpers/other_helper.dart';
 import 'dart:io'; // Import for File
 import '../controller/provider_complete_profile_controller.dart';
@@ -52,7 +51,7 @@ class ServiceProviderInfoScreen extends StatelessWidget {
                         backgroundColor: Colors.transparent,
                         child: ClipOval(
                           child: controller.profileImagePath.value.isEmpty
-                              ? CommonImage(
+                              ? const CommonImage(
 
                             imageSrc: "assets/images/profilePlaceholder.jpg",
                             size: 100,

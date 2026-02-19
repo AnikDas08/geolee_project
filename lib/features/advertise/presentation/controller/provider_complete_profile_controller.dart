@@ -6,7 +6,6 @@ import 'package:image_picker/image_picker.dart';
 import 'package:giolee78/services/api/api_service.dart';
 import 'package:giolee78/services/api/api_response_model.dart';
 import 'package:giolee78/services/storage/storage_services.dart';
-import 'package:giolee78/utils/enum/enum.dart';
 import '../../../../config/api/api_end_point.dart';
 import '../../../../services/storage/storage_keys.dart';
 import '../../../home/presentation/screen/home_nav_screen.dart';
@@ -137,8 +136,6 @@ class ServiceProviderController extends GetxController {
         ApiEndPoint.advertiserCompleteProfile,
         body: body,
         imagePath: profileImagePath.value,
-        imageName: "image",
-        method: "POST",
       );
 
       if (response.statusCode == 200) {
@@ -184,13 +181,13 @@ class ServiceProviderController extends GetxController {
 
   // ================= Resend OTP =================
 
-  void resendOtp() async {
+  Future<void> resendOtp() async {
     if (!isResendEnabled.value) return;
 
     try {
       final body = {"email": LocalStorage.myEmail.toString().trim()};
 
-      ApiResponseModel response = await ApiService.post(
+      final ApiResponseModel response = await ApiService.post(
 
         ApiEndPoint.resendOtp,
         body: body,
@@ -208,14 +205,14 @@ class ServiceProviderController extends GetxController {
   }
 
   // ================= Verify OTP =================
-  void verifyOtp() async {
+  Future<void> verifyOtp() async {
     try {
       final body = {
         "email": LocalStorage.myEmail.toString().trim(),
         "oneTimeCode": int.parse(otpController.text.trim())
       };
 
-      ApiResponseModel response = await ApiService.post(
+      final ApiResponseModel response = await ApiService.post(
         header: {
           'Content-Type': 'application/json',
         },

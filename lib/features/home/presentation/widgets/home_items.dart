@@ -25,11 +25,11 @@ class HomeItem extends StatelessWidget {
       onTap: onTap,
       child: Container(
         width: 170.w,
-        padding: EdgeInsets.all(10),
+        padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(8),
-          boxShadow: [
+          boxShadow: const [
             BoxShadow(
               color: Colors.black26,
               blurRadius: 2,
@@ -63,18 +63,11 @@ class HomeItem extends StatelessWidget {
             CommonText(
               text: post.title,
               fontSize: 12,
-              color: AppColors.primaryWork,
               fontWeight: FontWeight.w600,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
             ),
             CommonText(
               text: post.user.name,
               fontSize: 12,
-              color: AppColors.primaryWork,
-              fontWeight: FontWeight.w400,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
             ),
           ],
         ),

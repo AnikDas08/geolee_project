@@ -108,7 +108,6 @@ class _MyPostCardState extends State<MyPostCard> {
                               text: widget.userName,
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
-                              maxLines: 1,
                             ),
                             SizedBox(height: 4.h),
                             Row(
@@ -147,8 +146,6 @@ class _MyPostCardState extends State<MyPostCard> {
                                         text: widget.location,
                                         fontSize: 11,
                                         color: AppColors.secondaryText,
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
                                       ),
                                       SizedBox(width: 30.w),
                                       Expanded(

@@ -1,4 +1,3 @@
-import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -97,7 +96,6 @@ class Item extends StatelessWidget {
             CommonText(
               text: title,
               color: color,
-              fontWeight: FontWeight.w400,
               fontSize: 18,
               left: 16,
             ),

@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:giolee78/features/addpost/presentation/controller/post_controller.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../../config/api/api_end_point.dart';
@@ -53,7 +52,7 @@ class EditPostControllers extends GetxController {
       isLoading.value = true;
       final url = "${ApiEndPoint.getSinglePost}$postId";
 
-      ApiResponseModel response = await ApiService.get(
+      final ApiResponseModel response = await ApiService.get(
         url,
 
       );
@@ -96,7 +95,7 @@ class EditPostControllers extends GetxController {
     try {
       final url = "${ApiEndPoint.updatePost}$postId";
 
-      Map<String, String> body = {
+      final Map<String, String> body = {
         'description': descriptionController.text.trim(),
         'clickerType': selectedPricingOption.value,
         'privacy': selectedPriorityLevel.value.toLowerCase(),
@@ -104,7 +103,7 @@ class EditPostControllers extends GetxController {
       };
 
 
-      List<Map<String, dynamic>> files = [];
+      final List<Map<String, dynamic>> files = [];
       for (var file in selectedImages) {
         files.add({
           'name': 'image',
@@ -113,7 +112,7 @@ class EditPostControllers extends GetxController {
       }
 
 
-      var response = await ApiService.multipartImage(
+      final response = await ApiService.multipartImage(
         url,
         method: "PATCH",
         body: body,

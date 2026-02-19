@@ -225,7 +225,7 @@ class EditProfileScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: DropdownButtonFormField<String>(
-                      value: controller.selectedGender.value,
+                      initialValue: controller.selectedGender.value,
                       decoration: const InputDecoration(
                         border: InputBorder.none,
                       ),

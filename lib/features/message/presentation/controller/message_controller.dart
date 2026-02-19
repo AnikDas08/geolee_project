@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:giolee78/services/socket/socket_service.dart';
 import 'package:image_picker/image_picker.dart';
+
 
 class MessageController extends GetxController {
   /// Text Controller
@@ -38,6 +40,16 @@ class MessageController extends GetxController {
 
   static MessageController get instance => Get.put(MessageController());
 
+  void joinRoom() {
+    final body = {chatId};
+    SocketServices.emitWithAck('room:join', body, (data) {});
+  }
+
+  void leaveRoom() {
+    final body = {chatId};
+    SocketServices.emitWithAck('room:leave', body, (data) {});
+  }
+
   @override
   void onInit() {
     super.onInit();
@@ -67,7 +79,8 @@ class MessageController extends GetxController {
 
     // Demo service info for banner
     serviceTitle = 'House Cleaning Service';
-    serviceImage = 'https://images.pexels.com/photos/4239097/pexels-photo-4239097.jpeg';
+    serviceImage =
+        'https://images.pexels.com/photos/4239097/pexels-photo-4239097.jpeg';
     price = 120;
     clientStatus = 'RUNNING';
     postId = 'demo-post-1';
@@ -76,7 +89,8 @@ class MessageController extends GetxController {
       ChatMessage(
         id: '1',
         senderId: 'other_user',
-        senderImage: 'https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg',
+        senderImage:
+            'https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg',
         message: 'Hi, I saw your service. Are you available tomorrow?',
         timestamp: DateTime.now().subtract(const Duration(minutes: 25)),
         isCurrentUser: false,
@@ -92,7 +106,8 @@ class MessageController extends GetxController {
       ChatMessage(
         id: '3',
         senderId: 'other_user',
-        senderImage: 'https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg',
+        senderImage:
+            'https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg',
         message: 'Great! Can you also bring your own equipment?',
         timestamp: DateTime.now().subtract(const Duration(minutes: 15)),
         isCurrentUser: false,
@@ -108,7 +123,8 @@ class MessageController extends GetxController {
       ChatMessage(
         id: '5',
         senderId: 'other_user',
-        senderImage: 'https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg',
+        senderImage:
+            'https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg',
         message: 'Perfect, see you then!',
         timestamp: DateTime.now().subtract(const Duration(minutes: 5)),
         isCurrentUser: false,
@@ -219,7 +235,6 @@ class MessageController extends GetxController {
       timestamp: DateTime.now(),
       isCurrentUser: true,
       isImage: true,
-      isUploading: false,
     );
 
     messages.add(finalMessage);
@@ -249,6 +264,26 @@ class MessageController extends GetxController {
       }
     });
   }
+
+  // void listenMessage(String chatId) {
+  //   SocketServices.on('message:new', (data) {
+  //     final model = MessageModel.fromJson(data);
+  //
+  //     messages.insert(0, ChatMessage(
+  //       id: model.id,
+  //       senderId: model.senderId,
+  //       senderImage: model.senderImage,
+  //       message: model.message,
+  //       imageUrl: model.imageUrl,
+  //       timestamp: model.timestamp,
+  //       isCurrentUser: model.senderId == currentUserId,
+  //       isImage: model.isImage,
+  //       isNotice: model.isNotice,
+  //     ));
+  //
+  //     update();
+  //   });
+  // }
 
   @override
   void onClose() {

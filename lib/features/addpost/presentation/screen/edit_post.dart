@@ -67,14 +67,13 @@ class _EditPostState extends State<EditPost> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      CustomAppBar(title: "Edit Post"),
+                      const CustomAppBar(title: "Edit Post"),
                       SizedBox(height: 20.h),
 
                       // Upload Image Section
                       CommonText(
                         text: "Upload Images",
                         fontSize: 14.sp,
-                        fontWeight: FontWeight.w400,
                       ),
                       SizedBox(height: 10.h),
                       Obx(() => _buildImageUploadSection(context)),
@@ -84,7 +83,6 @@ class _EditPostState extends State<EditPost> {
                       CommonText(
                         text: "Description",
                         fontSize: 14.sp,
-                        fontWeight: FontWeight.w400,
                       ),
                       SizedBox(height: 5.h),
                       _buildTextField(
@@ -98,7 +96,6 @@ class _EditPostState extends State<EditPost> {
                       CommonText(
                         text: "Select Clicker",
                         fontSize: 14.sp,
-                        fontWeight: FontWeight.w400,
                       ),
                       SizedBox(height: 6.h),
                       Obx(
@@ -202,8 +199,6 @@ class _EditPostState extends State<EditPost> {
                           titleText: controller.isLoading.value
                               ? "Updating..."
                               : "Update Post",
-                          buttonColor: AppColors.primaryColor,
-                          buttonRadius: 8,
                           onTap: () {
                             controller.editPost();
                           },
@@ -269,7 +264,6 @@ class _EditPostState extends State<EditPost> {
         CommonText(
           text: "Images: ($totalImages)",
           fontSize: 12.sp,
-          fontWeight: FontWeight.w400,
           color: AppColors.textSecond,
         ),
         SizedBox(height: 8.h),
@@ -281,7 +275,6 @@ class _EditPostState extends State<EditPost> {
             crossAxisCount: 4,
             crossAxisSpacing: 10.w,
             mainAxisSpacing: 10.h,
-            childAspectRatio: 1.0,
           ),
           itemBuilder: (context, index) {
             if (index < existingImages.length) {
@@ -311,7 +304,7 @@ class _EditPostState extends State<EditPost> {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8.r),
-        border: Border.all(color: Colors.grey[300]!, width: 1),
+        border: Border.all(color: Colors.grey[300]!),
       ),
       child: Stack(
         children: [
@@ -370,7 +363,7 @@ class _EditPostState extends State<EditPost> {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8.r),
-        border: Border.all(color: Colors.grey[300]!, width: 1),
+        border: Border.all(color: Colors.grey[300]!),
       ),
       child: Stack(
         children: [
@@ -435,7 +428,6 @@ class _EditPostState extends State<EditPost> {
         decoration: BoxDecoration(
           border: Border.all(
             color: Colors.grey[300]!,
-            style: BorderStyle.solid,
           ),
           borderRadius: BorderRadius.circular(12.r),
         ),
@@ -559,7 +551,6 @@ class _EditPostState extends State<EditPost> {
         decoration: ShapeDecoration(
           shape: RoundedRectangleBorder(
             side: BorderSide(
-              width: 1,
               color: isSelected ? AppColors.primaryColor : Colors.grey[300]!,
             ),
             borderRadius: BorderRadius.circular(4),

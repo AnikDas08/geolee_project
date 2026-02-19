@@ -142,7 +142,7 @@ class GroupMessageScreen extends StatelessWidget {
                         onTap: controller.sendMessage,
                         child: Container(
                           padding: EdgeInsets.all(10.w),
-                          decoration: BoxDecoration(
+                          decoration: const BoxDecoration(
                             color: AppColors.primaryColor,
                             shape: BoxShape.circle,
                           ),

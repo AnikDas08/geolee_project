@@ -9,7 +9,7 @@ const  MyFriendsModel({this.success, this.message, this.pagination, this.data});
  factory MyFriendsModel.fromJson(dynamic json) {
 
    if(json == null){
-     return MyFriendsModel();
+     return const MyFriendsModel();
    }
    if(json is Map){
      return MyFriendsModel(message: json['message'], success:  json['success'], pagination: json['pagination'] is Map ? Pagination.fromJson(json['pagination']) : null ,
@@ -17,7 +17,7 @@ const  MyFriendsModel({this.success, this.message, this.pagination, this.data});
          data: json['data'] is List ? (json['data'] as List).map((e) =>MyFriendsData.fromJson(e)).toList() : []
      );
    }
-   return MyFriendsModel();
+   return const MyFriendsModel();
   }
 
   Map<String, dynamic> toJson() {

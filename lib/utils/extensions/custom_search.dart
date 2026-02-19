@@ -48,22 +48,21 @@ class CustomSearchField extends StatelessWidget {
                 child: Icon(Icons.search, color: hintColor, size: 20),
               ),
               contentPadding: const EdgeInsets.symmetric(
-                vertical: 0,
                 horizontal: 16,
               ),
               filled: true,
               fillColor: backgroundColor,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(borderRadius),
-                borderSide: BorderSide(color: borderColor, width: 1),
+                borderSide: BorderSide(color: borderColor),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(borderRadius),
-                borderSide: BorderSide(color: borderColor, width: 1),
+                borderSide: BorderSide(color: borderColor),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(borderRadius),
-                borderSide: BorderSide(color: borderColor, width: 1),
+                borderSide: BorderSide(color: borderColor),
               ),
             ),
           );

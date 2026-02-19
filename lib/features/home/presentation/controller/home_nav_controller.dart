@@ -1,7 +1,5 @@
 import 'package:get/get.dart';
 import 'package:giolee78/services/storage/storage_services.dart';
-import 'package:giolee78/utils/enum/enum.dart';
-import 'package:giolee78/utils/log/app_log.dart';
 
 class HomeNavController extends GetxController {
   final RxInt currentIndex = 0.obs;
@@ -18,7 +16,7 @@ class HomeNavController extends GetxController {
 
   void refreshRoleState() {
     // Check if the role is 'user'
-    bool isUser = LocalStorage.role == "user";
+    final bool isUser = LocalStorage.role == "user";
     isUserScreenActive.value = true; // Both roles start with HomeScreen (index 0)
     currentIndex.value = 0;
   }
@@ -26,7 +24,7 @@ class HomeNavController extends GetxController {
   void changeIndex(int index) {
     currentIndex.value = index;
 
-    bool isUser = LocalStorage.role == "user";
+    final bool isUser = LocalStorage.role == "user";
 
     if (isUser) {
       // Users always stay on userScreens

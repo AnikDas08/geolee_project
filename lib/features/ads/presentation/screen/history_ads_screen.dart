@@ -36,8 +36,6 @@ class HistoryAdsScreen extends StatelessWidget {
               text: 'Ads History',
               fontSize: 18,
               fontWeight: FontWeight.w600,
-              color: AppColors.black,
-              textAlign: TextAlign.center,
             ),
           ),
           body: SafeArea(
@@ -76,7 +74,7 @@ class HistoryAdsScreen extends StatelessWidget {
                                 description: ad.description,
                                 onTap: () {
                                   Get.to(
-                                    ViewAdsScreen(),
+                                    const ViewAdsScreen(),
                                     arguments: ad.id,
                                   )?.then((value) {
                                     if (value == true) {
@@ -120,7 +118,6 @@ class HistoryAdsScreen extends StatelessWidget {
                 color: controller.selectedTabIndex == 0
                     ? AppColors.white
                     : AppColors.black,
-                textAlign: TextAlign.center,
               ),
             ),
           ),
@@ -146,7 +143,6 @@ class HistoryAdsScreen extends StatelessWidget {
                 color: controller.selectedTabIndex == 1
                     ? AppColors.white
                     : AppColors.black,
-                textAlign: TextAlign.center,
               ),
             ),
           ),
@@ -203,9 +199,7 @@ class _HistoryAdCard extends StatelessWidget {
               SizedBox(height: 12.h),
               CommonText(
                 text: title,
-                fontSize: 16,
                 fontWeight: FontWeight.w600,
-                color: AppColors.black,
                 textAlign: TextAlign.left,
                 maxLines: 2,
                 overflow: TextOverflow.visible,
@@ -214,11 +208,9 @@ class _HistoryAdCard extends StatelessWidget {
               CommonText(
                 text: description,
                 fontSize: 12,
-                fontWeight: FontWeight.w400,
                 color: AppColors.textSecond,
                 textAlign: TextAlign.left,
                 maxLines: 3,
-                overflow: TextOverflow.ellipsis,
               ),
             ],
           ),

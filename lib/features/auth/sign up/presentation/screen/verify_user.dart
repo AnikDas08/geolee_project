@@ -50,7 +50,7 @@ class _VerifyUserState extends State<VerifyUser> {
                 key: formKey,
                 child: Column(
                   children: [
-                    CommonImage(imageSrc: AppIcons.enterotp, size: 250),
+                    const CommonImage(imageSrc: AppIcons.enterotp, size: 250),
                     20.height,
                     const CommonText(
                       text: AppString.otpVerify,
@@ -115,7 +115,6 @@ class _VerifyUserState extends State<VerifyUser> {
                         text: "Resend code in ${controller.time}",
                         fontSize: 14,
                         bottom: 20,
-                        fontWeight: FontWeight.w400,
                         color: AppColors.secondaryText,
                       ),
 
@@ -125,11 +124,8 @@ class _VerifyUserState extends State<VerifyUser> {
                       children: [
                         const CommonText(
                           text: "Didn't receive the code?",
-                          fontSize: 16,
                           bottom: 40,
                           maxLines: 3,
-                          fontWeight: FontWeight.w400,
-                          color: AppColors.textPrimary,
                         ),
                         const SizedBox(width: 4),
                         InkWell(
@@ -157,7 +153,6 @@ class _VerifyUserState extends State<VerifyUser> {
                           )
                               : CommonText(
                             text: "Resend",
-                            fontSize: 16,
                             bottom: 40,
                             fontWeight: FontWeight.w700,
                             maxLines: 3,

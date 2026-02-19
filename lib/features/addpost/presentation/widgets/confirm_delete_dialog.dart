@@ -3,13 +3,19 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../utils/constants/app_colors.dart';
 
-void showDeletePostDialog(BuildContext context, {required VoidCallback onConfirmDelete, String? title}) {
-  String? title = "Are you sure you want to\nDelete This Post?";
+void showDeletePostDialog(
+  BuildContext context, {
+  required VoidCallback onConfirmDelete,
+  String? title,
+}) {
+  final String? title = "Are you sure you want to\nDelete This Post?";
   showDialog(
     context: context,
     builder: (BuildContext dialogContext) {
       return Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10.r),
+        ),
         backgroundColor: Colors.white,
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 15.h),
@@ -28,7 +34,7 @@ void showDeletePostDialog(BuildContext context, {required VoidCallback onConfirm
               // --- Content Text ---
               Center(
                 child: Text(
-                  title,
+                  title ?? '',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 18.sp,

@@ -2,10 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
-import 'package:giolee78/component/button/common_button.dart';
 import 'package:giolee78/component/text/common_text.dart';
-import 'package:giolee78/config/route/app_routes.dart';
-import 'package:giolee78/features/ads/data/add_history_model.dart';
 import 'package:giolee78/features/ads/presentation/screen/edit_ads_screen.dart';
 import 'package:giolee78/utils/constants/app_colors.dart';
 import 'package:giolee78/utils/constants/app_images.dart';
@@ -52,8 +49,6 @@ class ViewAdsScreen extends StatelessWidget {
               text: 'View Ads',
               fontSize: 18,
               fontWeight: FontWeight.w600,
-              color: AppColors.black,
-              textAlign: TextAlign.center,
             ),
             backgroundColor: AppColors.background,
           ),
@@ -75,12 +70,12 @@ class ViewAdsScreen extends StatelessWidget {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              CommonText(text: "Adc Click"),
+                              const CommonText(text: "Adc Click"),
                               CommonText(
                                 text: ad.clickCount.toString(),
                                 fontSize: 36,
                                 fontWeight: FontWeight.w700,
-                                color: Color(0xFF373838),
+                                color: const Color(0xFF373838),
                               ),
                             ],
                           ),
@@ -97,12 +92,12 @@ class ViewAdsScreen extends StatelessWidget {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              CommonText(text: "Ads Reach"),
+                              const CommonText(text: "Ads Reach"),
                               CommonText(
                                 text: ad.reachCount.toString(),
                                 fontSize: 36,
                                 fontWeight: FontWeight.w700,
-                                color: Color(0xFF373838),
+                                color: const Color(0xFF373838),
                               ),
                             ],
                           ),
@@ -134,14 +129,12 @@ class ViewAdsScreen extends StatelessWidget {
                   text: ad.title,
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.black,
                   textAlign: TextAlign.left,
                 ),
                 SizedBox(height: 8.h),
                 CommonText(
                   text: ad.description,
                   fontSize: 14,
-                  fontWeight: FontWeight.w400,
                   color: AppColors.textSecond,
                   textAlign: TextAlign.left,
                 ),
@@ -180,7 +173,6 @@ class ViewAdsScreen extends StatelessWidget {
         InkWell(
           onTap: () {
             Get.dialog(
-              barrierDismissible: true,
               Dialog(
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -194,9 +186,8 @@ class ViewAdsScreen extends StatelessWidget {
                     children: [
                       Icon(Icons.delete, color: Colors.red, size: 40.sp),
                       SizedBox(height: 16.h),
-                      CommonText(
+                      const CommonText(
                         text: "Are you sure you want to delete this post?",
-                        textAlign: TextAlign.center,
                       ),
                       SizedBox(height: 24.h),
                       Row(
@@ -218,7 +209,7 @@ class ViewAdsScreen extends StatelessWidget {
                                   width: 2
                                 )
                               ),
-                              child: Center(
+                              child: const Center(
                                 child: CommonText(text: "Delete"),
                               ),
                             ),
@@ -236,7 +227,7 @@ class ViewAdsScreen extends StatelessWidget {
                                   borderRadius: BorderRadius.circular(12),
 
                               ),
-                              child: Center(
+                              child: const Center(
                                 child: CommonText(text: "Cancel",color: AppColors.white,),
                               ),
                             ),
@@ -255,9 +246,9 @@ class ViewAdsScreen extends StatelessWidget {
             width: 172.w,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: AppColors.red, width: 1),
+              border: Border.all(color: AppColors.red),
             ),
-            child: Center(
+            child: const Center(
               child: CommonText(
                 text: 'Delete Post',
                 fontWeight: FontWeight.w600,
@@ -277,9 +268,9 @@ class ViewAdsScreen extends StatelessWidget {
             decoration: BoxDecoration(
               color: AppColors.red,
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: AppColors.red, width: 1),
+              border: Border.all(color: AppColors.red),
             ),
-            child: Center(
+            child: const Center(
               child: CommonText(
                 text: 'Update Post',
                 color: AppColors.white,
@@ -305,14 +296,12 @@ class ViewAdsScreen extends StatelessWidget {
             text: label,
             fontSize: 12,
             fontWeight: FontWeight.w600,
-            color: AppColors.black,
           ),
           SizedBox(width: 4.w),
           Expanded(
             child: CommonText(
               text: value,
               fontSize: 12,
-              fontWeight: FontWeight.w400,
               color: isLink ? AppColors.primaryColor : AppColors.textSecond,
             ),
           ),

@@ -27,23 +27,23 @@ class SocketServices {
     });
   }
 
-  static on(String event, Function(dynamic data) handler) {
+  static void on(String event, Function(dynamic data) handler) {
     if (!_socket.connected) {
       connectToSocket();
     }
     _socket.on(event, handler);
   }
 
-  static emit(String event, Function(dynamic data) handler) {
+  static void emit(String event, Function(dynamic data) handler) {
     if (!_socket.connected) {
       connectToSocket();
     }
     _socket.emit(event, handler);
   }
 
-  static emitWithAck(
+  static void emitWithAck(
     String event,
-    Map<String, dynamic> data,
+    dynamic data,
     Function(dynamic data) handler,
   ) {
     if (!_socket.connected) {

@@ -1,7 +1,5 @@
-import 'package:flutter/cupertino.dart' show debugPrint;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:giolee78/features/ads/data/add_history_model.dart';
 import 'package:giolee78/config/api/api_end_point.dart';
 import 'package:giolee78/services/api/api_response_model.dart';
 import 'package:giolee78/services/api/api_service.dart';
@@ -27,9 +25,9 @@ class ViewAdsScreenController extends GetxController {
 
     try {
       final endpoint = "${ApiEndPoint.getAdvertisementById}$adsId";
-      ApiResponseModel response = await ApiService.get(endpoint);
+      final ApiResponseModel response = await ApiService.get(endpoint);
 
-      if (response.statusCode == 200 && response.data != null) {
+      if (response.statusCode == 200) {
         ad = SingleAdvertisement.fromJson(response.data['data']);
       }
     } catch (e) {
@@ -48,7 +46,7 @@ class ViewAdsScreenController extends GetxController {
         barrierDismissible: false,
       );
 
-      ApiResponseModel response = await ApiService.delete(
+      final ApiResponseModel response = await ApiService.delete(
         ApiEndPoint.deleteAdvertisementById + adsId,
       );
 

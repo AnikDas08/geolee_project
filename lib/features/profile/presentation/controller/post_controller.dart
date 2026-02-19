@@ -28,7 +28,7 @@ class MyPostController extends GetxController {
       update(); // Trigger UI for loading state
 
       final url = ApiEndPoint.getMyPost;
-      ApiResponseModel response = await ApiService.get(url);
+      final ApiResponseModel response = await ApiService.get(url);
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final myPostModel = MyPostModel.fromJson(response.data);
@@ -53,7 +53,7 @@ class MyPostController extends GetxController {
 
   Future<void> deletePost(String postId) async {
     try {
-      ApiResponseModel response = await ApiService.delete(
+      final ApiResponseModel response = await ApiService.delete(
         "${ApiEndPoint.deletePost}$postId",
       );
 
