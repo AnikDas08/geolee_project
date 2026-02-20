@@ -16,16 +16,36 @@ class MessageScreen extends StatefulWidget {
 
 class _MessageScreenState extends State<MessageScreen> {
   String _getImageUrl(String imagePath) {
-    if (imagePath.startsWith('http')) {
-      return imagePath;
-    }
+    if (imagePath.startsWith('http')) return imagePath;
     return imagePath;
   }
 
+  /// Returns an icon and color based on file extension
+  ({IconData icon, Color color}) _getFileIconInfo(String? ext) {
+    switch (ext?.toLowerCase()) {
+      case 'pdf':
+        return (icon: Icons.picture_as_pdf_rounded, color: Colors.red);
+      case 'doc':
+      case 'docx':
+        return (icon: Icons.description_rounded, color: Colors.blue);
+      case 'xls':
+      case 'xlsx':
+        return (icon: Icons.table_chart_rounded, color: Colors.green);
+      case 'ppt':
+      case 'pptx':
+        return (icon: Icons.slideshow_rounded, color: Colors.orange);
+      case 'txt':
+      case 'csv':
+        return (icon: Icons.article_rounded, color: Colors.blueGrey);
+      default:
+        return (icon: Icons.insert_drive_file_rounded, color: Colors.grey);
+    }
+  }
+
   void _showAttachmentPicker(
-    BuildContext context,
-    MessageController controller,
-  ) {
+      BuildContext context,
+      MessageController controller,
+      ) {
     showModalBottomSheet(
       context: context,
       shape: RoundedRectangleBorder(
@@ -37,17 +57,12 @@ class _MessageScreenState extends State<MessageScreen> {
             padding: EdgeInsets.symmetric(vertical: 20.h),
             child: Wrap(
               children: <Widget>[
+                // ── Photo Library ──────────────────────────────────────
                 ListTile(
-                  leading: Container(
-                    padding: EdgeInsets.all(10.w),
-                    decoration: BoxDecoration(
-                      color: Colors.purple.shade50,
-                      borderRadius: BorderRadius.circular(10.r),
-                    ),
-                    child: const Icon(
-                      Icons.photo_library,
-                      color: Colors.purple,
-                    ),
+                  leading: _attachmentIcon(
+                    Icons.photo_library,
+                    Colors.purple,
+                    Colors.purple.shade50,
                   ),
                   title: const Text('Photo Library'),
                   onTap: () {
@@ -55,19 +70,36 @@ class _MessageScreenState extends State<MessageScreen> {
                     controller.pickImageFromGallery();
                   },
                 ),
+
+                // ── Camera ─────────────────────────────────────────────
                 ListTile(
-                  leading: Container(
-                    padding: EdgeInsets.all(10.w),
-                    decoration: BoxDecoration(
-                      color: Colors.blue.shade50,
-                      borderRadius: BorderRadius.circular(10.r),
-                    ),
-                    child: const Icon(Icons.photo_camera, color: Colors.blue),
+                  leading: _attachmentIcon(
+                    Icons.photo_camera,
+                    Colors.blue,
+                    Colors.blue.shade50,
                   ),
                   title: const Text('Camera'),
                   onTap: () {
                     Navigator.of(context).pop();
                     controller.pickImageFromCamera();
+                  },
+                ),
+
+                // ── File (PDF / DOC / XLS …) ───────────────────────────
+                ListTile(
+                  leading: _attachmentIcon(
+                    Icons.attach_file_rounded,
+                    Colors.orange,
+                    Colors.orange.shade50,
+                  ),
+                  title: const Text('File'),
+                  subtitle: const Text(
+                    'PDF, DOC, DOCX, XLS, PNG, JPG …',
+                    style: TextStyle(fontSize: 12),
+                  ),
+                  onTap: () {
+                    Navigator.of(context).pop();
+                    controller.pickFile();
                   },
                 ),
               ],
@@ -78,21 +110,29 @@ class _MessageScreenState extends State<MessageScreen> {
     );
   }
 
+  Widget _attachmentIcon(IconData icon, Color iconColor, Color bgColor) {
+    return Container(
+      padding: EdgeInsets.all(10.w),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(10.r),
+      ),
+      child: Icon(icon, color: iconColor),
+    );
+  }
+
   @override
   void initState() {
     super.initState();
     final controller = MessageController.instance;
 
-    // Initialize from route parameters if available
     final params = Get.parameters;
     if (params['chatId'] != null) {
       controller.chatId = params['chatId'] ?? '';
       controller.name = params['name'] ?? '';
       controller.image = params['image'] ?? '';
-      controller.loadMessages() ;
+      controller.loadMessages();
     }
-
-
   }
 
   @override
@@ -107,7 +147,7 @@ class _MessageScreenState extends State<MessageScreen> {
           child: Scaffold(
             backgroundColor: Colors.grey[100],
 
-            /// App Bar with Profile
+            /// App Bar
             appBar: AppBar(
               backgroundColor: Colors.white,
               elevation: 0,
@@ -117,17 +157,16 @@ class _MessageScreenState extends State<MessageScreen> {
               ),
               title: Row(
                 children: [
-                  /// Profile Image with Online Status
                   Stack(
                     children: [
                       CircleAvatar(
                         radius: 20.r,
                         backgroundImage: controller.image.isNotEmpty
                             ? NetworkImage(
-                                _getImageUrl(
-                                  AppImages.baseurl + controller.image,
-                                ),
-                              )
+                          _getImageUrl(
+                            AppImages.baseurl + controller.image,
+                          ),
+                        )
                             : null,
                         child: controller.image.isEmpty
                             ? Icon(Icons.person, size: 20.sp)
@@ -143,23 +182,23 @@ class _MessageScreenState extends State<MessageScreen> {
                             decoration: BoxDecoration(
                               color: const Color(0xFF0FE16D),
                               shape: BoxShape.circle,
-                              border: Border.all(color: Colors.white, width: 2),
+                              border:
+                              Border.all(color: Colors.white, width: 2),
                             ),
                           ),
                         ),
                     ],
                   ),
-
                   SizedBox(width: 12.w),
-
-                  /// Name and Active Status
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          controller.name.isNotEmpty ? controller.name : 'Chat',
+                          controller.name.isNotEmpty
+                              ? controller.name
+                              : 'Chat',
                           style: TextStyle(
                             fontWeight: FontWeight.w600,
                             fontSize: 16.sp,
@@ -191,110 +230,146 @@ class _MessageScreenState extends State<MessageScreen> {
               ],
             ),
 
-            /// Body with Messages
+            /// Body
             body: controller.isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : Column(
-                    children: [
-                      /// Messages List
-                      Expanded(
-                        child: ListView.builder(
-                          controller: controller.scrollController,
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 16.w,
-                            vertical: 16.h,
+              children: [
+                /// Messages list
+                Expanded(
+                  child: ListView.builder(
+                    controller: controller.scrollController,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 16.w,
+                      vertical: 16.h,
+                    ),
+                    itemCount: controller.messages.length,
+                    itemBuilder: (context, index) {
+                      final message = controller.messages[index];
+                      return _buildMessageBubble(message);
+                    },
+                  ),
+                ),
+
+                /// Upload progress indicator
+                if (controller.isUploadingImage ||
+                    controller.isUploadingFile)
+                  Container(
+                    color: Colors.white,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 16.w,
+                      vertical: 8.h,
+                    ),
+                    child: Row(
+                      children: [
+                        SizedBox(
+                          width: 16.w,
+                          height: 16.w,
+                          child: const CircularProgressIndicator(
+                            strokeWidth: 2,
                           ),
-                          itemCount: controller.messages.length,
-                          itemBuilder: (context, index) {
-                            final message = controller.messages[index];
-                            return _buildMessageBubble(message);
-                          },
+                        ),
+                        SizedBox(width: 8.w),
+                        Text(
+                          controller.isUploadingImage
+                              ? 'Sending image…'
+                              : 'Sending file…',
+                          style: TextStyle(
+                            fontSize: 12.sp,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                /// Input Area
+                Container(
+                  color: Colors.white,
+                  padding: EdgeInsets.only(
+                    left: 16.w,
+                    right: 16.w,
+                    bottom:
+                    MediaQuery.of(context).padding.bottom + 16.h,
+                    top: 16.h,
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.grey[100],
+                            borderRadius: BorderRadius.circular(24.r),
+                          ),
+                          child: TextField(
+                            controller: controller.messageController,
+                            decoration: InputDecoration(
+                              hintText: "Write your message",
+                              hintStyle: TextStyle(
+                                fontSize: 14.sp,
+                                color: Colors.grey[400],
+                              ),
+                              border: InputBorder.none,
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: 20.w,
+                                vertical: 12.h,
+                              ),
+                              suffixIcon: GestureDetector(
+                                onTap: () => _showAttachmentPicker(
+                                  context,
+                                  controller,
+                                ),
+                                child: Padding(
+                                  padding: EdgeInsets.all(8.w),
+                                  child: Icon(
+                                    Icons.attach_file,
+                                    color: Colors.grey[600],
+                                    size: 22.sp,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            style: TextStyle(
+                              fontSize: 14.sp,
+                              color: Colors.black,
+                            ),
+                            onSubmitted: (_) => controller.sendMessage(),
+                          ),
                         ),
                       ),
-
-                      /// Input Area
-                      Container(
-                        color: Colors.white,
-                        padding: EdgeInsets.only(
-                          left: 16.w,
-                          right: 16.w,
-                          bottom: MediaQuery.of(context).padding.bottom + 16.h,
-                          top: 16.h,
-                        ),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: Colors.grey[100],
-                                  borderRadius: BorderRadius.circular(24.r),
-                                ),
-                                child: TextField(
-                                  controller: controller.messageController,
-                                  decoration: InputDecoration(
-                                    hintText: "Write your message",
-                                    hintStyle: TextStyle(
-                                      fontSize: 14.sp,
-                                      color: Colors.grey[400],
-                                    ),
-                                    border: InputBorder.none,
-                                    contentPadding: EdgeInsets.symmetric(
-                                      horizontal: 20.w,
-                                      vertical: 12.h,
-                                    ),
-                                    suffixIcon: GestureDetector(
-                                      onTap: () => _showAttachmentPicker(
-                                        context,
-                                        controller,
-                                      ),
-                                      child: Padding(
-                                        padding: EdgeInsets.all(8.w),
-                                        child: Icon(
-                                          Icons.attach_file,
-                                          color: Colors.grey[600],
-                                          size: 22.sp,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  style: TextStyle(
-                                    fontSize: 14.sp,
-                                    color: Colors.black,
-                                  ),
-                                  onSubmitted: (value) =>
-                                      controller.sendMessage(),
-                                ),
-                              ),
-                            ),
-                            SizedBox(width: 12.w),
-                            GestureDetector(
-                              onTap: controller.isUploadingImage
-                                  ? null
-                                  : controller.sendMessage,
-                              child: Container(
-                                padding: EdgeInsets.all(10.w),
-                                decoration: const BoxDecoration(
-                                  color: AppColors.primaryColor,
-                                  shape: BoxShape.circle,
-                                ),
-                                child: Icon(
-                                  Icons.send,
-                                  color: Colors.white,
-                                  size: 20.sp,
-                                ),
-                              ),
-                            ),
-                          ],
+                      SizedBox(width: 12.w),
+                      GestureDetector(
+                        onTap: (controller.isUploadingImage ||
+                            controller.isUploadingFile)
+                            ? null
+                            : controller.sendMessage,
+                        child: Container(
+                          padding: EdgeInsets.all(10.w),
+                          decoration: const BoxDecoration(
+                            color: AppColors.primaryColor,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            Icons.send,
+                            color: Colors.white,
+                            size: 20.sp,
+                          ),
                         ),
                       ),
                     ],
                   ),
+                ),
+              ],
+            ),
           ),
         );
       },
     );
   }
 
+  // ──────────────────────────────────────────────────────────────────────────
+  // Message bubble
+  // ──────────────────────────────────────────────────────────────────────────
   Widget _buildMessageBubble(ChatMessage message) {
     final timeFormat = DateFormat('hh:mm a');
 
@@ -306,7 +381,7 @@ class _MessageScreenState extends State<MessageScreen> {
             : MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          /// Other user's avatar (left side)
+          /// Other user avatar
           if (!message.isCurrentUser) ...[
             CircleAvatar(
               radius: 16.r,
@@ -320,7 +395,7 @@ class _MessageScreenState extends State<MessageScreen> {
             SizedBox(width: 8.w),
           ],
 
-          /// Message Bubble
+          /// Bubble
           Flexible(
             child: Column(
               crossAxisAlignment: message.isCurrentUser
@@ -355,65 +430,116 @@ class _MessageScreenState extends State<MessageScreen> {
                     horizontal: 16.w,
                     vertical: 12.h,
                   ),
-                  child: message.isImage
-                      ? Stack(
-                          children: [
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(8.r),
-                              child: Image.file(
-                                File(message.imageUrl!),
-                                width: 200.w,
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-                            if (message.isUploading)
-                              Positioned.fill(
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color: Colors.black.withOpacity(0.5),
-                                    borderRadius: BorderRadius.circular(8.r),
-                                  ),
-                                  child: const Center(
-                                    child: CircularProgressIndicator(
-                                      valueColor: AlwaysStoppedAnimation<Color>(
-                                        Colors.white,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                          ],
-                        )
-                      : Text(
-                          message.message,
-                          style: TextStyle(
-                            color: message.isCurrentUser
-                                ? Colors.black
-                                : Colors.black87,
-                            fontSize: 14.sp,
-                            height: 1.4,
-                          ),
-                        ),
+                  child: _buildBubbleContent(message),
                 ),
                 SizedBox(height: 4.h),
                 Text(
                   timeFormat.format(message.createdAt),
-                  style: TextStyle(fontSize: 11.sp, color: Colors.grey[500]),
+                  style:
+                  TextStyle(fontSize: 11.sp, color: Colors.grey[500]),
                 ),
               ],
             ),
           ),
-
-          /// Current user's avatar (right side)
-          /*if (message.isCurrentUser) ...[
-            SizedBox(width: 8.w),
-            CircleAvatar(
-              radius: 16.r,
-              backgroundColor: const Color(0xFF1ABC9C),
-              child: Icon(Icons.person, color: Colors.white, size: 16.sp),
-            ),
-          ],*/
         ],
+      ),
+    );
+  }
+
+  Widget _buildBubbleContent(ChatMessage message) {
+    // ── Image bubble ──────────────────────────────────────────────────────
+    if (message.isImage) {
+      final bool isRemote =
+          message.imageUrl != null && message.imageUrl!.startsWith('http');
+
+      return Stack(
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8.r),
+            child: isRemote
+                ? Image.network(
+              message.imageUrl!,
+              width: 200.w,
+              fit: BoxFit.cover,
+            )
+                : Image.file(
+              File(message.imageUrl!),
+              width: 200.w,
+              fit: BoxFit.cover,
+            ),
+          ),
+          if (message.isUploading)
+            Positioned.fill(
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.5),
+                  borderRadius: BorderRadius.circular(8.r),
+                ),
+                child: const Center(
+                  child: CircularProgressIndicator(
+                    valueColor:
+                    AlwaysStoppedAnimation<Color>(Colors.white),
+                  ),
+                ),
+              ),
+            ),
+        ],
+      );
+    }
+
+    // ── File bubble ───────────────────────────────────────────────────────
+    if (message.isFile) {
+      final info = _getFileIconInfo(message.fileExtension);
+
+      return Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            padding: EdgeInsets.all(8.w),
+            decoration: BoxDecoration(
+              color: info.color.withOpacity(0.12),
+              borderRadius: BorderRadius.circular(8.r),
+            ),
+            child: Icon(info.icon, color: info.color, size: 28.sp),
+          ),
+          SizedBox(width: 10.w),
+          Flexible(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  message.fileName ?? 'File',
+                  style: TextStyle(
+                    fontSize: 13.sp,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black87,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                SizedBox(height: 2.h),
+                Text(
+                  (message.fileExtension ?? '').toUpperCase(),
+                  style: TextStyle(
+                    fontSize: 11.sp,
+                    color: info.color,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      );
+    }
+
+    // ── Text bubble ────────────────────────────────────────────────────...
+    return Text(
+      message.message,
+      style: TextStyle(
+        color: message.isCurrentUser ? Colors.black : Colors.black87,
+        fontSize: 14.sp,
+        height: 1.4,
       ),
     );
   }

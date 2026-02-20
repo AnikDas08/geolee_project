@@ -101,40 +101,35 @@ class _VerifyScreenState extends State<VerifyScreen> {
                     ),
                   ),
 
-                  // GestureDetector(
-                  //   onTap: controller.time == '00:00'
-                  //       ? () {
-                  //           controller.startTimer();
-                  //           controller.forgotPasswordRepo();
-                  //         }
-                  //       : () {},
-                  //   child: CommonText(
-                  //     text: controller.time == '00:00'
-                  //         ? AppString.resendCode
-                  //         : "${AppString.resendCodeIn} ${controller.time} ${AppString.minute}",
-                  //     top: 10,
-                  //     bottom: 20,
-                  //     fontSize: 16,
-                  //   ),
-                  // ),
-                  const Row(
+                  Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      CommonText(
-                        text: "Didn't get the code?",
+                      const CommonText(
+                        text: "Didn't get the code? ",
                         bottom: 40,
                         maxLines: 3,
                       ),
-                      CommonText(
-                        text: "Resend",
-                        bottom: 40,
-                        fontWeight: FontWeight.w700,
-                        maxLines: 3,
-                        color: AppColors.primaryColor,
+                      GestureDetector(
+                        onTap: controller.time == '00:00'
+                            ? () {
+                          controller.startTimer();
+                          controller.forgotPasswordRepo();
+                        }
+                            : null, // disabled while timer is running
+                        child: CommonText(
+                          text: controller.time == '00:00'
+                              ? "Resend"
+                              : "Resend in ${controller.time}",
+                          bottom: 40,
+                          fontWeight: FontWeight.w700,
+                          maxLines: 3,
+                          color: controller.time == '00:00'
+                              ? AppColors.primaryColor
+                              : AppColors.secondaryText, // greyed out while counting
+                        ),
                       ),
                     ],
                   ),
-
                   ///  Submit Button here
                   CommonButton(
                     titleText: AppString.verify,
