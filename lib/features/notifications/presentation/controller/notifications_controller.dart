@@ -4,6 +4,7 @@ import 'package:giolee78/services/storage/storage_services.dart';
 
 import '../../data/model/notification_model.dart';
 import '../../repository/notification_repository.dart';
+
 class NotificationsController extends GetxController {
   List<NotificationModel> notifications = [];
   int unreadCount = 0;
@@ -20,7 +21,7 @@ class NotificationsController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    if(LocalStorage.token!=""){
+    if (LocalStorage.token.isNotEmpty) {
       getNotifications();
     }
     moreNotification();
@@ -34,64 +35,91 @@ class NotificationsController extends GetxController {
     update();
 
     page++;
+    try {
+      final response = await repository.getNotifications(page);
 
-    final response = await repository.getNotifications(page);
-
-    if (response.notifications.isEmpty) {
-      hasNoData = false;
-      update();
-    } else {
-      notifications.addAll(response.notifications);
+      if (response.notifications.isEmpty) {
+        hasNoData = true;
+      } else {
+        notifications.addAll(response.notifications);
+        unreadCount = response.unreadCount;
+      }
+    } catch (e) {
+      debugPrint('Failed to get notifications: $e');
+    } finally {
+      isLoading = false;
       update();
     }
-
-    unreadCount = response.unreadCount;
-
-    isLoading = false;
-    update();
   }
 
   /// Pagination
   void moreNotification() {
     scrollController.addListener(() async {
-      if (scrollController.position.pixels ==
-          scrollController.position.maxScrollExtent) {
+      if (scrollController.position.pixels == scrollController.position.maxScrollExtent) {
         if (isLoadingMore || hasNoData) return;
 
         isLoadingMore = true;
         update();
 
         page++;
+        try {
+          final response = await repository.getNotifications(page);
 
-        final response = await repository.getNotifications(page);
-
-        if (response.notifications.isEmpty) {
-          hasNoData = true;
-        } else {
-          notifications.addAll(response.notifications);
+          if (response.notifications.isEmpty) {
+            hasNoData = true;
+          } else {
+            notifications.addAll(response.notifications);
+            unreadCount = response.unreadCount;
+          }
+        } catch (e) {
+          debugPrint('Failed to load more notifications: $e');
+        } finally {
+          isLoadingMore = false;
+          update();
         }
-
-        unreadCount = response.unreadCount;
-
-        isLoadingMore = false;
-        update();
       }
     });
   }
 
-  /// Mark as Read (local)
-  void markAsRead(int index) {
-    notifications[index] =
-        NotificationModel(
-          id: notifications[index].id,
-          title: notifications[index].title,
-          message: notifications[index].message,
-          read: true,
-          createdAt: notifications[index].createdAt,
-        );
+  /// Mark single notification as read
+  Future<void> markAsRead(int index) async {
+    final notification = notifications[index];
 
+    if (notification.read) return;
+
+    notifications[index] = notification.copyWith(read: true);
     if (unreadCount > 0) unreadCount--;
     update();
+
+    // ✅ Pass the notification id
+    final success = await repository.markNotificationAsRead(notification.id);
+
+    if (!success) {
+      notifications[index] = notification.copyWith(read: false);
+      if (unreadCount < notifications.length) unreadCount++;
+      update();
+    }
+  }
+
+  /// Mark ALL notifications as read
+  Future<void> markAllAsRead() async {
+    if (unreadCount == 0) return;
+
+    final previous = List<NotificationModel>.from(notifications);
+    final previousUnread = unreadCount;
+
+    notifications = notifications.map((n) => n.copyWith(read: true)).toList();
+    unreadCount = 0;
+    update();
+
+    // ✅ No argument needed
+    final success = await repository.markAllNotificationsAsRead();
+
+    if (!success) {
+      notifications = previous;
+      unreadCount = previousUnread;
+      update();
+    }
   }
 
   @override

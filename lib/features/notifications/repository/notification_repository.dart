@@ -1,3 +1,4 @@
+import 'package:giolee78/config/api/api_end_point.dart';
 import 'package:giolee78/services/api/api_service.dart';
 import '../data/model/notification_response.dart';
 
@@ -15,7 +16,7 @@ class NotificationRepository {
   Future<bool> markNotificationAsRead(String id) async {
     try {
       final response = await ApiService.patch(
-        "/notifications/$id",
+        ApiEndPoint.readNotificationById + id,
         body: {"isRead": true},
       );
       return response.statusCode == 200;
@@ -28,7 +29,7 @@ class NotificationRepository {
   /// Mark all notifications as read
   Future<bool> markAllNotificationsAsRead() async {
     try {
-      final response = await ApiService.patch("/notifications/mark-all-read");
+      final response = await ApiService.patch(ApiEndPoint.readAllNotification);
       return response.statusCode == 200;
     } catch (e) {
       print("Error marking all notifications read: $e");
