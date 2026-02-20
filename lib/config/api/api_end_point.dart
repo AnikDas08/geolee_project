@@ -79,9 +79,11 @@ class ApiEndPoint {
   static const String advertiserUpdate = "${baseUrl}advertisers/update/me";
 
   // Support ========================================
+
   static const String support = "${baseUrl}supports/create";
 
   // Misc ===========================================
+
   static const String user = "${baseUrl}users";
   static const String post = "${baseUrl}posts";
   static const String customOffer = "${baseUrl}custom/offer";
@@ -90,8 +92,7 @@ class ApiEndPoint {
   static const String notifications = "${baseUrl}notification/all";
   static const String category = "${baseUrl}category/service";
   static const String privacyPolicies = "${baseUrl}disclaimer/privacy-policy";
-  static const String termsOfServices =
-      "${baseUrl}disclaimer/terms-and-conditions";
+  static const String termsOfServices = "${baseUrl}disclaimer/terms-and-conditions";
   static const String helpSupport = "${baseUrl}help/support";
   static const String chats = "${baseUrl}chats";
   static const String chatRoom = "${baseUrl}chats/my-chats";

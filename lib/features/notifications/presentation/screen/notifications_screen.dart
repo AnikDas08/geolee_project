@@ -18,10 +18,16 @@ class NotificationScreen extends StatelessWidget {
         title: const Text("Notifications"),
       ),
 
+      /// ✅ Removed `init:` from GetBuilder.
+      /// Controller must be registered before this screen opens,
+      /// e.g. via Get.put() in a Binding or before navigating:
+      ///
+      ///   Get.put(NotificationsController());
+      ///   // or
+      ///   Get.to(() => NotificationScreen(), binding: NotificationBinding());
+      ///
       body: GetBuilder<NotificationsController>(
-        init: NotificationsController(),
         builder: (controller) {
-
           /// First loading
           if (controller.isLoading && controller.notifications.isEmpty) {
             return const Center(
@@ -42,8 +48,7 @@ class NotificationScreen extends StatelessWidget {
             itemCount: controller.notifications.length +
                 (controller.isLoadingMore ? 1 : 0),
             itemBuilder: (context, index) {
-
-              /// Bottom loader
+              /// Bottom pagination loader
               if (index == controller.notifications.length) {
                 return const Padding(
                   padding: EdgeInsets.symmetric(vertical: 20),
@@ -54,12 +59,8 @@ class NotificationScreen extends StatelessWidget {
               final item = controller.notifications[index];
 
               return NotificationItem(
-
                 item: item,
-                onTap: () {
-                  controller.markAsRead(index);
-
-                },
+                onTap: () => controller.markAsRead(index),
               );
             },
           );

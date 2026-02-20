@@ -44,7 +44,7 @@ class _HomeScreenState extends State<HomeScreen> {
           : LocalStorage.lat,
       Get.find<HomeController>().currentLongitude.value != 0.0
           ? Get.find<HomeController>().currentLongitude.value
-          :LocalStorage.long,
+          : LocalStorage.long,
     ),
     zoom: 14.4746,
   );
@@ -363,25 +363,20 @@ class _HomeScreenState extends State<HomeScreen> {
                 }
               },
             ),
-
-            Obx(() {
-              final pending = myFriendController.requests
-                  .where((r) => r.status == "pending")
-                  .toList();
-
-              return Item(
-                imageSrc: AppIcons.friend,
-                title: 'Friend Request',
-                badgeText: pending.isEmpty ? null : pending.length.toString(),
-                onTap: () {
-                  try {
-                    Get.to(() => FriendRequestScreen());
-                  } catch (e) {
-                    Get.snackbar('Error', 'Failed to open Friend Request');
-                  }
-                },
-              );
-            }),
+            Obx(() => Item(
+              imageSrc: AppIcons.friend,
+              title: 'Friend Request',
+              badgeText: pendingRequests.isEmpty
+                  ? null
+                  : pendingRequests.length.toString(),
+              onTap: () {
+                try {
+                  Get.to(() => FriendRequestScreen());
+                } catch (e) {
+                  Get.snackbar('Error', 'Failed to open Friend Request');
+                }
+              },
+            )),
 
           ],
         ],
