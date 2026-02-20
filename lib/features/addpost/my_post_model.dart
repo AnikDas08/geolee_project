@@ -95,8 +95,8 @@ class PostData {
     privacy: json['privacy'] ?? '',
     status: json['status'] ?? '',
     isDeleted: json['isDeleted'] ?? false,
-    createdAt: DateTime.parse(json['createdAt']),
-    updatedAt: DateTime.parse(json['updatedAt']),
+    createdAt: DateTime.parse(json['createdAt']).toLocal(),
+    updatedAt: DateTime.parse(json['updatedAt']).toLocal(),
   );
 
   Map<String, dynamic> toJson() => {

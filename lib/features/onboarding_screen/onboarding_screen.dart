@@ -333,8 +333,8 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                 titleSize: 18.sp,
                 onTap: () async {
                   // Get current saved location
-                  final String? lat = await LocalStorage.lat.toString();
-                  final String? log = await LocalStorage.long.toString();
+                  final String lat = LocalStorage.lat.toString();
+                  final String log = LocalStorage.long.toString();
 
                   debugPrint("🚀 Navigation - Location -> Lat: $lat, Long: $log");
 

@@ -96,8 +96,9 @@ class PostData {
     privacy: json["privacy"],
     status: json["status"],
     isDeleted: json["isDeleted"],
-    createdAt: DateTime.parse(json["createdAt"]),
-    updatedAt: DateTime.parse(json["updatedAt"]),
+    // ✅ UTC → device local timezone এ convert
+    createdAt: DateTime.parse(json["createdAt"]).toLocal(),
+    updatedAt: DateTime.parse(json["updatedAt"]).toLocal(),
   );
 
   Map<String, dynamic> toJson() => {
@@ -111,8 +112,9 @@ class PostData {
     "privacy": privacy,
     "status": status,
     "isDeleted": isDeleted,
-    "createdAt": createdAt.toIso8601String(),
-    "updatedAt": updatedAt.toIso8601String(),
+    // ✅ server এ পাঠানোর সময় আবার UTC তে convert
+    "createdAt": createdAt.toUtc().toIso8601String(),
+    "updatedAt": updatedAt.toUtc().toIso8601String(),
   };
 }
 

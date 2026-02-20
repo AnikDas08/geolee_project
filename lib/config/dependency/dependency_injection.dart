@@ -56,5 +56,6 @@ class DependencyInjection extends Bindings {
     Get.lazyPut(() => DashBoardScreenController(), fenix: true);
     Get.lazyPut(() => ViewAdsScreenController(), fenix: true);
     Get.lazyPut(() => UpdateAdsController(), fenix: true);
+
   }
 }

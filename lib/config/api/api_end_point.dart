@@ -100,4 +100,6 @@ class ApiEndPoint {
   static const String servicePay = "${baseUrl}pay/booked-service";
   static const String myServiceHistory = "${baseUrl}pay/my-service-history";
   static const String updateRequest = "${baseUrl}pay/my-service-history/";
+  static const String readAllNotification = "${baseUrl}notifications/read-all";
+  static const String readNotificationById = "${baseUrl}notifications/read/";
 }

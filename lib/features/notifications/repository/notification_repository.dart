@@ -1,5 +1,7 @@
+import 'package:flutter/material.dart';
 import 'package:giolee78/services/api/api_service.dart';
-import '../data/model/notification_response.dart';
+import '../../../config/api/api_end_point.dart';
+import '../data/model/notification_model.dart';
 
 class NotificationRepository {
   /// Get notifications (pagination)
@@ -12,16 +14,28 @@ class NotificationRepository {
   }
 
   /// Mark single notification as read
-  Future<bool> markNotificationAsRead(String id) async {
+  Future<void> markAsRead(String notificationId) async {
     try {
       final response = await ApiService.patch(
-        "/notifications/$id",
+        "${ApiEndPoint.readNotificationById}/$notificationId",
         body: {"isRead": true},
       );
-      return response.statusCode == 200;
+      debugPrint("markAsRead response: ${response.statusCode}");
     } catch (e) {
-      print("Error marking notification read: $e");
-      return false;
+      debugPrint("markAsRead error: $e");
+      rethrow;
+    }
+  }
+
+  Future<void> markAllAsRead() async {
+    try {
+      await ApiService.patch(
+        ApiEndPoint.readAllNotification,
+        body: {},
+      );
+    } catch (e) {
+      debugPrint("markAllAsRead error: $e");
+      rethrow;
     }
   }
 

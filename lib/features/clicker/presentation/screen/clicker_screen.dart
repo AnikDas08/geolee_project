@@ -73,8 +73,8 @@ class _ClickerScreenState extends State<ClickerScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: CustomAppBar(
-        notificationCount: notificationsController.unreadCount,
+      appBar: const CustomAppBar(notificationCount: 0,
+        // notificationCount: notificationsController.unreadCount,
       ),
       body: Obx(() {
         // Initial loading state (empty list)

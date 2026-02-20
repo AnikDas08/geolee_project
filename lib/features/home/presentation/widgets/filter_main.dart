@@ -17,16 +17,11 @@ class _FilterDialogState extends State<FilterDialog>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
-  // ─── Period Filter ───
-  final List<String> periodOptions = [
-    'Last 24 Hours',
-    'Last 7 Days',
-    'Last 15 Days',
-    'Last 30 Days',
-  ];
+  // ─── Hour Options only ───
+  final List<int> hourOptions = [3, 6, 9, 12, 15, 18, 21, 24];
+
   String? selectedPeriod;
 
-  // ─── Custom Date Range ───
   DateTime? pickedStartDate;
   DateTime? pickedEndDate;
 
@@ -37,7 +32,6 @@ class _FilterDialogState extends State<FilterDialog>
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
 
-    // Restore existing filter state
     if (controller.selectedPeriod.value.isNotEmpty &&
         controller.selectedPeriod.value != 'Custom Range') {
       selectedPeriod = controller.selectedPeriod.value;
@@ -62,9 +56,8 @@ class _FilterDialogState extends State<FilterDialog>
       firstDate: DateTime(2020),
       lastDate: DateTime.now(),
       builder: (context, child) => Theme(
-        data: Theme.of(
-          context,
-        ).copyWith(colorScheme: const ColorScheme.light(primary: Colors.blue)),
+        data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.light(primary: Colors.blue)),
         child: child!,
       ),
     );
@@ -85,9 +78,8 @@ class _FilterDialogState extends State<FilterDialog>
       firstDate: pickedStartDate ?? DateTime(2020),
       lastDate: DateTime.now(),
       builder: (context, child) => Theme(
-        data: Theme.of(
-          context,
-        ).copyWith(colorScheme: const ColorScheme.light(primary: Colors.blue)),
+        data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.light(primary: Colors.blue)),
         child: child!,
       ),
     );
@@ -98,25 +90,17 @@ class _FilterDialogState extends State<FilterDialog>
 
   void _applyFilter() {
     if (_tabController.index == 0) {
-      // ─── Period filter ───
       if (selectedPeriod == null) {
-        Get.snackbar(
-          'Notice',
-          'Please select a time period',
-          snackPosition: SnackPosition.BOTTOM,
-        );
+        Get.snackbar('Notice', 'Please select a time period',
+            snackPosition: SnackPosition.BOTTOM);
         return;
       }
       controller.applyPeriodFilter(selectedPeriod!);
       Get.back();
     } else {
-      // ─── Custom date range ───
       if (pickedStartDate == null || pickedEndDate == null) {
-        Get.snackbar(
-          'Notice',
-          'Please select both start and end date',
-          snackPosition: SnackPosition.BOTTOM,
-        );
+        Get.snackbar('Notice', 'Please select both start and end date',
+            snackPosition: SnackPosition.BOTTOM);
         return;
       }
       widget.onApply('Custom Range', pickedStartDate!, pickedEndDate!);
@@ -152,47 +136,35 @@ class _FilterDialogState extends State<FilterDialog>
                 ),
                 Row(
                   children: [
-                    // Clear button — filter active থাকলে দেখাবে
                     Obx(
-                      () => controller.isDateFilterActive.value
+                          () => controller.isDateFilterActive.value
                           ? GestureDetector(
-                              onTap: () {
-                                controller.clearDateFilter();
-                                Get.back();
-                              },
-                              child: Container(
-                                margin: EdgeInsets.only(right: 8.w),
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: 15.w,
-                                  vertical: 6.h,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Colors.red.shade500,
-                                  borderRadius: BorderRadius.circular(8.r),
-                                  // border: Border.all(color: Colors.blue),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(
-
-
-                                      Icons.close,
-                                      size: 14.sp,
-                                      color: Colors.white,
-                                    ),
-                                    SizedBox(width: 4.w),
-                                    Text(
-                                      'Clear',
-                                      style: TextStyle(
-                                        fontSize: 12.sp,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            )
+                        onTap: () {
+                          controller.clearDateFilter();
+                          Get.back();
+                        },
+                        child: Container(
+                          margin: EdgeInsets.only(right: 8.w),
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 15.w, vertical: 6.h),
+                          decoration: BoxDecoration(
+                            color: Colors.red.shade500,
+                            borderRadius: BorderRadius.circular(8.r),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.close,
+                                  size: 14.sp, color: Colors.white),
+                              SizedBox(width: 4.w),
+                              Text('Clear',
+                                  style: TextStyle(
+                                      fontSize: 12.sp,
+                                      color: Colors.white)),
+                            ],
+                          ),
+                        ),
+                      )
                           : const SizedBox.shrink(),
                     ),
                     IconButton(
@@ -223,10 +195,8 @@ class _FilterDialogState extends State<FilterDialog>
                 indicatorSize: TabBarIndicatorSize.tab,
                 labelColor: Colors.white,
                 unselectedLabelColor: Colors.grey,
-                labelStyle: TextStyle(
-                  fontSize: 13.sp,
-                  fontWeight: FontWeight.w600,
-                ),
+                labelStyle:
+                TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w600),
                 tabs: [
                   Tab(
                     child: Row(
@@ -256,7 +226,7 @@ class _FilterDialogState extends State<FilterDialog>
 
             // ─── Tab Content ───
             SizedBox(
-              height: 200.h,
+              height: 180.h, // ✅ days না থাকায় height কমানো হয়েছে
               child: TabBarView(
                 controller: _tabController,
                 children: [_buildPeriodTab(), _buildDateRangeTab()],
@@ -274,16 +244,14 @@ class _FilterDialogState extends State<FilterDialog>
                   backgroundColor: Colors.blue,
                   padding: EdgeInsets.symmetric(vertical: 14.h),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8.r),
-                  ),
+                      borderRadius: BorderRadius.circular(8.r)),
                 ),
                 child: Text(
                   'Apply Filter',
                   style: TextStyle(
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
-                  ),
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white),
                 ),
               ),
             ),
@@ -293,47 +261,36 @@ class _FilterDialogState extends State<FilterDialog>
     );
   }
 
-  // ─── Tab 1: Period chip buttons ───
+  // ─── Tab 1: Hours only ───
   Widget _buildPeriodTab() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Select a time period',
-          style: TextStyle(
-            fontSize: 13.sp,
-            color: Colors.grey.shade600,
-            fontWeight: FontWeight.w500,
-          ),
+        Row(
+          children: [
+            Icon(Icons.schedule, size: 15.sp, color: Colors.blue),
+            SizedBox(width: 6.w),
+            Text(
+              'Select Hours',
+              style: TextStyle(
+                fontSize: 13.sp,
+                fontWeight: FontWeight.w700,
+                color: Colors.black87,
+              ),
+            ),
+          ],
         ),
         SizedBox(height: 14.h),
         Wrap(
-          spacing: 10.w,
-          runSpacing: 10.h,
-          children: periodOptions.map((period) {
-            final bool isSelected = selectedPeriod == period;
-            return GestureDetector(
-              onTap: () => setState(() => selectedPeriod = period),
-              child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
-                decoration: BoxDecoration(
-                  color: isSelected ? Colors.blue : Colors.grey.shade100,
-                  borderRadius: BorderRadius.circular(24.r),
-                  border: Border.all(
-                    color: isSelected ? Colors.blue : Colors.grey.shade300,
-                  ),
-                ),
-                child: Text(
-                  period,
-                  style: TextStyle(
-                    fontSize: 13.sp,
-                    color: isSelected ? Colors.white : Colors.black87,
-                    fontWeight: isSelected
-                        ? FontWeight.w600
-                        : FontWeight.normal,
-                  ),
-                ),
-              ),
+          spacing: 8.w,
+          runSpacing: 8.h,
+          children: hourOptions.map((h) {
+            final label = '${h}h';
+            final isSelected = selectedPeriod == label;
+            return _chipItem(
+              label: label,
+              isSelected: isSelected,
+              onTap: () => setState(() => selectedPeriod = label),
             );
           }).toList(),
         ),
@@ -341,7 +298,47 @@ class _FilterDialogState extends State<FilterDialog>
     );
   }
 
+  Widget _chipItem({
+    required String label,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 9.h),
+        decoration: BoxDecoration(
+          color: isSelected ? Colors.blue : Colors.grey.shade100,
+          borderRadius: BorderRadius.circular(20.r),
+          border: Border.all(
+            color: isSelected ? Colors.blue : Colors.grey.shade300,
+            width: isSelected ? 1.5 : 1.0,
+          ),
+          boxShadow: isSelected
+              ? [
+            BoxShadow(
+              color: Colors.blue.withOpacity(0.3),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
+            )
+          ]
+              : [],
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 12.sp,
+            color: isSelected ? Colors.white : Colors.black87,
+            fontWeight: isSelected ? FontWeight.w700 : FontWeight.normal,
+          ),
+        ),
+      ),
+    );
+  }
+
   // ─── Tab 2: Custom date range pickers ───
+
   Widget _buildDateRangeTab() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -349,36 +346,24 @@ class _FilterDialogState extends State<FilterDialog>
         Text(
           'Select date range',
           style: TextStyle(
-            fontSize: 13.sp,
-            color: Colors.grey.shade600,
-            fontWeight: FontWeight.w500,
-          ),
+              fontSize: 13.sp,
+              color: Colors.grey.shade600,
+              fontWeight: FontWeight.w500),
         ),
         SizedBox(height: 12.h),
-
-        // Start Date
-        Text(
-          'Start Date',
-          style: TextStyle(
-            fontSize: 14.sp,
-            fontWeight: FontWeight.w500,
-            color: Colors.black87,
-          ),
-        ),
+        Text('Start Date',
+            style: TextStyle(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w500,
+                color: Colors.black87)),
         SizedBox(height: 8.h),
         InkWell(onTap: _pickStartDate, child: _buildDateField(pickedStartDate)),
-
         SizedBox(height: 12.h),
-
-        // End Date
-        Text(
-          'End Date',
-          style: TextStyle(
-            fontSize: 14.sp,
-            fontWeight: FontWeight.w500,
-            color: Colors.black87,
-          ),
-        ),
+        Text('End Date',
+            style: TextStyle(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w500,
+                color: Colors.black87)),
         SizedBox(height: 8.h),
         InkWell(
           onTap: pickedStartDate != null ? _pickEndDate : null,
@@ -409,15 +394,11 @@ class _FilterDialogState extends State<FilterDialog>
                 ? DateFormat('dd MMM yyyy').format(date)
                 : 'Select date',
             style: TextStyle(
-              fontSize: 14.sp,
-              color: date != null ? Colors.black87 : Colors.grey,
-            ),
+                fontSize: 14.sp,
+                color: date != null ? Colors.black87 : Colors.grey),
           ),
-          Icon(
-            Icons.calendar_today,
-            size: 20.sp,
-            color: date != null ? Colors.blue : Colors.grey,
-          ),
+          Icon(Icons.calendar_today,
+              size: 20.sp, color: date != null ? Colors.blue : Colors.grey),
         ],
       ),
     );

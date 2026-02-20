@@ -85,8 +85,8 @@ class PostById {
       privacy: json['privacy'],
       status: json['status'],
       isDeleted: json['isDeleted'],
-      createdAt: DateTime.parse(json['createdAt']),
-      updatedAt: DateTime.parse(json['updatedAt']),
+      createdAt: DateTime.parse(json['createdAt']).toLocal(),
+      updatedAt: DateTime.parse(json['updatedAt']).toLocal(),
     );
   }
 }

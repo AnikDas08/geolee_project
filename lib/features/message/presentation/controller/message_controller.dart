@@ -76,7 +76,7 @@ class MessageController extends GetxController {
   }
 
   /// Load Messages (Static Data)
-  void loadMessages() async {
+  Future<void> loadMessages() async {
     isLoading = true;
     update();
 
@@ -99,7 +99,7 @@ class MessageController extends GetxController {
   }
 
   /// Send Text Message
-  void sendMessage() async {
+  Future<void> sendMessage() async {
     if (messageController.text.trim().isNotEmpty) {
       //
       // final newMessage = ChatMessage(
@@ -126,7 +126,7 @@ class MessageController extends GetxController {
 
       final url = ApiEndPoint.createMessage;
 
-      ApiResponseModel response = await ApiService.post(url, body: body);
+      final ApiResponseModel response = await ApiService.post(url, body: body);
 
       if (response.statusCode == 200) {
         debugPrint("========================${response.message}");

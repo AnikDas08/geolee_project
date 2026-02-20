@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:giolee78/config/api/api_end_point.dart';
 import 'package:giolee78/features/friend/data/friend_request_model.dart';
@@ -60,9 +61,16 @@ class MyFriendController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+
+    debugPrint("🚀 MyFriendController onInit called");
+    debugPrint("📍 RAW Lat: ${LocalStorage.lat}");
+    debugPrint("📍 RAW Long: ${LocalStorage.long}");
+    debugPrint("📍 Lat type: ${LocalStorage.lat.runtimeType}");
+
     fetchFriendRequests();
     getMyAllFriends();
     getSuggestedFriend();
+    _initLocationThenFetch();
     debugPrint("📍 Lat: ${LocalStorage.lat} | Long: ${LocalStorage.long}");
   }
 
@@ -173,6 +181,89 @@ class MyFriendController extends GetxController {
       }
     } catch (e) {
       Get.snackbar("Error", "Network error");
+    }
+  }
+
+
+  Future<void> _initLocationThenFetch() async {
+    try {
+      debugPrint("🔄 _initLocationThenFetch started");
+
+      // ─── Step 1: LocalStorage check ───
+      final double? storedLat = LocalStorage.lat;
+      final double? storedLng = LocalStorage.long;
+
+      debugPrint("📦 Stored → Lat: $storedLat | Lng: $storedLng");
+
+      if (storedLat != null &&
+          storedLat != 0.0 &&
+          storedLng != null &&
+          storedLng != 0.0) {
+        debugPrint("✅ Using stored location");
+        await getSuggestedFriend();
+        return;
+      }
+
+      // ─── Step 2: Permission check ───
+      debugPrint("📡 No stored location, requesting...");
+
+      LocationPermission permission = await Geolocator.checkPermission();
+      debugPrint("🔐 Permission status: $permission");
+
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        debugPrint("🔐 After request: $permission");
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        nearbyChatError.value = "Location permission permanently denied.\nPlease enable from settings.";
+        debugPrint("❌ Permission denied forever");
+        return;
+      }
+
+      if (permission == LocationPermission.denied) {
+        nearbyChatError.value = "Location permission denied.";
+        debugPrint("❌ Permission denied");
+        return;
+      }
+
+      // ─── Step 3: Get position ───
+      debugPrint("📡 Getting position...");
+      final Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      ).timeout(
+        const Duration(seconds: 15),
+        onTimeout: () {
+          debugPrint("⏱️ Location timeout! Trying last known...");
+          throw Exception("Location timeout");
+        },
+      );
+
+      debugPrint("✅ Got position: ${position.latitude}, ${position.longitude}");
+
+      // ─── Step 4: Save & fetch ───
+      LocalStorage.lat = position.latitude;
+      LocalStorage.long = position.longitude;
+
+      await getSuggestedFriend();
+    } catch (e) {
+      debugPrint("❌ _initLocationThenFetch error: $e");
+
+      // ─── Fallback: last known position ───
+      try {
+        final Position? lastKnown = await Geolocator.getLastKnownPosition();
+        if (lastKnown != null) {
+          debugPrint("📍 Using last known: ${lastKnown.latitude}, ${lastKnown.longitude}");
+          LocalStorage.lat = lastKnown.latitude;
+          LocalStorage.long = lastKnown.longitude;
+          await getSuggestedFriend();
+        } else {
+          nearbyChatError.value = "Could not get location. Please try again.";
+        }
+      } catch (e2) {
+        debugPrint("❌ Last known position error: $e2");
+        nearbyChatError.value = "Location error: $e";
+      }
     }
   }
 
