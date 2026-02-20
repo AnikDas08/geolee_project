@@ -216,15 +216,9 @@ class _OnboardingScreenState extends State<OnboardingScreen>
         timeLimit: const Duration(seconds: 10), // Add timeout
       );
 
-      await LocalStorage.setString(
-        LocalStorageKeys.lat,
-        position.latitude.toString(),
-      );
-
-      await LocalStorage.setString(
-        LocalStorageKeys.long,
-        position.longitude.toString(),
-      );
+      // Save as double to SharedPreferences to keep type consistent
+      await LocalStorage.setDouble(LocalStorageKeys.lat, position.latitude);
+      await LocalStorage.setDouble(LocalStorageKeys.long, position.longitude);
 
       debugPrint(
         "✅ Location saved → Lat: ${position.latitude}, Long: ${position.longitude}",

@@ -34,9 +34,8 @@ class LocalStorage {
   static bool verified = false;
   static String bio = "";
   static String advertiserBio = '';
-  // Default coordinates: lat (23.8103), long (90.4125)
-  static double lat = 23.8103;
-  static double long = 90.4125;
+  static double lat = 90.4125;
+  static double long = 23.8103;
   static String radius = "5";
   static bool accountInfoStatus = false;
   static String createdAt = "";
@@ -47,28 +46,6 @@ class LocalStorage {
   static Future<SharedPreferences> _getStorage() async {
     preferences ??= await SharedPreferences.getInstance();
     return preferences!;
-  }
-
-  // Safe reader for numeric values stored in SharedPreferences.
-  // SharedPreferences.getDouble will throw if the stored value is a String,
-  // so this helper accepts double/int/String and parses accordingly.
-  static double _getDoubleSafe(SharedPreferences prefs, String key, double defaultValue) {
-    try {
-      final dynamic raw = prefs.get(key);
-      if (raw == null) return defaultValue;
-      if (raw is double) return raw;
-      if (raw is int) return raw.toDouble();
-      if (raw is String) {
-        // Try parsing with dot or comma
-        var parsed = double.tryParse(raw);
-        if (parsed != null) return parsed;
-        parsed = double.tryParse(raw.replaceAll(',', '.'));
-        if (parsed != null) return parsed;
-      }
-    } catch (e) {
-      debugPrint('LocalStorage._getDoubleSafe error for $key: $e');
-    }
-    return defaultValue;
   }
 
   /// ----------------------------------------------------------
@@ -126,12 +103,11 @@ class LocalStorage {
     dateOfBirth = localStorage.getString(LocalStorageKeys.dateOfBirth) ?? "";
     gender = localStorage.getString(LocalStorageKeys.gender) ?? "";
     experience = localStorage.getString(LocalStorageKeys.experience) ?? "";
-    // Use safe reader to avoid exceptions when values were saved as strings
-    balance = _getDoubleSafe(localStorage, LocalStorageKeys.balance, 0.0);
+    balance = localStorage.getDouble(LocalStorageKeys.balance) ?? 0.0;
     verified = localStorage.getBool(LocalStorageKeys.verified) ?? false;
     bio = localStorage.getString(LocalStorageKeys.bio) ?? "";
-    lat = _getDoubleSafe(localStorage, LocalStorageKeys.lat, lat);
-    long = _getDoubleSafe(localStorage, LocalStorageKeys.long, long);
+    lat = localStorage.getDouble(LocalStorageKeys.lat) ?? 0.0;
+    long = localStorage.getDouble(LocalStorageKeys.long) ?? 0.0;
     accountInfoStatus = localStorage.getBool(LocalStorageKeys.accountInfoStatus) ?? false;
     createdAt = localStorage.getString(LocalStorageKeys.createdAt) ?? "";
     updatedAt = localStorage.getString(LocalStorageKeys.updatedAt) ?? "";
