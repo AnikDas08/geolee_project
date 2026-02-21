@@ -18,7 +18,7 @@ class SignInController extends GetxController {
     text: kDebugMode ? 'ebrahimnazmul20032@gmail.com' : '',
   );
   TextEditingController passwordController = TextEditingController(
-    text: kDebugMode ? 'password123' : "",
+    text: kDebugMode ? 'password1234' : "",
   );
 
   /// Sign in Api call here

@@ -226,7 +226,7 @@ class _FilterDialogState extends State<FilterDialog>
 
             // ─── Tab Content ───
             SizedBox(
-              height: 180.h, // ✅ days না থাকায় height কমানো হয়েছে
+              height: 195.h,
               child: TabBarView(
                 controller: _tabController,
                 children: [_buildPeriodTab(), _buildDateRangeTab()],
@@ -235,7 +235,6 @@ class _FilterDialogState extends State<FilterDialog>
 
             SizedBox(height: 20.h),
 
-            // ─── Apply Button ───
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(

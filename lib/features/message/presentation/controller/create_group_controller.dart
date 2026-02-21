@@ -174,6 +174,24 @@ class CreateGroupController extends GetxController {
     return true;
   }
 
+
+  Future<void>leaveChat(String id)async{
+    try{
+
+
+      final response = await ApiService.delete(ApiEndPoint.leaveChat + id);
+
+      if (response.statusCode == 200) {
+        debugPrint("${response.statusCode}${response.message}");
+      }
+
+    }catch(e){
+      debugPrint("Error fetching members: $e");
+    }
+
+  }
+
+
   // Create group API
   Future<void> createGroup() async {
     if (!_validateInputs()) return;

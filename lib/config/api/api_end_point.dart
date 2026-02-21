@@ -51,21 +51,16 @@ class ApiEndPoint {
   // Chat ===========================================
   static const String createOneToOneChat = "${baseUrl}chats/create-1-to-1";
   static const String createChatGroup = "${baseUrl}chats/create-group";
-  static const String deleteChatById =
-      "${baseUrl}chats/696b6da6a27367444bc2403a";
-  static const String leaveChat =
-      "${baseUrl}chats/leave/696b6da6a27367444bc2403a";
-  static const String joinChat =
-      "${baseUrl}chats/join/696b6da6a27367444bc2403a";
+  static const String deleteChatById = "${baseUrl}chats/696b6da6a27367444bc2403a";
+  static const String leaveChat ="${baseUrl}chats/leave/";
+  static const String joinChat = "${baseUrl}chats/join/696b6da6a27367444bc2403a";
   static const String nearbyChat = "${baseUrl}users/";
 
   static const String createAds = "${baseUrl}advertisements/create";
   static const String getAdvertisementMe = "${baseUrl}advertisements/me";
   static const String getAdvertisementById = "${baseUrl}advertisements/single/";
-  static const String updateAdvertisementById =
-      "${baseUrl}advertisements/update/";
-  static const String deleteAdvertisementById =
-      "${baseUrl}advertisements/delete/";
+  static const String updateAdvertisementById = "${baseUrl}advertisements/update/";
+  static const String deleteAdvertisementById = "${baseUrl}advertisements/delete/";
 
   // Plan===============================================
   static const String getPlans = "${baseUrl}plans";
@@ -106,4 +101,5 @@ class ApiEndPoint {
   static const String updateRequest = "${baseUrl}pay/my-service-history/";
   static const String readAllNotification = "${baseUrl}notifications/read-all";
   static const String readNotificationById = "${baseUrl}notifications/read/";
+
 }
