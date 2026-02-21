@@ -59,7 +59,7 @@ class MyFriendController extends GetxController {
 
   // ================= Lifecycle
   @override
-  void onInit() {
+  Future<void> onInit()async {
     super.onInit();
 
     debugPrint("🚀 MyFriendController onInit called");
@@ -67,10 +67,10 @@ class MyFriendController extends GetxController {
     debugPrint("📍 RAW Long: ${LocalStorage.long}");
     debugPrint("📍 Lat type: ${LocalStorage.lat.runtimeType}");
 
-    fetchFriendRequests();
-    getMyAllFriends();
-    getSuggestedFriend();
-    _initLocationThenFetch();
+    await fetchFriendRequests();
+    await getMyAllFriends();
+    await getSuggestedFriend();
+    await _initLocationThenFetch();
     debugPrint("📍 Lat: ${LocalStorage.lat} | Long: ${LocalStorage.long}");
   }
 
@@ -92,6 +92,7 @@ class MyFriendController extends GetxController {
   }
 
   // ================= Get My All Friends
+
   Future<void> getMyAllFriends() async {
     try {
       isLoading.value = true;
@@ -103,10 +104,31 @@ class MyFriendController extends GetxController {
       update();
     }
   }
+  Future<void> removeFriend(String friendshipId) async {
+    try {
+      // 👉 আগে index বের করো
+      final index = myFriendsList.indexWhere(
+            (data) => data.id == friendshipId,
+      );
 
-  // ================= Remove Friend (local only)
-  void removeFriend(String userId) {
-    myFriendsList.removeWhere((data) => data.friend?.sId == userId);
+      if (index == -1) return;
+      final removedFriend = myFriendsList.removeAt(index);
+      myFriendsList.refresh(); // 🔥 UI refresh
+
+      final response = await ApiService.delete(
+        ApiEndPoint.unfriend + friendshipId,
+      );
+
+      if (response.statusCode != 200) {
+        // ❌ API fail হলে আবার add back
+        myFriendsList.insert(index, removedFriend);
+        myFriendsList.refresh();
+        throw Exception("Failed to remove friend");
+      }
+
+    } catch (e) {
+      print("Error removing friend: $e");
+    }
   }
 
   RxList<FriendModel> friendRequestList = <FriendModel>[].obs;

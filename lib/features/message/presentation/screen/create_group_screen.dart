@@ -6,6 +6,7 @@ import 'package:giolee78/component/text/common_text.dart';
 import 'package:giolee78/config/route/app_routes.dart';
 import 'package:giolee78/utils/constants/app_colors.dart';
 
+import '../../../../config/api/api_end_point.dart';
 import '../controller/create_group_controller.dart';
 
 class CreateGroupScreen extends StatelessWidget {
@@ -90,30 +91,32 @@ class CreateGroupScreen extends StatelessWidget {
                     border: Border.all(color: Colors.grey[300]!),
                     borderRadius: BorderRadius.circular(8.r),
                   ),
-                  child: DropdownButtonFormField<String>(
-                    initialValue: controller.selectedPrivacyType,
-                    items: controller.privacyTypes.map((String type) {
-                      return DropdownMenuItem<String>(
-                        value: type,
-                        child: Text(
-                          type,
-                          style: TextStyle(fontSize: 14.sp),
+                  child: Obx(() {
+                    return DropdownButtonFormField<String>(
+                      value: controller.privacyOptions[controller.selectedPrivacyType.value],
+                      items: controller.privacyTypes.map((String type) {
+                        return DropdownMenuItem<String>(
+                          value: type,
+                          child: Text(
+                            type,
+                            style: TextStyle(fontSize: 14.sp),
+                          ),
+                        );
+                      }).toList(),
+                      onChanged: controller.changePrivacyType,
+                      decoration: InputDecoration(
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 16.w,
+                          vertical: 14.h,
                         ),
-                      );
-                    }).toList(),
-                    onChanged: controller.changePrivacyType,
-                    decoration: InputDecoration(
-                      contentPadding: EdgeInsets.symmetric(
-                        horizontal: 16.w,
-                        vertical: 14.h,
+                        border: InputBorder.none,
                       ),
-                      border: InputBorder.none,
-                    ),
-                    icon: Icon(
-                      Icons.keyboard_arrow_down,
-                      color: Colors.grey[600],
-                    ),
-                  ),
+                      icon: Icon(
+                        Icons.keyboard_arrow_down,
+                        color: Colors.grey[600],
+                      ),
+                    );
+                  }),
                 ),
 
                 SizedBox(height: 20.h),
@@ -198,17 +201,25 @@ class CreateGroupScreen extends StatelessWidget {
                 SizedBox(height: 12.h),
 
                 /// Selected Members Count
-                CommonText(
+                Obx(() => CommonText(
                   text: "Selected Member (${controller.selectedMembers.length})",
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w500,
                   color: Colors.grey,
                   bottom: 12.h,
-                ),
+                )),
 
                 /// Selected Members Chips
-                if (controller.selectedMembers.isNotEmpty)
-                  Wrap(
+                Obx(() {
+                  if (controller.selectedMembers.isEmpty) {
+                    return CommonText(
+                      text: "No members selected",
+                      fontSize: 13.sp,
+                      color: Colors.grey,
+                    );
+                  }
+
+                  return Wrap(
                     spacing: 8.w,
                     runSpacing: 8.h,
                     children: controller.selectedMembers.map((member) {
@@ -222,20 +233,23 @@ class CreateGroupScreen extends StatelessWidget {
                         onDeleted: () => controller.removeMember(member.id),
                       );
                     }).toList(),
-                  ),
+                  );
+                }),
 
                 SizedBox(height: 40.h),
 
                 /// Create Group Button
-                CommonButton(
-                  titleText: 'Create Group',
+                Obx(() => CommonButton(
+                  titleText: controller.isCreating.value
+                      ? 'Creating...'
+                      : 'Create Group',
                   buttonHeight: 50.h,
                   buttonRadius: 8.r,
                   titleSize: 16.sp,
-                  onTap: (){
-                    Get.toNamed(AppRoutes.chat);
+                  onTap: () {
+                    controller.createGroup();
                   },
-                ),
+                )),
 
                 SizedBox(height: 20.h),
               ],
@@ -246,15 +260,12 @@ class CreateGroupScreen extends StatelessWidget {
     );
   }
 
-  void _showAddMemberDialog(BuildContext context, CreateGroupController controller) {
-    // Mock data for demo - replace with actual API call
-    final List<GroupMember> availableMembers = [
-      GroupMember(id: '1', name: 'Shahir Ahmed'),
-      GroupMember(id: '2', name: 'Emily Davis'),
-      GroupMember(id: '3', name: 'Alex Johnson'),
-      GroupMember(id: '4', name: 'Sarah Wilson'),
-      GroupMember(id: '5', name: 'Mike Brown'),
-    ];
+  void _showAddMemberDialog(
+      BuildContext context,
+      CreateGroupController controller,
+      ) {
+    // Fetch members when dialog opens
+    controller.fetchMyChats();
 
     showModalBottomSheet(
       context: context,
@@ -263,144 +274,143 @@ class CreateGroupScreen extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
       ),
-      builder: (context) {
-        return GetBuilder<CreateGroupController>(
-          builder: (controller) {
-            final filteredMembers = controller.searchQuery.isEmpty
-                ? availableMembers
-                : availableMembers.where((member) {
-              return member.name.toLowerCase().contains(controller.searchQuery);
-            }).toList();
-
-            return Padding(
-              padding: EdgeInsets.only(
-                bottom: MediaQuery.of(context).viewInsets.bottom,
-              ),
-              child: SafeArea(
-                child: Container(
-                  height: MediaQuery.of(context).size.height * 0.7,
-                  padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+      builder: (_) {
+        return Obx(() {
+          return SafeArea(
+            child: Container(
+              height: MediaQuery.of(context).size.height * 0.7,
+              padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  /// Header
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      /// Header
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      CommonText(
+                        text: "Add Members",
+                        fontSize: 18.sp,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () {
+                          controller.clearSearch();
+                          Get.back();
+                        },
+                      ),
+                    ],
+                  ),
+
+                  SizedBox(height: 16.h),
+
+                  /// Search
+                  TextField(
+                    controller: controller.searchController,
+                    onChanged: controller.searchMembers,
+                    decoration: InputDecoration(
+                      hintText: "Search members...",
+                      prefixIcon: const Icon(Icons.search),
+                      suffixIcon: controller.searchQuery.value.isNotEmpty
+                          ? IconButton(
+                        icon: const Icon(Icons.clear),
+                        onPressed: controller.clearSearch,
+                      )
+                          : null,
+                      filled: true,
+                      fillColor: Colors.grey.shade100,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8.r),
+                        borderSide: BorderSide.none,
+                      ),
+                    ),
+                  ),
+
+                  SizedBox(height: 16.h),
+
+
+                  Expanded(
+                    child: controller.isMemberLoading.value
+                        ? const Center(
+                      child: CircularProgressIndicator(),
+                    )
+                        : controller.availableMembers.isEmpty
+                        ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          CommonText(
-                            text: "Add Members",
-                            fontSize: 18.sp,
-                            fontWeight: FontWeight.w600,
+                          Icon(
+                            Icons.people_outline,
+                            size: 48,
+                            color: Colors.grey[300],
                           ),
-                          IconButton(
-                            icon: const Icon(Icons.close),
-                            onPressed: () => Get.back(),
+                          SizedBox(height: 16.h),
+                          Text(
+                            "No members found",
+                            style: TextStyle(
+                              fontSize: 14.sp,
+                              color: Colors.grey[600],
+                            ),
                           ),
                         ],
                       ),
+                    )
+                        : ListView.builder(
+                      itemCount: controller.availableMembers.length,
+                      itemBuilder: (context, index) {
+                        final member =
+                        controller.availableMembers[index];
+                        final isSelected = controller.selectedMembers.any((m) => m.id == member.id);
 
-                      SizedBox(height: 16.h),
-
-                      /// Search Field
-                      TextField(
-                        controller: controller.searchController,
-                        onChanged: (value) => controller.searchMembers(value),
-                        decoration: InputDecoration(
-
-                          hintText: "Search members...",
-                          hintStyle: TextStyle(
-                            fontSize: 14.sp,
-                            color: Colors.grey[400],
+                        return ListTile(
+                          leading: CircleAvatar(
+                            backgroundColor:
+                            AppColors.primaryColor,
+                            backgroundImage: member.image != null
+                                ? NetworkImage(
+                                ApiEndPoint.imageUrl +
+                                    member.image!)
+                                : null,
+                            child: member.image == null
+                                ? Text(
+                              member.name[0].toUpperCase(),
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            )
+                                : null,
                           ),
-
-                          prefixIcon: Icon(Icons.search, color: Colors.grey[600]),
-                          suffixIcon: controller.searchQuery.isNotEmpty
-                              ? IconButton(
-                            icon: Icon(Icons.clear, color: Colors.grey[600]),
-                            onPressed: () => controller.clearSearch(),
+                          title: Text(member.name),
+                          trailing: isSelected
+                              ? const Icon(
+                            Icons.check_circle,
+                            color: Colors.green,
                           )
-                              : null,
-                          filled: true,
-                          fillColor: Colors.grey,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8.r),
-                            borderSide: BorderSide.none,
-                          ),
-                        ),
-                      ),
-
-                      SizedBox(height: 16.h),
-
-                      /// Members List
-                      Expanded(
-                        child: filteredMembers.isEmpty
-                            ? Center(
-                          child: CommonText(
-                            text: "No members found",
-                            fontSize: 14.sp,
+                              : const Icon(
+                            Icons.add_circle_outline,
                             color: Colors.grey,
                           ),
-                        )
-                            : ListView.builder(
-                          itemCount: filteredMembers.length,
-                          itemBuilder: (context, index) {
-                            final member = filteredMembers[index];
-                            final isSelected = controller.selectedMembers
-                                .any((m) => m.id == member.id);
-
-                            return ListTile(
-                              contentPadding: EdgeInsets.symmetric(
-                                vertical: 4.h,
-                              ),
-                              leading: CircleAvatar(
-                                backgroundColor: AppColors.primaryColor.withOpacity(0.1),
-                                child: Text(
-                                  member.name[0].toUpperCase(),
-                                  style: const TextStyle(
-                                    color: AppColors.primaryColor,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ),
-                              title: Text(
-                                member.name,
-                                style: TextStyle(
-                                  fontSize: 15.sp,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                              trailing: isSelected
-                                  ? const Icon(
-                                Icons.check_circle,
-                                color: AppColors.primaryColor,
-                              )
-                                  : Icon(
-                                Icons.add_circle_outline,
-                                color: Colors.grey[400],
-                              ),
-                              onTap: () {
-                                if (isSelected) {
-                                  controller.removeMember(member.id);
-                                } else {
-                                  controller.addMember(member);
-                                }
-                              },
-                            );
+                          onTap: () {
+                            controller.toggleMember(member);
                           },
-                        ),
-                      ),
-                      SizedBox(height: 20.h,),
-                      CommonButton(
-                          titleText: "Confirm",
-                        onTap: ()=>Get.back(),
-                      )
-                    ],
+                        );
+                      },
+                    ),
                   ),
-                ),
+
+                  SizedBox(height: 20.h),
+
+                  CommonButton(
+                    titleText: "Confirm",
+                    buttonHeight: 48.h,
+                    onTap: () => Get.back(),
+                  ),
+                ],
               ),
-            );
-          },
-        );
+            ),
+          );
+        });
       },
     );
   }

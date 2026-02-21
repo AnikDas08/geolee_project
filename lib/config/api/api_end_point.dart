@@ -22,7 +22,12 @@ class ApiEndPoint {
   static const String getUserSingleProfileById = "${baseUrl}users/single/";
   static const String nearByUsers = "${baseUrl}users";
   static const String deleteAccount = "${baseUrl}users/delete-account";
+  static const String sendGreeting= "${baseUrl}chats/send-greetings";
+  static String getMyChat(String search) {
+    return "$baseUrl/chats/my-chats?searchTerm=$search&isGroupChat=false";
+  }
 
+  static const String createGroup = "$baseUrl/chats/create-group";
   // Post ===========================================
   static const String createPost = "${baseUrl}posts/create";
   static const String updatePost = "${baseUrl}posts/update/";
@@ -36,12 +41,10 @@ class ApiEndPoint {
   static const String createFriendRequest = "${baseUrl}friend-requests/create/";
   static const String friendStatusUpdate = "${baseUrl}friend-requests/update/";
   static const String rejectedFriendRequest = "${baseUrl}friendships/";
-  static const String getMyFriendRequest =
-      "${baseUrl}friend-requests/my-requests";
+  static const String getMyFriendRequest = "${baseUrl}friend-requests/my-requests";
   static const String getMyAllFriend = "${baseUrl}friendships/my-friends";
   static const String checkFriendStatus = "${baseUrl}/friendships/check/";
-  static const String cancelFriendRequest =
-      "${baseUrl}/friend-requests/update/";
+  static const String cancelFriendRequest = "${baseUrl}/friend-requests/update/";
   static const String unfriend = "${baseUrl}/friendships/";
   static const String deleteFriend = "${baseUrl}friendships/";
 

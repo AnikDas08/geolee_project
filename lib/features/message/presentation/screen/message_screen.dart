@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:giolee78/utils/constants/app_images.dart';
 import 'package:intl/intl.dart';
 import '../../../../utils/constants/app_colors.dart';
+import '../../data/model/chat_message_model.dart';
 import '../controller/message_controller.dart';
 
 class MessageScreen extends StatefulWidget {
@@ -42,6 +43,7 @@ class _MessageScreenState extends State<MessageScreen> {
     }
   }
 
+  /// ========== ATTACHMENT PICKER MODAL ==========
   void _showAttachmentPicker(
       BuildContext context,
       MessageController controller,
@@ -141,19 +143,24 @@ class _MessageScreenState extends State<MessageScreen> {
       builder: (controller) {
         return WillPopScope(
           onWillPop: () async {
+            // Clear picked files when leaving
+            controller.clearAllPicks();
             Get.back();
             return true;
           },
           child: Scaffold(
             backgroundColor: Colors.grey[100],
 
-            /// App Bar
+            /// ========== APP BAR ==========
             appBar: AppBar(
               backgroundColor: Colors.white,
               elevation: 0,
               leading: IconButton(
                 icon: const Icon(Icons.arrow_back, color: Colors.black),
-                onPressed: () => Get.back(),
+                onPressed: () {
+                  controller.clearAllPicks();
+                  Get.back();
+                },
               ),
               title: Row(
                 children: [
@@ -230,12 +237,12 @@ class _MessageScreenState extends State<MessageScreen> {
               ],
             ),
 
-            /// Body
+            /// ========== BODY ==========
             body: controller.isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : Column(
               children: [
-                /// Messages list
+                /// ========== MESSAGES LIST ==========
                 Expanded(
                   child: ListView.builder(
                     controller: controller.scrollController,
@@ -251,9 +258,13 @@ class _MessageScreenState extends State<MessageScreen> {
                   ),
                 ),
 
-                /// Upload progress indicator
+                /// ========== PICKED FILE PREVIEW ==========
+                _buildPickedFilePreview(controller),
+
+                /// ========== UPLOAD PROGRESS ==========
                 if (controller.isUploadingImage ||
-                    controller.isUploadingFile)
+                    controller.isUploadingMedia ||
+                    controller.isUploadingDocument)
                   Container(
                     color: Colors.white,
                     padding: EdgeInsets.symmetric(
@@ -273,6 +284,8 @@ class _MessageScreenState extends State<MessageScreen> {
                         Text(
                           controller.isUploadingImage
                               ? 'Sending image…'
+                              : controller.isUploadingMedia
+                              ? 'Sending media…'
                               : 'Sending file…',
                           style: TextStyle(
                             fontSize: 12.sp,
@@ -283,82 +296,8 @@ class _MessageScreenState extends State<MessageScreen> {
                     ),
                   ),
 
-                /// Input Area
-                Container(
-                  color: Colors.white,
-                  padding: EdgeInsets.only(
-                    left: 16.w,
-                    right: 16.w,
-                    bottom:
-                    MediaQuery.of(context).padding.bottom + 16.h,
-                    top: 16.h,
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: Colors.grey[100],
-                            borderRadius: BorderRadius.circular(24.r),
-                          ),
-                          child: TextField(
-                            controller: controller.messageController,
-                            decoration: InputDecoration(
-                              hintText: "Write your message",
-                              hintStyle: TextStyle(
-                                fontSize: 14.sp,
-                                color: Colors.grey[400],
-                              ),
-                              border: InputBorder.none,
-                              contentPadding: EdgeInsets.symmetric(
-                                horizontal: 20.w,
-                                vertical: 12.h,
-                              ),
-                              suffixIcon: GestureDetector(
-                                onTap: () => _showAttachmentPicker(
-                                  context,
-                                  controller,
-                                ),
-                                child: Padding(
-                                  padding: EdgeInsets.all(8.w),
-                                  child: Icon(
-                                    Icons.attach_file,
-                                    color: Colors.grey[600],
-                                    size: 22.sp,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            style: TextStyle(
-                              fontSize: 14.sp,
-                              color: Colors.black,
-                            ),
-                            onSubmitted: (_) => controller.sendMessage(),
-                          ),
-                        ),
-                      ),
-                      SizedBox(width: 12.w),
-                      GestureDetector(
-                        onTap: (controller.isUploadingImage ||
-                            controller.isUploadingFile)
-                            ? null
-                            : controller.sendMessage,
-                        child: Container(
-                          padding: EdgeInsets.all(10.w),
-                          decoration: const BoxDecoration(
-                            color: AppColors.primaryColor,
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            Icons.send,
-                            color: Colors.white,
-                            size: 20.sp,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                /// ========== INPUT AREA ==========
+                _buildInputArea(context, controller),
               ],
             ),
           ),
@@ -367,9 +306,199 @@ class _MessageScreenState extends State<MessageScreen> {
     );
   }
 
-  // ──────────────────────────────────────────────────────────────────────────
+  /// ========== BUILD PICKED FILE PREVIEW ==========
+  Widget _buildPickedFilePreview(MessageController controller) {
+    return GetBuilder<MessageController>(
+      builder: (ctrl) {
+        // IMAGE PREVIEW
+        if (ctrl.isImagePicked()) {
+          return Container(
+            color: Colors.grey[50],
+            padding: EdgeInsets.all(8.w),
+            child: Stack(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(12.r),
+                  child: Image.file(
+                    File(ctrl.pickedImagePath!),
+                    height: 120.h,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                Positioned(
+                  top: 8.w,
+                  right: 8.w,
+                  child: Container(
+                    decoration: const BoxDecoration(
+                      color: Colors.red,
+                      shape: BoxShape.circle,
+                    ),
+                    child: IconButton(
+                      icon: const Icon(Icons.close, color: Colors.white),
+                      onPressed: ctrl.clearPickedImage,
+                      iconSize: 18.sp,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+
+        // FILE PREVIEW
+        if (ctrl.isFilePicked()) {
+          final fileInfo = _getFileIconInfo(ctrl.pickedFileType);
+
+          return Container(
+            color: Colors.grey[50],
+            padding: EdgeInsets.all(8.w),
+            child: Container(
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey[300]!),
+                borderRadius: BorderRadius.circular(12.r),
+                color: Colors.white,
+              ),
+              padding: EdgeInsets.all(12.w),
+              child: Row(
+                children: [
+                  Container(
+                    padding: EdgeInsets.all(8.w),
+                    decoration: BoxDecoration(
+                      color: fileInfo.color.withOpacity(0.12),
+                      borderRadius: BorderRadius.circular(8.r),
+                    ),
+                    child: Icon(
+                      fileInfo.icon,
+                      color: fileInfo.color,
+                      size: 32.sp,
+                    ),
+                  ),
+                  SizedBox(width: 12.w),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          ctrl.getPickedFileName(),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13.sp,
+                          ),
+                        ),
+                        Text(
+                          '${ctrl.getPickedFileType()} • ${ctrl.getPickedFileSize()}',
+                          style: TextStyle(
+                            fontSize: 11.sp,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: ctrl.clearPickedFile,
+                    iconSize: 20.sp,
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
+        return const SizedBox.shrink();
+      },
+    );
+  }
+
+  /// ========== BUILD INPUT AREA ==========
+  Widget _buildInputArea(BuildContext context, MessageController controller) {
+    return Container(
+      color: Colors.white,
+      padding: EdgeInsets.only(
+        left: 16.w,
+        right: 16.w,
+        bottom: MediaQuery.of(context).padding.bottom + 16.h,
+        top: 16.h,
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.grey[100],
+                borderRadius: BorderRadius.circular(24.r),
+              ),
+              child: TextField(
+                controller: controller.messageController,
+                decoration: InputDecoration(
+                  hintText: "Write your message",
+                  hintStyle: TextStyle(
+                    fontSize: 14.sp,
+                    color: Colors.grey[400],
+                  ),
+                  border: InputBorder.none,
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 20.w,
+                    vertical: 12.h,
+                  ),
+                  suffixIcon: GestureDetector(
+                    onTap: () => _showAttachmentPicker(context, controller),
+                    child: Padding(
+                      padding: EdgeInsets.all(8.w),
+                      child: Icon(
+                        Icons.attach_file,
+                        color: Colors.grey[600],
+                        size: 22.sp,
+                      ),
+                    ),
+                  ),
+                ),
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  color: Colors.black,
+                ),
+                onSubmitted: (_) => controller.sendTextAndFile(),
+              ),
+            ),
+          ),
+          SizedBox(width: 12.w),
+          GestureDetector(
+            onTap: (controller.isSendingText ||
+                controller.isUploadingImage ||
+                controller.isUploadingMedia ||
+                controller.isUploadingDocument)
+                ? null
+                : controller.sendTextAndFile,
+            child: Container(
+              padding: EdgeInsets.all(10.w),
+              decoration: BoxDecoration(
+                color: (controller.isSendingText ||
+                    controller.isUploadingImage ||
+                    controller.isUploadingMedia ||
+                    controller.isUploadingDocument)
+                    ? Colors.grey
+                    : AppColors.primaryColor,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.send,
+                color: Colors.white,
+                size: 20.sp,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ─────────────────────────────────────────
   // Message bubble
-  // ──────────────────────────────────────────────────────────────────────────
+
   Widget _buildMessageBubble(ChatMessage message) {
     final timeFormat = DateFormat('hh:mm a');
 
@@ -446,8 +575,9 @@ class _MessageScreenState extends State<MessageScreen> {
     );
   }
 
+  /// BUILD BUBBLE CONTENT
   Widget _buildBubbleContent(ChatMessage message) {
-    // ── Image bubble ──────────────────────────────────────────────────────
+    // ── Image bubble ──────────────────────────
     if (message.isImage) {
       final bool isRemote =
           message.imageUrl != null && message.imageUrl!.startsWith('http');

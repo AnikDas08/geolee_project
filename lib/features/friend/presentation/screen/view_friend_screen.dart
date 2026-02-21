@@ -39,6 +39,10 @@ class _ViewFriendScreenState extends State<ViewFriendScreen> {
   void initState() {
     super.initState();
 
+    // 🔥 Clear previous data first
+    controller.usersPosts.clear();
+    controller.userData.value = null;
+
     // Fetch posts by user ID
     controller.getPostsByUserId(widget.userId);
     controller.getUserById(widget.userId);

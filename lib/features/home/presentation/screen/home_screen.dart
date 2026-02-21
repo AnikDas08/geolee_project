@@ -494,8 +494,9 @@ class _HomeScreenState extends State<HomeScreen> {
                               'Permission Denied',
                               'Location permission is required.',
                             );
-                            if (status.isPermanentlyDenied)
+                            if (status.isPermanentlyDenied) {
                               await openAppSettings();
+                            }
                           }
                         } catch (e) {
                           debugPrint('Error requesting permission: $e');

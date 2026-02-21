@@ -207,6 +207,7 @@ class ProfileController extends GetxController {
         method: "PATCH",
         body: body,
         imagePath: selectedImage?.path,
+
       );
 
       if (response.statusCode == 200) {

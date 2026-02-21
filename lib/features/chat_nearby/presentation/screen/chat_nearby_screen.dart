@@ -74,7 +74,6 @@ class ChatNearbyScreen extends StatelessWidget {
           );
         }
 
-        // Display list
         // Display list with pagination
         return RefreshIndicator(
           onRefresh: () => controller.getNearbyChat(),
@@ -187,13 +186,16 @@ class _ChatNearbyAppBar extends StatelessWidget {
 class _NearbyUserCard extends StatelessWidget {
   const _NearbyUserCard({required this.nearbyChatUser});
 
-  final NearbyChatUserModel nearbyChatUser; // Changed from NearbyChatResponseModel
+  final NearbyChatUserModel nearbyChatUser;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        Get.to(() => ChatNearbyProfileScreen(user: nearbyChatUser));
+        // ✅ Pass the user object to the profile screen
+        Get.to(() => ChatNearbyProfileScreen(
+          user: nearbyChatUser,
+        ));
       },
       child: Container(
         decoration: ShapeDecoration(
@@ -210,9 +212,6 @@ class _NearbyUserCard extends StatelessWidget {
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
         child: Row(
           children: [
-
-
-
             CircleAvatar(
               radius: 20.r,
               backgroundColor: AppColors.primaryColor2.withOpacity(0.1),
@@ -232,7 +231,6 @@ class _NearbyUserCard extends StatelessWidget {
               )
                   : Image.asset(AppImages.private),
             ),
-
             SizedBox(width: 16.w),
             Expanded(
               child: Column(
@@ -245,16 +243,13 @@ class _NearbyUserCard extends StatelessWidget {
                     fontWeight: FontWeight.w500,
                     textAlign: TextAlign.start,
                   ),
-
                   SizedBox(height: 4.h),
-
                   CommonText(
-                    text:"Within ${ nearbyChatUser.distance?.toStringAsFixed(2) ?? "0"} KM",
+                    text: "Within ${nearbyChatUser.distance?.toStringAsFixed(2) ?? "0"} KM",
                     fontSize: 12.sp,
                     color: AppColors.primaryColor2,
                     textAlign: TextAlign.start,
                   ),
-
                 ],
               ),
             ),

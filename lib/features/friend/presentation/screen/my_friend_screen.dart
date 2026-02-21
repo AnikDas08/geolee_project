@@ -19,7 +19,7 @@ class MyFriendScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(MyFriendController());
+    final controller = Get.find<MyFriendController>();
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -109,17 +109,19 @@ class MyFriendScreen extends StatelessWidget {
                   itemBuilder: (context, index) {
                     final data = controller.myFriendsList[index];
                     final friend = data.friend;
+
                     return Padding(
                       padding: EdgeInsets.only(bottom: 10.h),
                       child: _FriendListItem(
-                        userId: friend?.sId ?? "",
+                        friendshipId: data.id ?? "",        // 🔥 relation id (unfriend এর জন্য)
+                        userId: friend?.id ?? "",           // 🔥 actual user id (view screen এর জন্য)
                         userName: friend?.name ?? "Unknown",
-                        avatar: "${ApiEndPoint.imageUrl}${friend!.image}",
+                        avatar: "${ApiEndPoint.imageUrl}${friend?.image ?? ""}",
                         controller: controller,
                       ),
                     );
                   },
-                ),
+                )
             ],
           ),
         ),
@@ -153,6 +155,7 @@ class _SuggestedFriendCard extends StatelessWidget {
     required this.userName,
     required this.controller,
     this.avatar,
+
   });
 
   final String userId;
@@ -163,8 +166,9 @@ class _SuggestedFriendCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () =>
-          Get.to(() => ViewFriendScreen(isFriend: false, userId: userId)),
+
+      onTap: () => Get.to(() => ViewFriendScreen(isFriend: false, userId: userId)),
+
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
         decoration: BoxDecoration(
@@ -178,10 +182,9 @@ class _SuggestedFriendCard extends StatelessWidget {
               children: [
                 CircleAvatar(
                   radius: 22.r,
-                  backgroundImage:
-                      (avatar != null && avatar!.startsWith('http'))
-                      ? NetworkImage(avatar!) as ImageProvider
-                      : const AssetImage(AppImages.profileImage),
+                  backgroundImage: (avatar != null && avatar!.isNotEmpty)
+                      ? NetworkImage(avatar!)
+                      : const AssetImage(AppImages.profileImage) as ImageProvider,
                 ),
                 SizedBox(width: 12.w),
                 CommonText(
@@ -273,12 +276,14 @@ Widget _buildButton({
 /// ================= Friend List Item =================
 class _FriendListItem extends StatelessWidget {
   const _FriendListItem({
+    required this.friendshipId,
     required this.userId,
     required this.userName,
     required this.controller,
     this.avatar,
   });
 
+  final String friendshipId;
   final String userId;
   final String userName;
   final String? avatar;
@@ -287,8 +292,10 @@ class _FriendListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () =>
-          Get.to(() => ViewFriendScreen(isFriend: true, userId: userId)),
+      onTap: () => Get.to(() => ViewFriendScreen(
+        isFriend: true,
+        userId: userId,
+      )),
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
         decoration: BoxDecoration(
@@ -303,9 +310,9 @@ class _FriendListItem extends StatelessWidget {
                 CircleAvatar(
                   radius: 22.r,
                   backgroundImage:
-                      (avatar != null && avatar!.startsWith('http'))
-                      ? NetworkImage(avatar!) as ImageProvider
-                      : const AssetImage(AppImages.profileImage),
+                  (avatar != null && avatar!.startsWith('http'))
+                      ? NetworkImage(avatar!)
+                      : const AssetImage(AppImages.profileImage) as ImageProvider,
                 ),
                 SizedBox(width: 12.w),
                 CommonText(
@@ -319,20 +326,47 @@ class _FriendListItem extends StatelessWidget {
               children: [
                 GestureDetector(
                   onTap: () => Get.toNamed(AppRoutes.message),
-                  child: Icon(
-                    Icons.chat_bubble_outline,
-                    size: 20.sp,
-                    color: AppColors.secondaryText,
-                  ),
+                  child: Icon(Icons.chat_bubble_outline, size: 20.sp),
                 ),
                 SizedBox(width: 12.w),
                 GestureDetector(
-                  onTap: () => controller.removeFriend(userId),
-                  child: Icon(
-                    Icons.close,
-                    size: 20.sp,
-                    color: AppColors.secondaryText,
-                  ),
+                  onTap: () {
+                    Get.dialog(
+                      Dialog(
+                        child: Padding(
+                          padding: EdgeInsets.all(20.r),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Text("Remove Friend?"),
+                              SizedBox(height: 20.h),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: ElevatedButton(
+                                      onPressed: () => Get.back(),
+                                      child: const Text("Cancel"),
+                                    ),
+                                  ),
+                                  SizedBox(width: 12.w),
+                                  Expanded(
+                                    child: ElevatedButton(
+                                      onPressed: () {
+                                        controller.removeFriend(friendshipId);
+                                        Get.back();
+                                      },
+                                      child: const Text("Unfriend"),
+                                    ),
+                                  ),
+                                ],
+                              )
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                  child: Icon(Icons.close, size: 20.sp),
                 ),
               ],
             ),

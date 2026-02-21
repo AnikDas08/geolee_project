@@ -162,19 +162,34 @@ class ClickerController extends GetxController {
   // ================= Get Posts By Specific User ID
   Future<void> getPostsByUserId(String userId) async {
     try {
+      debugPrint("🌐 [getPostsByUserId] Starting - userId: $userId");
       isUserLoading.value = true;
       usersPosts.clear();
 
       final url = "${ApiEndPoint.getUserById}$userId";
+      debugPrint("🌐 [getPostsByUserId] URL: $url");
+
       final response = await ApiService.get(url);
+
+      debugPrint("🌐 [getPostsByUserId] Status: ${response.statusCode}");
+      debugPrint("🌐 [getPostsByUserId] Response: ${response.data}");
 
       if (response.statusCode == 200) {
         final responseData = PostResponseById.fromJson(
           response.data as Map<String, dynamic>,
         );
+
+        debugPrint("✅ [getPostsByUserId] Parsed ${responseData.data.length} posts");
+
         usersPosts.assignAll(responseData.data);
+        usersPosts.refresh(); // 🔥 Force refresh
+
+        debugPrint("✅ [getPostsByUserId] usersPosts updated: ${usersPosts.length} posts");
+      } else {
+        debugPrint("❌ [getPostsByUserId] Error status: ${response.statusCode}");
       }
     } catch (e) {
+      debugPrint("❌ [getPostsByUserId] Exception: $e");
       Utils.errorSnackBar("Error", e.toString());
     } finally {
       isUserLoading.value = false;
