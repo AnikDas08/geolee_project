@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:giolee78/utils/log/app_log.dart';
 import '../../data/model/chat_list_model.dart';
 import '../../repository/chat_repository.dart';
 import '../../../../services/socket/socket_service.dart';
@@ -13,7 +12,9 @@ class ChatController extends GetxController {
   List<ChatModel> chats = [];
   List<ChatModel> filteredChats = []; // For search results
 
-  /// Chat Loading Bar
+  /// Chat Loading Bars
+  bool isSingleLoading = false;
+  bool isGroupLoading = false;
   bool isLoading = false;
 
   /// Chat more Data Loading Bar
@@ -57,10 +58,11 @@ class ChatController extends GetxController {
         final List<ChatModel> list = await chatRepository(
           page,
           searchController.text.trim(),
+          true,
         );
 
-        singleChats.addAll(list);
-
+        chats.addAll(list.where((item) => item.isGroup).toList());
+        filteredChats = chats;
         isLoadingMore = false;
         update();
       }
@@ -68,109 +70,164 @@ class ChatController extends GetxController {
   }
 
   /// Chat data Loading function
-  Future<void> getChatRepos({bool showLoading = true}) async {
-    appLog('naimul');
-    if (showLoading) {
-      isLoading = true;
+  Future<void> getChatRepos({
+    bool showLoading = true,
+    bool isGroup = false,
+  }) async {
+    print(">>>>>>>>>>>> 🛰️ getChatRepos START: isGroup=$isGroup <<<<<<<<<<<<");
+    try {
+      if (showLoading) {
+        if (isGroup) {
+          isGroupLoading = true;
+        } else {
+          isSingleLoading = true;
+        }
+        isLoading = true;
+        update();
+      }
+
+      page = 1;
+      final List<ChatModel> list = await chatRepository(
+        page,
+        searchController.text.trim(),
+        isGroup,
+      );
+
+      if (isGroup) {
+        chats.clear();
+        chats.addAll(list.where((item) => item.isGroup).toList());
+        filteredChats = chats;
+      } else {
+        singleChats.clear();
+        singleChats.addAll(list.where((item) => !item.isGroup).toList());
+      }
+
+      print(
+        ">>>>>>>>>>>> ✅ Chat List Loaded for isGroup=$isGroup: Result Count=${list.length}, Single=${singleChats.length}, Group=${chats.length} <<<<<<<<<<<<",
+      );
+    } catch (e) {
+      print(
+        ">>>>>>>>>>>> ❌ getChatRepos Error for isGroup=$isGroup: $e <<<<<<<<<<<<",
+      );
+    } finally {
+      if (isGroup) {
+        isGroupLoading = false;
+      } else {
+        isSingleLoading = false;
+      }
+      isLoading = isSingleLoading || isGroupLoading;
       update();
     }
-    page++;
-    if (!showLoading) {
-      page = 1;
-    }
-    final List<ChatModel> list = await chatRepository(
-      page,
-      searchController.text.trim(),
-    );
-
-    if (!showLoading) {
-      singleChats.clear();
-    }
-
-    singleChats.addAll(list);
-
-    isLoading = false;
-    update();
   }
 
   /// Api status check here
   Status get status {
-    if (isLoading && chats.isEmpty) return Status.loading;
+    if (isGroupLoading && chats.isEmpty) return Status.loading;
     if (filteredChats.isEmpty && hasNoData) return Status.error;
     return Status.completed;
   }
 
   /// Chat data Update Socket listener
   Future<void> listenChat() async {
-    // Listen for chat list updates (using identified event name from images if applicable)
     SocketServices.on("chat:update", (data) {
-      getChatRepos(showLoading: false);
-    });
+      print(">>>>>>>>>>>> 🔄 Socket Event: chat:update triggered <<<<<<<<<<<<");
+      getChatRepos(showLoading: false, isGroup: false);
+      getChatRepos(showLoading: false, isGroup: true);
+    }, namespace: "/"); // Using root as fallback
 
-    SocketServices.on("update-chatlist::${LocalStorage.userId}", (data) {
+    String eventName = "update-chatlist::${LocalStorage.userId}";
+    print(
+      ">>>>>>>>>>>> 🎧 Listening for Chat List Updates: $eventName <<<<<<<<<<<<",
+    );
+
+    SocketServices.on(eventName, (data) {
+      print(
+        ">>>>>>>>>>>> 📈 Socket Event: $eventName triggered with ${data.length} items <<<<<<<<<<<<",
+      );
       page = 0;
       chats.clear();
+      singleChats.clear();
       filteredChats.clear();
       hasNoData = false;
 
       for (var item in data) {
-        chats.add(ChatModel.fromJson(item));
+        try {
+          final chat = ChatModel.fromJson(item);
+          if (chat.isGroup) {
+            chats.add(chat);
+          } else {
+            singleChats.add(chat);
+          }
+        } catch (e) {
+          print(">>>>>>>>>>>> ❌ Socket Data Parsing Error: $e <<<<<<<<<<<<");
+        }
       }
 
       filteredChats = chats;
       update();
-    });
+    }, namespace: "/"); // Using root as fallback
   }
 
   /// Mark chat as read/seen
   void markChatAsSeen(String chatId) {
-    final index = singleChats.indexWhere((chat) => chat.id == chatId);
+    int index = singleChats.indexWhere((chat) => chat.id == chatId);
     if (index != -1) {
+      final oldChat = singleChats[index];
       singleChats[index] = ChatModel(
-        id: chats[index].id,
-        participant: chats[index].participant,
-        latestMessage: chats[index].latestMessage,
-        unreadCount: chats[index].unreadCount,
-        isDeleted: chats[index].isDeleted,
-        createdAt: chats[index].createdAt,
-        updatedAt: chats[index].updatedAt,
-        isOnline: chats[index].isOnline,
+        id: oldChat.id,
+        isGroup: oldChat.isGroup,
+        chatName: oldChat.chatName,
+        chatImage: oldChat.chatImage,
+        participant: oldChat.participant,
+        latestMessage: oldChat.latestMessage,
+        unreadCount: 0,
+        isDeleted: oldChat.isDeleted,
+        createdAt: oldChat.createdAt,
+        updatedAt: oldChat.updatedAt,
+        isOnline: oldChat.isOnline,
       );
+      update();
+      return;
+    }
 
+    index = chats.indexWhere((chat) => chat.id == chatId);
+    if (index != -1) {
+      final oldChat = chats[index];
+      chats[index] = ChatModel(
+        id: oldChat.id,
+        isGroup: oldChat.isGroup,
+        chatName: oldChat.chatName,
+        chatImage: oldChat.chatImage,
+        participant: oldChat.participant,
+        latestMessage: oldChat.latestMessage,
+        unreadCount: 0,
+        isDeleted: oldChat.isDeleted,
+        createdAt: oldChat.createdAt,
+        updatedAt: oldChat.updatedAt,
+        isOnline: oldChat.isOnline,
+      );
+      filteredChats = chats;
       update();
     }
   }
 
-  /// Chat data Loading function (demo/mock data)
-  Future<void> getChatRepo() async {
-    if (isLoading || hasNoData) return;
-    isLoading = true;
-    update();
-
-    await Future.delayed(const Duration(milliseconds: 300));
-
-    filteredChats = chats;
-    isLoading = false;
-    hasNoData = chats.isEmpty;
-    update();
-  }
-
-  /// Controller on Init
   @override
   void onInit() {
+    print(">>>>>>>>>>>> 🚀 ChatController onInit Called <<<<<<<<<<<<");
     super.onInit();
-
-    /// Initial data load using real repository
-    getChatRepos();
-
-    /// Start listening for real-time updates
+    fetchInitialData();
     listenChat();
+  }
+
+  Future<void> fetchInitialData() async {
+    Future.wait([
+      getChatRepos(isGroup: false),
+      getChatRepos(isGroup: true, showLoading: true),
+    ]);
   }
 
   @override
   void onClose() {
-    // searchController.dispose();
-    // scrollController.dispose();
     super.onClose();
   }
 }

@@ -60,7 +60,9 @@ Widget chatListItem({required ChatModel item}) {
                   radius: 35.sp,
                   child: ClipOval(
                     child: CommonImage(
-                      imageSrc: item.participant.image,
+                      imageSrc: item.isGroup
+                          ? (item.chatImage ?? "")
+                          : item.participant.image,
                       size: 70,
                     ),
                   ),
@@ -91,7 +93,9 @@ Widget chatListItem({required ChatModel item}) {
                       children: [
                         /// participant Name here
                         CommonText(
-                          text: item.participant.fullName,
+                          text: item.isGroup
+                              ? (item.chatName ?? "Unnamed Group")
+                              : item.participant.fullName,
                           fontWeight: hasUnseenMessages
                               ? FontWeight.w700
                               : FontWeight.w600,
@@ -110,58 +114,67 @@ Widget chatListItem({required ChatModel item}) {
                           color: hasUnseenMessages
                               ? Colors.black87
                               : AppColors.secondaryText,
-                          //textOverflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ],
                     ),
                   ),
                   12.width,
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
+                  Row(
                     children: [
-                      CommonText(
-                        text: hasUnseenMessages?"Distance 30 km":"",
-                        fontWeight: hasUnseenMessages
-                            ? FontWeight.w600
-                            : FontWeight.w400,
-                        fontSize: 12,
-                        color: hasUnseenMessages
-                            ? const Color(0xFFE88D67)
-                            : AppColors.secondaryText,
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          CommonText(
+                            text: hasUnseenMessages ? "Distance 30 km" : "",
+                            fontWeight: hasUnseenMessages
+                                ? FontWeight.w600
+                                : FontWeight.w400,
+                            fontSize: 12,
+                            color: hasUnseenMessages
+                                ? const Color(0xFFE88D67)
+                                : AppColors.secondaryText,
+                          ),
+                          CommonText(
+                            text: _formatTime(item.latestMessage.createdAt),
+                            fontWeight: hasUnseenMessages
+                                ? FontWeight.w600
+                                : FontWeight.w400,
+                            fontSize: 12,
+                            color: hasUnseenMessages
+                                ? const Color(0xFFE88D67)
+                                : AppColors.secondaryText,
+                          ),
+                      
+                          /// Unread Count Badge
+                          if (item.unreadCount > 0) ...[
+                            const SizedBox(height: 4),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFE88D67),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: CommonText(
+                                text: item.unreadCount > 99
+                                    ? '99+'
+                                    : item.unreadCount.toString(),
+                                fontSize: 10,
+                                color: Colors.white,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
+                        ],
                       ),
-                      CommonText(
-                        text: _formatTime(item.latestMessage.createdAt),
-                        fontWeight: hasUnseenMessages
-                            ? FontWeight.w600
-                            : FontWeight.w400,
-                        fontSize: 12,
-                        color: hasUnseenMessages
-                            ? const Color(0xFFE88D67)
-                            : AppColors.secondaryText,
-                      ),
+                      
 
-                      /// Unread Count Badge
-                      /*if (item.unreadCount > 0) ...[
-                        SizedBox(height: 4),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 6,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFE88D67),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: CommonText(
-                            text: item.unreadCount > 99
-                                ? '99+'
-                                : item.unreadCount.toString(),
-                            fontSize: 10,
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],*/
+                      
+                      
                     ],
                   ),
                 ],

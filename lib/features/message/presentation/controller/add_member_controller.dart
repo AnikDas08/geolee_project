@@ -12,6 +12,16 @@ class User {
   User({required this.id, required this.name, required this.avatarUrl});
 
   factory User.fromJson(Map<String, dynamic> json) {
+    final participant = json['anotherParticipant'];
+    if (participant != null) {
+      return User(
+        id: participant['_id'] ?? '',
+        name: participant['name'] ?? 'Unknown',
+        avatarUrl: participant['image'] ?? '',
+      );
+    }
+
+    // Fallback for direct user objects
     return User(
       id: json['_id'] ?? '',
       name: json['name'] ?? 'Unknown',

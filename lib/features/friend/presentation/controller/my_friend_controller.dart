@@ -8,6 +8,7 @@ import 'package:giolee78/services/api/api_service.dart';
 import 'package:giolee78/services/repo/get_my_all_friend_repo.dart';
 import 'package:giolee78/utils/constants/app_images.dart';
 
+import '../../../../config/route/app_routes.dart';
 import '../../../../services/api/api_response_model.dart';
 import '../../../../services/storage/storage_services.dart';
 import '../../../../utils/app_utils.dart';
@@ -104,6 +105,48 @@ class MyFriendController extends GetxController {
       update();
     }
   }
+
+
+
+  Future<void> createOrGetChatAndGo({
+    required String receiverId,
+    required String name,
+    required String image,
+  }) async {
+    try {
+      isLoading.value = true;
+
+      final response = await ApiService.post(
+        ApiEndPoint.createOneToOneChat,
+        body: {
+          "participant": receiverId,
+        },
+      );
+
+      if (response.isSuccess) {
+        final data = response.data["data"];
+        String chatId = data["_id"] ?? "";
+
+        if (chatId.isNotEmpty) {
+          Get.toNamed(
+            AppRoutes.message,
+            parameters: {
+              "chatId": chatId,
+              "name": name,
+              "image": image,
+            },
+          );
+        } else {
+          print("Chat ID null or empty");
+        }
+      }
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+
+
   Future<void> removeFriend(String friendshipId) async {
     try {
       // 👉 আগে index বের করো

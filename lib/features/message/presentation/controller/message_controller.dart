@@ -81,25 +81,41 @@ class MessageController extends GetxController {
   // ================================================
   // 0️⃣ LISTEN FOR NEW MESSAGES VIA SOCKET
   // ================================================
+
   void listenMessage() {
+    // Use root namespace as fallback since /messaging is unreachable
     SocketServices.on("message:new", (data) {
-      appLog("=============> New Message received via socket: $data");
+      print(
+        ">>>>>>>>>>>> 📩 New Message received via socket: $data <<<<<<<<<<<<",
+      );
 
-      // Ensure the message belongs to the current chat
-      // The backend might send the chat ID in the message data
-      final String incomingChatId = data['chat'] is String
-          ? data['chat']
-          : data['chat']['_id'];
+      try {
+        final String incomingChatId = data['chat'] is String
+            ? data['chat']
+            : data['chat']?['_id'] ?? '';
 
-      if (incomingChatId == chatId) {
-        final newMessage = ChatMessage.fromJson(data);
-
-        // Prevent duplicate messages if already loaded via API
-        if (!messages.any((m) => m.id == newMessage.id)) {
-          messages.add(newMessage);
-          update();
-          _scrollToBottom();
+        if (chatId.isNotEmpty && incomingChatId == chatId) {
+          final newMessage = ChatMessage.fromJson(data);
+          // Prevent duplicate messages
+          if (!messages.any((m) => m.id == newMessage.id)) {
+            messages.add(newMessage);
+            update();
+            _scrollToBottom();
+          }
         }
+      } catch (e) {
+        appLog("❌ Error parsing incoming socket message: $e");
+      }
+    });
+
+    // chat:update fires on root socket when any message is sent in this chat.
+    // This is the reliable fallback for the receiver to see new messages.
+    SocketServices.on("chat:update", (data) {
+      if (chatId.isNotEmpty) {
+        print(
+          ">>>>>>>>>>>> 🔄 chat:update received — reloading messages <<<<<<<<<<<<",
+        );
+        loadMessages(showLoading: false);
       }
     });
   }
@@ -331,12 +347,11 @@ class MessageController extends GetxController {
     return null;
   }
 
-  // ================================================
-  // 7️⃣ LOAD MESSAGES
-  // ================================================
-  Future<void> loadMessages() async {
-    isLoading = true;
-    update();
+  Future<void> loadMessages({bool showLoading = true}) async {
+    if (showLoading) {
+      isLoading = true;
+      update();
+    }
 
     try {
       // Join the socket room for this chat
@@ -355,12 +370,16 @@ class MessageController extends GetxController {
             final message = ChatMessage.fromJson(json);
             messages.add(message);
           }
+          // Sort oldest → newest so latest message is always at the bottom
+          messages.sort((a, b) => a.createdAt.compareTo(b.createdAt));
         }
       }
     } catch (e) {
       appLog("❌ Load messages error: $e");
     } finally {
-      isLoading = false;
+      if (showLoading) {
+        isLoading = false;
+      }
       update();
       _scrollToBottom();
     }
@@ -413,6 +432,8 @@ class MessageController extends GetxController {
       if (response.statusCode == 200) {
         appLog("✅ Text sent successfully");
         messageController.clear();
+        // Reload silently (no loading spinner) to show the sent message
+        await loadMessages(showLoading: false);
       } else {
         _showErrorSnackBar('Failed to send message');
       }
@@ -462,7 +483,8 @@ class MessageController extends GetxController {
     }
   }
 
-  // =======================this one for send image====================================
+  // =======================this one for send image===================================
+
   Future<void> _sendImageMessage(String imagePath) async {
     isUploadingImage = true;
     update();

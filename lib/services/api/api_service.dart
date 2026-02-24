@@ -130,6 +130,7 @@ class ApiService {
     dynamic body,
     Map<String, String>? header,
   }) async {
+    print(">>>>>>>>>>>> 🚀 API Request: $method $url <<<<<<<<<<<<");
     try {
       final response = await _dio.request(
         url,
@@ -233,18 +234,17 @@ class ApiService {
 CookieJar cookieJar = CookieJar();
 
 Future<CookieJar> cookieJarInit() async {
-  try{
+  try {
     final dir = await getApplicationDocumentsDirectory();
     cookieJar = PersistCookieJar(
       ignoreExpires: true,
       storage: FileStorage("${dir.path}/.cookies/"),
     );
     return cookieJar;
-  }catch(e){
+  } catch (e) {
     debugPrint("cookieJarInit Error: $e");
     return cookieJar;
   }
-
 }
 
 Dio _getMyDio() {
@@ -260,7 +260,7 @@ Dio _getMyDio() {
           ..receiveDataWhenStatusError = true
           ..responseType = ResponseType.json
           ..receiveTimeout = const Duration(seconds: 30)
-          ..baseUrl = options.baseUrl.startsWith('http')
+          ..baseUrl = options.path.startsWith('http')
               ? ''
               : ApiEndPoint.baseUrl;
         handler.next(options);

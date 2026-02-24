@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:giolee78/component/image/common_image.dart';
 import 'package:giolee78/component/text/common_text.dart';
+import 'package:giolee78/config/api/api_end_point.dart';
 import 'package:giolee78/utils/constants/app_colors.dart';
 
 import '../controller/search_controller.dart';
@@ -120,10 +121,10 @@ class SearchFriendScreen extends StatelessWidget {
                     ),
                   )
                       : ListView.separated(
-                    itemCount: controller.filteredUsers.length,
+                    itemCount: controller.nearbyChatList.length,
                     separatorBuilder: (context, index) => SizedBox(height: 16.h),
                     itemBuilder: (context, index) {
-                      final user = controller.filteredUsers[index];
+                      final user = controller.nearbyChatList[index];
                       return Container(
                         padding: EdgeInsets.symmetric(vertical: 8.h),
                         decoration: BoxDecoration(
@@ -143,7 +144,7 @@ class SearchFriendScreen extends StatelessWidget {
                                   radius: 24.r,
                                   child: ClipOval(
                                     child: CommonImage(
-                                      imageSrc: user.image,
+                                      imageSrc:"${ ApiEndPoint.imageUrl+user.image.toString()}",
                                       //imageType: ImageType.network,
                                       height: 48.r,
                                       width: 48.r,
@@ -160,25 +161,25 @@ class SearchFriendScreen extends StatelessWidget {
                               ],
                             ),
 
-                            /// Friend Status Icon
-                            !user.isFriend
-                                ? GestureDetector(
-                              onTap: () => controller.sendFriendRequest(user.id),
-                              child: Icon(
-                                Icons.person_add_outlined,
-                                color: Colors.black,
-                                size: 24.sp,
-                              ),
-                            )
-                                : SizedBox(
-                              width: 24.sp,
-                              height: 24.sp,
-                              child: Icon(
-                                Icons.check_box,
-                                color: Colors.green,
-                                size: 24.sp,
-                              ),
-                            ),
+                            // /// Friend Status Icon
+                            // !user.isFriend
+                            //     ? GestureDetector(
+                            //   onTap: () => controller.sendFriendRequest(user.id),
+                            //   child: Icon(
+                            //     Icons.person_add_outlined,
+                            //     color: Colors.black,
+                            //     size: 24.sp,
+                            //   ),
+                            // )
+                            //     : SizedBox(
+                            //   width: 24.sp,
+                            //   height: 24.sp,
+                            //   child: Icon(
+                            //     Icons.check_box,
+                            //     color: Colors.green,
+                            //     size: 24.sp,
+                            //   ),
+                            // ),
                           ],
                         ),
                       );

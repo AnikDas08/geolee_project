@@ -1,3 +1,5 @@
+import 'package:giolee78/config/api/api_end_point.dart';
+
 class ChatMessage {
   final String id;
   final String chatId;
@@ -45,28 +47,70 @@ class ChatMessage {
     this.isFile = false,
   });
 
-  factory ChatMessage.fromJson(Map<String, dynamic> json) {
+  /// Builds a full URL from a relative path returned by the server
+  static String _buildUrl(String? path) {
+    if (path == null || path.isEmpty) return '';
+    if (path.startsWith('http')) return path;
+    // Remove leading slash to avoid double-slash
+    final clean = path.startsWith('/') ? path.substring(1) : path;
+    return '${ApiEndPoint.imageUrl}/$clean';
+  }
+
+  /// Extracts the file name from a URL/path (e.g. "/uploads/doc_abc.pdf" → "doc_abc.pdf")
+  static String? _extractFileName(String? path, String? explicit) {
+    if (explicit != null && explicit.isNotEmpty) return explicit;
+    if (path == null || path.isEmpty) return null;
+    return path.split('/').last;
+  }
+
+  /// Extracts the extension from a URL/path (e.g. "doc.pdf" → "pdf")
+  static String? _extractExtension(String? path, String? explicit) {
+    if (explicit != null && explicit.isNotEmpty) return explicit;
+    if (path == null || path.isEmpty) return null;
+    final name = path.split('/').last;
+    final dotIndex = name.lastIndexOf('.');
+    if (dotIndex == -1) return null;
+    return name.substring(dotIndex + 1).toLowerCase();
+  }
+
+  factory ChatMessage.fromJson(Map<dynamic, dynamic> json) {
     final String type = json['type'] ?? 'text';
+    final String? content = json['content'];
+    final bool isImageType = type == 'image';
+    final bool isFileType =
+        type == 'document' || type == 'file' || type == 'media';
+
     return ChatMessage(
       id: json['_id'] ?? '',
-      chatId: json['chat'] ?? '',
+      chatId: json['chat'] is String
+          ? json['chat']
+          : json['chat']?['_id'] ?? '',
       senderId: json['sender']?['_id'] ?? '',
       senderName: json['sender']?['name'] ?? '',
       senderImage: json['sender']?['image'] ?? '',
       type: type,
-      message: json['content'] ?? '',
+      message: content ?? '',
       seenBy: List<String>.from(json['seenBy'] ?? []),
       isDeleted: json['isDeleted'] ?? false,
-      createdAt: DateTime.parse(json['createdAt'] ?? DateTime.now().toString()),
-      updatedAt: DateTime.parse(json['updatedAt'] ?? DateTime.now().toString()),
+      createdAt: DateTime.parse(
+        json['createdAt'] ?? DateTime.now().toIso8601String(),
+      ),
+      updatedAt: DateTime.parse(
+        json['updatedAt'] ?? DateTime.now().toIso8601String(),
+      ),
       isCurrentUser: json['isMyMessage'] ?? false,
       isSeen: json['isSeen'] ?? false,
-      imageUrl: type == 'image' ? json['content'] : null,
-      isImage: type == 'image',
-      fileUrl: type == 'file' ? json['content'] : null,
-      fileName: json['fileName'],
-      fileExtension: json['fileExtension'],
-      isFile: type == 'document' || type == 'file' || type == 'media',
+      // Image
+      imageUrl: isImageType ? _buildUrl(content) : null,
+      isImage: isImageType,
+      // File / document / media
+      fileUrl: isFileType ? _buildUrl(content) : null,
+      fileName: _extractFileName(isFileType ? content : null, json['fileName']),
+      fileExtension: _extractExtension(
+        isFileType ? content : null,
+        json['fileExtension'],
+      ),
+      isFile: isFileType,
     );
   }
 }

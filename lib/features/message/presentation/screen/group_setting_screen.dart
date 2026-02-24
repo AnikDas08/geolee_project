@@ -1,13 +1,12 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-// Assuming CommonImage handles network/asset images
 import 'package:giolee78/component/text/common_text.dart';
-import 'package:giolee78/config/route/app_routes.dart';
 import 'package:giolee78/utils/constants/app_colors.dart';
-import 'dart:io'; // Required for File image
-
-import '../controller/group_setting_controller.dart'; // Corrected import based on your provided file
+import 'package:giolee78/config/route/app_routes.dart';
+import '../../../../config/api/api_end_point.dart';
+import '../controller/group_setting_controller.dart';
 
 class GroupSettingsScreen extends StatelessWidget {
   const GroupSettingsScreen({super.key});
@@ -55,7 +54,8 @@ class GroupSettingsScreen extends StatelessWidget {
   }
 
   void _showEditGroupNameDialog(GroupSettingsController controller) {
-    final TextEditingController textController = TextEditingController(text: controller.groupName.value);
+    final TextEditingController textController =
+    TextEditingController(text: controller.groupName.value);
     Get.defaultDialog(
       title: "Edit Group Name",
       content: Padding(
@@ -70,12 +70,12 @@ class GroupSettingsScreen extends StatelessWidget {
       ),
       textConfirm: "Save",
       textCancel: "Cancel",
-      onCancel: () =>   Navigator.pop(Get.context!), // Use Get.back() for GetX dialogs
+      onCancel: () => Get.back(),
       confirmTextColor: AppColors.white,
       buttonColor: AppColors.primaryColor,
       onConfirm: () {
         controller.onUpdateGroupName(textController.text.trim());
-        Navigator.pop(Get.context!);
+        Get.back();
       },
     );
   }
@@ -84,6 +84,7 @@ class GroupSettingsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetBuilder<GroupSettingsController>(
       init: GroupSettingsController(),
+      global: false,
       builder: (controller) {
         return Scaffold(
           backgroundColor: AppColors.background,
@@ -91,7 +92,7 @@ class GroupSettingsScreen extends StatelessWidget {
             elevation: 0,
             backgroundColor: AppColors.background,
             leading: IconButton(
-              onPressed: () => Navigator.pop(context), // Use Get.back()
+              onPressed: () => Navigator.pop(context),
               icon: Icon(
                 Icons.arrow_back_ios_new,
                 size: 18.sp,
@@ -113,39 +114,37 @@ class GroupSettingsScreen extends StatelessWidget {
               padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
               child: Column(
                 children: [
-                  // --- Group Avatar Section (MODIFIED FOR IMAGE PICKER) ---
-                  GestureDetector( // Make the whole avatar area tappable
-                    onTap: controller.pickGroupImage, // Call image picker
+                  // --- Group Avatar ---
+                  GestureDetector(
+                    onTap: controller.pickGroupImage,
                     child: Stack(
                       alignment: Alignment.bottomRight,
                       children: [
-                        Obx(() { // Obx to react to changes in avatarFilePath
-                          if (controller.avatarFilePath!.value.isNotEmpty) {
-                            // Display selected image from file
+                        Obx(() {
+                          final avatarPath = controller.avatarFilePath.value;
+
+                          if (avatarPath.isNotEmpty) {
+                            final isNetworkImage = avatarPath.startsWith('http');
+
                             return CircleAvatar(
                               radius: 50.r,
                               backgroundColor: Colors.grey.shade300,
-                              backgroundImage: FileImage(File(controller.avatarFilePath!.value)),
-                              // Optionally, use a child for error/fallback icon
-                              child: ClipOval(
-                                child: Image.file(
-                                  File(controller.avatarFilePath!.value),
-                                  width: 100.r,
-                                  height: 100.r,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) {
-                                    return Icon(Icons.group, size: 50.sp, color: AppColors.white);
-                                  },
-                                ),
-                              ),
+                              backgroundImage: isNetworkImage
+                                  ? NetworkImage(
+                                avatarPath.startsWith('http')
+                                    ? avatarPath
+                                    : "${ApiEndPoint.imageUrl}${avatarPath.startsWith('/') ? avatarPath.substring(1) : avatarPath}",
+                              )
+                                  : FileImage(File(avatarPath)) as ImageProvider,
                             );
                           } else {
-                            // Display text fallback
                             return CircleAvatar(
                               radius: 50.r,
                               backgroundColor: Colors.grey.shade300,
                               child: CommonText(
-                                text: controller.groupName.value.substring(0, 2).toUpperCase(),
+                                text: controller.groupName.value.isNotEmpty
+                                    ? controller.groupName.value.substring(0, 1).toUpperCase()
+                                    : '?',
                                 fontSize: 32.sp,
                                 fontWeight: FontWeight.bold,
                                 color: AppColors.white,
@@ -169,9 +168,7 @@ class GroupSettingsScreen extends StatelessWidget {
                       ],
                     ),
                   ),
-
                   SizedBox(height: 12.h),
-
                   // --- Group Name & Edit ---
                   GestureDetector(
                     onTap: () => _showEditGroupNameDialog(controller),
@@ -179,33 +176,37 @@ class GroupSettingsScreen extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        CommonText(
-                          text: controller.groupName.value,
-                          fontSize: 18.sp,
-                          fontWeight: FontWeight.w600,
+                        Obx(
+                              () => CommonText(
+                            text: controller.groupName.value,
+                            fontSize: 18.sp,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                         SizedBox(width: 4.w),
                         Icon(Icons.edit, size: 16.sp, color: Colors.grey.shade600),
                       ],
                     ),
                   ),
-
                   SizedBox(height: 4.h),
-
                   // --- Member Count ---
-                  CommonText(
-                    text: '${controller.memberCount.value} Member',
-                    fontSize: 14.sp,
-                    color: AppColors.secondaryText,
+                  Obx(
+                        () => CommonText(
+                      text:
+                      '${controller.memberCount.value} Member${controller.memberCount.value != 1 ? 's' : ''}',
+                      fontSize: 14.sp,
+                      color: AppColors.secondaryText,
+                    ),
                   ),
-
                   SizedBox(height: 30.h),
-
                   // --- Settings List ---
                   _SettingsTile(
                     title: 'Add Member',
-                    onTap: (){
-                      Get.toNamed(AppRoutes.addMemberScreen);
+                    onTap: () {
+                      Get.toNamed(
+                        AppRoutes.addMemberScreen,
+                        arguments: {'chatId': controller.chatId},
+                      );
                     },
                   ),
                   _SettingsTile(

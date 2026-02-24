@@ -26,9 +26,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
-    con.getChatRepos();
   }
 
   @override
@@ -149,7 +147,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
 
           /// Body Section Starts here
           body: GetBuilder<ChatController>(
-            init: ChatController(),
+            init: con,
             builder: (controller) {
               return Padding(
                 padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
@@ -211,8 +209,33 @@ class _ChatListScreenState extends State<ChatListScreen> {
                       child: TabBarView(
                         children: [
                           /// Chat Tab
-                          controller.isLoading
+                          controller.isSingleLoading
                               ? const CommonLoader()
+                              : controller.singleChats.isEmpty
+                              ? SizedBox(
+                                  height: Get.height,
+                                  width: Get.width,
+                                  child: Center(
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        CommonImage(
+                                          imageSrc: "assets/images/noData.png",
+                                          height: 100.h,
+                                          width: 100.w,
+                                        ),
+                                        SizedBox(height: 20.h),
+                                        CommonText(
+                                          text: "No Chat List Found",
+                                          fontSize: 24.sp,
+                                          fontWeight: FontWeight.w600,
+                                          color: Colors.black,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                )
                               : ListView.builder(
                                   itemCount: controller.singleChats.length,
                                   padding: EdgeInsets.only(top: 16.h),
@@ -226,8 +249,13 @@ class _ChatListScreenState extends State<ChatListScreen> {
                                           AppRoutes.message,
                                           parameters: {
                                             "chatId": item.id,
-                                            "name": item.participant.fullName,
-                                            "image": item.participant.image,
+                                            "name": item.isGroup
+                                                ? (item.chatName ??
+                                                      "Unnamed Group")
+                                                : item.participant.fullName,
+                                            "image": item.isGroup
+                                                ? (item.chatImage ?? "")
+                                                : item.participant.image,
                                           },
                                         );
                                       },
@@ -299,14 +327,18 @@ class _ChatListScreenState extends State<ChatListScreen> {
                                             controller.filteredChats[index];
                                         return GestureDetector(
                                           onTap: () {
-                                            // CORRECTED: Direct navigation to GroupMessageScreen
+                                            // Mark as seen
+                                            // controller.markChatAsSeen(item.id);
+                                            // CORRECTED: Direct navigation to GroupMessageScreen with correct arguments
                                             Get.to(
                                               () => const GroupMessageScreen(),
                                               arguments: {
                                                 "chatId": item.id,
-                                                "name":
-                                                    item.participant.fullName,
-                                                "image": item.participant.image,
+                                                "groupName":
+                                                    item.chatName ??
+                                                    "Unnamed Group",
+                                                "memberCount": item.memberCount,
+                                                "image": item.chatImage ?? "",
                                               },
                                             );
                                           },

@@ -15,6 +15,17 @@ class GroupMember {
   GroupMember({required this.id, required this.name, this.image});
 
   factory GroupMember.fromJson(Map<String, dynamic> json) {
+    // If the JSON comes from 'my-chats', participant info is in 'anotherParticipant'
+    final participant = json['anotherParticipant'];
+    if (participant != null) {
+      return GroupMember(
+        id: participant['_id'] ?? '',
+        name: participant['name'] ?? 'Unknown',
+        image: participant['image'],
+      );
+    }
+
+    // Fallback for direct user objects (e.g. from search)
     return GroupMember(
       id: json['_id'] ?? json['id'] ?? '',
       name: json['name'] ?? 'Unknown',

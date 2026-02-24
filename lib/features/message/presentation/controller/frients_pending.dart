@@ -1,5 +1,8 @@
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
+import 'package:giolee78/config/api/api_end_point.dart';
+import 'package:giolee78/services/api/api_response_model.dart';
+import 'package:giolee78/services/api/api_service.dart';
 
 // Reusing the User model definition
 class User {
@@ -15,15 +18,21 @@ class PendingRequestController extends GetxController {
 
   // Mock list of pending requests
   final RxList<User> pendingRequests = <User>[
-    User(id: 'p1', name: 'Arlene McCoy', avatarUrl: 'https://placehold.co/40x40/FFD180/8D6E63?text=AM'),
-    User(id: 'p2', name: 'Darrell Steward', avatarUrl: 'https://placehold.co/40x40/FFCCBC/BF360C?text=DS'),
-    User(id: 'p3', name: 'Kathryn Murphy', avatarUrl: 'https://placehold.co/40x40/B3E5FC/0277BD?text=KM'),
-    User(id: 'p4', name: 'Ralph Edwards', avatarUrl: 'https://placehold.co/40x40/C8E6C9/2E7D32?text=RE'),
-    User(id: 'p5', name: 'Esther Howard', avatarUrl: 'https://placehold.co/40x40/FFF9C4/FFEB3B?text=EH'),
-    User(id: 'p6', name: 'Guy Hawkins', avatarUrl: 'https://placehold.co/40x40/E1BEE7/8E24AA?text=GH'),
-    User(id: 'p7', name: 'Annette Black', avatarUrl: 'https://placehold.co/40x40/CFD8DC/607D8B?text=AB'),
-    User(id: 'p8', name: 'Cameron Williamson', avatarUrl: 'https://placehold.co/40x40/FFE0B2/EF6C00?text=CW'),
-    User(id: 'p9', name: 'Jane Cooper', avatarUrl: 'https://placehold.co/40x40/F48FB1/AD1457?text=JC'),
+    User(
+      id: 'p1',
+      name: 'Arlene McCoy',
+      avatarUrl: 'https://placehold.co/40x40/FFD180/8D6E63?text=AM',
+    ),
+    User(
+      id: 'p2',
+      name: 'Darrell Steward',
+      avatarUrl: 'https://placehold.co/40x40/FFCCBC/BF360C?text=DS',
+    ),
+    User(
+      id: 'p3',
+      name: 'Kathryn Murphy',
+      avatarUrl: 'https://placehold.co/40x40/B3E5FC/0277BD?text=KM',
+    ),
   ].obs;
 
   @override
@@ -33,11 +42,16 @@ class PendingRequestController extends GetxController {
   }
 
   Future<void> fetchPendingRequests() async {
-    isLoading.value = true;
-    // Simulate network delay
-    await 1.seconds.delay();
-    // Data is already initialized in the mock list
-    isLoading.value = false;
+    try {
+      final url = ApiEndPoint.getPendingRequest;
+      ApiResponseModel response = await ApiService.get(url);
+
+      if (response.statusCode == 200) {
+        debugPrint(response.data.toString());
+      }
+    } catch (e) {
+      debugPrint(e.toString());
+    }
   }
 
   void onAcceptRequest(User user) {
@@ -52,7 +66,11 @@ class PendingRequestController extends GetxController {
         // Implement API call to accept request
         pendingRequests.removeWhere((p) => p.id == user.id);
         Navigator.pop(Get.context!);
-        Get.snackbar('Accepted', '${user.name} is now a member!', snackPosition: SnackPosition.BOTTOM);
+        Get.snackbar(
+          'Accepted',
+          '${user.name} is now a member!',
+          snackPosition: SnackPosition.BOTTOM,
+        );
       },
       onCancel: () {
         Navigator.pop(Get.context!);
@@ -72,7 +90,11 @@ class PendingRequestController extends GetxController {
         // Implement API call to reject request
         pendingRequests.removeWhere((p) => p.id == user.id);
         Navigator.pop(Get.context!);
-        Get.snackbar('Rejected', '${user.name}\'s request has been rejected.', snackPosition: SnackPosition.BOTTOM);
+        Get.snackbar(
+          'Rejected',
+          '${user.name}\'s request has been rejected.',
+          snackPosition: SnackPosition.BOTTOM,
+        );
       },
       onCancel: () {
         Navigator.pop(Get.context!);

@@ -325,7 +325,13 @@ class _FriendListItem extends StatelessWidget {
             Row(
               children: [
                 GestureDetector(
-                  onTap: () => Get.toNamed(AppRoutes.message),
+                  onTap: () {
+                    controller.createOrGetChatAndGo(
+                      receiverId: userId,
+                      name: userName,
+                      image: avatar ?? "",
+                    );
+                  },
                   child: Icon(Icons.chat_bubble_outline, size: 20.sp),
                 ),
                 SizedBox(width: 12.w),
