@@ -7,6 +7,7 @@ import 'package:giolee78/utils/constants/app_colors.dart';
 import 'package:intl/intl.dart';
 import 'dart:io';
 
+import 'package:giolee78/features/message/data/model/chat_message.dart';
 import '../controller/group_message_controller.dart';
 
 class GroupMessageScreen extends StatelessWidget {
@@ -15,11 +16,13 @@ class GroupMessageScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final arguments = Get.arguments ?? {};
+    final String chatId = arguments['chatId'] ?? '';
     final String groupName = arguments['groupName'] ?? 'Sports Club';
     final int memberCount = arguments['memberCount'] ?? 24;
 
     return GetBuilder<GroupMessageController>(
-      init: GroupMessageController()..initializeGroup(groupName, memberCount),
+      init: GroupMessageController()
+        ..initializeGroup(chatId, groupName, memberCount),
       builder: (controller) {
         return Scaffold(
           backgroundColor: const Color(0xFFF5F5F5),
@@ -35,11 +38,7 @@ class GroupMessageScreen extends StatelessWidget {
                 CircleAvatar(
                   radius: 18.r,
                   backgroundColor: AppColors.primaryColor,
-                  child: Icon(
-                    Icons.group,
-                    color: Colors.white,
-                    size: 20.sp,
-                  ),
+                  child: Icon(Icons.group, color: Colors.white, size: 20.sp),
                 ),
                 SizedBox(width: 12.w),
                 Expanded(
@@ -65,7 +64,10 @@ class GroupMessageScreen extends StatelessWidget {
               IconButton(
                 icon: const Icon(Icons.settings, color: Colors.black),
                 onPressed: () {
-                  Get.toNamed(AppRoutes.groupSetting);
+                  Get.toNamed(
+                    AppRoutes.groupSetting,
+                    arguments: {'chatId': controller.chatId},
+                  );
                 },
               ),
             ],
@@ -76,7 +78,10 @@ class GroupMessageScreen extends StatelessWidget {
               Expanded(
                 child: ListView.builder(
                   controller: controller.scrollController,
-                  padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 16.w,
+                    vertical: 16.h,
+                  ),
                   itemCount: controller.messages.length,
                   itemBuilder: (context, index) {
                     final message = controller.messages[index];
@@ -164,7 +169,7 @@ class GroupMessageScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildMessageItem(GroupMessage message) {
+  Widget _buildMessageItem(ChatMessage message) {
     return Padding(
       padding: EdgeInsets.only(bottom: 16.h),
       child: Column(
@@ -185,13 +190,13 @@ class GroupMessageScreen extends StatelessWidget {
                   backgroundColor: AppColors.primaryColor.withOpacity(0.2),
                   child: message.senderImage.isEmpty
                       ? Text(
-                    message.senderName[0].toUpperCase(),
-                    style: TextStyle(
-                      color: AppColors.primaryColor,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14.sp,
-                    ),
-                  )
+                          message.senderName[0].toUpperCase(),
+                          style: TextStyle(
+                            color: AppColors.primaryColor,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14.sp,
+                          ),
+                        )
                       : null,
                 ),
                 SizedBox(width: 8.w),
@@ -227,25 +232,25 @@ class GroupMessageScreen extends StatelessWidget {
                         ),
                         child: message.isImage
                             ? ClipRRect(
-                          borderRadius: BorderRadius.circular(8.r),
-                          child: Image.file(
-                            File(message.imageUrl!),
-                            width: 200.w,
-                            fit: BoxFit.cover,
-                          ),
-                        )
+                                borderRadius: BorderRadius.circular(8.r),
+                                child: Image.file(
+                                  File(message.imageUrl!),
+                                  width: 200.w,
+                                  fit: BoxFit.cover,
+                                ),
+                              )
                             : CommonText(
-                          text: message.message,
-                          fontSize: 14.sp,
-                          color: Colors.black87,
-                        ),
+                                text: message.message,
+                                fontSize: 14.sp,
+                                color: Colors.black87,
+                              ),
                       ),
 
                       /// Timestamp
                       Padding(
                         padding: EdgeInsets.only(top: 4.h, left: 4.w),
                         child: CommonText(
-                          text: _formatTime(message.timestamp),
+                          text: _formatTime(message.createdAt),
                           fontSize: 11.sp,
                           color: Colors.grey,
                         ),
@@ -272,25 +277,25 @@ class GroupMessageScreen extends StatelessWidget {
                   constraints: BoxConstraints(maxWidth: Get.width * 0.7),
                   child: message.isImage
                       ? ClipRRect(
-                    borderRadius: BorderRadius.circular(8.r),
-                    child: Image.file(
-                      File(message.imageUrl!),
-                      width: 200.w,
-                      fit: BoxFit.cover,
-                    ),
-                  )
+                          borderRadius: BorderRadius.circular(8.r),
+                          child: Image.file(
+                            File(message.imageUrl!),
+                            width: 200.w,
+                            fit: BoxFit.cover,
+                          ),
+                        )
                       : CommonText(
-                    text: message.message,
-                    fontSize: 14.sp,
-                    color: Colors.black87,
-                  ),
+                          text: message.message,
+                          fontSize: 14.sp,
+                          color: Colors.black87,
+                        ),
                 ),
 
                 /// Timestamp
                 Padding(
                   padding: EdgeInsets.only(top: 4.h, right: 4.w),
                   child: CommonText(
-                    text: _formatTime(message.timestamp),
+                    text: _formatTime(message.createdAt),
                     fontSize: 11.sp,
                     color: Colors.grey,
                   ),

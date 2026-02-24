@@ -5,7 +5,7 @@ import 'package:get/get.dart';
 import 'package:giolee78/utils/constants/app_images.dart';
 import 'package:intl/intl.dart';
 import '../../../../utils/constants/app_colors.dart';
-import '../../data/model/chat_message_model.dart';
+import 'package:giolee78/features/message/data/model/chat_message.dart';
 import '../controller/message_controller.dart';
 
 class MessageScreen extends StatefulWidget {
@@ -45,9 +45,9 @@ class _MessageScreenState extends State<MessageScreen> {
 
   /// ========== ATTACHMENT PICKER MODAL ==========
   void _showAttachmentPicker(
-      BuildContext context,
-      MessageController controller,
-      ) {
+    BuildContext context,
+    MessageController controller,
+  ) {
     showModalBottomSheet(
       context: context,
       shape: RoundedRectangleBorder(
@@ -170,10 +170,10 @@ class _MessageScreenState extends State<MessageScreen> {
                         radius: 20.r,
                         backgroundImage: controller.image.isNotEmpty
                             ? NetworkImage(
-                          _getImageUrl(
-                            AppImages.baseurl + controller.image,
-                          ),
-                        )
+                                _getImageUrl(
+                                  AppImages.baseurl + controller.image,
+                                ),
+                              )
                             : null,
                         child: controller.image.isEmpty
                             ? Icon(Icons.person, size: 20.sp)
@@ -189,8 +189,7 @@ class _MessageScreenState extends State<MessageScreen> {
                             decoration: BoxDecoration(
                               color: const Color(0xFF0FE16D),
                               shape: BoxShape.circle,
-                              border:
-                              Border.all(color: Colors.white, width: 2),
+                              border: Border.all(color: Colors.white, width: 2),
                             ),
                           ),
                         ),
@@ -203,9 +202,7 @@ class _MessageScreenState extends State<MessageScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          controller.name.isNotEmpty
-                              ? controller.name
-                              : 'Chat',
+                          controller.name.isNotEmpty ? controller.name : 'Chat',
                           style: TextStyle(
                             fontWeight: FontWeight.w600,
                             fontSize: 16.sp,
@@ -241,65 +238,65 @@ class _MessageScreenState extends State<MessageScreen> {
             body: controller.isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : Column(
-              children: [
-                /// ========== MESSAGES LIST ==========
-                Expanded(
-                  child: ListView.builder(
-                    controller: controller.scrollController,
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 16.w,
-                      vertical: 16.h,
-                    ),
-                    itemCount: controller.messages.length,
-                    itemBuilder: (context, index) {
-                      final message = controller.messages[index];
-                      return _buildMessageBubble(message);
-                    },
-                  ),
-                ),
+                    children: [
+                      /// ========== MESSAGES LIST ==========
+                      Expanded(
+                        child: ListView.builder(
+                          controller: controller.scrollController,
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 16.w,
+                            vertical: 16.h,
+                          ),
+                          itemCount: controller.messages.length,
+                          itemBuilder: (context, index) {
+                            final message = controller.messages[index];
+                            return _buildMessageBubble(message);
+                          },
+                        ),
+                      ),
 
-                /// ========== PICKED FILE PREVIEW ==========
-                _buildPickedFilePreview(controller),
+                      /// ========== PICKED FILE PREVIEW ==========
+                      _buildPickedFilePreview(controller),
 
-                /// ========== UPLOAD PROGRESS ==========
-                if (controller.isUploadingImage ||
-                    controller.isUploadingMedia ||
-                    controller.isUploadingDocument)
-                  Container(
-                    color: Colors.white,
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 16.w,
-                      vertical: 8.h,
-                    ),
-                    child: Row(
-                      children: [
-                        SizedBox(
-                          width: 16.w,
-                          height: 16.w,
-                          child: const CircularProgressIndicator(
-                            strokeWidth: 2,
+                      /// ========== UPLOAD PROGRESS ==========
+                      if (controller.isUploadingImage ||
+                          controller.isUploadingMedia ||
+                          controller.isUploadingDocument)
+                        Container(
+                          color: Colors.white,
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 16.w,
+                            vertical: 8.h,
+                          ),
+                          child: Row(
+                            children: [
+                              SizedBox(
+                                width: 16.w,
+                                height: 16.w,
+                                child: const CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              ),
+                              SizedBox(width: 8.w),
+                              Text(
+                                controller.isUploadingImage
+                                    ? 'Sending image…'
+                                    : controller.isUploadingMedia
+                                    ? 'Sending media…'
+                                    : 'Sending file…',
+                                style: TextStyle(
+                                  fontSize: 12.sp,
+                                  color: Colors.grey[600],
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                        SizedBox(width: 8.w),
-                        Text(
-                          controller.isUploadingImage
-                              ? 'Sending image…'
-                              : controller.isUploadingMedia
-                              ? 'Sending media…'
-                              : 'Sending file…',
-                          style: TextStyle(
-                            fontSize: 12.sp,
-                            color: Colors.grey[600],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
 
-                /// ========== INPUT AREA ==========
-                _buildInputArea(context, controller),
-              ],
-            ),
+                      /// ========== INPUT AREA ==========
+                      _buildInputArea(context, controller),
+                    ],
+                  ),
           ),
         );
       },
@@ -457,38 +454,33 @@ class _MessageScreenState extends State<MessageScreen> {
                     ),
                   ),
                 ),
-                style: TextStyle(
-                  fontSize: 14.sp,
-                  color: Colors.black,
-                ),
+                style: TextStyle(fontSize: 14.sp, color: Colors.black),
                 onSubmitted: (_) => controller.sendTextAndFile(),
               ),
             ),
           ),
           SizedBox(width: 12.w),
           GestureDetector(
-            onTap: (controller.isSendingText ||
-                controller.isUploadingImage ||
-                controller.isUploadingMedia ||
-                controller.isUploadingDocument)
+            onTap:
+                (controller.isSendingText ||
+                    controller.isUploadingImage ||
+                    controller.isUploadingMedia ||
+                    controller.isUploadingDocument)
                 ? null
                 : controller.sendTextAndFile,
             child: Container(
               padding: EdgeInsets.all(10.w),
               decoration: BoxDecoration(
-                color: (controller.isSendingText ||
-                    controller.isUploadingImage ||
-                    controller.isUploadingMedia ||
-                    controller.isUploadingDocument)
+                color:
+                    (controller.isSendingText ||
+                        controller.isUploadingImage ||
+                        controller.isUploadingMedia ||
+                        controller.isUploadingDocument)
                     ? Colors.grey
                     : AppColors.primaryColor,
                 shape: BoxShape.circle,
               ),
-              child: Icon(
-                Icons.send,
-                color: Colors.white,
-                size: 20.sp,
-              ),
+              child: Icon(Icons.send, color: Colors.white, size: 20.sp),
             ),
           ),
         ],
@@ -564,8 +556,7 @@ class _MessageScreenState extends State<MessageScreen> {
                 SizedBox(height: 4.h),
                 Text(
                   timeFormat.format(message.createdAt),
-                  style:
-                  TextStyle(fontSize: 11.sp, color: Colors.grey[500]),
+                  style: TextStyle(fontSize: 11.sp, color: Colors.grey[500]),
                 ),
               ],
             ),
@@ -588,15 +579,15 @@ class _MessageScreenState extends State<MessageScreen> {
             borderRadius: BorderRadius.circular(8.r),
             child: isRemote
                 ? Image.network(
-              message.imageUrl!,
-              width: 200.w,
-              fit: BoxFit.cover,
-            )
+                    message.imageUrl!,
+                    width: 200.w,
+                    fit: BoxFit.cover,
+                  )
                 : Image.file(
-              File(message.imageUrl!),
-              width: 200.w,
-              fit: BoxFit.cover,
-            ),
+                    File(message.imageUrl!),
+                    width: 200.w,
+                    fit: BoxFit.cover,
+                  ),
           ),
           if (message.isUploading)
             Positioned.fill(
@@ -607,8 +598,7 @@ class _MessageScreenState extends State<MessageScreen> {
                 ),
                 child: const Center(
                   child: CircularProgressIndicator(
-                    valueColor:
-                    AlwaysStoppedAnimation<Color>(Colors.white),
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                   ),
                 ),
               ),

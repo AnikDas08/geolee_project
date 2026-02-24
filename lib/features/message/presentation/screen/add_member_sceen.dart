@@ -11,10 +11,7 @@ class AddMemberScreen extends StatelessWidget {
   const AddMemberScreen({super.key});
 
   // Reusable list tile for both search results and current members
-  Widget _UserTile({
-    required User user,
-    required Widget actionWidget,
-  }) {
+  Widget _UserTile({required User user, required Widget actionWidget}) {
     return Container(
       padding: EdgeInsets.symmetric(vertical: 8.h),
       child: Row(
@@ -77,7 +74,10 @@ class AddMemberScreen extends StatelessWidget {
               children: [
                 // --- Search Input ---
                 Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 20.w,
+                    vertical: 10.h,
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -92,8 +92,13 @@ class AddMemberScreen extends StatelessWidget {
                         onChanged: controller.onSearchChanged,
                         decoration: InputDecoration(
                           hintText: 'Search user',
-                          hintStyle: TextStyle(color: AppColors.secondaryText.withOpacity(0.5)),
-                          contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+                          hintStyle: TextStyle(
+                            color: AppColors.secondaryText.withOpacity(0.5),
+                          ),
+                          contentPadding: EdgeInsets.symmetric(
+                            horizontal: 16.w,
+                            vertical: 14.h,
+                          ),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10.r),
                             borderSide: BorderSide.none,
@@ -101,18 +106,25 @@ class AddMemberScreen extends StatelessWidget {
                           filled: true,
                           fillColor: AppColors.white,
                         ),
-                        style: TextStyle(fontSize: 16.sp, color: AppColors.black),
+                        style: TextStyle(
+                          fontSize: 16.sp,
+                          color: AppColors.black,
+                        ),
                       ),
                     ],
                   ),
                 ),
 
                 // --- Search Results (Users to Invite) ---
-                if (controller.searchKeyword.isNotEmpty && controller.usersToInvite.isNotEmpty)
+                if (controller.searchKeyword.isNotEmpty &&
+                    controller.searchResults.isNotEmpty)
                   Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 8.h),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 20.w,
+                      vertical: 8.h,
+                    ),
                     child: Column(
-                      children: controller.usersToInvite.map((user) {
+                      children: controller.searchResults.map((user) {
                         return _UserTile(
                           user: user,
                           actionWidget: ElevatedButton(
@@ -120,7 +132,10 @@ class AddMemberScreen extends StatelessWidget {
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppColors.primaryColor,
                               foregroundColor: AppColors.white,
-                              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 16.w,
+                                vertical: 8.h,
+                              ),
                               minimumSize: Size(70.w, 35.h),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(8.r),
@@ -155,14 +170,21 @@ class AddMemberScreen extends StatelessWidget {
 
                 Expanded(
                   child: ListView.builder(
-                    padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 20.w,
+                      vertical: 10.h,
+                    ),
                     itemCount: controller.filteredMembers.length,
                     itemBuilder: (context, index) {
                       final member = controller.filteredMembers[index];
                       return _UserTile(
                         user: member,
                         actionWidget: IconButton(
-                          icon: Icon(Icons.close, size: 20.sp, color: Colors.grey.shade500),
+                          icon: Icon(
+                            Icons.close,
+                            size: 20.sp,
+                            color: Colors.grey.shade500,
+                          ),
                           onPressed: () => controller.onRemoveMember(member),
                         ),
                       );

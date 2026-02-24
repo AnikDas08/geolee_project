@@ -102,6 +102,11 @@ class ChatController extends GetxController {
 
   /// Chat data Update Socket listener
   Future<void> listenChat() async {
+    // Listen for chat list updates (using identified event name from images if applicable)
+    SocketServices.on("chat:update", (data) {
+      getChatRepos(showLoading: false);
+    });
+
     SocketServices.on("update-chatlist::${LocalStorage.userId}", (data) {
       page = 0;
       chats.clear();
@@ -121,8 +126,6 @@ class ChatController extends GetxController {
   void markChatAsSeen(String chatId) {
     final index = singleChats.indexWhere((chat) => chat.id == chatId);
     if (index != -1) {
-
-
       singleChats[index] = ChatModel(
         id: chats[index].id,
         participant: chats[index].participant,
@@ -157,8 +160,11 @@ class ChatController extends GetxController {
   void onInit() {
     super.onInit();
 
-    /// Load demo chat list data
-    getChatRepo();
+    /// Initial data load using real repository
+    getChatRepos();
+
+    /// Start listening for real-time updates
+    listenChat();
   }
 
   @override

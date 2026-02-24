@@ -136,16 +136,19 @@ class CreateGroupController extends GetxController {
 
       if (response.statusCode == 200) {
         final List data = response.data['data'] ?? [];
-        availableMembers.value =
-            data.map((e) => GroupMember.fromJson(e)).toList();
+        availableMembers.value = data
+            .map((e) => GroupMember.fromJson(e))
+            .toList();
       } else {
-        Get.snackbar("Error", response.message ?? "Failed to load members",
-            snackPosition: SnackPosition.BOTTOM);
+        Get.snackbar(
+          "Error",
+          response.message ?? "Failed to load members",
+          snackPosition: SnackPosition.BOTTOM,
+        );
       }
     } catch (e) {
       debugPrint("Error fetching members: $e");
-      Get.snackbar("Error", e.toString(),
-          snackPosition: SnackPosition.BOTTOM);
+      Get.snackbar("Error", e.toString(), snackPosition: SnackPosition.BOTTOM);
     } finally {
       isMemberLoading.value = false;
     }
@@ -154,43 +157,49 @@ class CreateGroupController extends GetxController {
   // Validate inputs
   bool _validateInputs() {
     if (groupNameController.text.trim().isEmpty) {
-      Get.snackbar('Error', 'Please enter group name',
-          backgroundColor: Colors.red, colorText: Colors.white);
+      Get.snackbar(
+        'Error',
+        'Please enter group name',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
       return false;
     }
 
     if (descriptionController.text.trim().isEmpty) {
-      Get.snackbar('Error', 'Please enter description',
-          backgroundColor: Colors.red, colorText: Colors.white);
+      Get.snackbar(
+        'Error',
+        'Please enter description',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
       return false;
     }
 
     if (selectedMembers.isEmpty) {
-      Get.snackbar('Error', 'Add at least one member',
-          backgroundColor: Colors.red, colorText: Colors.white);
+      Get.snackbar(
+        'Error',
+        'Add at least one member',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
       return false;
     }
 
     return true;
   }
 
-
-  Future<void>leaveChat(String id)async{
-    try{
-
-
-      final response = await ApiService.delete(ApiEndPoint.leaveChat + id);
+  Future<void> leaveChat(String id) async {
+    try {
+      final response = await ApiService.delete(ApiEndPoint.leaveChat(id));
 
       if (response.statusCode == 200) {
         debugPrint("${response.statusCode}${response.message}");
       }
-
-    }catch(e){
+    } catch (e) {
       debugPrint("Error fetching members: $e");
     }
-
   }
-
 
   // Create group API
   Future<void> createGroup() async {
@@ -214,8 +223,12 @@ class CreateGroupController extends GetxController {
       );
 
       if (response.statusCode == 200 || response.data['success'] == true) {
-        Get.snackbar("Success", "Group created successfully",
-            backgroundColor: Colors.green, colorText: Colors.white);
+        Get.snackbar(
+          "Success",
+          "Group created successfully",
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+        );
 
         // Clear form
         groupNameController.clear();
@@ -229,13 +242,21 @@ class CreateGroupController extends GetxController {
           Get.back();
         });
       } else {
-        Get.snackbar("Error", response.message ?? "Failed to create group",
-            backgroundColor: Colors.red, colorText: Colors.white);
+        Get.snackbar(
+          "Error",
+          response.message ?? "Failed to create group",
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
       }
     } catch (e) {
       debugPrint("Error creating group: $e");
-      Get.snackbar("Error", "Something went wrong: $e",
-          backgroundColor: Colors.red, colorText: Colors.white);
+      Get.snackbar(
+        "Error",
+        "Something went wrong: $e",
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
     } finally {
       isCreating.value = false;
     }

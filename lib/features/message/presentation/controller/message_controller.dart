@@ -4,7 +4,9 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:giolee78/config/api/api_end_point.dart';
+import 'package:giolee78/features/message/data/model/chat_message.dart';
 import 'package:giolee78/services/api/api_service.dart';
+import 'package:giolee78/services/socket/socket_service.dart';
 import 'package:giolee78/utils/log/app_log.dart';
 
 class MessageController extends GetxController {
@@ -63,13 +65,43 @@ class MessageController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    listenMessage();
   }
 
   @override
   void onClose() {
+    if (chatId.isNotEmpty) {
+      SocketServices.leaveRoom(chatId);
+    }
     messageController.dispose();
     scrollController.dispose();
     super.onClose();
+  }
+
+  // ================================================
+  // 0️⃣ LISTEN FOR NEW MESSAGES VIA SOCKET
+  // ================================================
+  void listenMessage() {
+    SocketServices.on("message:new", (data) {
+      appLog("=============> New Message received via socket: $data");
+
+      // Ensure the message belongs to the current chat
+      // The backend might send the chat ID in the message data
+      final String incomingChatId = data['chat'] is String
+          ? data['chat']
+          : data['chat']['_id'];
+
+      if (incomingChatId == chatId) {
+        final newMessage = ChatMessage.fromJson(data);
+
+        // Prevent duplicate messages if already loaded via API
+        if (!messages.any((m) => m.id == newMessage.id)) {
+          messages.add(newMessage);
+          update();
+          _scrollToBottom();
+        }
+      }
+    });
   }
 
   // ================================================
@@ -214,8 +246,15 @@ class MessageController extends GetxController {
 
     if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'heic'].contains(ext)) {
       pickedFileType = 'image';
-    } else if (['mp3', 'mp4', 'avi', 'mov', 'mkv', 'flv', 'wav']
-        .contains(ext)) {
+    } else if ([
+      'mp3',
+      'mp4',
+      'avi',
+      'mov',
+      'mkv',
+      'flv',
+      'wav',
+    ].contains(ext)) {
       pickedFileType = 'media';
     } else {
       pickedFileType = 'document';
@@ -300,6 +339,11 @@ class MessageController extends GetxController {
     update();
 
     try {
+      // Join the socket room for this chat
+      if (chatId.isNotEmpty) {
+        SocketServices.joinRoom(chatId);
+      }
+
       final String url = "${ApiEndPoint.messages}/$chatId";
       final response = await ApiService.get(url);
 
@@ -427,10 +471,7 @@ class MessageController extends GetxController {
       final response = await ApiService.multipart(
         ApiEndPoint.createMessage,
         imagePath: imagePath,
-        body: {
-          "chat": chatId,
-          "type": "image",
-        },
+        body: {"chat": chatId, "type": "image"},
       );
 
       if (response.statusCode == 200) {
@@ -460,10 +501,7 @@ class MessageController extends GetxController {
         ApiEndPoint.createMessage,
         imagePath: mediaPath,
         imageName: "media",
-        body: {
-          "chat": chatId,
-          "type": "media",
-        },
+        body: {"chat": chatId, "type": "media"},
       );
 
       if (response.statusCode == 200) {
@@ -492,10 +530,7 @@ class MessageController extends GetxController {
         ApiEndPoint.createMessage,
         imagePath: docPath,
         imageName: "doc",
-        body: {
-          "chat": chatId,
-          "type": "document",
-        },
+        body: {"chat": chatId, "type": "document"},
       );
 
       if (response.statusCode == 200) {
@@ -513,8 +548,6 @@ class MessageController extends GetxController {
       update();
     }
   }
-
-
 
   void _showSuccessSnackBar(String message) {
     Get.snackbar(
@@ -547,80 +580,5 @@ class MessageController extends GetxController {
         );
       }
     });
-  }
-}
-
-// ================================================ CHAT MESSAGE MODEL
-
-class ChatMessage {
-  final String id;
-  final String chatId;
-  final String senderId;
-  final String senderName;
-  final String senderImage;
-  final String type;
-  final String message;
-  final List<String> seenBy;
-  final bool isDeleted;
-  final DateTime createdAt;
-  final DateTime updatedAt;
-  final bool isCurrentUser;
-  final bool isSeen;
-  final String? imageUrl;
-  final bool isImage;
-  final bool isUploading;
-  final bool isNotice;
-  final String? fileUrl;
-  final String? fileName;
-  final String? fileExtension;
-  final bool isFile;
-
-  ChatMessage({
-    required this.id,
-    required this.chatId,
-    required this.senderId,
-    required this.senderName,
-    required this.senderImage,
-    required this.type,
-    required this.message,
-    required this.seenBy,
-    required this.isDeleted,
-    required this.createdAt,
-    required this.updatedAt,
-    required this.isCurrentUser,
-    required this.isSeen,
-    this.imageUrl,
-    this.isImage = false,
-    this.isUploading = false,
-    this.isNotice = false,
-    this.fileUrl,
-    this.fileName,
-    this.fileExtension,
-    this.isFile = false,
-  });
-
-  factory ChatMessage.fromJson(Map<String, dynamic> json) {
-    final String type = json['type'] ?? 'text';
-    return ChatMessage(
-      id: json['_id'] ?? '',
-      chatId: json['chat'] ?? '',
-      senderId: json['sender']?['_id'] ?? '',
-      senderName: json['sender']?['name'] ?? '',
-      senderImage: json['sender']?['image'] ?? '',
-      type: type,
-      message: json['content'] ?? '',
-      seenBy: List<String>.from(json['seenBy'] ?? []),
-      isDeleted: json['isDeleted'] ?? false,
-      createdAt: DateTime.parse(json['createdAt'] ?? DateTime.now().toString()),
-      updatedAt: DateTime.parse(json['updatedAt'] ?? DateTime.now().toString()),
-      isCurrentUser: json['isMyMessage'] ?? false,
-      isSeen: json['isSeen'] ?? false,
-      imageUrl: type == 'image' ? json['content'] : null,
-      isImage: type == 'image',
-      fileUrl: type == 'file' ? json['content'] : null,
-      fileName: json['fileName'],
-      fileExtension: json['fileExtension'],
-      isFile: type == 'document' || type == 'file' || type == 'media',
-    );
   }
 }

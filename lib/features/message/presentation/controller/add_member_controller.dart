@@ -1,5 +1,8 @@
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
+import 'package:giolee78/config/api/api_end_point.dart';
+import 'package:giolee78/services/api/api_service.dart';
+import 'package:giolee78/utils/log/app_log.dart';
 
 class User {
   final String id;
@@ -7,95 +10,142 @@ class User {
   final String avatarUrl;
 
   User({required this.id, required this.name, required this.avatarUrl});
+
+  factory User.fromJson(Map<String, dynamic> json) {
+    return User(
+      id: json['_id'] ?? '',
+      name: json['name'] ?? 'Unknown',
+      avatarUrl: json['image'] ?? '',
+    );
+  }
 }
 
 class AddMemberController extends GetxController {
   final RxBool isLoading = false.obs;
   final RxString searchKeyword = ''.obs;
+  String chatId = '';
 
-  // Mock list of all potential users (to be searched)
-  final List<User> _allPotentialUsers = [
-    User(id: 'u1', name: 'Arlene McCoy', avatarUrl: 'https://placehold.co/40x40/FFD180/8D6E63?text=AM'),
-    User(id: 'u2', name: 'Darrell Steward', avatarUrl: 'https://placehold.co/40x40/FFCCBC/BF360C?text=DS'),
-    User(id: 'u3', name: 'Kathryn Murphy', avatarUrl: 'https://placehold.co/40x40/B3E5FC/0277BD?text=KM'),
-    User(id: 'u4', name: 'Ralph Edwards', avatarUrl: 'https://placehold.co/40x40/C8E6C9/2E7D32?text=RE'),
-  ];
+  // Real list of users from search
+  final RxList<User> searchResults = <User>[].obs;
 
-  // Mock list of current members (to be displayed and potentially removed)
-  final RxList<User> currentMembers = <User>[
-    User(id: 'm1', name: 'Arlene McCoy', avatarUrl: 'https://placehold.co/40x40/FFD180/8D6E63?text=AM'),
-    User(id: 'm5', name: 'Theresa Webb', avatarUrl: 'https://placehold.co/40x40/D1C4E9/4527A0?text=TW'),
-    User(id: 'm6', name: 'Wade Warren', avatarUrl: 'https://placehold.co/40x40/F0F4C3/AFB42B?text=WW'),
-    User(id: 'm7', name: 'Savannah Nunez', avatarUrl: 'https://placehold.co/40x40/F8BBD0/C2185B?text=SN'),
-    User(id: 'm8', name: 'Devon Lane', avatarUrl: 'https://placehold.co/40x40/BCAAA4/5D4037?text=DL'),
-    User(id: 'm9', name: 'Cody Fisher', avatarUrl: 'https://placehold.co/40x40/B2DFDB/00695C?text=CF'),
-    User(id: 'm10', name: 'Esther Howard', avatarUrl: 'https://placehold.co/40x40/FFF9C4/FFEB3B?text=EH'),
-    User(id: 'm11', name: 'Guy Hawkins', avatarUrl: 'https://placehold.co/40x40/E1BEE7/8E24AA?text=GH'),
-    User(id: 'm12', name: 'Annette Black', avatarUrl: 'https://placehold.co/40x40/CFD8DC/607D8B?text=AB'),
-    User(id: 'm13', name: 'Cameron Williamson', avatarUrl: 'https://placehold.co/40x40/FFE0B2/EF6C00?text=CW'),
-  ].obs;
+  // Real list of current members (fetched from API)
+  final RxList<User> currentMembers = <User>[].obs;
 
-  // Computed list of users available to be added, based on search and membership status
-  RxList<User> get usersToInvite => _allPotentialUsers
-      .where((user) =>
-  !currentMembers.any((member) => member.id == user.id) &&
-      (searchKeyword.isEmpty ||
-          user.name.toLowerCase().contains(searchKeyword.value.toLowerCase())))
-      .toList()
-      .obs;
-
-  // Computed list of current members filtered by search (for the bottom section)
-  RxList<User> get filteredMembers => currentMembers
-      .where((member) =>
-  searchKeyword.isEmpty ||
-      member.name.toLowerCase().contains(searchKeyword.value.toLowerCase()))
-      .toList()
-      .obs;
+  // Computed list of current members filtered by search (locally)
+  List<User> get filteredMembers => currentMembers
+      .where(
+        (member) =>
+            searchKeyword.isEmpty ||
+            member.name.toLowerCase().contains(
+              searchKeyword.value.toLowerCase(),
+            ),
+      )
+      .toList();
 
   @override
   void onInit() {
     super.onInit();
-    fetchGroupData();
+    chatId = Get.arguments['chatId'] ?? '';
+    fetchCurrentMembers();
   }
 
-  Future<void> fetchGroupData() async {
-    isLoading.value = true;
-    // Simulate fetching both user list and current members
-    await 1.seconds.delay();
+  /// Fetch current members of the group
+  Future<void> fetchCurrentMembers() async {
+    if (chatId.isEmpty) return;
 
-    // The data is already initialized, just toggling loading state
-    isLoading.value = false;
+    try {
+      isLoading.value = true;
+      // Note: Assuming there's an endpoint to get group details or members
+      // If not specifically available, we might need to get it from the chat list
+      final response = await ApiService.get("${ApiEndPoint.chatRoom}/$chatId");
+      if (response.statusCode == 200) {
+        final List<dynamic> membersData =
+            response.data['data']?['participants'] ?? [];
+        currentMembers.value = membersData
+            .map((e) => User.fromJson(e))
+            .toList();
+      }
+    } catch (e) {
+      appLog("❌ Error fetching current members: $e");
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  /// Search for users to invite
+  Future<void> searchUsers(String query) async {
+    if (query.isEmpty) {
+      searchResults.clear();
+      return;
+    }
+
+    try {
+      isLoading.value = true;
+      final response = await ApiService.get(ApiEndPoint.getMyChat(query));
+      if (response.statusCode == 200) {
+        final List<dynamic> data = response.data['data'] ?? [];
+        searchResults.value = data.map((e) => User.fromJson(e)).toList();
+      }
+    } catch (e) {
+      appLog("❌ Error searching users: $e");
+    } finally {
+      isLoading.value = false;
+    }
   }
 
   void onSearchChanged(String value) {
     searchKeyword.value = value.trim();
+    searchUsers(value.trim());
   }
 
-  void onAddMember(User user) {
-    // Check if the user is already a member (safety check)
-    if (!currentMembers.any((member) => member.id == user.id)) {
-      currentMembers.add(user);
-      searchKeyword.value = ''; // Clear search after adding
-      Get.snackbar('Added', '${user.name} has been added to the group.', snackPosition: SnackPosition.BOTTOM);
+  /// Add member to group via API
+  Future<void> onAddMember(User user) async {
+    if (chatId.isEmpty) return;
+
+    try {
+      final response = await ApiService.patch(
+        ApiEndPoint.addMember,
+        body: {"chatId": chatId, "userId": user.id},
+      );
+
+      if (response.statusCode == 200) {
+        currentMembers.add(user);
+        searchResults.removeWhere((u) => u.id == user.id);
+        Get.snackbar('Success', '${user.name} added to group');
+      }
+    } catch (e) {
+      appLog("❌ Error adding member: $e");
+      Get.snackbar('Error', 'Failed to add member');
     }
   }
 
-  void onRemoveMember(User member) {
-    // Confirmation dialog is a good practice here
+  /// Remove member from group via API
+  Future<void> onRemoveMember(User member) async {
+    if (chatId.isEmpty) return;
+
     Get.defaultDialog(
       title: "Remove Member",
-      middleText: "Are you sure you want to remove ${member.name} from the group?",
+      middleText: "Remove ${member.name} from the group?",
       textConfirm: "Remove",
       textCancel: "Cancel",
       confirmTextColor: Colors.white,
       buttonColor: Colors.red,
-      onConfirm: () {
-        currentMembers.removeWhere((m) => m.id == member.id);
-        Navigator.pop(Get.context!);
-        Get.snackbar('Removed', '${member.name} has been removed.', snackPosition: SnackPosition.BOTTOM);
-      },
-      onCancel: () {
-        Navigator.pop(Get.context!);
+      onConfirm: () async {
+        try {
+          final response = await ApiService.patch(
+            ApiEndPoint.removeMember,
+            body: {"chatId": chatId, "userId": member.id},
+          );
+
+          if (response.statusCode == 200) {
+            currentMembers.removeWhere((m) => m.id == member.id);
+            Get.back();
+            Get.snackbar('Removed', '${member.name} removed');
+          }
+        } catch (e) {
+          appLog("❌ Error removing member: $e");
+          Get.snackbar('Error', 'Failed to remove member');
+        }
       },
     );
   }
