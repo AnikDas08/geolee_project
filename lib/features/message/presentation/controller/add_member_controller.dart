@@ -199,7 +199,7 @@ class AddMemberController extends GetxController {
                           Get.back(); // Close dialog first
 
                           final response = await ApiService.patch(
-                            ApiEndPoint.removeMember,
+                            "${ApiEndPoint.removeMember}${chatId}",
                             body: {"member": member.id},
                           );
 
