@@ -77,7 +77,9 @@ class ChatModel {
       id: json['_id']?.toString() ?? '',
       isGroup: isGroup,
       chatName: cName,
-      chatImage: _parseStringOrFirstInList(json['image']),
+      chatImage: _parseStringOrFirstInList(
+        json['avatarUrl'] ?? json['image'],
+      ),
       participant: Participant.fromJson(participantJson ?? {}),
       latestMessage: LatestMessage.fromJson(json['latestMessage'] ?? {}),
       unreadCount: finalUnreadCount,

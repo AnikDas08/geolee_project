@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../config/api/api_end_point.dart';
+import '../../../../config/route/app_routes.dart';
 import '../../../../services/api/api_response_model.dart';
 import '../../../../services/api/api_service.dart';
+import 'chat_controller.dart';
 
 // ============================================
 // GROUP MEMBER MODEL
@@ -234,6 +236,18 @@ class CreateGroupController extends GetxController {
       );
 
       if (response.statusCode == 200 || response.data['success'] == true) {
+        final createdGroupId = response.data['data']['_id'];
+        final createdGroupName = groupNameController.text.trim();
+        final createdGroupImage = response.data['data']['avatarUrl'] ?? "";
+
+        // Navigate before clearing form
+        Get.toNamed(AppRoutes.message, parameters: {
+          "chatId": createdGroupId,
+          "name": createdGroupName,
+          "image": createdGroupImage,
+        });
+
+        // Snackbar
         Get.snackbar(
           "Success",
           "Group created successfully",
@@ -241,24 +255,15 @@ class CreateGroupController extends GetxController {
           colorText: Colors.white,
         );
 
-        // Clear form
+        // Clear form after navigation
         groupNameController.clear();
         descriptionController.clear();
         searchController.clear();
         selectedMembers.clear();
         selectedPrivacyType.value = PrivacyType.public;
 
-        // Go back
-        Future.delayed(const Duration(milliseconds: 500), () {
-          Get.back();
-        });
-      } else {
-        Get.snackbar(
-          "Error",
-          response.message ?? "Failed to create group",
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
-        );
+        // Refresh group list
+        ChatController.instance.getChatRepos();
       }
     } catch (e) {
       debugPrint("Error creating group: $e");

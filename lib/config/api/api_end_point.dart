@@ -1,11 +1,11 @@
 class ApiEndPoint {
-  static const String baseUrl = "http://148.230.126.149:5000/api/v1";
-  static const String imageUrl = "http://148.230.126.149:5000";
-  static const String socketUrl = "http://148.230.126.149:5000";
-  //
-  // static const String baseUrl = "http://10.10.7.7:5006/api/v1";
-  // static const String imageUrl = "http://10.10.7.7:5006";
-  // static const String socketUrl = "http://10.10.7.7:5006";
+  // static const String baseUrl = "http://148.230.126.149:5000/api/v1";
+  // static const String imageUrl = "http://148.230.126.149:5000";
+  // static const String socketUrl = "http://148.230.126.149:5000";
+
+  static const String baseUrl = "http://10.10.7.7:5006/api/v1";
+  static const String imageUrl = "http://10.10.7.7:5006";
+  static const String socketUrl = "http://10.10.7.7:5006";
 
   // Auth ===========================================
   static const String signUp = "$baseUrl/users/create-user";
@@ -29,7 +29,7 @@ class ApiEndPoint {
   }
 
   static const String createGroup = "$baseUrl/chats/create-group";
-  static const String getPendingRequest="$baseUrl/join-requests/chat/";
+  static const String getPendingRequest = "$baseUrl/join-requests/chat/";
   static const String createOneToOneChat = "$baseUrl/chats/create-1-to-1";
 
   // Post ===========================================
@@ -56,12 +56,16 @@ class ApiEndPoint {
   // Chat ===========================================
   // static const String createOneToOneChat = "$baseUrl/chats/create-1-to-1";
   static const String createChatGroup = "$baseUrl/chats/create-group";
+
   static String deleteChatById(String id) => "$baseUrl/chats/$id";
+
   static String leaveChat(String id) => "$baseUrl/chats/leave/$id";
+
   static String joinChat(String id) => "$baseUrl/chats/join/$id";
   static const String addMember = "$baseUrl/chats/add-member";
-  static const String removeMember = "$baseUrl/chats/remove-member";
+  static const String removeMember = "$baseUrl/chats/remove-member/";
   static const String nearbyChat = "$baseUrl/users/";
+  static const String getSingleChatById = "$baseUrl/chats/single";
 
   static const String createAds = "$baseUrl/advertisements/create";
   static const String getAdvertisementMe = "$baseUrl/advertisements/me";
@@ -108,8 +112,6 @@ class ApiEndPoint {
   static const String readAllNotification = "$baseUrl/notifications/read-all";
   static const String readNotificationById = "$baseUrl/notifications/read/";
 
-
-  static String updateChatById(String chatId) => '$baseUrl/chats/update/$chatId';
-
-
+  static String updateChatById(String chatId) =>
+      '$baseUrl/chats/update/$chatId';
 }

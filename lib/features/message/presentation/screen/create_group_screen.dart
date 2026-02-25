@@ -48,7 +48,7 @@ class CreateGroupScreen extends StatelessWidget {
                 TextField(
                   controller: controller.groupNameController,
                   decoration: InputDecoration(
-                    hintText: "Sports Club",
+                    hintText: "Enter Your Group Name",
                     hintStyle: TextStyle(
                       fontSize: 14.sp,
                       color: Colors.grey[400],
@@ -132,7 +132,7 @@ class CreateGroupScreen extends StatelessWidget {
                   controller: controller.descriptionController,
                   maxLines: 5,
                   decoration: InputDecoration(
-                    hintText: "About The Role\nWe Are Looking for a Senior and Friendly Plumber To Join Our Team...",
+                    hintText: "Write here your group description",
                     hintStyle: TextStyle(
                       fontSize: 14.sp,
                       color: Colors.grey[400],
@@ -264,9 +264,7 @@ class CreateGroupScreen extends StatelessWidget {
       BuildContext context,
       CreateGroupController controller,
       ) {
-    // Fetch members when dialog opens
     controller.fetchMyChats();
-
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,

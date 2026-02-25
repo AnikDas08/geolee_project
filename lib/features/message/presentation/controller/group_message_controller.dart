@@ -44,8 +44,8 @@ class GroupMessageController extends GetxController {
   String chatId = '';
 
   /// Group Info
-  String groupName = '';
-  int memberCount = 0;
+  RxString groupName = ''.obs;
+  RxInt memberCount = 0.obs;
 
   /// Scroll Controller
   final ScrollController scrollController = ScrollController();
@@ -56,8 +56,8 @@ class GroupMessageController extends GetxController {
   /// Initialize with group data
   void initializeGroup(String id, String name, int members) {
     chatId = id;
-    groupName = name;
-    memberCount = members;
+    groupName.value = name;
+    memberCount.value = members;
     loadMessages(showLoading: true);
   }
 

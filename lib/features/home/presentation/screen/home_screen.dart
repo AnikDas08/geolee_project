@@ -153,14 +153,13 @@ class _HomeScreenState extends State<HomeScreen> {
         borderRadius: BorderRadius.circular(10.r),
         child: Stack(
           children: [
-            // ✅ Obx দিয়ে GoogleMap wrap — markerList বদলালেই map instantly update হবে
+
             Obx(
               () => GoogleMap(
                 mapType: MapType.satellite,
                 initialCameraPosition: _initialPosition,
                 myLocationEnabled: true,
                 heatmaps: controller.heatmaps,
-                // ✅ RxList কে Set এ convert করে pass করা হচ্ছে
                 markers: Set<Marker>.from(controller.markerList),
                 onMapCreated: (GoogleMapController mapController) async {
                   try {

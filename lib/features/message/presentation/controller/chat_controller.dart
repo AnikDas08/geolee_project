@@ -69,6 +69,7 @@ class ChatController extends GetxController {
     });
   }
 
+
   /// Chat data Loading function
   Future<void> getChatRepos({
     bool showLoading = true,
