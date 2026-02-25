@@ -4,6 +4,7 @@ class ChatModel {
   final String? chatName;
   final String? chatImage;
   final Participant participant;
+  final List<Participant> participants; // ✅ Added full participants list
   final LatestMessage latestMessage;
   final int unreadCount;
   final bool isDeleted;
@@ -18,6 +19,7 @@ class ChatModel {
     this.chatName,
     this.chatImage,
     required this.participant,
+    required this.participants, // ✅ Added to constructor
     required this.latestMessage,
     required this.unreadCount,
     required this.isDeleted,
@@ -26,6 +28,39 @@ class ChatModel {
     required this.updatedAt,
     this.memberCount = 0,
   });
+
+  // ✅ Added copyWith for state updates
+  ChatModel copyWith({
+    String? id,
+    bool? isGroup,
+    String? chatName,
+    String? chatImage,
+    Participant? participant,
+    List<Participant>? participants,
+    LatestMessage? latestMessage,
+    int? unreadCount,
+    bool? isDeleted,
+    bool? isOnline,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    int? memberCount,
+  }) {
+    return ChatModel(
+      id: id ?? this.id,
+      isGroup: isGroup ?? this.isGroup,
+      chatName: chatName ?? this.chatName,
+      chatImage: chatImage ?? this.chatImage,
+      participant: participant ?? this.participant,
+      participants: participants ?? this.participants,
+      latestMessage: latestMessage ?? this.latestMessage,
+      unreadCount: unreadCount ?? this.unreadCount,
+      isDeleted: isDeleted ?? this.isDeleted,
+      isOnline: isOnline ?? this.isOnline,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      memberCount: memberCount ?? this.memberCount,
+    );
+  }
 
   static String? _parseStringOrFirstInList(dynamic value) {
     if (value == null) return null;
@@ -42,10 +77,6 @@ class ChatModel {
     String? cName = _parseStringOrFirstInList(json['chatName']);
     bool isGroup = isGroupFromFlag || (cName != null && cName.isNotEmpty);
 
-    print(
-      ">>>>>>>>>>>> 👤 Parsing Chat: ID=${json['_id'] ?? 'N/A'}, isGroup=$isGroup, Name=${cName ?? "Single Chat"} <<<<<<<<<<<<",
-    );
-
     var participantJson = json['anotherParticipant'];
     if (participantJson == null &&
         json['participants'] != null &&
@@ -54,58 +85,45 @@ class ChatModel {
       participantJson = (json['participants'] as List).first;
     }
 
-    // Log the raw unread count values for debugging
-    final dynamic rawUnread = json['unreadCount'];
-    final dynamic rawUnseen =
-        json['unseenCount'] ?? json['unSeenCount'] ?? json['unseen_count'];
-
-    print(
-      ">>>>>>>>>>>> 📊 Unread Debug [ID=${json['_id']}]: unreadCount=$rawUnread, unseen=$rawUnseen <<<<<<<<<<<<",
-    );
-
-    // Prefer specific "unseen" count if available, otherwise fallback to unreadCount
-    final int finalUnreadCount = rawUnseen != null
-        ? int.tryParse(rawUnseen.toString()) ?? 0
-        : (rawUnread != null ? int.tryParse(rawUnread.toString()) ?? 0 : 0);
-
-    int mCount = 0;
+    // ✅ Parse full participants list
+    List<Participant> allParticipants = [];
     if (json['participants'] != null && json['participants'] is List) {
-      mCount = (json['participants'] as List).length;
+      allParticipants = (json['participants'] as List)
+          .map((p) => Participant.fromJson(p is Map<String, dynamic> ? p : {"_id": p.toString()}))
+          .toList();
     }
+
+    final dynamic rawUnseen = json['unseenCount'] ?? json['unSeenCount'] ?? json['unseen_count'] ?? json['unreadCount'];
+    final int finalUnreadCount = rawUnseen != null ? int.tryParse(rawUnseen.toString()) ?? 0 : 0;
 
     return ChatModel(
       id: json['_id']?.toString() ?? '',
       isGroup: isGroup,
       chatName: cName,
-      chatImage: _parseStringOrFirstInList(
-        json['avatarUrl'] ?? json['image'],
-      ),
+      chatImage: _parseStringOrFirstInList(json['avatarUrl'] ?? json['image']),
       participant: Participant.fromJson(participantJson ?? {}),
+      participants: allParticipants, // ✅ Correctly assigned
       latestMessage: LatestMessage.fromJson(json['latestMessage'] ?? {}),
       unreadCount: finalUnreadCount,
       isDeleted: json['isDeleted'] ?? false,
       isOnline: json['isOnline'] ?? false,
-      createdAt:
-          DateTime.tryParse(json['createdAt']?.toString() ?? '') ??
-          DateTime.now(),
-      updatedAt:
-          DateTime.tryParse(json['updatedAt']?.toString() ?? '') ??
-          DateTime.now(),
-      memberCount: mCount,
+      createdAt: DateTime.tryParse(json['createdAt']?.toString() ?? '') ?? DateTime.now(),
+      updatedAt: DateTime.tryParse(json['updatedAt']?.toString() ?? '') ?? DateTime.now(),
+      memberCount: allParticipants.length,
     );
   }
 }
 
 class Participant {
-  final String id;
+  final String sId; // Match your filter property name
   final String fullName;
   final String image;
 
-  Participant({required this.id, required this.fullName, required this.image});
+  Participant({required this.sId, required this.fullName, required this.image});
 
   factory Participant.fromJson(Map<String, dynamic> json) {
     return Participant(
-      id: json['_id']?.toString() ?? '',
+      sId: json['_id']?.toString() ?? '',
       fullName: json['name']?.toString() ?? '',
       image: ChatModel._parseStringOrFirstInList(json['image']) ?? '',
     );
@@ -126,36 +144,20 @@ class LatestMessage {
   });
 
   factory LatestMessage.fromJson(Map<String, dynamic> json) {
-    // Server may store message text in different fields
-    final String rawText =
-        json['text']?.toString() ??
-        json['content']?.toString() ??
-        json['message']?.toString() ??
-        '';
-
-    // Show friendly label for non-text messages
+    final String rawText = json['text']?.toString() ?? json['content']?.toString() ?? json['message']?.toString() ?? '';
     final String type = json['type']?.toString() ?? 'text';
     String displayText = rawText;
-    if (displayText.isEmpty || (type != 'text' && displayText.isNotEmpty)) {
-      if (type == 'image')
-        displayText = '📷 Image';
-      else if (type == 'document')
-        displayText = '📄 Document';
-      else if (type == 'media')
-        displayText = '🎥 Media';
-      else if (type == 'audio')
-        displayText = '🎵 Audio';
-      else
-        displayText = rawText;
-    }
+    
+    if (type == 'image') displayText = '📷 Image';
+    else if (type == 'document') displayText = '📄 Document';
+    else if (type == 'media') displayText = '🎥 Media';
+    else if (type == 'audio') displayText = '🎵 Audio';
 
     return LatestMessage(
       id: json['_id']?.toString() ?? '',
       sender: json['sender']?.toString() ?? '',
       text: displayText,
-      createdAt:
-          DateTime.tryParse(json['createdAt']?.toString() ?? '') ??
-          DateTime.now(),
+      createdAt: DateTime.tryParse(json['createdAt']?.toString() ?? '') ?? DateTime.now(),
     );
   }
 }
