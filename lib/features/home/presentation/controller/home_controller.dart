@@ -592,7 +592,6 @@ class HomeController extends GetxController {
         currentLatitude.value = position.latitude;
         currentLongitude.value = position.longitude;
 
-        // ✅ save to LocalStorage — MyFriendController uses this
         LocalStorage.lat = position.latitude;
         LocalStorage.long = position.longitude;
 

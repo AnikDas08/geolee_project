@@ -39,6 +39,10 @@ class _ViewFriendScreenState extends State<ViewFriendScreen> {
   void initState() {
     super.initState();
 
+    // 🔥 Clear previous data first
+    controller.usersPosts.clear();
+    controller.userData.value = null;
+
     // Fetch posts by user ID
     controller.getPostsByUserId(widget.userId);
     controller.getUserById(widget.userId);
@@ -239,10 +243,26 @@ class _ViewFriendScreenState extends State<ViewFriendScreen> {
                   title: 'Message',
                   image: AppIcons.chat2,
                   color: AppColors.primaryColor,
-                  onTap: () {
-                    Get.toNamed(AppRoutes.message);
-                  },
+                    onTap: () {
+                      controller.createOrGetChatAndGo(
+                        receiverId: widget.userId,
+                        name: user?.name ?? "",
+                        image: user?.image ?? "",
+                      );
+                    }
                 );
+
+
+
+
+            // Get.toNamed(AppRoutes.message, parameters: {
+            // "chatId": item.id,
+            // "name": item.isGroup ? (item.chatName ?? "Unnamed Group")
+            //     : item.participant.fullName,
+            // "image": item.isGroup
+            // ? (item.chatImage ?? "")
+            //     : item.participant.image,
+            // },
 
               /// 📤 REQUEST SENT
               case FriendStatus.requested:

@@ -8,6 +8,7 @@ import '../../../../../services/api/api_service.dart';
 import '../../../../../config/api/api_end_point.dart';
 import '../../../../../services/storage/storage_keys.dart';
 import '../../../../../services/storage/storage_services.dart';
+import '../../../../../services/socket/socket_service.dart';
 
 class SignInController extends GetxController {
   /// Sign in Button Loading variable
@@ -18,10 +19,10 @@ class SignInController extends GetxController {
     text: kDebugMode ? 'ebrahimnazmul20032@gmail.com' : '',
   );
   TextEditingController passwordController = TextEditingController(
-    text: kDebugMode ? 'password123' : "",
+    text: kDebugMode ? 'password1234' : "",
   );
 
-  /// Sign in Api call here
+  // Sign in Api call here
 
   Future<void> signInUser(GlobalKey<FormState> formKey) async {
     if (!formKey.currentState!.validate()) return;
@@ -43,10 +44,11 @@ class SignInController extends GetxController {
       if (response.statusCode == 200) {
         final data = response.data;
 
-        Get.snackbar(
-          barBlur: 0.5,
-            "Welcome Back","Logged In Successfully");
-        await LocalStorage.setString(LocalStorageKeys.token, data["data"]['accessToken']);
+        Get.snackbar(barBlur: 0.5, "Welcome Back", "Logged In Successfully");
+        await LocalStorage.setString(
+          LocalStorageKeys.token,
+          data["data"]['accessToken'],
+        );
 
         LocalStorage.isLogIn = true;
 
@@ -56,8 +58,11 @@ class SignInController extends GetxController {
         );
         await LocalStorage.setString(LocalStorageKeys.role, "user");
         LocalStorage.getAllPrefData();
+        SocketServices.connectToSocket();
 
-        print("My Token Is :===========================💕💕💕💕💕💕 ${LocalStorage.token.toString()}");
+        print(
+          "My Token Is :===========================💕💕💕💕💕💕 ${LocalStorage.token.toString()}",
+        );
         await getUserData();
 
         Get.toNamed(AppRoutes.homeNav);
@@ -69,7 +74,9 @@ class SignInController extends GetxController {
         Get.snackbar(
           colorText: AppColors.white,
           backgroundColor: AppColors.red,
-            'Invalid Credential', "${response.message}");
+          'Invalid Credential',
+          "${response.message}",
+        );
       }
     } catch (e) {
       Get.snackbar("Error", e.toString());
@@ -93,9 +100,9 @@ class SignInController extends GetxController {
         LocalStorage.myImage = data['data']?["image"];
         LocalStorage.myName = data['data']?["name"];
         LocalStorage.myEmail = data['data']?["email"];
-        LocalStorage.bio=data['data']?['bio'];
-        LocalStorage.dateOfBirth=data['data']?['dob'];
-        LocalStorage.gender=data['data']?['gender'];
+        LocalStorage.bio = data['data']?['bio'];
+        LocalStorage.dateOfBirth = data['data']?['dob'];
+        LocalStorage.gender = data['data']?['gender'];
 
         LocalStorage.setBool(LocalStorageKeys.isLogIn, LocalStorage.isLogIn);
         LocalStorage.setString(LocalStorageKeys.userId, LocalStorage.userId);

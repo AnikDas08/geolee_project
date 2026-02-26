@@ -152,6 +152,9 @@ class SignUpController extends GetxController {
 
   ///===========================================================================verify OTP
 
+
+
+
   Future<void> verifyOtpRepo() async {
     isLoadingVerify = true;
     update();
@@ -218,7 +221,6 @@ class SignUpController extends GetxController {
 
       final Map<String, String> body = {"email": emailController.text.trim()};
 
-      // Try different possible endpoints
       final response = await ApiService.post(ApiEndPoint.resendOtp, body: body);
 
       print("📦 Resend OTP Response: ${response.statusCode}");

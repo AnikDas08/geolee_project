@@ -6,7 +6,9 @@ import 'package:giolee78/config/api/api_end_point.dart';
 import 'package:giolee78/services/api/api_service.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../../../component/pop_up/common_pop_menu.dart';
 import '../../../home/presentation/controller/home_controller.dart';
+import '../../../home/presentation/screen/home_nav_screen.dart';
 
 class PostController extends GetxController {
   @override
@@ -24,7 +26,6 @@ class PostController extends GetxController {
 
   // Form controllers
   final description = TextEditingController();
-
 
   final selectedPricingOption = ''.obs;
 
@@ -136,15 +137,17 @@ class PostController extends GetxController {
       final response = await ApiService.post(url, body: formData);
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        Get.snackbar(
-          'Success',
-          'Post created successfully!',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.green,
-          colorText: Colors.white,
+        final HomeController _homeController = Get.find<HomeController>();
+        _homeController.refresh();
+
+        successPopUps(
+          message: 'Your Post Successfully Uploaded.Thank You.',
+          onTap: () {
+            Get.offAll(HomeNav());
+          },
+          buttonTitle: "Got It",
         );
 
-        // Clear after successful post
         description.clear();
         selectedImages.clear();
         selectedPricingOption.value = '';

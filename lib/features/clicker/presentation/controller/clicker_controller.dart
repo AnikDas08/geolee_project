@@ -10,6 +10,7 @@ import 'package:giolee78/services/api/api_service.dart';
 import 'package:giolee78/services/storage/storage_services.dart';
 import 'package:giolee78/utils/app_utils.dart';
 import '../../../../config/api/api_end_point.dart';
+import '../../../../config/route/app_routes.dart';
 import '../../../friend/data/post_model_by_id.dart';
 import '../../data/addbanner_model.dart';
 
@@ -78,6 +79,42 @@ class ClickerController extends GetxController {
     super.onClose();
   }
 
+  Future<void> createOrGetChatAndGo({
+    required String receiverId,
+    required String name,
+    required String image,
+  }) async {
+    try {
+      isLoading.value = true;
+
+      final response = await ApiService.post(
+        ApiEndPoint.createOneToOneChat,
+        body: {
+          "participant": receiverId,
+        },
+      );
+
+      if (response.isSuccess) {
+        final data = response.data["data"];
+        String chatId = data["_id"] ?? "";
+
+        if (chatId.isNotEmpty) {
+          Get.toNamed(
+            AppRoutes.message,
+            parameters: {
+              "chatId": chatId,
+              "name": name,
+              "image": image,
+            },
+          );
+        } else {
+          print("Chat ID null or empty");
+        }
+      }
+    } finally {
+      isLoading.value = false;
+    }
+  }
   // ================= Fetch Dynamic Banners
   Future<void> getBanners() async {
     try {
@@ -162,19 +199,34 @@ class ClickerController extends GetxController {
   // ================= Get Posts By Specific User ID
   Future<void> getPostsByUserId(String userId) async {
     try {
+      debugPrint("🌐 [getPostsByUserId] Starting - userId: $userId");
       isUserLoading.value = true;
       usersPosts.clear();
 
       final url = "${ApiEndPoint.getUserById}$userId";
+      debugPrint("🌐 [getPostsByUserId] URL: $url");
+
       final response = await ApiService.get(url);
+
+      debugPrint("🌐 [getPostsByUserId] Status: ${response.statusCode}");
+      debugPrint("🌐 [getPostsByUserId] Response: ${response.data}");
 
       if (response.statusCode == 200) {
         final responseData = PostResponseById.fromJson(
           response.data as Map<String, dynamic>,
         );
+
+        debugPrint("✅ [getPostsByUserId] Parsed ${responseData.data.length} posts");
+
         usersPosts.assignAll(responseData.data);
+        usersPosts.refresh(); // 🔥 Force refresh
+
+        debugPrint("✅ [getPostsByUserId] usersPosts updated: ${usersPosts.length} posts");
+      } else {
+        debugPrint("❌ [getPostsByUserId] Error status: ${response.statusCode}");
       }
     } catch (e) {
+      debugPrint("❌ [getPostsByUserId] Exception: $e");
       Utils.errorSnackBar("Error", e.toString());
     } finally {
       isUserLoading.value = false;

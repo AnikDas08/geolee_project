@@ -30,7 +30,8 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final Completer<GoogleMapController> _mapController = Completer<GoogleMapController>();
+  final Completer<GoogleMapController> _mapController =
+      Completer<GoogleMapController>();
   final myFriendController = Get.put(MyFriendController());
 
   late final pendingRequests = myFriendController.requests
@@ -133,8 +134,10 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             const CircularProgressIndicator(color: AppColors.primaryColor),
             SizedBox(height: 16.h),
-            Text('Loading map data...',
-                style: TextStyle(fontSize: 14.sp, color: Colors.grey[600])),
+            Text(
+              'Loading map data...',
+              style: TextStyle(fontSize: 14.sp, color: Colors.grey[600]),
+            ),
           ],
         ),
       ),
@@ -150,41 +153,44 @@ class _HomeScreenState extends State<HomeScreen> {
         borderRadius: BorderRadius.circular(10.r),
         child: Stack(
           children: [
-            // ✅ Obx দিয়ে GoogleMap wrap — markerList বদলালেই map instantly update হবে
-            Obx(() => GoogleMap(
-              mapType: MapType.satellite,
-              initialCameraPosition: _initialPosition,
-              myLocationEnabled: true,
-              heatmaps: controller.heatmaps,
-              // ✅ RxList কে Set এ convert করে pass করা হচ্ছে
-              markers: Set<Marker>.from(controller.markerList),
-              onMapCreated: (GoogleMapController mapController) async {
-                try {
-                  if (!_mapController.isCompleted) {
-                    _mapController.complete(mapController);
-                    if (controller.currentLatitude.value != 0.0 &&
-                        controller.currentLongitude.value != 0.0) {
-                      await mapController.animateCamera(
-                        CameraUpdate.newCameraPosition(
-                          CameraPosition(
-                            target: LatLng(
-                              controller.currentLatitude.value,
-                              controller.currentLongitude.value,
+
+            Obx(
+              () => GoogleMap(
+                mapType: MapType.satellite,
+                initialCameraPosition: _initialPosition,
+                myLocationEnabled: true,
+                heatmaps: controller.heatmaps,
+                markers: Set<Marker>.from(controller.markerList),
+                onMapCreated: (GoogleMapController mapController) async {
+                  try {
+                    if (!_mapController.isCompleted) {
+                      _mapController.complete(mapController);
+                      if (controller.currentLatitude.value != 0.0 &&
+                          controller.currentLongitude.value != 0.0) {
+                        await mapController.animateCamera(
+                          CameraUpdate.newCameraPosition(
+                            CameraPosition(
+                              target: LatLng(
+                                controller.currentLatitude.value,
+                                controller.currentLongitude.value,
+                              ),
+                              zoom: 14.4746,
                             ),
-                            zoom: 14.4746,
                           ),
-                        ),
-                      );
+                        );
+                      }
                     }
+                  } catch (e) {
+                    debugPrint('Error on map created: $e');
                   }
-                } catch (e) {
-                  debugPrint('Error on map created: $e');
-                }
-              },
-              onTap: (LatLng position) {
-                debugPrint('Map tapped: ${position.latitude}, ${position.longitude}');
-              },
-            )),
+                },
+                onTap: (LatLng position) {
+                  debugPrint(
+                    'Map tapped: ${position.latitude}, ${position.longitude}',
+                  );
+                },
+              ),
+            ),
 
             // Overlay buttons
             Positioned(
@@ -226,10 +232,12 @@ class _HomeScreenState extends State<HomeScreen> {
             },
             child: Row(
               children: [
-                Obx(() => Text(
-                  controller.clickerCount.value ?? 'Select Clicker',
-                  style: TextStyle(fontSize: 12.sp, color: Colors.black87),
-                )),
+                Obx(
+                  () => Text(
+                    controller.clickerCount.value ?? 'Select Clicker',
+                    style: TextStyle(fontSize: 12.sp, color: Colors.black87),
+                  ),
+                ),
                 Icon(Icons.arrow_drop_down, size: 24.sp),
               ],
             ),
@@ -240,24 +248,28 @@ class _HomeScreenState extends State<HomeScreen> {
               Get.dialog(FilterDialog(onApply: controller.applyFilter));
             },
             // ✅ filter active থাকলে dot দেখাবে
-            child: Obx(() => Row(
-              children: [
-                if (controller.isDateFilterActive.value)
-                  Container(
-                    width: 8.w,
-                    height: 8.h,
-                    margin: EdgeInsets.only(right: 4.w),
-                    decoration: const BoxDecoration(
-                      color: Colors.blue,
-                      shape: BoxShape.circle,
+            child: Obx(
+              () => Row(
+                children: [
+                  if (controller.isDateFilterActive.value)
+                    Container(
+                      width: 8.w,
+                      height: 8.h,
+                      margin: EdgeInsets.only(right: 4.w),
+                      decoration: const BoxDecoration(
+                        color: Colors.blue,
+                        shape: BoxShape.circle,
+                      ),
                     ),
+                  Text(
+                    'Filter',
+                    style: TextStyle(fontSize: 12.sp, color: Colors.black87),
                   ),
-                Text('Filter',
-                    style: TextStyle(fontSize: 12.sp, color: Colors.black87)),
-                SizedBox(width: 4.w),
-                Icon(Icons.filter_alt, size: 16.sp),
-              ],
-            )),
+                  SizedBox(width: 4.w),
+                  Icon(Icons.filter_alt, size: 16.sp),
+                ],
+              ),
+            ),
           ),
         ],
       );
@@ -297,7 +309,10 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  Widget _buildOverlayButton({required VoidCallback onTap, required Widget child}) {
+  Widget _buildOverlayButton({
+    required VoidCallback onTap,
+    required Widget child,
+  }) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -363,21 +378,22 @@ class _HomeScreenState extends State<HomeScreen> {
                 }
               },
             ),
-            Obx(() => Item(
-              imageSrc: AppIcons.friend,
-              title: 'Friend Request',
-              badgeText: pendingRequests.isEmpty
-                  ? null
-                  : pendingRequests.length.toString(),
-              onTap: () {
-                try {
-                  Get.to(() => FriendRequestScreen());
-                } catch (e) {
-                  Get.snackbar('Error', 'Failed to open Friend Request');
-                }
-              },
-            )),
-
+            Obx(
+              () => Item(
+                imageSrc: AppIcons.friend,
+                title: 'Friend Request',
+                badgeText: pendingRequests.isEmpty
+                    ? null
+                    : pendingRequests.length.toString(),
+                onTap: () {
+                  try {
+                    Get.to(() => FriendRequestScreen());
+                  } catch (e) {
+                    Get.snackbar('Error', 'Failed to open Friend Request');
+                  }
+                },
+              ),
+            ),
           ],
         ],
       );
@@ -400,15 +416,21 @@ class _HomeScreenState extends State<HomeScreen> {
       Get.dialog(
         AlertDialog(
           backgroundColor: Colors.white,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8.0),
+          ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               const Text(
                 'By Enabling Location, Your Nearby Activity May Be Visible To Others, '
-                    'And Your Location Data Will Be Stored Temporarily.',
+                'And Your Location Data Will Be Stored Temporarily.',
                 textAlign: TextAlign.start,
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, height: 1.5),
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  height: 1.5,
+                ),
               ),
               const SizedBox(height: 24),
               Row(
@@ -416,7 +438,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   Expanded(
                     child: OutlinedButton(
                       onPressed: () => Get.back(),
-                      style: OutlinedButton.styleFrom(foregroundColor: Colors.black),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.black,
+                      ),
                       child: const Text('Back'),
                     ),
                   ),
@@ -427,7 +451,11 @@ class _HomeScreenState extends State<HomeScreen> {
                         try {
                           Get.back();
                           Get.dialog(
-                            const Center(child: CircularProgressIndicator(color: Colors.blue)),
+                            const Center(
+                              child: CircularProgressIndicator(
+                                color: Colors.blue,
+                              ),
+                            ),
                             barrierDismissible: false,
                           );
 
@@ -437,38 +465,57 @@ class _HomeScreenState extends State<HomeScreen> {
                           }
 
                           if (status.isGranted) {
-                            final bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+                            final bool serviceEnabled =
+                                await Geolocator.isLocationServiceEnabled();
                             if (!serviceEnabled) {
                               Get.back();
-                              Get.snackbar('GPS Disabled', 'Please enable GPS/Location services',
-                                  snackPosition: SnackPosition.BOTTOM,
-                                  backgroundColor: Colors.orange.withOpacity(0.7),
-                                  colorText: Colors.white);
+                              Get.snackbar(
+                                'GPS Disabled',
+                                'Please enable GPS/Location services',
+                                snackPosition: SnackPosition.BOTTOM,
+                                backgroundColor: Colors.orange.withOpacity(0.7),
+                                colorText: Colors.white,
+                              );
                               return;
                             }
 
-                            final Position position = await Geolocator.getCurrentPosition(
-                                desiredAccuracy: LocationAccuracy.high);
+                            final Position position =
+                                await Geolocator.getCurrentPosition(
+                                  desiredAccuracy: LocationAccuracy.high,
+                                );
                             Get.back();
                             LocalStorage.lat = position.latitude;
                             LocalStorage.long = position.longitude;
                             Get.to(() => const ChatNearbyScreen());
                           } else {
                             Get.back();
-                            Get.snackbar('Permission Denied', 'Location permission is required.');
-                            if (status.isPermanentlyDenied) await openAppSettings();
+                            Get.snackbar(
+                              'Permission Denied',
+                              'Location permission is required.',
+                            );
+                            if (status.isPermanentlyDenied) {
+                              await openAppSettings();
+                            }
                           }
                         } catch (e) {
                           debugPrint('Error requesting permission: $e');
                           Get.back();
-                          Get.snackbar('Error', 'Failed to request location permission',
-                              snackPosition: SnackPosition.BOTTOM,
-                              backgroundColor: Colors.red.withOpacity(0.7),
-                              colorText: Colors.white);
+                          Get.snackbar(
+                            'Error',
+                            'Failed to request location permission',
+                            snackPosition: SnackPosition.BOTTOM,
+                            backgroundColor: Colors.red.withOpacity(0.7),
+                            colorText: Colors.white,
+                          );
                         }
                       },
-                      style: ElevatedButton.styleFrom(backgroundColor: AppColors.primaryColor),
-                      child: const Text('OK', style: TextStyle(color: Colors.white)),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primaryColor,
+                      ),
+                      child: const Text(
+                        'OK',
+                        style: TextStyle(color: Colors.white),
+                      ),
                     ),
                   ),
                 ],

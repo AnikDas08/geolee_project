@@ -72,7 +72,7 @@ class _VerifyUserState extends State<VerifyUser> {
                       ),
                     ),
 
-                    /// OTP Filed here
+
                     Flexible(
                       flex: 0,
                       child: PinCodeTextField(
@@ -118,7 +118,7 @@ class _VerifyUserState extends State<VerifyUser> {
                         color: AppColors.secondaryText,
                       ),
 
-                    /// Resend OTP Button
+
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [

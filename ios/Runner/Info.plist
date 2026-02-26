@@ -19,6 +19,10 @@
 	<key>CFBundleName</key>
 	<string>giolee78</string>
 	<key>CFBundlePackageType</key>
+	<key>NSCameraUsageDescription</key>
+    <string>Camera is needed to send photos</string>
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>Photo library access needed to send images</string>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
 	<string>$(FLUTTER_BUILD_NAME)</string>

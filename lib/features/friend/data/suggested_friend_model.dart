@@ -70,7 +70,7 @@ class SuggestedFriendUserModel {
   final DateTime createdAt;
   final DateTime updatedAt;
   final AdvertiserModel? advertiser;
-  final double? distance; // ✅ add this
+  final double? distance;
 
   SuggestedFriendUserModel({
     required this.id,

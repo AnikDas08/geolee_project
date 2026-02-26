@@ -17,7 +17,7 @@ import '../../../profile/presentation/controller/my_profile_controller.dart';
 class HomeDetails extends StatefulWidget {
   const HomeDetails({super.key, required this.notificationCount});
 
-  final int notificationCount;
+  final RxInt notificationCount;
 
   @override
   State<HomeDetails> createState() => _HomeDetailsState();
@@ -54,43 +54,23 @@ class _HomeDetailsState extends State<HomeDetails> {
         desiredAccuracy: LocationAccuracy.high,
       ).timeout(const Duration(seconds: 10));
 
-      try {
-        final List<Placemark> placemarks = await placemarkFromCoordinates(
-          position.latitude,
-          position.longitude,
-        );
+      final List<Placemark> placemarks = await placemarkFromCoordinates(
+        position.latitude,
+        position.longitude,
+      );
 
-        if (placemarks.isNotEmpty && mounted) {
-          final Placemark place = placemarks[0];
+      if (placemarks.isNotEmpty && mounted) {
+        final place = placemarks[0];
 
-          // Priority list of fields from most specific to least specific
-          final List<String?> potentialFields = [
-            place.thoroughfare,      // Road
-            place.subLocality,       // Area/Neighborhood
-            place.locality,          // City
-            place.administrativeArea,// State
-            place.country,           // Country
-          ];
+        final parts = [
+          place.thoroughfare,
+          place.subLocality,
+          place.locality,
+          place.administrativeArea,
+          place.country,
+        ].where((e) => e != null && e.isNotEmpty).take(3).join(", ");
 
-          final List<String> finalParts = [];
-
-          // Logic: Check each field, add if not empty, stop when we have 3
-          for (var field in potentialFields) {
-            if (field != null && field.isNotEmpty) {
-              finalParts.add(field);
-            }
-            if (finalParts.length == 3) break; // STOP at 3 fields
-          }
-
-          setState(() {
-            displayLocation = finalParts.isNotEmpty
-                ? finalParts.join(", ")
-                : "Location Found";
-            loadingLocation = false;
-          });
-        }
-      } catch (e) {
-        _updateLocationText("Address unavailable");
+        _updateLocationText(parts.isEmpty ? "Location Found" : parts);
       }
     } catch (e) {
       _updateLocationText("Location Error");
@@ -98,109 +78,126 @@ class _HomeDetailsState extends State<HomeDetails> {
   }
 
   void _updateLocationText(String text) {
-    if (mounted) {
-      setState(() {
-        displayLocation = text;
-        loadingLocation = false;
-      });
-    }
+    if (!mounted) return;
+    setState(() {
+      displayLocation = text;
+      loadingLocation = false;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return GetBuilder<MyProfileController>(
-        init: MyProfileController(),
-        builder: (controller) {
-          return Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Row(
-                  children: [
-                    GestureDetector(
-                      onTap: () {
-                        if (LocalStorage.token.isNotEmpty) {
-                          Get.toNamed(AppRoutes.profile);
-                        }
-                      },
-                      child: CircleAvatar(
-                        radius: 20,
-                        backgroundColor: Colors.grey[200],
-                        child: ClipOval(
-                          child: CommonImage(
-                            fill: BoxFit.cover,
-                            imageSrc: controller.userImage.isNotEmpty && LocalStorage.token.isNotEmpty
-                                ? ApiEndPoint.imageUrl + controller.userImage
-                                : "assets/images/profile.png",
-                            size: 40,
-                          ),
+      init: MyProfileController(),
+      builder: (controller) {
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            /// LEFT PROFILE (তোর original UI)
+            Expanded(
+              child: Row(
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      if (LocalStorage.token.isNotEmpty) {
+                        Get.toNamed(AppRoutes.profile);
+                      }
+                    },
+                    child: CircleAvatar(
+                      radius: 20,
+                      backgroundColor: Colors.grey[200],
+                      child: ClipOval(
+                        child: CommonImage(
+                          fill: BoxFit.cover,
+                          imageSrc: controller.userImage.isNotEmpty &&
+                              LocalStorage.token.isNotEmpty
+                              ? ApiEndPoint.imageUrl + controller.userImage
+                              : "assets/images/profile.png",
+                          size: 40,
                         ),
                       ),
                     ),
-                    12.width,
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          CommonText(
-                            text: controller.userName.isNotEmpty ? controller.userName : "Guest",
-                            color: AppColors.textColorFirst,
-                            fontWeight: FontWeight.w600,
-                          ),
-                          Row(
-                            children: [
-                              const CommonImage(imageSrc: AppIcons.location, size: 14),
-                              8.width,
-                              Expanded(
-                                child: Text(
-                                  displayLocation,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w400,
-                                    color: AppColors.secondaryText,
-                                  ),
+                  ),
+                  12.width,
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        CommonText(
+                          text: controller.userName.isNotEmpty
+                              ? controller.userName
+                              : "Guest",
+                          color: AppColors.textColorFirst,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        Row(
+                          children: [
+                            const CommonImage(
+                              imageSrc: AppIcons.location,
+                              size: 14,
+                            ),
+                            8.width,
+                            Expanded(
+                              child: Text(
+                                displayLocation,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w400,
+                                  color: AppColors.secondaryText,
                                 ),
                               ),
-                            ],
-                          ),
-                        ],
-                      ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
+            ),
 
-              /// Notification Section
-              Stack(
+            /// 🔔 Notification Section (FIXED)
+            Obx(
+                  () => Stack(
                 clipBehavior: Clip.none,
                 children: [
                   Padding(
                     padding: const EdgeInsets.only(right: 10),
                     child: GestureDetector(
                       onTap: () => Get.toNamed(AppRoutes.notifications),
-                      child: const CommonImage(imageSrc: AppIcons.notification, size: 28),
+                      child: const CommonImage(
+                        imageSrc: AppIcons.notification,
+                        size: 28,
+                      ),
                     ),
                   ),
-                  if (widget.notificationCount > 0)
+                  if (widget.notificationCount.value > 0)
                     Positioned(
                       right: 4,
                       top: -4,
                       child: Container(
                         padding: const EdgeInsets.all(4),
-                        decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
+                        decoration: const BoxDecoration(
+                          color: Colors.red,
+                          shape: BoxShape.circle,
+                        ),
                         child: Text(
-                          "${widget.notificationCount}",
-                          style: const TextStyle(color: Colors.white, fontSize: 10),
+                          "${widget.notificationCount.value}",
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                          ),
                         ),
                       ),
                     ),
                 ],
               ),
-            ],
-          );
-        }
+            ),
+          ],
+        );
+      },
     );
   }
 }

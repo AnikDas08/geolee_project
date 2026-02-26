@@ -1,13 +1,13 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-// Assuming CommonImage handles network/asset images
 import 'package:giolee78/component/text/common_text.dart';
-import 'package:giolee78/config/route/app_routes.dart';
 import 'package:giolee78/utils/constants/app_colors.dart';
-import 'dart:io'; // Required for File image
-
-import '../controller/group_setting_controller.dart'; // Corrected import based on your provided file
+import 'package:giolee78/config/route/app_routes.dart';
+import '../../../../config/api/api_end_point.dart';
+import '../../../../utils/log/app_log.dart';
+import '../controller/group_setting_controller.dart';
 
 class GroupSettingsScreen extends StatelessWidget {
   const GroupSettingsScreen({super.key});
@@ -54,29 +54,143 @@ class GroupSettingsScreen extends StatelessWidget {
     );
   }
 
-  void _showEditGroupNameDialog(GroupSettingsController controller) {
-    final TextEditingController textController = TextEditingController(text: controller.groupName.value);
-    Get.defaultDialog(
-      title: "Edit Group Name",
-      content: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 8.w),
-        child: TextField(
-          controller: textController,
-          autofocus: true,
-          decoration: const InputDecoration(
-            hintText: "Enter new group name",
+  void showEditGroupNameDialog(GroupSettingsController controller) {
+    final TextEditingController textController = TextEditingController(
+      text: controller.groupName.value,
+    );
+    final RxBool isLoading = false.obs;
+
+    Get.dialog(
+      Obx(
+        () => Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          insetPadding: EdgeInsets.symmetric(horizontal: 24.w),
+          child: Container(
+            padding: EdgeInsets.all(20.w),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.edit, size: 50.sp, color: AppColors.primaryColor),
+                SizedBox(height: 12.h),
+                Text(
+                  "Edit Group Name",
+                  style: TextStyle(
+                    fontSize: 20.sp,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 8.h),
+                Text(
+                  "Enter a new name for the group",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    color: Colors.grey.shade700,
+                  ),
+                ),
+                SizedBox(height: 16.h),
+
+                // Text Field
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 12.w),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade100,
+                    borderRadius: BorderRadius.circular(8.r),
+                  ),
+                  child: TextField(
+                    controller: textController,
+                    autofocus: true,
+                    decoration: InputDecoration(
+                      border: InputBorder.none,
+                      hintText: "Enter new group name",
+                    ),
+                  ),
+                ),
+                SizedBox(height: 20.h),
+
+                // Buttons Row
+                Row(
+                  children: [
+                    // Cancel Button
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () => Get.back(),
+                        child: Container(
+                          padding: EdgeInsets.symmetric(vertical: 12.h),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8.r),
+                            border: Border.all(color: Colors.grey.shade400),
+                            color: Colors.grey.shade100,
+                          ),
+                          alignment: Alignment.center,
+                          child: Text(
+                            "Cancel",
+                            style: TextStyle(
+                              fontSize: 14.sp,
+                              color: Colors.grey.shade800,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: 12.w),
+
+                    // Save Button
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: isLoading.value
+                            ? null
+                            : () async {
+                                try {
+                                  isLoading.value = true;
+                                  controller.onUpdateGroupName(
+                                    textController.text.trim(),
+                                  );
+                                  Get.back();
+                                } finally {
+                                  isLoading.value = false;
+                                }
+                              },
+                        child: Container(
+                          padding: EdgeInsets.symmetric(vertical: 12.h),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8.r),
+                            color: AppColors.primaryColor,
+                          ),
+                          alignment: Alignment.center,
+                          child: isLoading.value
+                              ? SizedBox(
+                                  height: 18.h,
+                                  width: 18.h,
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : Text(
+                                  "Save",
+                                  style: TextStyle(
+                                    fontSize: 14.sp,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
-      textConfirm: "Save",
-      textCancel: "Cancel",
-      onCancel: () =>   Navigator.pop(Get.context!), // Use Get.back() for GetX dialogs
-      confirmTextColor: AppColors.white,
-      buttonColor: AppColors.primaryColor,
-      onConfirm: () {
-        controller.onUpdateGroupName(textController.text.trim());
-        Navigator.pop(Get.context!);
-      },
     );
   }
 
@@ -84,6 +198,7 @@ class GroupSettingsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetBuilder<GroupSettingsController>(
       init: GroupSettingsController(),
+      global: false,
       builder: (controller) {
         return Scaffold(
           backgroundColor: AppColors.background,
@@ -91,7 +206,7 @@ class GroupSettingsScreen extends StatelessWidget {
             elevation: 0,
             backgroundColor: AppColors.background,
             leading: IconButton(
-              onPressed: () => Navigator.pop(context), // Use Get.back()
+              onPressed: () => Navigator.pop(context),
               icon: Icon(
                 Icons.arrow_back_ios_new,
                 size: 18.sp,
@@ -113,39 +228,73 @@ class GroupSettingsScreen extends StatelessWidget {
               padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
               child: Column(
                 children: [
-                  // --- Group Avatar Section (MODIFIED FOR IMAGE PICKER) ---
-                  GestureDetector( // Make the whole avatar area tappable
-                    onTap: controller.pickGroupImage, // Call image picker
+                  // --- Group Avatar ---
+                  GestureDetector(
+                    onTap: controller.pickGroupImage,
                     child: Stack(
                       alignment: Alignment.bottomRight,
                       children: [
-                        Obx(() { // Obx to react to changes in avatarFilePath
-                          if (controller.avatarFilePath!.value.isNotEmpty) {
-                            // Display selected image from file
+                        Obx(() {
+                          final avatarPath = controller.avatarFilePath.value;
+
+                          // ১. ইমেজ লোড হচ্ছে কিনা তা দেখার জন্য ইন্ডিকেটর (ঐচ্ছিক)
+                          if (controller.isSaving.value) {
+                            return CircleAvatar(
+                              radius: 50.r,
+                              child: CircularProgressIndicator(),
+                            );
+                          }
+
+                          // ২. যদি ইমেজ পাথ থাকে
+                          if (avatarPath.isNotEmpty) {
+                            final isNetworkImage =
+                                avatarPath.startsWith('http') ||
+                                !avatarPath.contains(
+                                  '/data/user/',
+                                ); // অ্যান্ড্রয়েড লোকাল পাথের সাধারণ চেক
+
                             return CircleAvatar(
                               radius: 50.r,
                               backgroundColor: Colors.grey.shade300,
-                              backgroundImage: FileImage(File(controller.avatarFilePath!.value)),
-                              // Optionally, use a child for error/fallback icon
-                              child: ClipOval(
-                                child: Image.file(
-                                  File(controller.avatarFilePath!.value),
-                                  width: 100.r,
-                                  height: 100.r,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) {
-                                    return Icon(Icons.group, size: 50.sp, color: AppColors.white);
-                                  },
-                                ),
-                              ),
+                              backgroundImage: isNetworkImage
+                                  ? NetworkImage(
+                                      avatarPath.startsWith('http')
+                                          ? avatarPath
+                                          : () {
+                                              // Base URL এবং Path এর মাঝে স্ল্যাশ নিশ্চিত করা
+                                              String baseUrl =
+                                                  ApiEndPoint.imageUrl;
+                                              if (!baseUrl.endsWith('/')) {
+                                                baseUrl = '$baseUrl/';
+                                              }
+                                              String cleanPath =
+                                                  avatarPath.startsWith('/')
+                                                  ? avatarPath.substring(1)
+                                                  : avatarPath;
+
+                                              return "$baseUrl$cleanPath";
+                                            }(),
+                                    )
+                                  : FileImage(File(avatarPath))
+                                        as ImageProvider,
+
+                              // ইমেজ লোড হতে এরর হলে অল্টারনেটিভ টেক্সট দেখাবে
+                              onBackgroundImageError: (exception, stackTrace) {
+                                appLog("❌ Image Load Error: $exception");
+                              },
                             );
                           } else {
-                            // Display text fallback
+                            // ৩. যদি কোন ইমেজ না থাকে (Default Initial)
                             return CircleAvatar(
                               radius: 50.r,
-                              backgroundColor: Colors.grey.shade300,
+                              backgroundColor: AppColors.primaryColor
+                                  .withOpacity(0.8),
                               child: CommonText(
-                                text: controller.groupName.value.substring(0, 2).toUpperCase(),
+                                text: controller.groupName.value.isNotEmpty
+                                    ? controller.groupName.value
+                                          .substring(0, 1)
+                                          .toUpperCase()
+                                    : '?',
                                 fontSize: 32.sp,
                                 fontWeight: FontWeight.bold,
                                 color: AppColors.white,
@@ -169,43 +318,49 @@ class GroupSettingsScreen extends StatelessWidget {
                       ],
                     ),
                   ),
-
                   SizedBox(height: 12.h),
-
                   // --- Group Name & Edit ---
                   GestureDetector(
-                    onTap: () => _showEditGroupNameDialog(controller),
+                    onTap: () => showEditGroupNameDialog(controller),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        CommonText(
-                          text: controller.groupName.value,
-                          fontSize: 18.sp,
-                          fontWeight: FontWeight.w600,
+                        Obx(
+                          () => CommonText(
+                            text: controller.groupName.value,
+                            fontSize: 18.sp,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                         SizedBox(width: 4.w),
-                        Icon(Icons.edit, size: 16.sp, color: Colors.grey.shade600),
+                        Icon(
+                          Icons.edit,
+                          size: 16.sp,
+                          color: Colors.grey.shade600,
+                        ),
                       ],
                     ),
                   ),
-
                   SizedBox(height: 4.h),
-
                   // --- Member Count ---
-                  CommonText(
-                    text: '${controller.memberCount.value} Member',
-                    fontSize: 14.sp,
-                    color: AppColors.secondaryText,
+                  Obx(
+                    () => CommonText(
+                      text:
+                          '${controller.memberCount.value} Member${controller.memberCount.value != 1 ? 's' : ''}',
+                      fontSize: 14.sp,
+                      color: AppColors.secondaryText,
+                    ),
                   ),
-
                   SizedBox(height: 30.h),
-
                   // --- Settings List ---
                   _SettingsTile(
                     title: 'Add Member',
-                    onTap: (){
-                      Get.toNamed(AppRoutes.addMemberScreen);
+                    onTap: () {
+                      Get.toNamed(
+                        AppRoutes.addMemberScreen,
+                        arguments: {'chatId': controller.chatId},
+                      );
                     },
                   ),
                   _SettingsTile(
@@ -218,7 +373,7 @@ class GroupSettingsScreen extends StatelessWidget {
                   ),
                   _SettingsTile(
                     title: 'Leave Group',
-                    onTap: controller.onLeaveGroup,
+                    onTap: controller.showLeaveGroupDialog,
                     titleColor: Colors.red,
                   ),
                   _SettingsTile(

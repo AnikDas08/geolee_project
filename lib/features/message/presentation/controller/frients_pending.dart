@@ -1,30 +1,28 @@
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
+import 'package:giolee78/config/api/api_end_point.dart';
+import 'package:giolee78/services/api/api_response_model.dart';
+import 'package:giolee78/services/api/api_service.dart';
 
-// Reusing the User model definition
 class User {
   final String id;
   final String name;
   final String avatarUrl;
 
   User({required this.id, required this.name, required this.avatarUrl});
+
+  factory User.fromJson(Map<String, dynamic> json) {
+    return User(
+      id: json['id'] ?? '',
+      name: json['name'] ?? '',
+      avatarUrl: json['avatarUrl'] ?? '',
+    );
+  }
 }
 
 class PendingRequestController extends GetxController {
   final RxBool isLoading = false.obs;
-
-  // Mock list of pending requests
-  final RxList<User> pendingRequests = <User>[
-    User(id: 'p1', name: 'Arlene McCoy', avatarUrl: 'https://placehold.co/40x40/FFD180/8D6E63?text=AM'),
-    User(id: 'p2', name: 'Darrell Steward', avatarUrl: 'https://placehold.co/40x40/FFCCBC/BF360C?text=DS'),
-    User(id: 'p3', name: 'Kathryn Murphy', avatarUrl: 'https://placehold.co/40x40/B3E5FC/0277BD?text=KM'),
-    User(id: 'p4', name: 'Ralph Edwards', avatarUrl: 'https://placehold.co/40x40/C8E6C9/2E7D32?text=RE'),
-    User(id: 'p5', name: 'Esther Howard', avatarUrl: 'https://placehold.co/40x40/FFF9C4/FFEB3B?text=EH'),
-    User(id: 'p6', name: 'Guy Hawkins', avatarUrl: 'https://placehold.co/40x40/E1BEE7/8E24AA?text=GH'),
-    User(id: 'p7', name: 'Annette Black', avatarUrl: 'https://placehold.co/40x40/CFD8DC/607D8B?text=AB'),
-    User(id: 'p8', name: 'Cameron Williamson', avatarUrl: 'https://placehold.co/40x40/FFE0B2/EF6C00?text=CW'),
-    User(id: 'p9', name: 'Jane Cooper', avatarUrl: 'https://placehold.co/40x40/F48FB1/AD1457?text=JC'),
-  ].obs;
+  final RxList<User> pendingRequests = <User>[].obs;
 
   @override
   void onInit() {
@@ -32,13 +30,57 @@ class PendingRequestController extends GetxController {
     fetchPendingRequests();
   }
 
+  /// Fetch pending requests from server
   Future<void> fetchPendingRequests() async {
-    isLoading.value = true;
-    // Simulate network delay
-    await 1.seconds.delay();
-    // Data is already initialized in the mock list
-    isLoading.value = false;
+    try {
+      isLoading.value = true;
+      final url = ApiEndPoint.getPendingRequest; // ex: {{BASE_URL}}/join-requests/
+      ApiResponseModel response = await ApiService.get(url);
+
+      if (response.statusCode == 200 && response.data['data'] != null) {
+        final List data = response.data['data'];
+        pendingRequests.value = data.map((e) => User.fromJson(e)).toList();
+        debugPrint("✅ Pending Requests Loaded: ${pendingRequests.length}");
+      } else {
+        debugPrint("❌ Failed to load pending requests");
+      }
+    } catch (e) {
+      debugPrint("❌ Error fetching pending requests: $e");
+    } finally {
+      isLoading.value = false;
+    }
   }
+
+  /// Update join request status
+  Future<void> updateRequestStatus(User user, String status) async {
+    try {
+      final url = "${ApiEndPoint.baseUrl}/join-requests/update/${user.id}";
+      final body = {"status": status}; // accepted | rejected | cancelled
+      isLoading.value = true;
+
+      ApiResponseModel response = await ApiService.patch(
+        url,
+        body: body,
+      );
+
+      if (response.statusCode == 200) {
+        pendingRequests.removeWhere((p) => p.id == user.id);
+        Get.snackbar(
+          status == "accepted" ? "Accepted" : "Rejected",
+          "${user.name} request has been ${status}!",
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      } else {
+        Get.snackbar("Error", "Failed to update request status");
+      }
+    } catch (e) {
+      debugPrint("❌ Error updating request: $e");
+      Get.snackbar("Error", "Error updating request: $e");
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
 
   void onAcceptRequest(User user) {
     Get.defaultDialog(
@@ -48,18 +90,15 @@ class PendingRequestController extends GetxController {
       textCancel: "Cancel",
       confirmTextColor: Colors.white,
       buttonColor: Colors.green,
-      onConfirm: () {
-        // Implement API call to accept request
-        pendingRequests.removeWhere((p) => p.id == user.id);
-        Navigator.pop(Get.context!);
-        Get.snackbar('Accepted', '${user.name} is now a member!', snackPosition: SnackPosition.BOTTOM);
+      onConfirm: () async {
+        await updateRequestStatus(user, "accepted");
+        Get.back();
       },
-      onCancel: () {
-        Navigator.pop(Get.context!);
-      },
+      onCancel: () => Get.back(),
     );
   }
 
+  /// Reject request
   void onRejectRequest(User user) {
     Get.defaultDialog(
       title: "Reject Request",
@@ -68,15 +107,11 @@ class PendingRequestController extends GetxController {
       textCancel: "Cancel",
       confirmTextColor: Colors.white,
       buttonColor: Colors.red,
-      onConfirm: () {
-        // Implement API call to reject request
-        pendingRequests.removeWhere((p) => p.id == user.id);
-        Navigator.pop(Get.context!);
-        Get.snackbar('Rejected', '${user.name}\'s request has been rejected.', snackPosition: SnackPosition.BOTTOM);
+      onConfirm: () async {
+        await updateRequestStatus(user, "rejected");
+        Get.back();
       },
-      onCancel: () {
-        Navigator.pop(Get.context!);
-      },
+      onCancel: () => Get.back(),
     );
   }
 }
