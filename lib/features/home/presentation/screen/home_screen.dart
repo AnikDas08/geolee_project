@@ -42,10 +42,10 @@ class _HomeScreenState extends State<HomeScreen> {
     target: LatLng(
       Get.find<HomeController>().currentLatitude.value != 0.0
           ? Get.find<HomeController>().currentLatitude.value
-          : LocalStorage.lat,
+          : LocalStorage.user.location.lat,
       Get.find<HomeController>().currentLongitude.value != 0.0
           ? Get.find<HomeController>().currentLongitude.value
-          : LocalStorage.long,
+          : LocalStorage.user.location.long,
     ),
     zoom: 14.4746,
   );
@@ -153,7 +153,6 @@ class _HomeScreenState extends State<HomeScreen> {
         borderRadius: BorderRadius.circular(10.r),
         child: Stack(
           children: [
-
             Obx(
               () => GoogleMap(
                 mapType: MapType.satellite,
@@ -484,8 +483,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   desiredAccuracy: LocationAccuracy.high,
                                 );
                             Get.back();
-                            LocalStorage.lat = position.latitude;
-                            LocalStorage.long = position.longitude;
+
                             Get.to(() => const ChatNearbyScreen());
                           } else {
                             Get.back();

@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:giolee78/config/api/api_end_point.dart'; // ApiEndPoint ইম্পোর্ট নিশ্চিত করুন
-import 'package:giolee78/utils/constants/app_images.dart';
 import 'package:intl/intl.dart';
 import '../../../../utils/constants/app_colors.dart';
 import 'package:giolee78/features/message/data/model/chat_message.dart';
@@ -28,7 +27,7 @@ class _MessageScreenState extends State<MessageScreen> {
       baseUrl = '$baseUrl/';
     }
 
-    String cleanPath = path.startsWith('/') ? path.substring(1) : path;
+    final String cleanPath = path.startsWith('/') ? path.substring(1) : path;
     return "$baseUrl$cleanPath";
   }
 

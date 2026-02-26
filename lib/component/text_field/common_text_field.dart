@@ -26,7 +26,7 @@ class CommonTextField extends StatefulWidget {
     this.hintTextColor = AppColors.textFiledColor,
     this.labelTextColor = AppColors.textFiledColor,
     this.textColor = AppColors.textColors,
-    this.borderColor = AppColors.borderColor,
+    this.borderColor = AppColors.grey,
     this.onSubmitted,
     this.onTap,
     this.suffixIcon,
@@ -52,7 +52,7 @@ class CommonTextField extends StatefulWidget {
   final VoidCallback? onTap;
   final TextEditingController? controller;
   final TextInputAction textInputAction;
-  final FormFieldValidator? validator;
+  final FormFieldValidator<String>? validator;
   final TextInputType keyboardType;
   final List<TextInputFormatter>? inputFormatters;
   final int? maxLines;
@@ -78,75 +78,61 @@ class _CommonTextFieldState extends State<CommonTextField> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: ShapeDecoration(
-        color: Colors.white /* Icon-White */,
-        shape: RoundedRectangleBorder(
-          side: const BorderSide(
-            color: Color(0xFFDEE2E3) /* Disable */,
-          ),
-          borderRadius: BorderRadius.circular(widget.borderRadius),
+    return TextFormField(
+      autovalidateMode: AutovalidateMode.onUnfocus,
+      keyboardType: widget.keyboardType,
+      controller: widget.controller,
+      obscureText: widget.isPassword ? obscureText : false,
+      textInputAction: widget.textInputAction,
+      maxLength: widget.mexLength,
+      maxLines: widget.maxLines ?? 1,
+      cursorColor: AppColors.black,
+      inputFormatters: widget.inputFormatters,
+      style: TextStyle(fontSize: 14, color: widget.textColor),
+      onFieldSubmitted: widget.onSubmitted,
+      onTap: widget.onTap,
+      validator: widget.validator,
+      decoration: InputDecoration(
+        errorMaxLines: 2,
+        filled: true,
+        prefixIcon: widget.prefixIcon,
+        fillColor: Colors.transparent,
+        counterText: "",
+        contentPadding: EdgeInsets.symmetric(
+          horizontal: widget.paddingHorizontal.w,
+          vertical: widget.paddingVertical.h,
         ),
-      ),
-      child: TextFormField(
-
-        autovalidateMode: AutovalidateMode.onUnfocus,
-        keyboardType: widget.keyboardType,
-        controller: widget.controller,
-        obscureText: widget.isPassword ? obscureText : false,
-        textInputAction: widget.textInputAction,
-        maxLength: widget.mexLength,
-        maxLines: widget.maxLines ?? 1,
-        cursorColor: AppColors.black,
-        inputFormatters: widget.inputFormatters,
-        style: TextStyle(fontSize: 14, color: widget.textColor),
-        onFieldSubmitted: widget.onSubmitted,
-        onTap: widget.onTap,
-        validator: widget.validator,
-        decoration: InputDecoration(
-          errorMaxLines: 2,
-          filled: true,
-          prefixIcon: widget.prefixIcon,
-          fillColor: Colors.transparent,
-          counterText: "",
-          contentPadding: EdgeInsets.symmetric(
-            horizontal: widget.paddingHorizontal.w,
-            vertical: widget.paddingVertical.h,
-          ),
-          border: _buildBorder(),
-          enabledBorder: _buildBorder(),
-          focusedBorder: _buildBorder(),
-          disabledBorder: _buildBorder(),
-          errorBorder: _buildBorder(),
-          hintText: widget.hintText,
-          labelText: widget.labelText,
-          hintStyle: GoogleFonts.poppins(
-            fontSize: 14,
-            color: widget.hintTextColor,
-          ),
-          labelStyle: GoogleFonts.poppins(
-            fontSize: 14,
-            color: widget.labelTextColor,
-          ),
-          prefix: CommonText(
-            text: widget.prefixText ?? "",
-          ),
-          suffixIcon: widget.isPassword
-              ? GestureDetector(
-                  onTap: toggle,
-                  child: Padding(
-                    padding: EdgeInsetsDirectional.only(end: 10.w),
-                    child: Icon(
-                      obscureText
-                          ? Icons.visibility_off_outlined
-                          : Icons.visibility_outlined,
-                      size: 20.sp,
-                      color: widget.textColor,
-                    ),
+        border: _buildBorder(),
+        enabledBorder: _buildBorder(),
+        focusedBorder: _buildBorder(),
+        disabledBorder: _buildBorder(),
+        errorBorder: _buildBorder(),
+        hintText: widget.hintText,
+        labelText: widget.labelText,
+        hintStyle: GoogleFonts.poppins(
+          fontSize: 14,
+          color: widget.hintTextColor,
+        ),
+        labelStyle: GoogleFonts.poppins(
+          fontSize: 14,
+          color: widget.labelTextColor,
+        ),
+        prefix: CommonText(text: widget.prefixText ?? ""),
+        suffixIcon: widget.isPassword
+            ? GestureDetector(
+                onTap: toggle,
+                child: Padding(
+                  padding: EdgeInsetsDirectional.only(end: 10.w),
+                  child: Icon(
+                    obscureText
+                        ? Icons.visibility_off_outlined
+                        : Icons.visibility_outlined,
+                    size: 20.sp,
+                    color: widget.textColor,
                   ),
-                )
-              : widget.suffixIcon,
-        ),
+                ),
+              )
+            : widget.suffixIcon,
       ),
     );
   }

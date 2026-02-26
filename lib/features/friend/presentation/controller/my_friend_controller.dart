@@ -63,16 +63,11 @@ class MyFriendController extends GetxController {
   Future<void> onInit()async {
     super.onInit();
 
-    debugPrint("🚀 MyFriendController onInit called");
-    debugPrint("📍 RAW Lat: ${LocalStorage.lat}");
-    debugPrint("📍 RAW Long: ${LocalStorage.long}");
-    debugPrint("📍 Lat type: ${LocalStorage.lat.runtimeType}");
 
     await fetchFriendRequests();
     await getMyAllFriends();
     await getSuggestedFriend();
     await _initLocationThenFetch();
-    debugPrint("📍 Lat: ${LocalStorage.lat} | Long: ${LocalStorage.long}");
   }
 
   // ================= Per-User Helpers
@@ -125,7 +120,7 @@ class MyFriendController extends GetxController {
 
       if (response.isSuccess) {
         final data = response.data["data"];
-        String chatId = data["_id"] ?? "";
+        final String chatId = data["_id"] ?? "";
 
         if (chatId.isNotEmpty) {
           Get.toNamed(
@@ -255,8 +250,8 @@ class MyFriendController extends GetxController {
       debugPrint("🔄 _initLocationThenFetch started");
 
       // ─── Step 1: LocalStorage check ───
-      final double? storedLat = LocalStorage.lat;
-      final double? storedLng = LocalStorage.long;
+      final double? storedLat = LocalStorage.user.location.lat;
+      final double? storedLng = LocalStorage.user.location.long;
 
       debugPrint("📦 Stored → Lat: $storedLat | Lng: $storedLng");
 
@@ -306,9 +301,7 @@ class MyFriendController extends GetxController {
 
       debugPrint("✅ Got position: ${position.latitude}, ${position.longitude}");
 
-      // ─── Step 4: Save & fetch ───
-      LocalStorage.lat = position.latitude;
-      LocalStorage.long = position.longitude;
+
 
       await getSuggestedFriend();
     } catch (e) {
@@ -319,8 +312,6 @@ class MyFriendController extends GetxController {
         final Position? lastKnown = await Geolocator.getLastKnownPosition();
         if (lastKnown != null) {
           debugPrint("📍 Using last known: ${lastKnown.latitude}, ${lastKnown.longitude}");
-          LocalStorage.lat = lastKnown.latitude;
-          LocalStorage.long = lastKnown.longitude;
           await getSuggestedFriend();
         } else {
           nearbyChatError.value = "Could not get location. Please try again.";
@@ -340,8 +331,8 @@ class MyFriendController extends GetxController {
         suggestedFriendList.clear();
       }
 
-      final double lat = LocalStorage.lat ?? 0.0;
-      final double lng = LocalStorage.long ?? 0.0;
+      final double lat = LocalStorage.user.location.lat ?? 0.0;
+      final double lng = LocalStorage.user.location.long ?? 0.0;
 
       if (lat == 0.0 || lng == 0.0) {
         nearbyChatError.value =

@@ -52,7 +52,8 @@ class AdvertiserEditProfileScreen extends StatelessWidget {
 
                       Align(
                         alignment: Alignment.centerLeft,
-                          child: _buildLabel('Business Name')),
+                        child: _buildLabel('Business Name'),
+                      ),
 
                       6.height,
 
@@ -67,8 +68,9 @@ class AdvertiserEditProfileScreen extends StatelessWidget {
                       10.height,
 
                       Align(
-                          alignment: Alignment.centerLeft,
-                          child: _buildLabel('Bio')),
+                        alignment: Alignment.centerLeft,
+                        child: _buildLabel('Bio'),
+                      ),
 
                       6.height,
 
@@ -76,7 +78,8 @@ class AdvertiserEditProfileScreen extends StatelessWidget {
                         controller: controller.bioController,
                         validator: OtherHelper.validator,
                         maxLines: 4,
-                        hintText: 'Skilled professionals offering reliable, on-demand services to meet your everyday needs quickly and efficiently.',
+                        hintText:
+                            'Skilled professionals offering reliable, on-demand services to meet your everyday needs quickly and efficiently.',
                         hintTextColor: AppColors.secondaryText,
                         textColor: AppColors.black,
                       ),
@@ -84,8 +87,9 @@ class AdvertiserEditProfileScreen extends StatelessWidget {
                       10.height,
 
                       Align(
-                          alignment: Alignment.centerLeft,
-                          child: _buildLabel('Phone Number')),
+                        alignment: Alignment.centerLeft,
+                        child: _buildLabel('Phone Number'),
+                      ),
 
                       6.height,
 
@@ -99,8 +103,9 @@ class AdvertiserEditProfileScreen extends StatelessWidget {
                       10.height,
 
                       Align(
-                          alignment: Alignment.centerLeft,
-                          child: _buildLabel('Business Licence Number')),
+                        alignment: Alignment.centerLeft,
+                        child: _buildLabel('Business Licence Number'),
+                      ),
 
                       6.height,
 
@@ -112,13 +117,12 @@ class AdvertiserEditProfileScreen extends StatelessWidget {
                         textColor: AppColors.black,
                       ),
 
-
-
                       10.height,
 
                       Align(
-                          alignment: Alignment.centerLeft,
-                          child: _buildLabel('Business Type')),
+                        alignment: Alignment.centerLeft,
+                        child: _buildLabel('Business Type'),
+                      ),
 
                       6.height,
 
@@ -129,11 +133,6 @@ class AdvertiserEditProfileScreen extends StatelessWidget {
                         hintTextColor: AppColors.secondaryText,
                         textColor: AppColors.black,
                       ),
-
-
-
-
-
 
                       32.height,
                       CommonButton(
@@ -175,9 +174,7 @@ class AdvertiserEditProfileScreen extends StatelessWidget {
               ),
             ],
           ),
-          child: ClipOval(
-            child: _buildImage(controller),
-          ),
+          child: ClipOval(child: _buildImage(controller)),
         ),
 
         /// Edit Icon
@@ -212,7 +209,6 @@ class AdvertiserEditProfileScreen extends StatelessWidget {
     );
   }
 
-
   /// ✅ FIXED: Build Image Widget
   Widget _buildImage(AdvertiserEditProfileController controller) {
     // Check if new image is selected
@@ -235,9 +231,9 @@ class AdvertiserEditProfileScreen extends StatelessWidget {
 
   /// Build Network or Default Image
   Widget _buildNetworkOrDefaultImage() {
-    if (LocalStorage.myImage.isNotEmpty) {
+    if (LocalStorage.user.image.isNotEmpty) {
       return CommonImage(
-        imageSrc: ApiEndPoint.imageUrl + LocalStorage.businessLogo,
+        imageSrc: ApiEndPoint.imageUrl + LocalStorage.user.advertiser.logo,
         width: 100.w,
         height: 100.h,
         fill: BoxFit.cover,

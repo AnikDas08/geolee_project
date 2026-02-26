@@ -2,10 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:giolee78/config/api/api_end_point.dart';
-import 'package:giolee78/config/route/app_routes.dart';
 import 'package:giolee78/features/chat_nearby/data/nearby_friends_model.dart';
 import 'package:giolee78/features/chat_nearby/presentation/controller/chat_nearby_profile_controller.dart';
-import 'package:timeago/timeago.dart';
 
 import '../../../../component/button/common_button.dart';
 import '../../../../component/image/common_image.dart';

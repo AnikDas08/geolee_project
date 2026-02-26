@@ -62,25 +62,22 @@ class GroupMessageController extends GetxController {
   }
 
   @override
-  void onInit() async{
+  Future<void> onInit() async {
     super.onInit();
 
     listenMessage();
-     await fetchGroupDetails();
-
+    await fetchGroupDetails();
   }
 
   @override
-  void onClose(){
+  void onClose() {
     if (chatId.isNotEmpty) {
-      SocketServices.leaveRoom(chatId);
+      SocketService.emit("room:leave", chatId);
     }
     messageController.dispose();
     scrollController.dispose();
     super.onClose();
-
   }
-
 
   Future<void> fetchGroupDetails() async {
     if (chatId.isEmpty) {
@@ -104,7 +101,6 @@ class GroupMessageController extends GetxController {
           avatarFilePath.value = data['avatarUrl'];
           appLog("✅ Avatar loaded: ${data['avatarUrl']}");
         }
-
       } else {
         appLog("❌ Failed to fetch group: ${response.statusCode}");
         Get.snackbar('Error', 'Failed to load group details');
@@ -113,14 +109,13 @@ class GroupMessageController extends GetxController {
       appLog("❌ Error fetching group details: $e");
       Get.snackbar('Error', 'Error loading group details');
     } finally {
-
       update();
     }
   }
 
   // ─── Socket ───────────────────────────────────────
   void listenMessage() {
-    SocketServices.on("message:new", (data) {
+    SocketService.on("message:new", (data) {
       try {
         final String incomingChatId = data['chat'] is String
             ? data['chat']
@@ -138,9 +133,9 @@ class GroupMessageController extends GetxController {
       }
     });
 
-    SocketServices.on("chat:update", (data) {
+    SocketService.on("chat:update", (data) {
       if (chatId.isNotEmpty) {
-        loadMessages(showLoading: false);
+        loadMessages();
       }
     });
   }
@@ -155,7 +150,7 @@ class GroupMessageController extends GetxController {
     }
 
     try {
-      SocketServices.joinRoom(chatId);
+      SocketService.emit('room:join', chatId);
       final String url = "${ApiEndPoint.messages}/$chatId";
       final response = await ApiService.get(url);
 
@@ -183,12 +178,14 @@ class GroupMessageController extends GetxController {
     if (isSendingText ||
         isUploadingImage ||
         isUploadingMedia ||
-        isUploadingDocument)
+        isUploadingDocument) {
       return;
+    }
     if (messageController.text.trim().isEmpty &&
         !hasPickedImage &&
-        !hasPickedFile)
+        !hasPickedFile) {
       return;
+    }
 
     if (messageController.text.trim().isNotEmpty) {
       await _sendTextMessage();
@@ -212,7 +209,7 @@ class GroupMessageController extends GetxController {
       );
       if (response.statusCode == 200) {
         messageController.clear();
-        await loadMessages(showLoading: false);
+        await loadMessages();
       } else {
         _showError('Failed to send message');
       }
@@ -261,7 +258,7 @@ class GroupMessageController extends GetxController {
         body: {"chat": chatId, "type": "image"},
       );
       if (response.statusCode == 200) {
-        await loadMessages(showLoading: false);
+        await loadMessages();
       } else {
         _showError('Failed to send image');
       }
@@ -282,7 +279,7 @@ class GroupMessageController extends GetxController {
         body: {"chat": chatId, "type": "media"},
       );
       if (response.statusCode == 200) {
-        await loadMessages(showLoading: false);
+        await loadMessages();
       } else {
         _showError('Failed to send media');
       }
@@ -303,7 +300,7 @@ class GroupMessageController extends GetxController {
         body: {"chat": chatId, "type": "document"},
       );
       if (response.statusCode == 200) {
-        await loadMessages(showLoading: false);
+        await loadMessages();
       } else {
         _showError('Failed to send document');
       }
@@ -468,6 +465,7 @@ class GroupMessageController extends GetxController {
 
   // ─── Getters ──────────────────────────────────────
   bool isImagePicked() => hasPickedImage && pickedImage != null;
+
   bool isFilePicked() => hasPickedFile && pickedFile != null;
 
   String? getPickedFilePath() {
@@ -517,5 +515,6 @@ class GroupMessageController extends GetxController {
 
   // Legacy method kept for any existing call sites
   Future<void> sendMessage() => sendTextAndFile();
+
   Future<void> pickAndSendImage() => pickImageFromGallery();
 }

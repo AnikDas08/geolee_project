@@ -10,7 +10,6 @@ import 'package:giolee78/utils/extensions/extension.dart';
 
 import '../../../../component/image/common_image.dart';
 import '../../../../component/text/common_text.dart';
-import '../../../../config/api/api_end_point.dart';
 import '../../../../utils/constants/app_colors.dart';
 import '../../../profile/presentation/controller/my_profile_controller.dart';
 
@@ -109,9 +108,10 @@ class _HomeDetailsState extends State<HomeDetails> {
                       child: ClipOval(
                         child: CommonImage(
                           fill: BoxFit.cover,
-                          imageSrc: controller.userImage.isNotEmpty &&
-                              LocalStorage.token.isNotEmpty
-                              ? ApiEndPoint.imageUrl + controller.userImage
+                          imageSrc:
+                              LocalStorage.user.image.isNotEmpty &&
+                                  LocalStorage.token.isNotEmpty
+                              ? LocalStorage.user.image
                               : "assets/images/profile.png",
                           size: 40,
                         ),
@@ -124,8 +124,8 @@ class _HomeDetailsState extends State<HomeDetails> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         CommonText(
-                          text: controller.userName.isNotEmpty
-                              ? controller.userName
+                          text: LocalStorage.user.name.isNotEmpty
+                              ? LocalStorage.user.name
                               : "Guest",
                           color: AppColors.textColorFirst,
                           fontWeight: FontWeight.w600,
@@ -160,7 +160,7 @@ class _HomeDetailsState extends State<HomeDetails> {
 
             /// 🔔 Notification Section (FIXED)
             Obx(
-                  () => Stack(
+              () => Stack(
                 clipBehavior: Clip.none,
                 children: [
                   Padding(

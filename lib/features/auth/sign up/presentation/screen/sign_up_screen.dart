@@ -12,11 +12,12 @@ import '../widget/already_accunt_rich_text.dart';
 import '../widget/sign_up_all_filed.dart';
 
 class SignUpScreen extends StatelessWidget {
-  const SignUpScreen({super.key});
+   SignUpScreen({super.key});
+
+  final _formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
-    final signUpFormKey = GlobalKey<FormState>();
     return Scaffold(
       /// App Bar Section Starts Here
       appBar: AppBar(leading: const SizedBox()),
@@ -27,7 +28,7 @@ class SignUpScreen extends StatelessWidget {
           return SingleChildScrollView(
             padding: EdgeInsets.symmetric(horizontal: 24.w),
             child: Form(
-              key: signUpFormKey,
+              key: _formKey,
               child: Column(
                 children: [
                   /// Sign UP Instructions here
@@ -48,14 +49,16 @@ class SignUpScreen extends StatelessWidget {
                   CommonButton(
                     titleText: AppString.signUp,
                     isLoading: controller.isLoading,
-                    onTap: () => controller.signUpUser(signUpFormKey),
+                    onTap: () {
+                      if (!_formKey.currentState!.validate()) {
+                        return;
+                      }
+                      controller.signUpUser();
+                    },
                   ),
                   const SizedBox(height: 20),
 
-                  const CommonText(
-                    text: "Or Sign Up With",
-                    color: Colors.grey,
-                  ),
+                  const CommonText(text: "Or Sign Up With", color: Colors.grey),
 
                   24.height,
 
@@ -68,9 +71,7 @@ class SignUpScreen extends StatelessWidget {
                           decoration: ShapeDecoration(
                             shape: RoundedRectangleBorder(
                               side: const BorderSide(
-                                color: Color(
-                                  0xFFD1D5D6,
-                                ) /* Disable-Color */,
+                                color: Color(0xFFD1D5D6) /* Disable-Color */,
                               ),
                               borderRadius: BorderRadius.circular(8),
                             ),
@@ -107,9 +108,7 @@ class SignUpScreen extends StatelessWidget {
                           decoration: ShapeDecoration(
                             shape: RoundedRectangleBorder(
                               side: const BorderSide(
-                                color: Color(
-                                  0xFFD1D5D6,
-                                ) /* Disable-Color */,
+                                color: Color(0xFFD1D5D6) /* Disable-Color */,
                               ),
                               borderRadius: BorderRadius.circular(8),
                             ),

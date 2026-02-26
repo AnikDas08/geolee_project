@@ -2,7 +2,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:giolee78/services/storage/storage_services.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../../../config/route/app_routes.dart';
@@ -32,9 +31,6 @@ class AlreadyAccountRichText extends StatelessWidget {
             text: AppString.signIn,
             recognizer: TapGestureRecognizer()
               ..onTap = () {
-
-              debugPrint("====================${LocalStorage.long}");
-
                 Get.toNamed(AppRoutes.signIn);
               },
             style: GoogleFonts.plusJakartaSans(

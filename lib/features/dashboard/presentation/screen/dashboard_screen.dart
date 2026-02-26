@@ -106,9 +106,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         GestureDetector(
           onTap: () {
             _providerProfileViewController.getAdvertiserData();
-            print(
-              "My Role Is :===========================${LocalStorage.role.toString()}",
-            );
+
             Get.to(() => const DashBoardProfile());
           },
           child: Row(
@@ -122,7 +120,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
                 child: Center(
                   child: CommonImage(
-                    imageSrc: "${ApiEndPoint.imageUrl+_providerProfileViewController.businessLogo}",
+                    // imageSrc: "${ApiEndPoint.imageUrl+_providerProfileViewController.businessLogo}",
+                    imageSrc: LocalStorage.user.advertiser.logo,
                     borderRadius: 12.r,
                     fill: BoxFit.cover,
                   ),
@@ -135,7 +134,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
 
                   CommonText(
-                    text: _providerProfileViewController.businessName,
+                    // text: _providerProfileViewController.businessName,
+                    text: LocalStorage.user.advertiser.businessName,
                     textAlign: TextAlign.left,
                     fontWeight: FontWeight.w600,
                     color: AppColors.textColorFirst,

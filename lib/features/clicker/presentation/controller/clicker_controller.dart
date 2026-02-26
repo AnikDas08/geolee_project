@@ -96,7 +96,7 @@ class ClickerController extends GetxController {
 
       if (response.isSuccess) {
         final data = response.data["data"];
-        String chatId = data["_id"] ?? "";
+        final String chatId = data["_id"] ?? "";
 
         if (chatId.isNotEmpty) {
           Get.toNamed(

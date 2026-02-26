@@ -238,7 +238,7 @@ class FirstMessageController extends GetxController {
       ChatMessageModel(
         time: DateTime.now(),
         text: "",
-        image: LocalStorage.myImage,
+        image: LocalStorage.user.image,
         messageImage: selectedAttachment!.path,
         isMe: true,
         isUploading: true,
@@ -271,7 +271,7 @@ class FirstMessageController extends GetxController {
           ChatMessageModel(
             time: DateTime.parse(messageData['createdAt']).toLocal(),
             text: messageData['text'] ?? '',
-            image: LocalStorage.myImage,
+            image: LocalStorage.user.image,
             messageImage: messageData['image'],
             isMe: true,
           ),
@@ -333,7 +333,7 @@ class FirstMessageController extends GetxController {
       ChatMessageModel(
         time: DateTime.now(),
         text: messageController.text,
-        image: LocalStorage.myImage,
+        image: LocalStorage.user.image,
         isMe: true,
       ),
     );
@@ -370,7 +370,7 @@ class FirstMessageController extends GetxController {
   }
 
   Future<void> listenMessage(String chatId) async {
-    SocketServices.on('getMessage::$chatId', (data) {
+    SocketService.on('getMessage::$chatId', (data) {
       // Add new message at BOTTOM
       messages.add(
         ChatMessageModel(

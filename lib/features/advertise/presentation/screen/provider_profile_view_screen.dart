@@ -4,13 +4,12 @@ import 'package:get/get.dart';
 import 'package:giolee78/component/button/common_button.dart';
 import 'package:giolee78/component/image/common_image.dart';
 import 'package:giolee78/component/text/common_text.dart';
-import 'package:giolee78/config/api/api_end_point.dart';
 import 'package:giolee78/utils/constants/app_colors.dart';
 import 'package:giolee78/utils/constants/app_images.dart';
 import 'package:giolee78/utils/extensions/extension.dart';
 
+import '../../../../services/storage/storage_services.dart';
 import '../controller/provider_profile_view_controller.dart';
-
 
 class ProviderProfileViewScreen extends StatelessWidget {
   const ProviderProfileViewScreen({super.key});
@@ -44,49 +43,49 @@ class ProviderProfileViewScreen extends StatelessWidget {
           body: SafeArea(
             child: controller.isLoading
                 ? const Center(
-              child: CircularProgressIndicator(
-                color: AppColors.primaryColor,
-              ),
-            )
-                : SingleChildScrollView(
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 20.w),
-                child: Column(
-                  children: [
-                    20.height,
-
-                    /// Profile Image
-                    _buildProfileImage(controller),
-
-                    16.height,
-
-                    /// Name
-                    CommonText(
-                      text:controller.businessName,
-                      fontSize: 18.sp,
-                      fontWeight: FontWeight.w600,
+                    child: CircularProgressIndicator(
+                      color: AppColors.primaryColor,
                     ),
+                  )
+                : SingleChildScrollView(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 20.w),
+                      child: Column(
+                        children: [
+                          20.height,
 
-                    32.height,
+                          /// Profile Image
+                          _buildProfileImage(controller),
 
-                    /// About Section
-                    _buildAboutSection(controller),
+                          16.height,
 
-                    24.height,
+                          /// Name
+                          CommonText(
+                            text: LocalStorage.user.advertiser.businessName,
+                            fontSize: 18.sp,
+                            fontWeight: FontWeight.w600,
+                          ),
 
-                    /// Profile Details
-                    _buildProfileDetails(controller),
+                          32.height,
 
-                    32.height,
+                          /// About Section
+                          _buildAboutSection(controller),
 
-                    /// Edit Profile Button
-                    _buildEditProfileButton(controller),
+                          24.height,
 
-                    32.height,
-                  ],
-                ),
-              ),
-            ),
+                          /// Profile Details
+                          _buildProfileDetails(controller),
+
+                          32.height,
+
+                          /// Edit Profile Button
+                          _buildEditProfileButton(controller),
+
+                          32.height,
+                        ],
+                      ),
+                    ),
+                  ),
           ),
         );
       },
@@ -110,19 +109,20 @@ class ProviderProfileViewScreen extends StatelessWidget {
         ],
       ),
       child: ClipOval(
-        child: controller.userImage.isNotEmpty
+        child: LocalStorage.user.advertiser.logo.isNotEmpty
             ? CommonImage(
-          imageSrc: ApiEndPoint.imageUrl + controller.businessLogo,
-          width: 120.w,
-          height: 120.h,
-          fill: BoxFit.cover,
-        )
+                // imageSrc: ApiEndPoint.imageUrl + controller.businessLogo,
+                imageSrc: LocalStorage.user.advertiser.logo,
+                width: 120.w,
+                height: 120.h,
+                fill: BoxFit.cover,
+              )
             : CommonImage(
-          imageSrc: AppImages.profile,
-          width: 120.w,
-          height: 120.h,
-          fill: BoxFit.cover,
-        ),
+                imageSrc: AppImages.profile,
+                width: 120.w,
+                height: 120.h,
+                fill: BoxFit.cover,
+              ),
       ),
     );
   }
@@ -142,7 +142,8 @@ class ProviderProfileViewScreen extends StatelessWidget {
         8.height,
         // Content (bio)
         CommonText(
-          text: controller.advertiserBion,
+          // text: controller.advertiserBion,
+          text: LocalStorage.user.advertiser.bio,
           fontSize: 14.sp,
           color: AppColors.secondaryText,
           textAlign: TextAlign.start,
@@ -159,23 +160,29 @@ class ProviderProfileViewScreen extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8),
 
-        color: Colors.white
+        color: Colors.white,
       ),
       child: Column(
         children: [
           // Uncomment if mobile is available in the API
           // _buildDetailRow('Mobile', controller.mobile),
           // 16.height,
-          _buildDetailRow('E-mail', controller.userEmail),
+          _buildDetailRow('E-mail', LocalStorage.user.email),
           16.height,
-          _buildDetailRow('Phone Number', controller.phone),
+          _buildDetailRow('Phone Number', LocalStorage.user.advertiser.phone),
           16.height,
-          _buildDetailRow('Business License Number', controller.businessLicenceNumber),
+          _buildDetailRow(
+            'Business License Number',
+            LocalStorage.user.advertiser.licenseNumber,
+          ),
           16.height,
-          _buildDetailRow('Business Type', controller.businessType),
+          _buildDetailRow(
+            'Business Type',
+            LocalStorage.user.advertiser.businessType,
+          ),
           16.height,
-          _buildDetailRow('Address', controller.address,)
-            ],
+          _buildDetailRow('Address', LocalStorage.user.address),
+        ],
       ),
     );
   }
@@ -185,11 +192,7 @@ class ProviderProfileViewScreen extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        CommonText(
-          text: label,
-          fontSize: 14.sp,
-          textAlign: TextAlign.start,
-        ),
+        CommonText(text: label, fontSize: 14.sp, textAlign: TextAlign.start),
         Flexible(
           child: CommonText(
             text: value.isNotEmpty ? value : 'Not Set',

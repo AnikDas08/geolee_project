@@ -23,8 +23,8 @@ class SearchFriendController extends GetxController {
   Future<void> getSearchFriend() async {
     try {
       isLoading.value = true;
-      final double lat = LocalStorage.lat ?? 0.0;
-      final double lng = LocalStorage.long ?? 0.0;
+      final double lat = LocalStorage.user.location.lat ?? 0.0;
+      final double lng = LocalStorage.user.location.long ?? 0.0;
 
       // ১. নিয়ারবাই ইউজার গেট করা
       final url = "${ApiEndPoint.nearbyChat}?lat=$lat&lng=$lng&limit=50";
@@ -32,7 +32,7 @@ class SearchFriendController extends GetxController {
 
       if (response.isSuccess) {
         final List data = response.data['data'] ?? [];
-        List<SearchFriendUserModel> fetchedUsers = data.map((e) => SearchFriendUserModel.fromJson(e)).toList();
+        final List<SearchFriendUserModel> fetchedUsers = data.map((e) => SearchFriendUserModel.fromJson(e)).toList();
 
         searchFriendList.value = fetchedUsers;
 
@@ -90,7 +90,7 @@ class SearchFriendController extends GetxController {
 
   Future<void> cancelRequest(SearchFriendUserModel user) async {
     try {
-      String requestId = user.pendingRequestId.value;
+      final String requestId = user.pendingRequestId.value;
       if (requestId.isEmpty) return;
 
       final response = await ApiService.patch(

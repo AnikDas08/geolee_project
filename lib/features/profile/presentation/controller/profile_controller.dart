@@ -3,8 +3,6 @@ import 'package:get/get.dart';
 import 'package:giolee78/features/profile/presentation/controller/my_profile_controller.dart';
 import 'package:giolee78/services/api/api_response_model.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:giolee78/features/profile/data/model/user_profile_model.dart';
-import 'package:giolee78/services/storage/storage_keys.dart';
 import 'package:giolee78/services/storage/storage_services.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'dart:io';
@@ -17,12 +15,12 @@ import '../../../../utils/log/app_log.dart';
 import '../../../home/presentation/controller/home_nav_controller.dart';
 
 class ProfileController extends GetxController {
+  static ProfileController get instance => Get.find<ProfileController>();
 
   /// Language List here
   List<String> languages = ["English", "French", "Arabic"];
 
   /// Form key
-  final formKey = GlobalKey<FormState>();
 
   /// Selected language
   String selectedLanguage = "English";
@@ -32,8 +30,6 @@ class ProfileController extends GetxController {
 
   /// Loading state
   bool isLoading = false;
-
-  UserProfileModel? profileModel;
 
   /// Image picker instance
   final ImagePicker _picker = ImagePicker();
@@ -50,23 +46,17 @@ class ProfileController extends GetxController {
   Future<void> _loadAdvertiserStatus() async {
     advertiserToken = await getUserDataForRole();
     isLoadingRole = false;
-    update(); 
+    update();
   }
 
   /// Controllers
-  TextEditingController nameController = TextEditingController()
-    ..text = LocalStorage.myName;
-  TextEditingController numberController = TextEditingController();
-  TextEditingController passwordController = TextEditingController();
-  TextEditingController aboutController = TextEditingController()
-    ..text = LocalStorage.bio;
-  TextEditingController dateOfBirthController = TextEditingController()
-    ..text = LocalStorage.dateOfBirth.isNotEmpty
-        ? LocalStorage.dateOfBirth.split('T').first
-        : "";
-  TextEditingController genderController = TextEditingController()
-    ..text = LocalStorage.gender;
-  TextEditingController addressController = TextEditingController();
+  final nameController = TextEditingController();
+  final numberController = TextEditingController();
+  final passwordController = TextEditingController();
+  final aboutController = TextEditingController();
+  final dateOfBirthController = TextEditingController();
+  final genderController = TextEditingController();
+  final addressController = TextEditingController();
 
   /// Request permission
   Future<bool> _requestImagePermission(ImageSource source) async {
@@ -178,14 +168,15 @@ class ProfileController extends GetxController {
 
   /// Edit profile API
   Future<void> editProfileRepo() async {
-    if (!formKey.currentState!.validate()) return;
     if (!LocalStorage.isLogIn) return;
 
     isLoading = true;
     update();
 
     try {
-      final DateTime? dobDate = DateTime.tryParse(dateOfBirthController.text.trim());
+      final DateTime? dobDate = DateTime.tryParse(
+        dateOfBirthController.text.trim(),
+      );
       if (dobDate == null) {
         Utils.errorSnackBar("Error", "Invalid Date of Birth");
         isLoading = false;
@@ -207,25 +198,9 @@ class ProfileController extends GetxController {
         method: "PATCH",
         body: body,
         imagePath: selectedImage?.path,
-
       );
 
       if (response.statusCode == 200) {
-        final data = response.data;
-        LocalStorage.myName = data['data']?["name"] ?? LocalStorage.myName;
-        LocalStorage.myImage = data['data']?["image"] ?? LocalStorage.myImage;
-        LocalStorage.bio = data['data']?['bio'] ?? LocalStorage.bio;
-        LocalStorage.gender = data['data']?['gender'] ?? LocalStorage.gender;
-        LocalStorage.dateOfBirth = data['data']?['dob'] ?? LocalStorage.dateOfBirth;
-
-        await Future.wait([
-          LocalStorage.setString(LocalStorageKeys.myName, LocalStorage.myName),
-          LocalStorage.setString(LocalStorageKeys.myImage, LocalStorage.myImage),
-          LocalStorage.setString(LocalStorageKeys.bio, LocalStorage.bio),
-          LocalStorage.setString(LocalStorageKeys.gender, LocalStorage.gender),
-          LocalStorage.setString(LocalStorageKeys.dateOfBirth, LocalStorage.dateOfBirth),
-        ]);
-
         // ✅ FIXED: Use Get.find to update the actual UI controller instance
         if (Get.isRegistered<MyProfileController>()) {
           Get.find<MyProfileController>().getUserData();
@@ -236,10 +211,12 @@ class ProfileController extends GetxController {
           Get.find<HomeNavController>().update();
         }
         Get.back();
-         Utils.successSnackBar("Success","Profile Updated Successfully");
-
+        Utils.successSnackBar("Success", "Profile Updated Successfully");
       } else {
-        Utils.errorSnackBar("Error", response.data['message'] ?? "Failed to update profile");
+        Utils.errorSnackBar(
+          "Error",
+          response.data['message'] ?? "Failed to update profile",
+        );
       }
     } catch (e) {
       Utils.errorSnackBar("Error", "Failed to update profile: $e");
@@ -255,11 +232,13 @@ class ProfileController extends GetxController {
 
   Future<String?> getUserDataForRole() async {
     try {
-      final response = await ApiService.get(ApiEndPoint.profile).timeout(const Duration(seconds: 30));
+      final response = await ApiService.get(
+        ApiEndPoint.profile,
+      ).timeout(const Duration(seconds: 30));
       if (response.statusCode == 200) {
         final data = response.data;
         advToken = data['data']?['advertiser']?.toString() ?? "";
-        isVerified = data['data']?['isVerified']??false;
+        isVerified = data['data']?['isVerified'] ?? false;
         userId = data['data']?['_id']?.toString() ?? "";
         return advToken;
       }
@@ -269,13 +248,14 @@ class ProfileController extends GetxController {
     }
   }
 
-
   Future<void> deleteAccount() async {
     if (userId.isEmpty) return;
     isLoading = true;
     update();
     try {
-      final ApiResponseModel response = await ApiService.delete(ApiEndPoint.deleteAccount);
+      final ApiResponseModel response = await ApiService.delete(
+        ApiEndPoint.deleteAccount,
+      );
       if (response.statusCode == 200) {
         LocalStorage.removeAllPrefData();
         Get.offAllNamed(AppRoutes.signIn);

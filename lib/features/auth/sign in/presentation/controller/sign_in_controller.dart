@@ -2,118 +2,74 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:giolee78/utils/constants/app_colors.dart';
+import 'package:giolee78/features/profile/presentation/controller/my_profile_controller.dart';
+import 'package:giolee78/utils/app_utils.dart';
+import 'package:giolee78/utils/log/app_log.dart';
+import 'package:giolee78/utils/log/error_log.dart';
 import '../../../../../config/route/app_routes.dart';
 import '../../../../../services/api/api_service.dart';
 import '../../../../../config/api/api_end_point.dart';
 import '../../../../../services/storage/storage_keys.dart';
 import '../../../../../services/storage/storage_services.dart';
 import '../../../../../services/socket/socket_service.dart';
+import '../../../../profile/data/model/user_profile_model.dart';
 
 class SignInController extends GetxController {
+  @override
+  void onInit() {
+    super.onInit();
+    setInfo();
+  }
+
   /// Sign in Button Loading variable
   bool isLoading = false;
 
   /// email and password Controller here
-  TextEditingController emailController = TextEditingController(
-    text: kDebugMode ? 'ebrahimnazmul20032@gmail.com' : '',
-  );
-  TextEditingController passwordController = TextEditingController(
-    text: kDebugMode ? 'password1234' : "",
-  );
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
 
-  // Sign in Api call here
+  void setInfo() {
+    if (!kDebugMode) return;
+    emailController.text = 'developernaimul00@gmail.com';
+    passwordController.text = 'hello123';
+  }
 
-  Future<void> signInUser(GlobalKey<FormState> formKey) async {
-    if (!formKey.currentState!.validate()) return;
-    // return;
-
-    isLoading = true;
-    update();
+  Future<void> signInUser() async {
     try {
-      final Map<String, String> body = {
-        "email": emailController.text,
-        "password": passwordController.text,
+      isLoading = true;
+      update();
+
+      final body = {
+        "email": emailController.text.trim(),
+        "password": passwordController.text.trim(),
       };
-
-      final response = await ApiService.post(
-        ApiEndPoint.signIn,
-        body: body,
-      ).timeout(const Duration(seconds: 30));
-
+      final response = await ApiService.post(ApiEndPoint.signIn, body: body);
       if (response.statusCode == 200) {
-        final data = response.data;
+        final Map<String, dynamic> data = response.data['data'] ?? {};
+        final token = data["accessToken"] ?? "";
+        final Map<String, dynamic> user = data["user"] ?? {};
 
-        Get.snackbar(barBlur: 0.5, "Welcome Back", "Logged In Successfully");
-        await LocalStorage.setString(
-          LocalStorageKeys.token,
-          data["data"]['accessToken'],
-        );
-
-        LocalStorage.isLogIn = true;
-
-        await LocalStorage.setBool(
-          LocalStorageKeys.isLogIn,
-          LocalStorage.isLogIn,
-        );
-        await LocalStorage.setString(LocalStorageKeys.role, "user");
-        LocalStorage.getAllPrefData();
-        SocketServices.connectToSocket();
-
-        print(
-          "My Token Is :===========================💕💕💕💕💕💕 ${LocalStorage.token.toString()}",
-        );
-        await getUserData();
-
+        LocalStorage.setUser = UserModel.fromJson(user);
+        if (LocalStorage.user.id.isEmpty) {
+          MyProfileController.instance.getUserData();
+        }
+        final userId = LocalStorage.user.id;
+        LocalStorage.token = token;
+        LocalStorage.userId = userId;
+        LocalStorage.setString(LocalStorageKeys.token, token);
+        LocalStorage.setString(LocalStorageKeys.userId, userId);
+        SocketService.connect();
+        Utils.successSnackBar("Welcome Back", "Logged In Successfully");
         Get.toNamed(AppRoutes.homeNav);
-        // Get.to(() => const HistoryAdsScreen());
-
         emailController.clear();
         passwordController.clear();
       } else {
-        Get.snackbar(
-          colorText: AppColors.white,
-          backgroundColor: AppColors.red,
-          'Invalid Credential',
-          "${response.message}",
-        );
+        Utils.errorSnackBar('Invalid Credential', "${response.message}");
       }
-    } catch (e) {
-      Get.snackbar("Error", e.toString());
-    } finally {
-      isLoading = false;
-      update();
-    }
-  }
+    } catch (e, s) {
+      Utils.errorSnackBar("Error", 'Something went wrong');
 
-  Future<void> getUserData() async {
-    isLoading = true;
-    update();
-    try {
-      final response = await ApiService.get(
-        ApiEndPoint.profile,
-      ).timeout(const Duration(seconds: 30));
-
-      if (response.statusCode == 200) {
-        final data = response.data;
-        LocalStorage.userId = data['data']?["_id"];
-        LocalStorage.myImage = data['data']?["image"];
-        LocalStorage.myName = data['data']?["name"];
-        LocalStorage.myEmail = data['data']?["email"];
-        LocalStorage.bio = data['data']?['bio'];
-        LocalStorage.dateOfBirth = data['data']?['dob'];
-        LocalStorage.gender = data['data']?['gender'];
-
-        LocalStorage.setBool(LocalStorageKeys.isLogIn, LocalStorage.isLogIn);
-        LocalStorage.setString(LocalStorageKeys.userId, LocalStorage.userId);
-        LocalStorage.setString(LocalStorageKeys.myImage, LocalStorage.myImage);
-        LocalStorage.setString(LocalStorageKeys.myName, LocalStorage.myName);
-        LocalStorage.setString(LocalStorageKeys.myEmail, LocalStorage.myEmail);
-      } else {
-        Get.snackbar(response.statusCode.toString(), response.message);
-      }
-    } catch (e) {
-      Get.snackbar("Error", e.toString());
+      errorLog(s.toString());
     } finally {
       isLoading = false;
       update();

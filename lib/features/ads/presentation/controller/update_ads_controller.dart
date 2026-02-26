@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:giolee78/utils/log/app_log.dart';
 import 'package:image_picker/image_picker.dart';
 
 import 'package:giolee78/config/api/api_end_point.dart';
@@ -99,29 +100,29 @@ class UpdateAdsController extends GetxController {
         }
 
         // Handle image
-        print("🖼️ Raw image: ${ad?.image}");
+        appLog("🖼️ Raw image: ${ad?.image}");
 
         if (ad?.image != null && ad!.image.isNotEmpty) {
           // Store only the image path/filename, not the full URL
           coverImagePath.value = ad!.image;
-          print("🖼️ Image Path: ${coverImagePath.value}");
+          appLog("🖼️ Image Path: ${coverImagePath.value}");
         } else {
-          print("❌ No image found!");
+          appLog("❌ No image found!");
         }
 
         // Handle plan
-        print("💰 Raw plan: ${ad?.plan}");
+        appLog("💰 Raw plan: ${ad?.plan}");
         if (ad?.plan != null && ad!.plan.isNotEmpty) {
           selectedPricingPlan.value = ad!.plan.toLowerCase().trim();
-          print("💰 Selected Plan: ${selectedPricingPlan.value}");
+          appLog("💰 Selected Plan: ${selectedPricingPlan.value}");
         }
       } else {
-        print("❌ Invalid response");
+        appLog("❌ Invalid response");
         Get.snackbar("Error", "Failed to load ad data");
       }
     } catch (e, stackTrace) {
-      print("❌ Fetch Ad Error: $e");
-      print("❌ Stack Trace: $stackTrace");
+      appLog("❌ Fetch Ad Error: $e");
+      appLog("❌ Stack Trace: $stackTrace");
       Get.snackbar("Error", "Failed to load ad data: $e");
     }
 
@@ -314,8 +315,8 @@ class UpdateAdsController extends GetxController {
     try {
       isLoading.value = true;
 
-      print("📤 Updating ad: $adsId");
-      print("🖼️ Image path: ${coverImagePath.value}");
+      appLog("📤 Updating ad: $adsId");
+      appLog("🖼️ Image path: ${coverImagePath.value}");
 
       // যদি image path local file path না হয়, শুধু text body পাঠাও
       final bool isLocalImage = File(coverImagePath.value).existsSync();

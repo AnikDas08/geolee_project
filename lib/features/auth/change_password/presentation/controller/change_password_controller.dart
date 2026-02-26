@@ -6,23 +6,21 @@ import '../../../../../config/api/api_end_point.dart';
 
 class ChangePasswordController extends GetxController {
   bool isLoading = false;
-  final formKey = GlobalKey<FormState>();
 
-  TextEditingController currentPasswordController = TextEditingController();
-  TextEditingController newPasswordController = TextEditingController();
-  TextEditingController confirmPasswordController = TextEditingController();
+  final currentPasswordController = TextEditingController();
+  final newPasswordController = TextEditingController();
+  final confirmPasswordController = TextEditingController();
 
   ///  change password function
 
   Future<void> changePasswordRepo() async {
-    if (!formKey.currentState!.validate()) return;
-    isLoading = true;
-    update();
     try {
-      final Map<String, String> body = {
-        "currentPassword": currentPasswordController.text,
-        "newPassword": newPasswordController.text,
-        "confirmPassword": confirmPasswordController.text,
+      isLoading = true;
+      update();
+      final body = {
+        "currentPassword": currentPasswordController.text.trim(),
+        "newPassword": newPasswordController.text.trim(),
+        "confirmPassword": confirmPasswordController.text.trim(),
       };
 
       final response = await ApiService.post(
@@ -39,8 +37,7 @@ class ChangePasswordController extends GetxController {
       } else {
         Get.snackbar("Failed", response.message);
       }
-      isLoading = false;
-      update();
+
     } catch (e) {
       Get.snackbar("Error", e.toString());
     } finally {

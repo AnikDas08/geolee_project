@@ -73,9 +73,9 @@ class ChatModel {
   }
 
   factory ChatModel.fromJson(Map<String, dynamic> json) {
-    bool isGroupFromFlag = json['isGroup'] ?? json['isGroupChat'] ?? false;
-    String? cName = _parseStringOrFirstInList(json['chatName']);
-    bool isGroup = isGroupFromFlag || (cName != null && cName.isNotEmpty);
+    final bool isGroupFromFlag = json['isGroup'] ?? json['isGroupChat'] ?? false;
+    final String? cName = _parseStringOrFirstInList(json['chatName']);
+    final bool isGroup = isGroupFromFlag || (cName != null && cName.isNotEmpty);
 
     var participantJson = json['anotherParticipant'];
     if (participantJson == null &&
@@ -148,8 +148,9 @@ class LatestMessage {
     final String type = json['type']?.toString() ?? 'text';
     String displayText = rawText;
     
-    if (type == 'image') displayText = '📷 Image';
-    else if (type == 'document') displayText = '📄 Document';
+    if (type == 'image') {
+      displayText = '📷 Image';
+    } else if (type == 'document') displayText = '📄 Document';
     else if (type == 'media') displayText = '🎥 Media';
     else if (type == 'audio') displayText = '🎵 Audio';
 

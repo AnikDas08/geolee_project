@@ -75,9 +75,9 @@ class EditPostControllers extends GetxController {
   void _populateFieldsWithPostData() {
     if (mySinglePost.value != null) {
       final post = mySinglePost.value!;
-      descriptionController.text = post.description ?? '';
-      selectedPricingOption.value = post.clickerType ?? '';
-      selectedPriorityLevel.value = post.privacy ?? '';
+      descriptionController.text = post.description ;
+      selectedPricingOption.value = post.clickerType ;
+      selectedPriorityLevel.value = post.privacy ;
 
       if (post.photos.isNotEmpty) {
         existingImageUrls.assignAll(post.photos);

@@ -9,7 +9,6 @@ import 'package:giolee78/utils/extensions/extension.dart';
 
 import '../../../../component/image/common_image.dart';
 import '../../../../component/text/common_text.dart';
-import '../../../../config/api/api_end_point.dart';
 import '../../../../utils/constants/app_colors.dart';
 
 class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
@@ -137,9 +136,7 @@ class _CustomAppBarState extends State<CustomAppBar> {
                         child: ClipOval(
                           child: CommonImage(
                             fill: BoxFit.cover,
-                            imageSrc: (LocalStorage.myImage.isNotEmpty && LocalStorage.token.isNotEmpty)
-                                ? ApiEndPoint.imageUrl + LocalStorage.myImage
-                                : "assets/images/profile.png",
+                            imageSrc: LocalStorage.user.image,
                             size: 40,
                           ),
                         ),
@@ -152,8 +149,10 @@ class _CustomAppBarState extends State<CustomAppBar> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           CommonText(
-                            text: (LocalStorage.myName.isNotEmpty && LocalStorage.token.isNotEmpty)
-                                ? LocalStorage.myName
+                            text:
+                                (LocalStorage.user.name.isNotEmpty &&
+                                    LocalStorage.token.isNotEmpty)
+                                ? LocalStorage.user.name
                                 : "User",
                             color: AppColors.textColorFirst,
                             fontWeight: FontWeight.w600,
@@ -208,15 +207,18 @@ class _CustomAppBarState extends State<CustomAppBar> {
   Widget _buildNotificationBadge() {
     return Container(
       padding: const EdgeInsets.all(4),
-      decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
+      decoration: const BoxDecoration(
+        color: Colors.red,
+        shape: BoxShape.circle,
+      ),
       constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
       child: Center(
         child: Text(
           "${widget.notificationCount}",
           style: const TextStyle(
-              color: Colors.white,
-              fontSize: 10,
-              fontWeight: FontWeight.bold
+            color: Colors.white,
+            fontSize: 10,
+            fontWeight: FontWeight.bold,
           ),
         ),
       ),

@@ -1,16 +1,16 @@
 class ApiEndPoint {
 
   //Live URL
-  static const String baseUrl = "http://148.230.126.149:5000/api/v1";
-  static const String imageUrl = "http://148.230.126.149:5000";
-  static const String socketUrl = "http://148.230.126.149:5000";
+  // static const String baseUrl = "http://148.230.126.149:5000/api/v1";
+  // static const String imageUrl = "http://148.230.126.149:5000";
+  // static const String socketUrl = "http://148.230.126.149:5000";
 
 
   //Local URL
 
-  // static const String baseUrl = "http://10.10.7.7:5006/api/v1";
-  // static const String imageUrl = "http://10.10.7.7:5006";
-  // static const String socketUrl = "http://10.10.7.7:5006";
+  static const String baseUrl = "http://10.10.7.7:5006/api/v1";
+  static const String imageUrl = "http://10.10.7.7:5006";
+  static const String socketUrl = "http://10.10.7.7:5006";
 
   // Auth ===========================================
   static const String signUp = "$baseUrl/users/create-user";

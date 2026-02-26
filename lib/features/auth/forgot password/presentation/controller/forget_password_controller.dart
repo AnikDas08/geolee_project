@@ -10,6 +10,7 @@ import '../../../../../config/api/api_end_point.dart';
 import '../../../../../services/storage/storage_keys.dart';
 import '../../../../../services/storage/storage_services.dart';
 import '../../../../../utils/app_utils.dart';
+import '../../../../../utils/log/error_log.dart';
 
 class ForgetPasswordController extends GetxController {
   /// Loading for forget password
@@ -43,7 +44,8 @@ class ForgetPasswordController extends GetxController {
   );
 
   /// create Forget Password Controller instance
-  static ForgetPasswordController get instance => Get.find<ForgetPasswordController>();
+  static ForgetPasswordController get instance =>
+      Get.find<ForgetPasswordController>();
 
   @override
   void dispose() {
@@ -78,27 +80,23 @@ class ForgetPasswordController extends GetxController {
   /// Forget Password Api Call
 
   Future<void> forgotPasswordRepo() async {
-    // Get.toNamed(AppRoutes.verifyEmail);
-    // return;
-    isLoadingEmail = true;
-    update();
     try {
+      isLoadingEmail = true;
+      update();
       final Map<String, String> body = {"email": emailController.text};
       final response = await ApiService.post(
         ApiEndPoint.forgotPassword,
         body: body,
-        header: {'Content-Type': "application/json"},
       );
       //
       if (response.statusCode == 200) {
-        final data = response.data;
         Utils.successSnackBar("OTP Send", response.message);
         Get.toNamed(AppRoutes.verifyEmail);
       } else {
         Utils.errorSnackBar(response.statusCode, response.message);
-        // Get.snackbar(response.statusCode.toString(), response.message);
       }
     } catch (e) {
+      errorLog(e.toString());
       Get.snackbar("Error is =============================", e.toString());
     } finally {
       isLoadingEmail = false;
@@ -109,34 +107,26 @@ class ForgetPasswordController extends GetxController {
   /// Verify OTP Api Call
 
   Future<void> verifyOtpRepo() async {
-    isLoadingVerify = true;
-    update();
-
     try {
+      isLoadingVerify = true;
+      update();
       final body = {
         "email": emailController.text.trim(),
         "oneTimeCode": int.parse(otpController.text.trim()),
       };
 
-      final response = await ApiService.post(
-        ApiEndPoint.verifyOtp,
-        body: body,
-      );
+      final response = await ApiService.post(ApiEndPoint.verifyOtp, body: body);
 
       final data = response.data;
-      if (response.statusCode == 200 && data['success'] == true) {
-
+      if (response.statusCode == 200) {
         Get.offAllNamed(AppRoutes.createPassword);
 
-       final String token = data['data']['resetToken'];
-       forgetPasswordToken=token;
-       LocalStorage.setString(LocalStorageKeys.forgotPasswordToken, LocalStorage.forgotPasswordToken=token);
-        debugPrint("OTP VERIFIED → Navigating...");
+        final String token = data['data']?['resetToken'] ?? '';
+        forgetPasswordToken = token;
 
         emailController.clear();
         otpController.clear();
         update();
-
       } else {
         Utils.errorSnackBar(
           "Error ${response.statusCode}",
@@ -155,29 +145,14 @@ class ForgetPasswordController extends GetxController {
   /// Create New Password Api Call
 
   Future<void> resetPasswordRepo() async {
-
-    print("====================================${forgetPasswordToken}");
-    // successPopUps(
-    //   message:
-    //       "Your password has been successfully reset. You can now log in using your new password.",
-    //   onTap: () {
-    //     Get.offAllNamed(AppRoutes.signIn);
-    //   },
-    //   buttonTitle: "Login",
-    // );
-    // return;
-
     isLoadingReset = true;
     update();
     try {
-      final Map<String, String> header = {
-        "Content-Type": "application/json",
-        "Authorization": forgetPasswordToken,
-      };
+      final Map<String, String> header = {"Authorization": forgetPasswordToken};
 
       final Map<String, String> body = {
-        "newPassword": passwordController.text,
-        "confirmPassword": confirmPasswordController.text,
+        "newPassword": passwordController.text.trim(),
+        "confirmPassword": confirmPasswordController.text.trim(),
       };
       final response = await ApiService.post(
         ApiEndPoint.resetPassword,
@@ -193,11 +168,11 @@ class ForgetPasswordController extends GetxController {
               "Your password has been successfully reset. You can now log in using your new password.",
         );
 
-        //emailController.clear();
-        /*otpController.clear();
+        emailController.clear();
+        otpController.clear();
         passwordController.clear();
         confirmPasswordController.clear();
-        Get.offAllNamed(AppRoutes.signIn);*/
+        Get.offAllNamed(AppRoutes.signIn);
       } else {
         Get.snackbar(response.statusCode.toString(), response.message);
       }

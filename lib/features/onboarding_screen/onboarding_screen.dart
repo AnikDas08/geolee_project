@@ -73,12 +73,15 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       if (!mounted) return;
 
       setState(() {
-        isLocationEnabled = serviceEnabled &&
+        isLocationEnabled =
+            serviceEnabled &&
             (permission == LocationPermission.always ||
                 permission == LocationPermission.whileInUse);
       });
 
-      debugPrint("🔍 Location Status: Service=$serviceEnabled, Permission=$permission, Enabled=$isLocationEnabled");
+      debugPrint(
+        "🔍 Location Status: Service=$serviceEnabled, Permission=$permission, Enabled=$isLocationEnabled",
+      );
     } catch (e) {
       debugPrint("❌ Location check error: $e");
       if (mounted) {
@@ -155,7 +158,6 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     // Step 5: If permission granted, save location immediately
     if (permission == LocationPermission.whileInUse ||
         permission == LocationPermission.always) {
-
       await _checkLocationStatus(); // Update toggle state
 
       // 🔥 SAVE LOCATION immediately after enabling
@@ -164,9 +166,11 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(saved
-                ? '✅ Location enabled & saved successfully'
-                : '⚠️ Location enabled but failed to get coordinates'),
+            content: Text(
+              saved
+                  ? '✅ Location enabled & saved successfully'
+                  : '⚠️ Location enabled but failed to get coordinates',
+            ),
             backgroundColor: saved ? Colors.green : Colors.orange,
             duration: const Duration(seconds: 2),
           ),
@@ -313,10 +317,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                 fontWeight: FontWeight.w600,
               ),
               10.height,
-              CommonText(
-                text: AppString.onboardingSubText,
-                fontSize: 14.sp,
-              ),
+              CommonText(text: AppString.onboardingSubText, fontSize: 14.sp),
               20.height,
               _buildLocationPermissionSection(),
               40.height,
@@ -326,12 +327,6 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                 buttonRadius: 10.r,
                 titleSize: 18.sp,
                 onTap: () async {
-                  // Get current saved location
-                  final String lat = LocalStorage.lat.toString();
-                  final String log = LocalStorage.long.toString();
-
-                  debugPrint("🚀 Navigation - Location -> Lat: $lat, Long: $log");
-
                   Get.toNamed(AppRoutes.signUp);
                 },
               ),
@@ -377,14 +372,14 @@ class _OnboardingScreenState extends State<OnboardingScreen>
           ),
           isLoading
               ? const SizedBox(
-            width: 24,
-            height: 24,
-            child: CircularProgressIndicator(strokeWidth: 2),
-          )
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
               : Switch.adaptive(
-            value: isLocationEnabled,
-            onChanged: _toggleLocation,
-          ),
+                  value: isLocationEnabled,
+                  onChanged: _toggleLocation,
+                ),
         ],
       ),
     );

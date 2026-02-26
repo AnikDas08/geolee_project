@@ -18,11 +18,8 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     Future.delayed(const Duration(seconds: 3), () {
       if (LocalStorage.isLogIn) {
-
-        print("My Role Is :===========================💕💕💕💕💕💕 ${LocalStorage.role.toString()}");
-       Get.offAllNamed(AppRoutes.homeNav);
+        Get.offAllNamed(AppRoutes.homeNav);
       } else {
-        print("My Role Is :===========================💕💕💕💕💕💕 ${LocalStorage.role.toString()}");
         Get.offAllNamed(AppRoutes.onboarding);
       }
     });

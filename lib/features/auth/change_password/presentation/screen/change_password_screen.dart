@@ -12,7 +12,9 @@ import 'package:giolee78/utils/constants/app_string.dart';
 import 'package:giolee78/utils/helpers/other_helper.dart';
 
 class ChangePasswordScreen extends StatelessWidget {
-  const ChangePasswordScreen({super.key});
+  ChangePasswordScreen({super.key});
+
+  final _formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
@@ -24,10 +26,13 @@ class ChangePasswordScreen extends StatelessWidget {
             child: SingleChildScrollView(
               padding: EdgeInsets.symmetric(horizontal: 20.w),
               child: Form(
-                key: controller.formKey,
+                key: _formKey,
                 child: Column(
                   children: [
-                    const CommonImage(imageSrc: AppIcons.changePassword, size: 200),
+                    const CommonImage(
+                      imageSrc: AppIcons.changePassword,
+                      size: 200,
+                    ),
                     40.height,
                     const CommonText(
                       text: AppString.changePassword,
@@ -84,7 +89,12 @@ class ChangePasswordScreen extends StatelessWidget {
                     CommonButton(
                       titleText: AppString.update,
                       isLoading: controller.isLoading,
-                      onTap: controller.changePasswordRepo,
+                      onTap: () {
+                        if (!_formKey.currentState!.validate()) {
+                          return;
+                        }
+                        controller.changePasswordRepo();
+                      },
                     ),
                   ],
                 ),

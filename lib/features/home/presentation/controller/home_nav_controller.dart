@@ -9,24 +9,19 @@ class HomeNavController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    // Initialize based on saved role
-    refreshRoleState();
 
+    refreshRoleState();
   }
 
   void refreshRoleState() {
-    // Check if the role is 'user'
-    final bool isUser = LocalStorage.role == "user";
-    isUserScreenActive.value = true; // Both roles start with HomeScreen (index 0)
+    isUserScreenActive.value = true;
     currentIndex.value = 0;
   }
 
   void changeIndex(int index) {
     currentIndex.value = index;
 
-    final bool isUser = LocalStorage.role == "user";
-
-    if (isUser) {
+    if (LocalStorage.isUser) {
       // Users always stay on userScreens
       isUserScreenActive.value = true;
     } else {

@@ -6,7 +6,6 @@ import 'package:permission_handler/permission_handler.dart';
 
 import '../../../../config/api/api_end_point.dart';
 import '../../../../services/api/api_service.dart';
-import '../../../../services/storage/storage_keys.dart';
 import '../../../../services/storage/storage_services.dart';
 import '../../../../utils/app_utils.dart';
 import '../../../profile/presentation/screen/dashboard_profile.dart';
@@ -62,7 +61,6 @@ class AdvertiserEditProfileController extends GetxController {
       if (response.statusCode == 200) {
         final advertiserData = response.data['data'] ?? {};
 
-
         debugPrint(" Advertiser Response Data Is: ${response.data}");
 
         // ========== UPDATE TEXT CONTROLLERS ==========
@@ -76,16 +74,10 @@ class AdvertiserEditProfileController extends GetxController {
         await _saveToLocalStorage(advertiserData);
 
         print("✅ Profile data loaded and saved successfully");
-      } else {
-        print("❌ Failed to fetch profile: ${response.message}");
-        _loadFromLocalStorage();
-      }
+      } else {}
     } catch (e) {
-      print("❌ Fetch Profile Error: $e");
-      // Utils.errorSnackBar("Error", "Failed to load profile data");
-      // Load from local storage as fallback
-      _loadFromLocalStorage();
-    } finally {
+      print("❌ Fetch Profile Error");
+
       isLoading = false;
       update();
     }
@@ -94,41 +86,12 @@ class AdvertiserEditProfileController extends GetxController {
   // ================= SAVE TO LOCAL STORAGE =================
   Future<void> _saveToLocalStorage(Map<String, dynamic> advertiserData) async {
     try {
-      // Update LocalStorage variables
       LocalStorage.userId = advertiserData["_id"] ?? LocalStorage.userId;
-      LocalStorage.businessName = advertiserData["businessName"] ?? '';
-      LocalStorage.businessType = advertiserData["businessType"] ?? '';
-      LocalStorage.businessLicenceNumber = advertiserData["licenseNumber"] ?? '';
-      LocalStorage.phone = advertiserData["phone"] ?? '';
-      LocalStorage.advertiserBio = advertiserData["bio"] ?? '';
-      LocalStorage.businessLogo = advertiserData["logo"] ?? '';
-
-      // Save to SharedPreferences
-      await Future.wait([
-        LocalStorage.setString(LocalStorageKeys.userId, LocalStorage.userId),
-        LocalStorage.setString(LocalStorageKeys.businessName, LocalStorage.businessName),
-        LocalStorage.setString(LocalStorageKeys.businessType, LocalStorage.businessType),
-        LocalStorage.setString(LocalStorageKeys.businessLicenceNumber, LocalStorage.businessLicenceNumber),
-        LocalStorage.setString(LocalStorageKeys.phone, LocalStorage.phone),
-        LocalStorage.setString(LocalStorageKeys.advertiserBio, LocalStorage.advertiserBio),
-        LocalStorage.setString(LocalStorageKeys.businessLogo, LocalStorage.businessLogo),
-      ]);
 
       print("✅ Data saved to local storage");
     } catch (e) {
       print("❌ Error saving to local storage: $e");
     }
-  }
-
-  // ================= LOAD FROM LOCAL STORAGE (FALLBACK) =================
-  void _loadFromLocalStorage() {
-    businessNameController.text = LocalStorage.businessName;
-    businessLicenceController.text = LocalStorage.businessLicenceNumber;
-    businessTypeController.text = LocalStorage.businessType;
-    phoneNumberController.text = LocalStorage.phone;
-    bioController.text = LocalStorage.advertiserBio;
-
-    print("📂 Loaded data from local storage");
   }
 
   // ================= IMAGE PICKER =================
@@ -200,7 +163,10 @@ class AdvertiserEditProfileController extends GetxController {
           duration: const Duration(seconds: 4),
           mainButton: TextButton(
             onPressed: () => openAppSettings(),
-            child: const Text('Open Settings', style: TextStyle(color: Colors.white)),
+            child: const Text(
+              'Open Settings',
+              style: TextStyle(color: Colors.white),
+            ),
           ),
         );
         return;
@@ -280,12 +246,6 @@ class AdvertiserEditProfileController extends GetxController {
         // ========== SAVE TO LOCAL STORAGE ==========
 
         await _saveToLocalStorage(advertiserData);
-
-        // If image was uploaded, save the local path too
-        if (selectedImage?.path != null) {
-          LocalStorage.myImage = selectedImage!.path;
-          await LocalStorage.setString(LocalStorageKeys.myImage, LocalStorage.myImage);
-        }
 
         Utils.successSnackBar(
           "Success",

@@ -1,164 +1,121 @@
-import 'package:giolee78/services/storage/storage_services.dart';
 import 'package:socket_io_client/socket_io_client.dart' as io;
 import '../../config/api/api_end_point.dart';
-import '../notification/notification_service.dart';
+import '../../utils/log/app_log.dart';
 
-class SocketServices {
-  static final Map<String, io.Socket> _sockets = {};
+class SocketService {
+  SocketService._();
 
-  /// Get or create a socket for a specific namespace
-  static io.Socket getSocket(String namespace) {
-    // If a namespace fails, we should ideally fallback to root
-    // For now, let's try to return the requested one or root if it's messaging/notification
-    if (_sockets[namespace] == null || !_sockets[namespace]!.connected) {
-      connectToNamespace(namespace);
-    }
-    return _sockets[namespace]!;
-  }
+  static io.Socket? _socket;
 
-  ///<<<============ Connect with namespace ====================>>>
-  static void connectToNamespace(String namespace) {
-    String baseUrl = ApiEndPoint.socketUrl;
-    if (baseUrl.endsWith("/")) {
-      baseUrl = baseUrl.substring(0, baseUrl.length - 1);
-    }
+  /// Socket connection state
+  static bool get isConnected => _socket?.connected ?? false;
 
-    // Standardize URL joining
-    String namespacePath = namespace == "/"
-        ? ""
-        : (namespace.startsWith("/") ? namespace : "/$namespace");
-    String fullUrl = "$baseUrl$namespacePath";
+  /// ================= CONNECT =================
+  static void connect() {
+    if (isConnected) return;
+    appLog('🔌 Initializing socket connection');
 
-    print(
-      ">>>>>>>>>>>> 🔌 Connecting to Namespace: '$namespace' via $fullUrl <<<<<<<<<<<<",
-    );
-
-    _sockets[namespace]?.dispose();
-
-    final socket = io.io(
-      fullUrl,
+    _socket = io.io(
+      ApiEndPoint.socketUrl,
       io.OptionBuilder()
-          .setTransports(['websocket', 'polling'])
-          .setExtraHeaders({'Authorization': 'Bearer ${LocalStorage.token}'})
-          .setAuth({'token': LocalStorage.token})
-          .setQuery({'token': LocalStorage.token})
+          .setTransports(['websocket'])
           .enableAutoConnect()
-          .enableForceNew()
+          .enableReconnection()
+          .setReconnectionAttempts(5) // max 5 retries
+          .setReconnectionDelay(2000) // 2 sec
+          .setReconnectionDelayMax(5000) // max 5 sec
           .build(),
     );
 
-    socket.on('connect', (data) {
-      print(
-        ">>>>>>>>>>>> 🌐 Socket Connected [$namespace]: ID=${socket.id} <<<<<<<<<<<<",
-      );
-    });
+    _registerCoreListeners();
+    _registerUserNotificationListener();
 
-    socket.on('connect_error', (data) {
-      print(
-        ">>>>>>>>>>>> ❌ Socket Connection Error [$namespace]: $data <<<<<<<<<<<<",
-      );
-    });
-
-    socket.on('error', (data) {
-      print(">>>>>>>>>>>> ⚠️ Socket Error [$namespace]: $data <<<<<<<<<<<<");
-    });
-
-    socket.on('disconnect', (data) {
-      print(
-        ">>>>>>>>>>>> 🔌 Socket Disconnected [$namespace]: $data <<<<<<<<<<<<",
-      );
-    });
-
-    // Unified Event Listeners (Setup on all sockets as redundancy, but primarily targeted at '/')
-    socket.on("notification:new", (data) {
-      print(
-        ">>>>>>>>>>>> 🔔 New Notification via socket [$namespace]: $data <<<<<<<<<<<<",
-      );
-      NotificationService.showNotification(data);
-    });
-
-    socket.on("message:new", (data) {
-      print(
-        ">>>>>>>>>>>> 📩 New Message via socket [$namespace]: $data <<<<<<<<<<<<",
-      );
-    });
-
-    socket.on("chat:update", (data) {
-      print(">>>>>>>>>>>> 🔄 Chat Update via socket [$namespace] <<<<<<<<<<<<");
-    });
-
-    _sockets[namespace] = socket;
-    socket.connect();
+    _socket?.connect();
   }
 
-  /// Compatibility methods for existing code that uses the root namespace
-  static io.Socket get socket => getSocket("/");
-
-  static void connectToSocket() {
-    // Connect to prioritized namespaces
-    connectToNamespace("/");
-    // We still try these as per user request, but logic will fallback in usage
-    connectToNamespace("messaging");
-    connectToNamespace("notification");
+  /// ================= CORE LISTENERS =================
+  static void _registerCoreListeners() {
+    final socket = _socket;
+    if (socket == null) return;
+    socket
+      ..onConnect((_) => appLog('✅ Socket connected'))
+      ..onDisconnect((_) => appLog('⚠️ Socket disconnected'))
+      ..onReconnectAttempt((attempt) => appLog('🔄Reconnect attempt: $attempt'))
+      ..onReconnectFailed((_) => appLog('❌Reconnect failed(max attempts hit)'))
+      ..onConnectError((e) => appLog('❌ Connect error: $e'))
+      ..onError((e) => appLog('❌ Socket error: $e'));
   }
 
-  ///<<<============ Join Chat Room ====================>>>
-  static void joinRoom(String chatId) {
-    print(
-      ">>>>>>>>>>>> 🚪 Joining Room: $chatId (Primary: root socket) <<<<<<<<<<<<",
-    );
-    // Emit on root as well because namespaces are failin
-    getSocket("/").emit("room:join", chatId);
+  /// ================= USER NOTIFICATION =================
+  static void _registerUserNotificationListener() {
+    final event = 'notification:new';
+    _socket!
+      ..off(event)
+      ..on(event, (data) {
+        appLog('📩 User notification: $data');
+      });
+  }
 
-    // Also try messaging if it happens to connect later
-    if (_sockets["messaging"]?.connected ?? false) {
-      _sockets["messaging"]?.emit("room:join", chatId);
+  /// ================= LISTEN =================
+  static void on(String event, void Function(dynamic data) handler) {
+    final socket = _getConnectedSocket();
+    if (socket == null) {
+      appLog('❌ Cannot listen. Socket not connected. Event: $event');
+      return;
     }
+
+    socket
+      ..off(event) // Remove Previous listeners
+      ..on(event, handler);
   }
 
-  ///<<<============ Leave Chat Room ====================>>>
-  static void leaveRoom(String chatId) {
-    print(">>>>>>>>>>>> 🚪 Leaving Room: $chatId <<<<<<<<<<<<");
-    getSocket("/").emit("room:leave", chatId);
-    if (_sockets["messaging"]?.connected ?? false) {
-      _sockets["messaging"]?.emit("room:leave", chatId);
+  /// ================= EMIT =================
+  static void emit(String event, dynamic data) {
+    final socket = _getConnectedSocket();
+    if (socket == null) {
+      appLog('❌ Emit failed. Socket not connected. Event: $event');
+      return;
     }
+
+    socket.emit(event, data);
   }
 
-  static void on(
-    String event,
-    Function(dynamic data) handler, {
-    String namespace = "/",
-  }) {
-    // If requested namespace is not connected, use root as fallback
-    if (namespace != "/" && _sockets[namespace]?.connected != true) {
-      print(
-        ">>>>>>>>>>>> ⚠️ Namespace $namespace not connected, listening on root for $event <<<<<<<<<<<<",
-      );
-      getSocket("/").on(event, handler);
-    } else {
-      getSocket(namespace).on(event, handler);
-    }
-  }
-
-  static void emit(String event, dynamic data, {String namespace = "/"}) {
-    if (namespace != "/" && _sockets[namespace]?.connected != true) {
-      getSocket("/").emit(event, data);
-    } else {
-      getSocket(namespace).emit(event, data);
-    }
-  }
-
+  /// ================= EMIT WITH ACK =================
   static void emitWithAck(
     String event,
-    dynamic data,
-    Function(dynamic data) handler, {
-    String namespace = "/",
-  }) {
-    if (namespace != "/" && _sockets[namespace]?.connected != true) {
-      getSocket("/").emitWithAck(event, data, ack: handler);
-    } else {
-      getSocket(namespace).emitWithAck(event, data, ack: handler);
+    Map<String, dynamic> data,
+    void Function(dynamic ackData) onAck,
+  ) {
+    final socket = _getConnectedSocket();
+    if (socket == null) {
+      appLog('❌ EmitWithAck failed. Socket not connected. Event: $event');
+      return;
     }
+
+    socket.emitWithAck(event, data, ack: onAck);
+  }
+
+  /// ================= DISCONNECT =================
+  static void disconnect() {
+    final socket = _socket;
+    if (socket == null) return;
+    appLog('🔌 Socket disconnected manually');
+    socket
+      ..clearListeners()
+      ..disconnect();
+    _socket = null;
+  }
+
+  /// ================= INTERNAL =================
+  static io.Socket? _getConnectedSocket() {
+    if (_socket == null) {
+      connect();
+      return null;
+    }
+    if (!_socket!.connected) {
+      appLog('⚠️ Socket exists but not connected yet');
+      return null;
+    }
+    return _socket;
   }
 }

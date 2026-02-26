@@ -19,7 +19,7 @@ class ServiceProviderController extends GetxController {
   var skills = <String>[].obs;
   var profileImagePath = ''.obs;
 
-  final formKey=GlobalKey<FormState>();
+  final formKey = GlobalKey<FormState>();
 
   // Timer & OTP
   var start = 180.obs;
@@ -47,6 +47,7 @@ class ServiceProviderController extends GetxController {
     experience.value = '5 Years';
     skills.value = ['Electrician', 'House', 'Wiring'];
   }
+
   //
   // @override
   // void onClose() {
@@ -75,8 +76,11 @@ class ServiceProviderController extends GetxController {
       skills.add(skillController.text.trim());
       skillController.clear();
     } else {
-      Get.snackbar('Duplicate Skill', 'This skill is already added',
-          snackPosition: SnackPosition.BOTTOM);
+      Get.snackbar(
+        'Duplicate Skill',
+        'This skill is already added',
+        snackPosition: SnackPosition.BOTTOM,
+      );
     }
   }
 
@@ -85,8 +89,6 @@ class ServiceProviderController extends GetxController {
   // ================= Advertiser Info =================
   Future<void> completeAdvertiserInfo() async {
     try {
-
-
       if (profileImagePath.value.isEmpty) {
         Get.snackbar('Validation Error', 'Please Select an Image');
         return;
@@ -111,7 +113,9 @@ class ServiceProviderController extends GetxController {
       }
       if (businessLicenseNumberController.text.isEmpty) {
         Get.snackbar(
-            'Validation Error', 'Please Enter your Business License Number');
+          'Validation Error',
+          'Please Enter your Business License Number',
+        );
         return;
       }
       if (businessTypeController.text.isEmpty) {
@@ -119,8 +123,7 @@ class ServiceProviderController extends GetxController {
         return;
       }
 
-
-      isLoading.value=true;
+      isLoading.value = true;
 
       final body = {
         "businessName": businessNameController.text.trim(),
@@ -130,7 +133,6 @@ class ServiceProviderController extends GetxController {
         "businessType": businessTypeController.text.trim(),
       };
 
-
       // API Call
       final response = await ApiService.multipart(
         ApiEndPoint.advertiserCompleteProfile,
@@ -139,23 +141,21 @@ class ServiceProviderController extends GetxController {
       );
 
       if (response.statusCode == 200) {
-        isLoading.value = false ;
-
-
+        isLoading.value = false;
 
         // await LocalStorage.setString(LocalStorageKeys.token, "");
 
-        await LocalStorage.setString(LocalStorageKeys.role,"advertise");
+        await LocalStorage.setString(LocalStorageKeys.role, "advertise");
 
         Get.offAll(ProviderVerifyUser());
         startTimer();
       } else {
-        isLoading.value=false;
+        isLoading.value = false;
         Get.snackbar("Error", response.message);
         debugPrint("Error: ${response.message}");
       }
     } catch (e) {
-      isLoading.value=false;
+      isLoading.value = false;
       debugPrint("Exception: ${e.toString()}");
     }
   }
@@ -185,13 +185,9 @@ class ServiceProviderController extends GetxController {
     if (!isResendEnabled.value) return;
 
     try {
-      final body = {"email": LocalStorage.myEmail.toString().trim()};
+      final body = {"email": LocalStorage.user.email.trim()};
 
-      final ApiResponseModel response = await ApiService.post(
-
-        ApiEndPoint.resendOtp,
-        body: body,
-      );
+      final response = await ApiService.post(ApiEndPoint.resendOtp, body: body);
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         Get.snackbar('OTP', "OTP Sent Successfully");
@@ -208,14 +204,12 @@ class ServiceProviderController extends GetxController {
   Future<void> verifyOtp() async {
     try {
       final body = {
-        "email": LocalStorage.myEmail.toString().trim(),
-        "oneTimeCode": int.parse(otpController.text.trim())
+        "email": LocalStorage.user.email.trim(),
+        "oneTimeCode": int.tryParse(otpController.text.trim()) ?? 0,
       };
 
       final ApiResponseModel response = await ApiService.post(
-        header: {
-          'Content-Type': 'application/json',
-        },
+        header: {'Content-Type': 'application/json'},
         ApiEndPoint.advertiserVerify,
         body: body,
       );
@@ -223,21 +217,25 @@ class ServiceProviderController extends GetxController {
       if (response.statusCode == 200 || response.statusCode == 201) {
         Get.snackbar('Verify', "OTP Verify SuccessFull");
 
-        final data=response.data;
+        final data = response.data;
         await LocalStorage.setString(LocalStorageKeys.role, "advertise");
 
         /*LocalStorage.myRole = UserType.advertiser.name;
         LocalStorage.setString(LocalStorageKeys.myRole, LocalStorage.myRole);
 */
-        await LocalStorage.setString(LocalStorage.token, data["data"]["accessToken"]);
-        LocalStorage.token=data["data"]["accessToken"];
+        await LocalStorage.setString(
+          LocalStorage.token,
+          data["data"]["accessToken"],
+        );
+        LocalStorage.token = data["data"]["accessToken"];
 
-        successPopUps(message: 'Verify Success', onTap: (){
-          Get.offAll(HomeNav());
-
-        }, buttonTitle: "Go To Dashboard");
-
-
+        successPopUps(
+          message: 'Verify Success',
+          onTap: () {
+            Get.offAll(HomeNav());
+          },
+          buttonTitle: "Go To Dashboard",
+        );
       } else {
         Get.snackbar('Error', "OTP verification failed");
         debugPrint("Error: ${response.message}");

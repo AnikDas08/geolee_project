@@ -71,7 +71,7 @@ class MessageController extends GetxController {
   @override
   void onClose() {
     if (chatId.isNotEmpty) {
-      SocketServices.leaveRoom(chatId);
+      SocketService.emit("room:leave", chatId);
     }
     messageController.dispose();
     scrollController.dispose();
@@ -84,7 +84,7 @@ class MessageController extends GetxController {
 
   void listenMessage() {
     // Use root namespace as fallback since /messaging is unreachable
-    SocketServices.on("message:new", (data) {
+    SocketService.on("message:new", (data) {
       print(
         ">>>>>>>>>>>> 📩 New Message received via socket: $data <<<<<<<<<<<<",
       );
@@ -110,7 +110,7 @@ class MessageController extends GetxController {
 
     // chat:update fires on root socket when any message is sent in this chat.
     // This is the reliable fallback for the receiver to see new messages.
-    SocketServices.on("chat:update", (data) {
+    SocketService.on("chat:update", (data) {
       if (chatId.isNotEmpty) {
         print(
           ">>>>>>>>>>>> 🔄 chat:update received — reloading messages <<<<<<<<<<<<",
@@ -356,7 +356,7 @@ class MessageController extends GetxController {
     try {
       // Join the socket room for this chat
       if (chatId.isNotEmpty) {
-        SocketServices.joinRoom(chatId);
+        SocketService.emit("room:join", chatId);
       }
 
       final String url = "${ApiEndPoint.messages}/$chatId";

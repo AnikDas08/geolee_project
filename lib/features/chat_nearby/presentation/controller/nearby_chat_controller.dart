@@ -16,12 +16,12 @@ class NearbyChatController extends GetxController {
   int _totalPages = 1;
   int _totalUsers = 0;
   RxBool isPaginationLoading = false.obs;
+
   bool get hasMoreData => _currentPage < _totalPages;
 
   @override
   void onInit() {
     super.onInit();
-    debugPrint("📍 Lat: ${LocalStorage.lat} | Long: ${LocalStorage.long}");
     getNearbyChat();
   }
 
@@ -34,16 +34,18 @@ class NearbyChatController extends GetxController {
         nearbyChatList.clear();
       }
 
-      final double lat = LocalStorage.lat ?? 0.0;
-      final double lng = LocalStorage.long ?? 0.0;
+      final double lat = LocalStorage.user.location.lat;
+      final double lng = LocalStorage.user.location.long;
 
       if (lat == 0.0 || lng == 0.0) {
-        nearbyChatError.value = "Location not available. Please enable location.";
+        nearbyChatError.value =
+            "Location not available. Please enable location.";
         debugPrint("❌ Invalid coordinates - Lat: $lat, Lng: $lng");
         return;
       }
 
-      final url = "${ApiEndPoint.nearbyChat}?lat=$lat&lng=$lng&page=$_currentPage&limit=20";
+      final url =
+          "${ApiEndPoint.nearbyChat}?lat=$lat&lng=$lng&page=$_currentPage&limit=20";
 
       debugPrint("🌐 Fetching Nearby Chat - URL: $url");
       debugPrint("📄 Page: $_currentPage");
@@ -64,7 +66,9 @@ class NearbyChatController extends GetxController {
         if (pagination != null) {
           _totalPages = pagination['totalPage'] ?? 1;
           _totalUsers = pagination['total'] ?? 0;
-          debugPrint("📊 Total Users: $_totalUsers | Total Pages: $_totalPages | Current Page: $_currentPage");
+          debugPrint(
+            "📊 Total Users: $_totalUsers | Total Pages: $_totalPages | Current Page: $_currentPage",
+          );
         }
 
         // ========== PARSE DATA WITH PER-ITEM ERROR HANDLING ==========
@@ -85,7 +89,9 @@ class NearbyChatController extends GetxController {
           try {
             final user = NearbyChatUserModel.fromJson(data[i]);
             parsedList.add(user);
-            debugPrint("✅ Parsed user [$i]: ${user.name} | Role: ${user.role} | Distance: ${user.distance}");
+            debugPrint(
+              "✅ Parsed user [$i]: ${user.name} | Role: ${user.role} | Distance: ${user.distance}",
+            );
           } catch (e) {
             // ✅ Skip broken items instead of stopping all parsing
             debugPrint("❌ Failed to parse user at index [$i]: $e");
@@ -93,7 +99,9 @@ class NearbyChatController extends GetxController {
           }
         }
 
-        debugPrint("✅ Successfully parsed: ${parsedList.length} / ${data.length} users");
+        debugPrint(
+          "✅ Successfully parsed: ${parsedList.length} / ${data.length} users",
+        );
 
         // ========== ADD TO LIST ==========
         if (isRefresh) {
@@ -103,7 +111,6 @@ class NearbyChatController extends GetxController {
         }
 
         debugPrint("📋 Total in list now: ${nearbyChatList.length}");
-
       } else {
         nearbyChatError.value = response.message ?? "Something went wrong";
         debugPrint("❌ API Error: ${response.message}");

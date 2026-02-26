@@ -68,7 +68,11 @@ class ChatController extends GetxController {
   }) async {
     try {
       if (showLoading) {
-        if (isGroup) isGroupLoading = true; else isSingleLoading = true;
+        if (isGroup) {
+          isGroupLoading = true;
+        } else {
+          isSingleLoading = true;
+        }
         isLoading = true;
         update();
       }
@@ -97,7 +101,11 @@ class ChatController extends GetxController {
     } catch (e) {
       print(">>>>>>>>>>>> ❌ getChatRepos Error: $e <<<<<<<<<<<<");
     } finally {
-      if (isGroup) isGroupLoading = false; else isSingleLoading = false;
+      if (isGroup) {
+        isGroupLoading = false;
+      } else {
+        isSingleLoading = false;
+      }
       isLoading = isSingleLoading || isGroupLoading;
       update();
     }
@@ -110,13 +118,13 @@ class ChatController extends GetxController {
   }
 
   Future<void> listenChat() async {
-    SocketServices.on("chat:update", (data) {
-      getChatRepos(showLoading: false, isGroup: false);
+    SocketService.on("chat:update", (data) {
+      getChatRepos(showLoading: false);
       getChatRepos(showLoading: false, isGroup: true);
     });
 
-    String eventName = "update-chatlist::${LocalStorage.userId}";
-    SocketServices.on(eventName, (data) {
+    final String eventName = "update-chatlist::${LocalStorage.userId}";
+    SocketService.on(eventName, (data) {
       page = 0;
       chats.clear();
       singleChats.clear();
@@ -171,8 +179,8 @@ class ChatController extends GetxController {
 
   Future<void> fetchInitialData() async {
     await Future.wait([
-      getChatRepos(isGroup: false),
-      getChatRepos(isGroup: true, showLoading: true),
+      getChatRepos(),
+      getChatRepos(isGroup: true),
     ]);
   }
 }

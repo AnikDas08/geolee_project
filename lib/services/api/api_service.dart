@@ -1,11 +1,8 @@
 import 'dart:async';
 import 'dart:io';
-import 'package:cookie_jar/cookie_jar.dart';
 import 'package:dio/dio.dart';
-import 'package:dio_cookie_manager/dio_cookie_manager.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:giolee78/services/storage/storage_services.dart';
 import 'package:mime/mime.dart';
-import 'package:path_provider/path_provider.dart';
 import '../../config/api/api_end_point.dart';
 import '../../utils/constants/app_string.dart';
 import '../../utils/log/api_log.dart';
@@ -206,6 +203,9 @@ class ApiService {
   }
 
   static ApiResponseModel _handleDioException(DioException error) {
+    if (error.response != null && error.response!.statusCode == 401) {
+      LocalStorage.removeAllPrefData();
+    }
     switch (error.type) {
       case DioExceptionType.connectionTimeout:
       case DioExceptionType.receiveTimeout:
@@ -231,22 +231,6 @@ class ApiService {
 
 /// ========== [ DIO INSTANCE WITH INTERCEPTORS ] ========== ///
 
-CookieJar cookieJar = CookieJar();
-
-Future<CookieJar> cookieJarInit() async {
-  try {
-    final dir = await getApplicationDocumentsDirectory();
-    cookieJar = PersistCookieJar(
-      ignoreExpires: true,
-      storage: FileStorage("${dir.path}/.cookies/"),
-    );
-    return cookieJar;
-  } catch (e) {
-    debugPrint("cookieJarInit Error: $e");
-    return cookieJar;
-  }
-}
-
 Dio _getMyDio() {
   final Dio dio = Dio();
 
@@ -254,6 +238,7 @@ Dio _getMyDio() {
     InterceptorsWrapper(
       onRequest: (options, handler) {
         options
+          ..headers['authorization'] ??= 'Bearer ${LocalStorage.token}'
           ..headers['Content-Type'] ??= 'application/json'
           ..connectTimeout = const Duration(seconds: 30)
           ..sendTimeout = const Duration(seconds: 30)
@@ -272,7 +257,6 @@ Dio _getMyDio() {
         handler.next(error);
       },
     ),
-    CookieManager(cookieJar),
     apiLog(),
   ]);
 

@@ -19,10 +19,8 @@ import 'package:giolee78/services/storage/storage_services.dart';
 import 'package:giolee78/utils/constants/app_images.dart';
 import 'package:giolee78/utils/constants/app_icons.dart';
 import 'package:giolee78/utils/constants/app_colors.dart';
-import 'package:giolee78/utils/enum/enum.dart';
 import 'package:giolee78/utils/extensions/extension.dart';
 
-import '../../../../config/api/api_end_point.dart';
 import '../../../advertise/presentation/controller/advertiser_edit_profile_controller.dart';
 import '../../../advertise/presentation/controller/provider_profile_view_controller.dart';
 
@@ -40,13 +38,11 @@ class DashBoardProfile extends StatelessWidget {
               imageSrc: AppIcons.profile,
               title: 'My Profile',
               onTap: () {
+                final advEditProfileController = Get.put(
+                  AdvertiserEditProfileController(),
+                );
 
-              final  advEditProfileController=Get.put(AdvertiserEditProfileController());
-
-              advEditProfileController.fetchAdvertiserProfile();
-
-                print("===============================${LocalStorage.myRole}");
-                print("===============================${LocalStorage.businessLicenceNumber}");
+                advEditProfileController.fetchAdvertiserProfile();
 
                 Get.to(() => const ProviderProfileViewScreen());
               },
@@ -55,10 +51,10 @@ class DashBoardProfile extends StatelessWidget {
               imageSrc: AppIcons.edit,
               title: 'Change Password',
               onTap: () {
-                Get.to(() => const ChangePasswordScreen());
+                Get.toNamed(AppRoutes.changePassword);
               },
             ),
-            if (LocalStorage.role == "advertise")
+            if (!LocalStorage.isUser)
               ProfileItemData(
                 imageSrc: AppIcons.edit,
                 title: 'Ads History',
@@ -115,42 +111,40 @@ class DashBoardProfile extends StatelessWidget {
                 padding: EdgeInsets.symmetric(horizontal: 20.w),
                 child: Column(
                   children: [
-
                     /// User Profile Image here
-
-
                     Center(
                       child: GetBuilder<ProviderProfileViewController>(
                         builder: (controller) {
                           return ClipOval(
-                            child: controller.userImage.isNotEmpty
+                            child: LocalStorage.user.image.isNotEmpty
                                 ? CommonImage(
-                              imageSrc: ApiEndPoint.imageUrl + controller.businessLogo,
-                              width: 120.w,
-                              height: 120.h,
-                              fill: BoxFit.cover,
-                            )
+                                    imageSrc: LocalStorage.user.image,
+                                    width: 120.w,
+                                    height: 120.h,
+                                    fill: BoxFit.cover,
+                                  )
                                 : CommonImage(
-                              imageSrc: AppImages.profile,
-                              width: 120.w,
-                              height: 120.h,
-                              fill: BoxFit.cover,
-                            ),
+                                    imageSrc: AppImages.profile,
+                                    width: 120.w,
+                                    height: 120.h,
+                                    fill: BoxFit.cover,
+                                  ),
                           );
-                        }
+                        },
                       ),
                     ),
 
                     /// User Name here
                     CommonText(
-                      text: LocalStorage.businessName,
+                      // text: LocalStorage.businessName,
+                      text: LocalStorage.user.advertiser.businessName,
                       fontWeight: FontWeight.w600,
                       top: 16,
                       bottom: 8.h,
                     ),
                     CommonText(
-                      text:
-                      LocalStorage.advertiserBio,
+                      // text: LocalStorage.advertiserBio,
+                      text: LocalStorage.user.advertiser.bio,
                       fontSize: 12,
                       bottom: 20,
                       maxLines: 2,
@@ -158,7 +152,7 @@ class DashBoardProfile extends StatelessWidget {
                       right: 25,
                       color: AppColors.secondaryText,
                     ),
-                    if(LocalStorage.myRole==UserType.user.name)
+                    if (LocalStorage.isUser)
                       CommonButton(
                         titleText: 'Public',
                         buttonWidth: 80.w,
@@ -185,7 +179,7 @@ class DashBoardProfile extends StatelessWidget {
                         );
                       },
                     ),
-                    SizedBox(height: 20.h,),
+                    SizedBox(height: 20.h),
 
                     /*if (LocalStorage.myRole != "advertiser")
                       CommonButton(
@@ -208,26 +202,17 @@ class DashBoardProfile extends StatelessWidget {
 
                         },
                       ),*/
-
-                    if (LocalStorage.role != "user")
+                    if (LocalStorage.isUser)
                       CommonButton(
                         titleText: "Become a User",
                         onTap: () {
-                          print("My Role Is :===========================${LocalStorage.role.toString()}");
-
                           successPopUps(
-                            message:
-                            'Your Role now User.',
-                            onTap: () async{
-                              await LocalStorage.setString(LocalStorageKeys.role, "user");
-                              // LocalStorage.setString(
-                              //LocalStorageKeys.myRole, LocalStorage.myRole=UserType.user.name,
-                              //
-                              // );
-
-                              //LocalStorage.setRoles(LocalStorageKeys.myRole, LocalStorage.myRole='user');
-                              print("My Role Is :===========================${LocalStorage.role.toString()}");
-                              //appLog(LocalStorage.myRole.toString());
+                            message: 'Your Role now User.',
+                            onTap: () async {
+                              await LocalStorage.setString(
+                                LocalStorageKeys.role,
+                                "user",
+                              );
 
                               Get.offAllNamed(AppRoutes.homeNav);
                             },

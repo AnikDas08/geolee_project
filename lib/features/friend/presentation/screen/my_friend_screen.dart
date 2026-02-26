@@ -5,7 +5,6 @@ import 'package:get/get.dart';
 import 'package:giolee78/component/text/common_text.dart';
 import 'package:giolee78/component/text_field/common_text_field.dart';
 import 'package:giolee78/config/api/api_end_point.dart';
-import 'package:giolee78/config/route/app_routes.dart';
 import 'package:giolee78/features/friend/presentation/screen/view_friend_screen.dart';
 import 'package:giolee78/utils/constants/app_colors.dart';
 import 'package:giolee78/utils/constants/app_images.dart';
@@ -194,8 +193,6 @@ class _SuggestedFriendCard extends StatelessWidget {
                       text: userName,
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                 ],
@@ -331,8 +328,6 @@ class _FriendListItem extends StatelessWidget {
                       text: userName,
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                 ],

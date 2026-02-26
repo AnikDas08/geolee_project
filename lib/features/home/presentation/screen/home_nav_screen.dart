@@ -56,7 +56,8 @@ class HomeNav extends StatelessWidget {
             backgroundColor: AppColors.primaryColor,
             elevation: 4,
             shape: const CircleBorder(),
-            onPressed: () => controller.changeIndex(1), // Middle Button
+            onPressed: () => controller.changeIndex(1),
+            // Middle Button
             child: const Center(child: CommonImage(imageSrc: AppIcons.add)),
           ),
         );
@@ -64,9 +65,6 @@ class HomeNav extends StatelessWidget {
 
       bottomNavigationBar: Obx(() {
         if (!controller.showNavBar.value) return const SizedBox.shrink();
-
-        // CORRECT WAY TO CHECK ROLE
-        final bool isUser = LocalStorage.role == "user";
 
         return BottomAppBar(
           shape: const CircularNotchedRectangle(),
@@ -85,12 +83,14 @@ class HomeNav extends StatelessWidget {
                 ),
 
                 SizedBox(width: 40.w), // Space for FAB
-
                 // RIGHT BUTTON: Message or Dashboard
                 _buildNavItem(
                   index: 2,
-                  iconPath: isUser ? AppIcons.chatIcon : AppIcons.chatIcon, // Assuming you have a dashboard icon
-                  label: isUser ? 'Message' : 'Dashboard',
+                  iconPath: LocalStorage.isUser
+                      ? AppIcons.chatIcon
+                      : AppIcons.chatIcon,
+                  // Assuming you have a dashboard icon
+                  label: LocalStorage.isUser ? 'Message' : 'Dashboard',
                 ),
               ],
             ),

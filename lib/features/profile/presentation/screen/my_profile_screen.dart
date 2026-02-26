@@ -4,11 +4,12 @@ import 'package:get/get.dart';
 import 'package:giolee78/component/button/common_button.dart';
 import 'package:giolee78/component/image/common_image.dart';
 import 'package:giolee78/component/text/common_text.dart';
-import 'package:giolee78/config/api/api_end_point.dart';
 import 'package:giolee78/features/profile/presentation/controller/my_profile_controller.dart';
 import 'package:giolee78/utils/constants/app_colors.dart';
 import 'package:giolee78/utils/constants/app_images.dart';
 import 'package:giolee78/utils/extensions/extension.dart';
+
+import '../../../../services/storage/storage_services.dart';
 
 class MyProfileScreen extends StatelessWidget {
   const MyProfileScreen({super.key});
@@ -24,7 +25,6 @@ class MyProfileScreen extends StatelessWidget {
             backgroundColor: AppColors.background,
             elevation: 0,
             leading: GestureDetector(
-
               onTap: () {
                 Navigator.pop(context);
               },
@@ -43,49 +43,50 @@ class MyProfileScreen extends StatelessWidget {
           body: SafeArea(
             child: controller.isLoading
                 ? const Center(
-              child: CircularProgressIndicator(
-                color: AppColors.primaryColor,
-              ),
-            )
-                : SingleChildScrollView(
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 20.w),
-                child: Column(
-                  children: [
-                    20.height,
-
-                    /// Profile Image
-                    _buildProfileImage(controller),
-
-                    16.height,
-
-                    /// Name
-                    CommonText(
-                      text: controller.userName,
-                      fontSize: 18.sp,
-                      fontWeight: FontWeight.w600,
+                    child: CircularProgressIndicator(
+                      color: AppColors.primaryColor,
                     ),
+                  )
+                : SingleChildScrollView(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 20.w),
+                      child: Column(
+                        children: [
+                          20.height,
 
-                    32.height,
+                          /// Profile Image
+                          _buildProfileImage(controller),
 
-                    /// About Section
-                    _buildAboutSection(controller),
+                          16.height,
 
-                    24.height,
+                          /// Name
+                          CommonText(
+                            // text: controller.userName,
+                            text: LocalStorage.user.name,
+                            fontSize: 18.sp,
+                            fontWeight: FontWeight.w600,
+                          ),
 
-                    /// Profile Details
-                    _buildProfileDetails(controller),
+                          32.height,
 
-                    32.height,
+                          /// About Section
+                          _buildAboutSection(controller),
 
-                    /// Edit Profile Button
-                    _buildEditProfileButton(controller),
+                          24.height,
 
-                    32.height,
-                  ],
-                ),
-              ),
-            ),
+                          /// Profile Details
+                          _buildProfileDetails(controller),
+
+                          32.height,
+
+                          /// Edit Profile Button
+                          _buildEditProfileButton(controller),
+
+                          32.height,
+                        ],
+                      ),
+                    ),
+                  ),
           ),
         );
       },
@@ -109,19 +110,19 @@ class MyProfileScreen extends StatelessWidget {
         ],
       ),
       child: ClipOval(
-        child: controller.userImage.isNotEmpty
+        child: LocalStorage.user.image.isNotEmpty
             ? CommonImage(
-          imageSrc: ApiEndPoint.imageUrl + controller.userImage,
-          width: 120.w,
-          height: 120.h,
-          fill: BoxFit.cover,
-        )
+                imageSrc: LocalStorage.user.image,
+                width: 120.w,
+                height: 120.h,
+                fill: BoxFit.cover,
+              )
             : CommonImage(
-          imageSrc: AppImages.profile,
-          width: 120.w,
-          height: 120.h,
-          fill: BoxFit.cover,
-        ),
+                imageSrc: AppImages.profile,
+                width: 120.w,
+                height: 120.h,
+                fill: BoxFit.cover,
+              ),
       ),
     );
   }
@@ -146,7 +147,7 @@ class MyProfileScreen extends StatelessWidget {
         Align(
           alignment: Alignment.centerLeft,
           child: CommonText(
-            text: controller.bio,
+            text: LocalStorage.user.bio,
             fontSize: 14.sp,
             color: AppColors.secondaryText,
             textAlign: TextAlign.start,
@@ -164,11 +165,11 @@ class MyProfileScreen extends StatelessWidget {
         // Uncomment if mobile is available in the API
         // _buildDetailRow('Mobile', controller.mobile),
         // 16.height,
-        _buildDetailRow('E-mail', controller.userEmail),
+        _buildDetailRow('E-mail', LocalStorage.user.email),
         16.height,
-        _buildDetailRow('Date of Birth', controller.dateOfBirth),
+        _buildDetailRow('Date of Birth', LocalStorage.user.dob.date),
         16.height,
-        _buildDetailRow('Gender', controller.gender),
+        _buildDetailRow('Gender', LocalStorage.user.gender),
       ],
     );
   }
@@ -178,11 +179,7 @@ class MyProfileScreen extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        CommonText(
-          text: label,
-          fontSize: 14.sp,
-          textAlign: TextAlign.start,
-        ),
+        CommonText(text: label, fontSize: 14.sp, textAlign: TextAlign.start),
         Flexible(
           child: CommonText(
             text: value.isNotEmpty ? value : 'Not Set',

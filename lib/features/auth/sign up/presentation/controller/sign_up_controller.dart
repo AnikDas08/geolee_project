@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
+import 'package:giolee78/utils/log/app_log.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:intl_phone_field/countries.dart';
@@ -15,10 +16,12 @@ import 'package:giolee78/utils/helpers/other_helper.dart';
 import '../../../../../config/route/app_routes.dart';
 import '../../../../../services/api/api_service.dart';
 import '../../../../../config/api/api_end_point.dart';
+import '../../../../../services/storage/storage_services.dart';
 import '../../../../../utils/app_utils.dart';
+import '../../../../../utils/log/error_log.dart';
+import '../../../../profile/data/model/user_profile_model.dart';
 
 class SignUpController extends GetxController {
-
   /// Sign Up Form Key
   ///
   bool isPopUpOpen = false;
@@ -30,7 +33,7 @@ class SignUpController extends GetxController {
   Position? currentPosition;
   var markers = <Marker>{};
   var initialCameraPosition = const CameraPosition(
-    target: LatLng(23.8103, 90.4125), // Dhaka, Bangladesh default
+    target: LatLng(23.8103, 90.4125),
     zoom: 14.0,
   ).obs;
 
@@ -39,7 +42,7 @@ class SignUpController extends GetxController {
 
   String time = "";
 
-  List selectedOption = ["User", "Consultant"];
+  List<String> selectedOption = ["User", "Consultant"];
 
   String selectRole = "USER";
   String countryCode = "+880";
@@ -49,25 +52,16 @@ class SignUpController extends GetxController {
 
   static SignUpController get instance => Get.put(SignUpController());
 
-  TextEditingController nameController = TextEditingController(
-    text: kDebugMode ? "Md Ibrahim Nazmul" : "",
-  );
+  final nameController = TextEditingController();
   TextEditingController emailController = TextEditingController();
-  TextEditingController passwordController = TextEditingController(
-    text: kDebugMode ? 'password123' : '',
-  );
-  TextEditingController confirmPasswordController = TextEditingController(
-    text: kDebugMode ? 'password123' : '',
-  );
-  TextEditingController numberController = TextEditingController(
-    text: kDebugMode ? '1865965581' : '',
-  );
-  TextEditingController otpController = TextEditingController();
-
-  final TextEditingController dateController = TextEditingController();
-  final TextEditingController addressController = TextEditingController();
-  final TextEditingController ageController = TextEditingController();
-  final TextEditingController bioController = TextEditingController();
+  final passwordController = TextEditingController();
+  final confirmPasswordController = TextEditingController();
+  final numberController = TextEditingController();
+  final otpController = TextEditingController();
+  final dateController = TextEditingController();
+  final addressController = TextEditingController();
+  final ageController = TextEditingController();
+  final bioController = TextEditingController();
 
   String? selectedGender;
   final List<String> genderOptions = ['male', 'female', 'other'];
@@ -111,39 +105,27 @@ class SignUpController extends GetxController {
 
   ///============================================Sign Up
 
-  Future<void> signUpUser(GlobalKey<FormState> signUpFormKey) async {
-    if (!signUpFormKey.currentState!.validate()) return;
-
-    isLoading = true;
-    update();
-
+  Future<void> signUpUser() async {
     try {
-      final Map<String, String> body = {
+      isLoading = true;
+      update();
+      final body = {
         "name": nameController.text.trim(),
         "email": emailController.text.trim(),
         "password": passwordController.text.trim(),
       };
 
-      print("📤 Signing up user: ${body['email']}");
-
       final response = await ApiService.post(ApiEndPoint.signUp, body: body);
-
-      print("📦 Sign Up Response: ${response.statusCode}");
-      print("📦 Response Data: ${response.data}");
-
       if (response.statusCode == 200 || response.statusCode == 201) {
-        // Start OTP timer
         startTimer();
-
         Utils.successSnackBar("Success", "OTP has been sent to your email");
-
         Get.toNamed(AppRoutes.verifyUser);
       } else {
         Utils.errorSnackBar(response.statusCode.toString(), response.message);
       }
     } catch (e) {
-      print("❌ Sign Up Error: $e");
-      Utils.errorSnackBar("Error", e.toString());
+      errorLog("❌ Sign Up Error: $e");
+      Utils.errorSnackBar("Error", 'Something went wrong');
     } finally {
       isLoading = false;
       update();
@@ -152,53 +134,39 @@ class SignUpController extends GetxController {
 
   ///===========================================================================verify OTP
 
-
-
-
   Future<void> verifyOtpRepo() async {
-    isLoadingVerify = true;
-    update();
-
     try {
-      debugPrint("📤 Verifying OTP for: ${emailController.text}");
+      isLoadingVerify = true;
+      update();
 
-      final Map<String, dynamic> body = {
+      final body = {
         "email": emailController.text.trim(),
         "oneTimeCode": int.parse(otpController.text.trim()),
       };
 
-      final Map<String, String> header = {'Content-Type': "application/json"};
-
       final response = await ApiService.post(
         ApiEndPoint.verifyEmail,
         body: body,
-        header: header,
       );
 
-      print("📦 Verify OTP Response: ${response.statusCode}");
-      print("📦 Response Data: ${response.data}");
-
       if (response.statusCode == 200) {
-        final data = response.data;
-
-        if (data['success'] == true) {
-          // Stop timer
-          _timer?.cancel();
-
-          final String bearerToken = data['data']['accessToken'];
-
-          Utils.successSnackBar("Success", "Email verified successfully");
-
-          Get.toNamed(AppRoutes.completeProfile);
-        } else {
-          Utils.errorSnackBar("Error", data['message'] ?? "Unknown error");
-        }
+        final Map<String, dynamic> data = response.data['data'];
+        _timer?.cancel();
+        final String token = data['accessToken'] ?? '';
+        final String userId = data['user']?['id'] ?? '';
+        final Map<String, dynamic> user = data['user'] ?? {};
+        LocalStorage.token = token;
+        LocalStorage.userId = userId;
+        LocalStorage.setUser = UserModel.fromJson(user);
+        LocalStorage.setString(LocalStorage.token, token);
+        Utils.successSnackBar("Success", "Email verified successfully");
+        Get.toNamed(AppRoutes.completeProfile);
       } else {
         Utils.errorSnackBar(response.statusCode.toString(), response.message);
       }
     } catch (e) {
-      print("❌ Verify OTP Error: $e");
-      Get.snackbar("Error", e.toString());
+      appLog("❌ Verify OTP Error: $e");
+      Get.snackbar("Error", 'Something went wrong');
     } finally {
       isLoadingVerify = false;
       update();
@@ -207,32 +175,21 @@ class SignUpController extends GetxController {
 
   ///===================================================Resend OTP
   Future<void> resendOtp() async {
-    // Don't allow resend if timer is still running
     if (start > 0) {
       Utils.errorSnackBar("Please Wait", "You can resend OTP in $time");
       return;
     }
 
-    isResendingOtp = true;
-    update();
-
     try {
-      print("📤 Resending OTP to: ${emailController.text}");
-
-      final Map<String, String> body = {"email": emailController.text.trim()};
+      isResendingOtp = true;
+      update();
+      final body = {"email": emailController.text.trim()};
 
       final response = await ApiService.post(ApiEndPoint.resendOtp, body: body);
 
-      print("📦 Resend OTP Response: ${response.statusCode}");
-      print("📦 Response Data: ${response.data}");
-
       if (response.statusCode == 200 || response.statusCode == 201) {
-        // Clear current OTP
         otpController.clear();
-
-        // Restart timer
         startTimer();
-
         Utils.successSnackBar(
           "OTP Resent",
           "A new OTP has been sent to your email",
@@ -244,38 +201,8 @@ class SignUpController extends GetxController {
         );
       }
     } catch (e) {
-      print("❌ Resend OTP Error: $e");
-
-      // If resend endpoint doesn't exist, try using signup endpoint
-      try {
-        print("📤 Trying alternative resend method...");
-
-        final Map<String, String> body = {
-          "name": nameController.text.trim(),
-          "email": emailController.text.trim(),
-          "password": passwordController.text.trim(),
-        };
-
-        final response = await ApiService.post(ApiEndPoint.signUp, body: body);
-
-        if (response.statusCode == 200 || response.statusCode == 201) {
-          otpController.clear();
-          startTimer();
-
-          Utils.successSnackBar(
-            "OTP Resent",
-            "A new OTP has been sent to your email",
-          );
-        } else {
-          Utils.errorSnackBar(
-            "Error",
-            response.message ?? "Failed to resend OTP",
-          );
-        }
-      } catch (alternativeError) {
-        print("❌ Alternative Resend Error: $alternativeError");
-        Utils.errorSnackBar("Error", "Failed to resend OTP");
-      }
+      errorLog("❌ Resend OTP Error: $e");
+      Utils.errorSnackBar("Error", 'Something went wrong');
     } finally {
       isResendingOtp = false;
       update();
@@ -288,7 +215,6 @@ class SignUpController extends GetxController {
     update();
 
     String formattedDob = "";
-
 
     if (image == null || image!.isEmpty) {
       Get.snackbar('Validation Error', 'Please select a profile image');
@@ -310,8 +236,6 @@ class SignUpController extends GetxController {
       return;
     }
 
-
-
     if (dateController.text.isNotEmpty) {
       try {
         final DateTime parsedDate = DateFormat(
@@ -323,9 +247,6 @@ class SignUpController extends GetxController {
         formattedDob = "";
       }
     }
-
-
-
 
     final Map<String, String> body = {
       "gender": selectedGender!.toLowerCase(),

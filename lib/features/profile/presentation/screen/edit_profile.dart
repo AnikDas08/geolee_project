@@ -4,7 +4,6 @@ import 'package:get/get.dart';
 import 'package:giolee78/component/button/common_button.dart';
 import 'package:giolee78/component/image/common_image.dart';
 import 'package:giolee78/component/text/common_text.dart';
-import 'package:giolee78/config/api/api_end_point.dart';
 import 'package:giolee78/features/profile/presentation/controller/profile_controller.dart';
 import 'package:giolee78/services/storage/storage_services.dart';
 import 'package:giolee78/utils/constants/app_colors.dart';
@@ -12,7 +11,9 @@ import 'package:giolee78/utils/extensions/extension.dart';
 import 'package:giolee78/features/profile/presentation/widgets/edit_profile_all_filed.dart';
 
 class EditProfile extends StatelessWidget {
-  const EditProfile({super.key});
+  EditProfile({super.key});
+
+  final _formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +38,7 @@ class EditProfile extends StatelessWidget {
               child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: 20.w),
                 child: Form(
-                  key: controller.formKey,
+                  key: _formKey,
                   child: Column(
                     children: [
                       20.height,
@@ -55,7 +56,12 @@ class EditProfile extends StatelessWidget {
                       /// Update Button
                       CommonButton(
                         titleText: 'Update',
-                        onTap: controller.editProfileRepo,
+                        onTap: () {
+                          if (!_formKey.currentState!.validate()) {
+                            return;
+                          }
+                          controller.editProfileRepo();
+                        },
                         isLoading: controller.isLoading,
                         buttonHeight: 56.h,
                         buttonRadius: 8.r,
@@ -92,9 +98,7 @@ class EditProfile extends StatelessWidget {
               ),
             ],
           ),
-          child: ClipOval(
-            child: _buildImage(controller),
-          ),
+          child: ClipOval(child: _buildImage(controller)),
         ),
 
         /// Edit Icon
@@ -141,9 +145,9 @@ class EditProfile extends StatelessWidget {
 
   /// Build Network or Default Image
   Widget _buildNetworkOrDefaultImage() {
-    if (LocalStorage.myImage.isNotEmpty) {
+    if (LocalStorage.user.image.isNotEmpty) {
       return CommonImage(
-        imageSrc: ApiEndPoint.imageUrl + LocalStorage.myImage,
+        imageSrc: LocalStorage.user.image,
         width: 100.w,
         height: 100.h,
         fill: BoxFit.cover,

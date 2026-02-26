@@ -75,7 +75,7 @@ class AppRoutes {
   static List<GetPage> routes = [
     GetPage(name: splash, page: () => const SplashScreen()),
     GetPage(name: onboarding, page: () => const OnboardingScreen()),
-    GetPage(name: signUp, page: () => const SignUpScreen()),
+    GetPage(name: signUp, page: () => SignUpScreen()),
     GetPage(name: verifyUser, page: () => const VerifyUser()),
     GetPage(name: completeProfile, page: () => const CompleteProfile()),
     GetPage(name: addLocation, page: () => const AddLocation()),
@@ -83,12 +83,12 @@ class AppRoutes {
     GetPage(name: forgotPassword, page: () => ForgotPasswordScreen()),
     GetPage(name: verifyEmail, page: () => const VerifyScreen()),
     GetPage(name: createPassword, page: () => CreatePassword()),
-    GetPage(name: changePassword, page: () => const ChangePasswordScreen()),
+    GetPage(name: changePassword, page: () =>  ChangePasswordScreen()),
     GetPage(name: notifications, page: () => const NotificationScreen()),
     GetPage(name: chat, page: () => const ChatListScreen()),
     GetPage(name: message, page: () => const MessageScreen()),
     GetPage(name: profile, page: () => const ProfileScreen()),
-    GetPage(name: editProfile, page: () => const EditProfile()),
+    GetPage(name: editProfile, page: () => EditProfile()),
     GetPage(name: privacyPolicy, page: () => const PrivacyPolicyScreen()),
     GetPage(name: termsOfServices, page: () => const TermsOfServicesScreen()),
     GetPage(name: homeNav, page: () => HomeNav()),
@@ -97,10 +97,16 @@ class AppRoutes {
     GetPage(name: serviceProviderInfo, page: () => ServiceProviderInfoScreen()),
     GetPage(name: editProfileScreen, page: () => EditProfileScreen()),
     GetPage(name: editPost, page: () => EditPostScreen()),
-    GetPage(name: stripeWebViewScreen, page: () => StripeWebViewPage(checkoutUrl: Get.arguments),),
+    GetPage(
+      name: stripeWebViewScreen,
+      page: () => StripeWebViewPage(checkoutUrl: Get.arguments),
+    ),
     GetPage(name: searchScreen, page: () => const SearchFriendScreen()),
     GetPage(name: groupSetting, page: () => const GroupSettingsScreen()),
     GetPage(name: addMemberScreen, page: () => const AddMemberScreen()),
-    GetPage(name: friendPendingScreenHere, page: () => const PendingRequestScreen()),
+    GetPage(
+      name: friendPendingScreenHere,
+      page: () => const PendingRequestScreen(),
+    ),
   ];
 }

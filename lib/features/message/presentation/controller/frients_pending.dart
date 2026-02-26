@@ -35,7 +35,7 @@ class PendingRequestController extends GetxController {
     try {
       isLoading.value = true;
       final url = ApiEndPoint.getPendingRequest; // ex: {{BASE_URL}}/join-requests/
-      ApiResponseModel response = await ApiService.get(url);
+      final ApiResponseModel response = await ApiService.get(url);
 
       if (response.statusCode == 200 && response.data['data'] != null) {
         final List data = response.data['data'];
@@ -58,7 +58,7 @@ class PendingRequestController extends GetxController {
       final body = {"status": status}; // accepted | rejected | cancelled
       isLoading.value = true;
 
-      ApiResponseModel response = await ApiService.patch(
+      final ApiResponseModel response = await ApiService.patch(
         url,
         body: body,
       );

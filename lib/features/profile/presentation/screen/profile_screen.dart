@@ -6,6 +6,7 @@ import 'package:giolee78/component/image/common_image.dart';
 import 'package:giolee78/component/other_widgets/item.dart';
 import 'package:giolee78/component/pop_up/common_pop_menu.dart';
 import 'package:giolee78/component/text/common_text.dart';
+import 'package:giolee78/config/route/app_routes.dart';
 import 'package:giolee78/features/advertise/presentation/screen/provider_complete_profile_screen.dart';
 import 'package:giolee78/features/auth/change_password/presentation/screen/change_password_screen.dart';
 import 'package:giolee78/features/home/presentation/screen/home_nav_screen.dart';
@@ -16,12 +17,10 @@ import 'package:giolee78/features/profile/presentation/screen/my_profile_screen.
 import 'package:giolee78/features/profile/presentation/screen/privacy_policy_screen.dart';
 import 'package:giolee78/features/profile/presentation/screen/terms_of_services_screen.dart';
 import 'package:giolee78/services/storage/storage_services.dart';
-import 'package:giolee78/utils/constants/app_images.dart';
 import 'package:giolee78/utils/constants/app_icons.dart';
 import 'package:giolee78/utils/constants/app_colors.dart';
 import 'package:giolee78/utils/extensions/extension.dart';
 
-import '../../../../config/api/api_end_point.dart';
 import '../../../../services/storage/storage_keys.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -31,21 +30,16 @@ class ProfileScreen extends StatefulWidget {
   State<ProfileScreen> createState() => _ProfileScreenState();
 }
 
-
-
 class _ProfileScreenState extends State<ProfileScreen> {
-
   final ProfileController controller = Get.put(ProfileController());
-
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     controller.getUserDataForRole();
-
-    print("===========================${LocalStorage.myRole}");
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -64,7 +58,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               imageSrc: AppIcons.edit,
               title: 'Change Password',
               onTap: () {
-                Get.to(() => const ChangePasswordScreen());
+                Get.toNamed(AppRoutes.changePassword);
               },
             ),
             ProfileItemData(
@@ -124,21 +118,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         child: GetBuilder<MyProfileController>(
                           builder: (myProfileController) {
                             return ClipOval(
-                              child: myProfileController.userImage.isNotEmpty
-                                  ? CommonImage(
-                                      imageSrc:
-                                          ApiEndPoint.imageUrl +
-                                          myProfileController.userImage,
-                                      width: 120.w,
-                                      height: 120.h,
-                                      fill: BoxFit.cover,
-                                    )
-                                  : CommonImage(
-                                      imageSrc: AppImages.profile,
-                                      width: 120.w,
-                                      height: 120.h,
-                                      fill: BoxFit.cover,
-                                    ),
+                              child: CommonImage(
+                                imageSrc: LocalStorage.user.name,
+                                width: 120.w,
+                                height: 120.h,
+                                fill: BoxFit.cover,
+                              ),
                             );
                           },
                         ),
@@ -147,14 +132,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                     /// User Name here
                     CommonText(
-                      text: LocalStorage.myName,
+                      text: LocalStorage.user.name,
                       fontWeight: FontWeight.w600,
                       top: 16,
                       bottom: 8.h,
                     ),
                     CommonText(
-                      text: LocalStorage.bio.isNotEmpty
-                          ? LocalStorage.bio
+                      text: LocalStorage.user.bio.isNotEmpty
+                          ? LocalStorage.user.bio
                           : "Bio Not Set Yet",
                       fontSize: 12,
                       bottom: 20,
@@ -163,7 +148,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       right: 25,
                       color: AppColors.secondaryText,
                     ),
-                    if (LocalStorage.role == "user")
+                    if (LocalStorage.isUser)
                       // CommonButton(
                       //   titleText: 'Public',
                       //   buttonWidth: 80.w,
@@ -173,8 +158,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       //   borderColor: AppColors.primaryColor2,
                       //   buttonColor: AppColors.primaryColor2,
                       // ),
-
-                    16.height,
+                      16.height,
 
                     ListView.builder(
                       shrinkWrap: true,
@@ -192,36 +176,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                     SizedBox(height: 20.h),
 
-                      if(LocalStorage.role=="user")
-
+                    if (LocalStorage.isUser)
                       CommonButton(
                         titleText: "Advertise with Us",
-                        onTap: () async{
-                          print(
-                            "My Role Is :=========================== ${LocalStorage.myRole.toString()}",
-                          );
-
-                          if((controller.advToken.isEmpty||controller.advToken=="")){
-
-                            print("Token is Empty I Have no token");
-                            await Get.to(()=>ServiceProviderInfoScreen());
-                          }else{
+                        onTap: () async {
+                          if ((controller.advToken.isEmpty ||
+                              controller.advToken == "")) {
+                            await Get.to(() => ServiceProviderInfoScreen());
+                          } else {
                             // Update LocalStorage properly
-                           await LocalStorage.setString(LocalStorageKeys.role,"advertise");
+                            await LocalStorage.setString(
+                              LocalStorageKeys.role,
+                              "advertise",
+                            );
 
                             // Navigate to HomeNav after updating role
-                            Get.offAll(()=>HomeNav());
+                            Get.offAll(() => HomeNav());
                           }
-
 
                           // if (LocalStorage.myRole == UserType.advertiser.name) {
                           //   Get.offAllNamed(AppRoutes.homeNav);
                           // } else {
                           //   Get.toNamed(AppRoutes.serviceProviderInfo);
                           // }
-
-
-
                         },
                       ),
                   ],

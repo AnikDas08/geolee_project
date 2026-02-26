@@ -230,7 +230,6 @@ class _ChatListScreenState extends State<ChatListScreen> {
                                           text: "No Chat List Found",
                                           fontSize: 24.sp,
                                           fontWeight: FontWeight.w600,
-                                          color: Colors.black,
                                         ),
                                       ],
                                     ),

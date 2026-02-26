@@ -108,8 +108,6 @@ Widget chatListItem({required ChatModel item}) {
                       color: hasUnseenMessages
                           ? Colors.black87
                           : AppColors.secondaryText,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),
