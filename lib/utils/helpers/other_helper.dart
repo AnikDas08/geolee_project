@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:giolee78/utils/constants/app_string.dart';
 
 import '../constants/app_colors.dart';
 
@@ -11,12 +10,11 @@ class OtherHelper {
     r"^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9]([a-zA-Z0-9\-]*[a-zA-Z0-9])*(\.[a-zA-Z]{2,})+$",
   );
   static RegExp passRegExp = RegExp(r'(?=.*[a-z])(?=.*[0-9])');
-  static RegExp phoneRegexp = RegExp(r'^\+?[0-9]{7,15}$');
 
   static final RegExp urlRegexp =
   RegExp(r'^(https?:\/\/)(([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,})(\/\S*)?$');
 
-  static String? urlValidator( value) {
+  static String? urlValidator(value) {
     if (value == null || value.trim().isEmpty) {
       return "Website link is required";
     }
@@ -34,56 +32,79 @@ class OtherHelper {
 
 
   static String? validator(value) {
-    if (value.isEmpty) {
-      return AppString.thisFieldIsRequired;
+    if (value == null || value.isEmpty) {
+      return "This field is required";
     }
     return null;
   }
 
+  /// ✅ STRICT PHONE VALIDATOR - Minimum 10 digits, Maximum 15 digits
   static String? phoneNumberValidator(value) {
     if (value == null || value.isEmpty) {
-      return AppString.thisFieldIsRequired;
-    } else if (!phoneRegexp.hasMatch(value)) {
-      return AppString.enterValidPhone;
+      return "Phone number is required";
     }
-    return null;
+
+    // Remove all spaces and hyphens for validation
+    String cleanValue = value.replaceAll(' ', '').replaceAll('-', '');
+
+    // Check if starts with +
+    final bool hasPlus = cleanValue.startsWith('+');
+    if (hasPlus) {
+      cleanValue = cleanValue.substring(1); // Remove the + for digit counting
+    }
+
+    // Check if all remaining characters are digits
+    if (!RegExp(r'^[0-9]+$').hasMatch(cleanValue)) {
+      return "Phone number can only contain digits (and optional +)";
+    }
+
+    // Check digit count (10-15)
+    final int digitCount = cleanValue.length;
+    if (digitCount < 10) {
+      return "Phone number must be at least 10 digits";
+    }
+    if (digitCount > 15) {
+      return "Phone number cannot exceed 15 digits";
+    }
+
+    return null; // Valid
   }
 
   static String? emailValidator(value) {
     if (value == null || value.isEmpty) {
-      return AppString.thisFieldIsRequired;
+      return "Email is required";
     } else if (!emailRegexp.hasMatch(value)) {
-      return AppString.enterValidEmail;
+      return "Enter a valid email";
     }
     return null;
   }
 
   static String? passwordValidator(value) {
     if (value == null || value.isEmpty) {
-      return AppString.thisFieldIsRequired;
+      return "Password is required";
     } else if (value.length < 8) {
-      return AppString.passwordMustBeeEightCharacters;
+      return "Password must be at least 8 characters";
     } else if (!passRegExp.hasMatch(value)) {
-      return AppString.passwordMustBeeEightCharacters;
+      return "Password must contain letters and numbers";
     }
     return null;
   }
 
   static String? confirmPasswordValidator(
-    value,
-    TextEditingController passwordController,
-  ) {
+      value,
+      TextEditingController passwordController,
+      ) {
     if (value == null || value.isEmpty) {
-      return AppString.thisFieldIsRequired;
+      return "Please confirm password";
     } else if (value != passwordController.text) {
-      return AppString.thePasswordDoesNotMatch;
+      return "Passwords do not match";
     }
     return null;
   }
 
   static Future<String> openDatePickerDialog(
-    TextEditingController controller,
-  ) async {
+      TextEditingController controller,
+      ) async {
     final DateTime? picked = await showDatePicker(
       builder: (context, child) => Theme(
         data: Theme.of(context).copyWith(
@@ -144,8 +165,8 @@ class OtherHelper {
   }
 
   static Future<String> openTimePickerDialog(
-    TextEditingController? controller,
-  ) async {
+      TextEditingController? controller,
+      ) async {
     final TimeOfDay? picked = await showTimePicker(
       context: Get.context!,
       initialTime: TimeOfDay.now(),

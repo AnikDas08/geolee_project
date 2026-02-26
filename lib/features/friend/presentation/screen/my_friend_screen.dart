@@ -5,7 +5,6 @@ import 'package:get/get.dart';
 import 'package:giolee78/component/text/common_text.dart';
 import 'package:giolee78/component/text_field/common_text_field.dart';
 import 'package:giolee78/config/api/api_end_point.dart';
-import 'package:giolee78/config/route/app_routes.dart';
 import 'package:giolee78/features/friend/presentation/screen/view_friend_screen.dart';
 import 'package:giolee78/utils/constants/app_colors.dart';
 import 'package:giolee78/utils/constants/app_images.dart';
@@ -47,7 +46,7 @@ class MyFriendScreen extends StatelessWidget {
             physics: const BouncingScrollPhysics(),
             padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
             children: [
-              const _SearchField(),
+              _SearchField(controller: controller),
               SizedBox(height: 16.h),
 
               /// ================= Suggested Friends =================
@@ -77,25 +76,26 @@ class MyFriendScreen extends StatelessWidget {
                     );
                   },
                 ),
-
                 SizedBox(height: 20.h),
               ],
 
               /// ================= My Friends =================
               CommonText(
-                text: 'Total Friend (${controller.myFriendsList.length})',
+                text: 'Total Friend (${controller.filteredFriendsList.length})',
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
                 textAlign: TextAlign.start,
               ),
               SizedBox(height: 12.h),
 
-              if (controller.myFriendsList.isEmpty)
+              if (controller.filteredFriendsList.isEmpty)
                 Padding(
                   padding: EdgeInsets.symmetric(vertical: 40.h),
-                  child: const Center(
+                  child: Center(
                     child: CommonText(
-                      text: 'No friends yet',
+                      text: controller.searchQuery.value.isNotEmpty
+                          ? 'No results found'
+                          : 'No friends yet',
                       fontSize: 14,
                       color: AppColors.secondaryText,
                     ),
@@ -105,18 +105,19 @@ class MyFriendScreen extends StatelessWidget {
                 ListView.builder(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
-                  itemCount: controller.myFriendsList.length,
+                  itemCount: controller.filteredFriendsList.length,
                   itemBuilder: (context, index) {
-                    final data = controller.myFriendsList[index];
+                    final data = controller.filteredFriendsList[index];
                     final friend = data.friend;
 
                     return Padding(
                       padding: EdgeInsets.only(bottom: 10.h),
                       child: _FriendListItem(
-                        friendshipId: data.id ?? "",        // 🔥 relation id (unfriend এর জন্য)
-                        userId: friend?.id ?? "",           // 🔥 actual user id (view screen এর জন্য)
+                        friendshipId: data.id ?? "",
+                        userId: friend?.id ?? "",
                         userName: friend?.name ?? "Unknown",
-                        avatar: "${ApiEndPoint.imageUrl}${friend?.image ?? ""}",
+                        avatar:
+                        "${ApiEndPoint.imageUrl}${friend?.image ?? ""}",
                         controller: controller,
                       ),
                     );
@@ -132,7 +133,9 @@ class MyFriendScreen extends StatelessWidget {
 
 /// ================= Search =================
 class _SearchField extends StatelessWidget {
-  const _SearchField();
+  const _SearchField({required this.controller});
+
+  final MyFriendController controller;
 
   @override
   Widget build(BuildContext context) {
@@ -140,6 +143,7 @@ class _SearchField extends StatelessWidget {
       hintText: 'Search friends...',
       paddingHorizontal: 14,
       paddingVertical: 12,
+      onSubmitted: (value) => controller.searchQuery.value = value,
       prefixIcon: Padding(
         padding: EdgeInsets.symmetric(horizontal: 12.w),
         child: Icon(Icons.search, size: 18.sp, color: AppColors.textFiledColor),
@@ -155,7 +159,6 @@ class _SuggestedFriendCard extends StatelessWidget {
     required this.userName,
     required this.controller,
     this.avatar,
-
   });
 
   final String userId;
@@ -166,9 +169,8 @@ class _SuggestedFriendCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-
-      onTap: () => Get.to(() => ViewFriendScreen(isFriend: false, userId: userId)),
-
+      onTap: () =>
+          Get.to(() => ViewFriendScreen(isFriend: false, userId: userId)),
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
         decoration: BoxDecoration(
@@ -185,25 +187,21 @@ class _SuggestedFriendCard extends StatelessWidget {
                     radius: 22.r,
                     backgroundImage: (avatar != null && avatar!.isNotEmpty)
                         ? NetworkImage(avatar!)
-                        : const AssetImage(AppImages.profileImage) as ImageProvider,
+                        : const AssetImage(AppImages.profileImage)
+                    as ImageProvider,
                   ),
                   SizedBox(width: 12.w),
-                  // ✅ Wrap with Expanded + add maxLines + overflow
                   Expanded(
                     child: CommonText(
                       text: userName,
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                 ],
               ),
             ),
-
             SizedBox(width: 8.w),
-
             if (userId != LocalStorage.userId)
               Obx(() {
                 final status = controller.getFriendStatus(userId);
@@ -322,25 +320,21 @@ class _FriendListItem extends StatelessWidget {
                     backgroundImage:
                     (avatar != null && avatar!.startsWith('http'))
                         ? NetworkImage(avatar!)
-                        : const AssetImage(AppImages.profileImage) as ImageProvider,
+                        : const AssetImage(AppImages.profileImage)
+                    as ImageProvider,
                   ),
                   SizedBox(width: 12.w),
-                  // ✅ Wrap with Expanded + add maxLines + overflow
                   Expanded(
                     child: CommonText(
                       text: userName,
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                 ],
               ),
             ),
-
             SizedBox(width: 8.w),
-
             Row(
               children: [
                 GestureDetector(

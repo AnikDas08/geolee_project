@@ -9,14 +9,33 @@ import 'package:giolee78/services/api/api_service.dart';
 import 'package:giolee78/services/socket/socket_service.dart';
 import 'package:giolee78/utils/log/app_log.dart';
 
+import '../../../../utils/app_utils.dart';
+
 class MessageController extends GetxController {
-  /// ========== TEXT CONTROLLER ==========
+  // ================================================
+  // FRIEND STATUS
+  // ================================================
+  RxBool isFriend = false.obs;
+  RxBool hasPendingRequest = false.obs;
+  RxString otherUserId = ''.obs;
+  RxString friendStatusValue = ''.obs;
+
+  /// Whether friendship status has been loaded (to avoid showing sheet before we know)
+  RxBool friendStatusLoaded = false.obs;
+
+  // ================================================
+  // TEXT CONTROLLER
+  // ================================================
   final messageController = TextEditingController();
 
-  /// ========== IMAGE & FILE PICKERS ==========
+  // ================================================
+  // IMAGE & FILE PICKERS
+  // ================================================
   final ImagePicker _imagePicker = ImagePicker();
 
-  /// ========== PICKED FILES VARIABLES ==========
+  // ------------------------------------------------
+  // PICKED FILES VARIABLES
+  // ------------------------------------------------
   XFile? pickedImage;
   PlatformFile? pickedFile;
   String? pickedImagePath;
@@ -24,48 +43,67 @@ class MessageController extends GetxController {
   String? pickedFileName;
   String? pickedFileType;
 
-  /// ========== UI STATE VARIABLES ==========
+  // ------------------------------------------------
+  // UI STATE VARIABLES
+  // ------------------------------------------------
   bool isPickingImage = false;
   bool isPickingFile = false;
   bool hasPickedImage = false;
   bool hasPickedFile = false;
 
-  /// ========== LOADING STATES ==========
+  // ------------------------------------------------
+  // LOADING STATES
+  // ------------------------------------------------
   bool isUploadingImage = false;
   bool isUploadingMedia = false;
   bool isUploadingDocument = false;
   bool isSendingText = false;
 
-  /// ========== MESSAGES ==========
+  // ------------------------------------------------
+  // MESSAGES
+  // ------------------------------------------------
   List<ChatMessage> messages = [];
 
-  /// ========== CHAT VARIABLES ==========
+  // ------------------------------------------------
+  // CHAT VARIABLES
+  // ------------------------------------------------
   String chatId = '';
   String chatRoomId = '';
   String name = '';
   String image = '';
   bool isActive = true;
+  String userId = '';
 
-  /// ========== SERVICE INFO ==========
+  // ------------------------------------------------
+  // SERVICE INFO
+  // ------------------------------------------------
   String serviceTitle = '';
   String serviceImage = '';
   num price = 0;
   String postId = '';
   String clientStatus = '';
 
-  /// ========== GENERAL LOADING STATE ==========
+  // ------------------------------------------------
+  // GENERAL LOADING STATE
+  // ------------------------------------------------
   bool isLoading = false;
 
-  /// ========== SCROLL CONTROLLER ==========
+  // ------------------------------------------------
+  // SCROLL CONTROLLER
+  // ------------------------------------------------
   final ScrollController scrollController = ScrollController();
 
   static MessageController get instance => Get.put(MessageController());
 
-  /// ========== LIFECYCLE ==========
+  // ================================================
+  // LIFECYCLE
+  // ================================================
   @override
   void onInit() {
     super.onInit();
     listenMessage();
+    // NOTE: checkFriendshipStatus is called from MessageScreen.initState()
+    // after chatId and userId have been set from route parameters.
   }
 
   @override
@@ -79,15 +117,11 @@ class MessageController extends GetxController {
   }
 
   // ================================================
-  // 0️⃣ LISTEN FOR NEW MESSAGES VIA SOCKET
+  // 0. LISTEN FOR NEW MESSAGES VIA SOCKET
   // ================================================
-
   void listenMessage() {
-    // Use root namespace as fallback since /messaging is unreachable
     SocketServices.on("message:new", (data) {
-      print(
-        ">>>>>>>>>>>> 📩 New Message received via socket: $data <<<<<<<<<<<<",
-      );
+      appLog(">>>>>>>>>>>> 📩 New Message received via socket: $data <<<<<<<<<<<<");
 
       try {
         final String incomingChatId = data['chat'] is String
@@ -96,7 +130,6 @@ class MessageController extends GetxController {
 
         if (chatId.isNotEmpty && incomingChatId == chatId) {
           final newMessage = ChatMessage.fromJson(data);
-          // Prevent duplicate messages
           if (!messages.any((m) => m.id == newMessage.id)) {
             messages.add(newMessage);
             update();
@@ -108,20 +141,16 @@ class MessageController extends GetxController {
       }
     });
 
-    // chat:update fires on root socket when any message is sent in this chat.
-    // This is the reliable fallback for the receiver to see new messages.
     SocketServices.on("chat:update", (data) {
       if (chatId.isNotEmpty) {
-        print(
-          ">>>>>>>>>>>> 🔄 chat:update received — reloading messages <<<<<<<<<<<<",
-        );
+        appLog(">>>>>>>>>>>> 🔄 chat:update received — reloading messages <<<<<<<<<<<<");
         loadMessages(showLoading: false);
       }
     });
   }
 
   // ================================================
-  // 1️⃣ PICK IMAGE FROM GALLERY
+  // 1. PICK IMAGE FROM GALLERY
   // ================================================
   Future<void> pickImageFromGallery() async {
     try {
@@ -155,7 +184,7 @@ class MessageController extends GetxController {
   }
 
   // ================================================
-  // 2️⃣ PICK IMAGE FROM CAMERA
+  // 2. PICK IMAGE FROM CAMERA
   // ================================================
   Future<void> pickImageFromCamera() async {
     try {
@@ -189,7 +218,7 @@ class MessageController extends GetxController {
   }
 
   // ================================================
-  // 3️⃣ PICK FILE
+  // 3. PICK FILE
   // ================================================
   Future<void> pickFile() async {
     try {
@@ -199,29 +228,9 @@ class MessageController extends GetxController {
       final FilePickerResult? result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
         allowedExtensions: [
-          'pdf',
-          'doc',
-          'docx',
-          'xls',
-          'xlsx',
-          'ppt',
-          'pptx',
-          'txt',
-          'csv',
-          'jpg',
-          'jpeg',
-          'png',
-          'gif',
-          'webp',
-          'bmp',
-          'heic',
-          'mp3',
-          'mp4',
-          'avi',
-          'mov',
-          'mkv',
-          'flv',
-          'wav',
+          'pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx',
+          'txt', 'csv', 'jpg', 'jpeg', 'png', 'gif', 'webp',
+          'bmp', 'heic', 'mp3', 'mp4', 'avi', 'mov', 'mkv', 'flv', 'wav',
         ],
       );
 
@@ -255,22 +264,14 @@ class MessageController extends GetxController {
   }
 
   // ================================================
-  // 4️⃣ DETECT FILE TYPE
+  // 4. DETECT FILE TYPE
   // ================================================
   void _detectFileType(String fileName) {
     final ext = fileName.toLowerCase().split('.').last;
 
     if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'heic'].contains(ext)) {
       pickedFileType = 'image';
-    } else if ([
-      'mp3',
-      'mp4',
-      'avi',
-      'mov',
-      'mkv',
-      'flv',
-      'wav',
-    ].contains(ext)) {
+    } else if (['mp3', 'mp4', 'avi', 'mov', 'mkv', 'flv', 'wav'].contains(ext)) {
       pickedFileType = 'media';
     } else {
       pickedFileType = 'document';
@@ -278,7 +279,7 @@ class MessageController extends GetxController {
   }
 
   // ================================================
-  // 5️⃣ CLEAR PICKED FILES
+  // 5. CLEAR PICKED FILES
   // ================================================
   void clearPickedImage() {
     pickedImage = null;
@@ -310,21 +311,15 @@ class MessageController extends GetxController {
   }
 
   // ================================================
-  // 6️⃣ GETTER METHODS
+  // 6. GETTER METHODS
   // ================================================
   String getPickedFileName() {
-    if (hasPickedImage && pickedImage != null) {
-      return pickedImage!.name;
-    }
-    if (hasPickedFile && pickedFile != null) {
-      return pickedFile!.name;
-    }
+    if (hasPickedImage && pickedImage != null) return pickedImage!.name;
+    if (hasPickedFile && pickedFile != null) return pickedFile!.name;
     return '';
   }
 
-  String getPickedFileType() {
-    return pickedFileType ?? 'unknown';
-  }
+  String getPickedFileType() => pickedFileType ?? 'unknown';
 
   String getPickedFileSize() {
     if (hasPickedFile && pickedFile != null) {
@@ -338,15 +333,14 @@ class MessageController extends GetxController {
   bool isFilePicked() => hasPickedFile && pickedFile != null;
 
   String? getPickedFilePath() {
-    if (hasPickedImage && pickedImagePath != null) {
-      return pickedImagePath;
-    }
-    if (hasPickedFile && pickedFilePath != null) {
-      return pickedFilePath;
-    }
+    if (hasPickedImage && pickedImagePath != null) return pickedImagePath;
+    if (hasPickedFile && pickedFilePath != null) return pickedFilePath;
     return null;
   }
 
+  // ================================================
+  // 7. LOAD MESSAGES
+  // ================================================
   Future<void> loadMessages({bool showLoading = true}) async {
     if (showLoading) {
       isLoading = true;
@@ -354,7 +348,6 @@ class MessageController extends GetxController {
     }
 
     try {
-      // Join the socket room for this chat
       if (chatId.isNotEmpty) {
         SocketServices.joinRoom(chatId);
       }
@@ -370,31 +363,25 @@ class MessageController extends GetxController {
             final message = ChatMessage.fromJson(json);
             messages.add(message);
           }
-          // Sort oldest → newest so latest message is always at the bottom
           messages.sort((a, b) => a.createdAt.compareTo(b.createdAt));
         }
       }
     } catch (e) {
       appLog("❌ Load messages error: $e");
     } finally {
-      if (showLoading) {
-        isLoading = false;
-      }
+      if (showLoading) isLoading = false;
       update();
       _scrollToBottom();
     }
   }
 
   // ================================================
-  // 8️⃣ SEND METHODS
+  // 8. SEND METHODS
   // ================================================
-
-  // ===================main send message method===================
   Future<void> sendMessage() async {
     await sendTextAndFile();
   }
 
-  //==================== Send text and file ===============================
   Future<void> sendTextAndFile() async {
     if (messageController.text.trim().isEmpty &&
         !isImagePicked() &&
@@ -403,18 +390,15 @@ class MessageController extends GetxController {
       return;
     }
 
-    // Send text first
     if (messageController.text.trim().isNotEmpty) {
       await _sendTextMessage();
     }
 
-    // Then send file
     if (isImagePicked() || isFilePicked()) {
       await sendPickedFile();
     }
   }
 
-  //====================this one for send text message==================================
   Future<void> _sendTextMessage() async {
     isSendingText = true;
     update();
@@ -432,7 +416,6 @@ class MessageController extends GetxController {
       if (response.statusCode == 200) {
         appLog("✅ Text sent successfully");
         messageController.clear();
-        // Reload silently (no loading spinner) to show the sent message
         await loadMessages(showLoading: false);
       } else {
         _showErrorSnackBar('Failed to send message');
@@ -446,7 +429,6 @@ class MessageController extends GetxController {
     }
   }
 
-  //==========================this one for send file =================================
   Future<void> sendPickedFile() async {
     final filePath = getPickedFilePath();
     final fileType = pickedFileType;
@@ -456,7 +438,6 @@ class MessageController extends GetxController {
       return;
     }
 
-    // Validate file exists
     if (!File(filePath).existsSync()) {
       _showErrorSnackBar('File not found or deleted');
       clearAllPicks();
@@ -482,8 +463,6 @@ class MessageController extends GetxController {
       update();
     }
   }
-
-  // =======================this one for send image===================================
 
   Future<void> _sendImageMessage(String imagePath) async {
     isUploadingImage = true;
@@ -511,8 +490,6 @@ class MessageController extends GetxController {
       update();
     }
   }
-
-  //==================this one for send media (audio and video)================
 
   Future<void> _sendMediaMessage(String mediaPath) async {
     isUploadingMedia = true;
@@ -542,7 +519,6 @@ class MessageController extends GetxController {
     }
   }
 
-  //=================this one for send document =========================
   Future<void> _sendDocumentMessage(String docPath) async {
     isUploadingDocument = true;
     update();
@@ -602,5 +578,109 @@ class MessageController extends GetxController {
         );
       }
     });
+  }
+
+  // ================================================
+  // 9. FRIENDSHIP METHODS
+  // ================================================
+
+  /// Call this after setting userId from route params
+  Future<void> checkFriendshipStatus(String targetUserId) async {
+    if (targetUserId.isEmpty) {
+      friendStatusLoaded.value = true;
+      return;
+    }
+
+    try {
+      debugPrint("🔍 Checking friendship with: $targetUserId");
+      otherUserId.value = targetUserId;
+
+      final response = await ApiService.get(
+        "${ApiEndPoint.checkFriendStatus}$targetUserId",
+      );
+
+      debugPrint("📦 Friendship check response: ${response.statusCode}");
+
+      if (response.statusCode == 200) {
+        final data = response.data['data'];
+
+        if (data['isAlreadyFriend'] == true) {
+          debugPrint("✅ Already Friends");
+          isFriend.value = true;
+          hasPendingRequest.value = false;
+          friendStatusValue.value = 'friends';
+        } else if (data['pendingFriendRequest'] != null) {
+          debugPrint("⏳ Pending Friend Request");
+          isFriend.value = false;
+          hasPendingRequest.value = true;
+          friendStatusValue.value = 'pending';
+        } else {
+          debugPrint("❌ Not Friends");
+          isFriend.value = false;
+          hasPendingRequest.value = false;
+          friendStatusValue.value = 'none';
+        }
+      } else {
+        debugPrint("❌ Error checking friendship: ${response.message}");
+        // Default to not friends on error so sheet shows
+        isFriend.value = false;
+        friendStatusValue.value = 'none';
+      }
+    } catch (e) {
+      debugPrint("❌ Friendship check error: $e");
+      isFriend.value = false;
+      friendStatusValue.value = 'none';
+    } finally {
+      friendStatusLoaded.value = true;
+    }
+  }
+
+  Future<void> sendFriendRequest(String targetUserId) async {
+    try {
+      debugPrint("📤 Sending friend request to: $targetUserId");
+
+      final response = await ApiService.post(
+        ApiEndPoint.createFriendRequest,
+        body: {"receiver": targetUserId},
+      );
+
+      debugPrint("📦 Friend request response: ${response.statusCode}");
+
+      if (response.statusCode == 200) {
+        debugPrint("✅ Friend request sent");
+        hasPendingRequest.value = true;
+        friendStatusValue.value = 'pending';
+        Utils.successSnackBar("Sent", "Friend request sent successfully");
+      } else {
+        debugPrint("❌ Error sending friend request: ${response.message}");
+        Utils.errorSnackBar(
+          "Error",
+          response.message ?? "Failed to send friend request",
+        );
+      }
+    } catch (e) {
+      debugPrint("❌ Friend request error: $e");
+      Utils.errorSnackBar("Error", "Something went wrong");
+    }
+  }
+
+  Future<void> cancelFriendRequest(String targetUserId) async {
+    try {
+      debugPrint("❌ Canceling friend request for: $targetUserId");
+
+      final response = await ApiService.patch(
+        "${ApiEndPoint.cancelFriendRequest}$targetUserId",
+        body: {"status": "cancelled"},
+      );
+
+      if (response.statusCode == 200) {
+        debugPrint("✅ Friend request cancelled");
+        hasPendingRequest.value = false;
+        friendStatusValue.value = 'none';
+        Utils.successSnackBar("Cancelled", "Friend request cancelled");
+      }
+    } catch (e) {
+      debugPrint("❌ Cancel error: $e");
+    }
   }
 }

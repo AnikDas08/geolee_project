@@ -62,7 +62,7 @@ class GroupMessageController extends GetxController {
   }
 
   @override
-  void onInit() async{
+  Future<void> onInit() async{
     super.onInit();
 
     listenMessage();
@@ -140,7 +140,7 @@ class GroupMessageController extends GetxController {
 
     SocketServices.on("chat:update", (data) {
       if (chatId.isNotEmpty) {
-        loadMessages(showLoading: false);
+        loadMessages();
       }
     });
   }
@@ -183,12 +183,14 @@ class GroupMessageController extends GetxController {
     if (isSendingText ||
         isUploadingImage ||
         isUploadingMedia ||
-        isUploadingDocument)
+        isUploadingDocument) {
       return;
+    }
     if (messageController.text.trim().isEmpty &&
         !hasPickedImage &&
-        !hasPickedFile)
+        !hasPickedFile) {
       return;
+    }
 
     if (messageController.text.trim().isNotEmpty) {
       await _sendTextMessage();
@@ -212,7 +214,7 @@ class GroupMessageController extends GetxController {
       );
       if (response.statusCode == 200) {
         messageController.clear();
-        await loadMessages(showLoading: false);
+        await loadMessages();
       } else {
         _showError('Failed to send message');
       }
@@ -261,7 +263,7 @@ class GroupMessageController extends GetxController {
         body: {"chat": chatId, "type": "image"},
       );
       if (response.statusCode == 200) {
-        await loadMessages(showLoading: false);
+        await loadMessages();
       } else {
         _showError('Failed to send image');
       }
@@ -282,7 +284,7 @@ class GroupMessageController extends GetxController {
         body: {"chat": chatId, "type": "media"},
       );
       if (response.statusCode == 200) {
-        await loadMessages(showLoading: false);
+        await loadMessages();
       } else {
         _showError('Failed to send media');
       }
@@ -303,7 +305,7 @@ class GroupMessageController extends GetxController {
         body: {"chat": chatId, "type": "document"},
       );
       if (response.statusCode == 200) {
-        await loadMessages(showLoading: false);
+        await loadMessages();
       } else {
         _showError('Failed to send document');
       }

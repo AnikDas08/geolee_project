@@ -30,7 +30,7 @@ class _GroupMessageScreenState extends State<GroupMessageScreen> {
       baseUrl = '$baseUrl/';
     }
 
-    String cleanPath = path.startsWith('/') ? path.substring(1) : path;
+    final String cleanPath = path.startsWith('/') ? path.substring(1) : path;
 
     return "$baseUrl$cleanPath";
   }
@@ -69,7 +69,7 @@ class _GroupMessageScreenState extends State<GroupMessageScreen> {
                   Obx(() {
                     final String path = controller.avatarFilePath.value;
                     if (path.isNotEmpty) {
-                      bool isActuallyLocalFile = path.startsWith('/data/') ||
+                      final bool isActuallyLocalFile = path.startsWith('/data/') ||
                           path.startsWith('/storage/') ||
                           path.startsWith('file://');
 

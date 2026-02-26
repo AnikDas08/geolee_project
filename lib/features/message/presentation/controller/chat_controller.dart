@@ -5,12 +5,13 @@ import '../../repository/chat_repository.dart';
 import '../../../../services/socket/socket_service.dart';
 import '../../../../services/storage/storage_services.dart';
 import '../../../../utils/enum/enum.dart';
+import '../../../../config/api/api_end_point.dart';
+import '../../../../services/api/api_service.dart';
 
 class ChatController extends GetxController {
-  /// Chat List here
   List<ChatModel> singleChats = [];
   List<ChatModel> chats = [];
-  List<ChatModel> filteredChats = []; 
+  List<ChatModel> filteredChats = [];
 
   bool isSingleLoading = false;
   bool isGroupLoading = false;
@@ -48,11 +49,11 @@ class ChatController extends GetxController {
           true,
         );
 
-        // ✅ শুধুমাত্র সেই গ্রুপগুলো যোগ করুন যেখানে আমি পার্টিসিপেন্ট হিসেবে আছি
-        final joinedGroups = list.where((item) => 
-          item.isGroup && 
-          item.participants.any((p) => p.sId == LocalStorage.userId)
-        ).toList();
+        final joinedGroups = list
+            .where((item) =>
+        item.isGroup &&
+            item.participants.any((p) => p.sId == LocalStorage.userId))
+            .toList();
 
         chats.addAll(joinedGroups);
         filteredChats = chats;
@@ -68,7 +69,11 @@ class ChatController extends GetxController {
   }) async {
     try {
       if (showLoading) {
-        if (isGroup) isGroupLoading = true; else isSingleLoading = true;
+        if (isGroup) {
+          isGroupLoading = true;
+        } else {
+          isSingleLoading = true;
+        }
         isLoading = true;
         update();
       }
@@ -82,25 +87,72 @@ class ChatController extends GetxController {
 
       if (isGroup) {
         chats.clear();
-        // ✅ ফিল্টার: শুধুমাত্র জয়েন করা গ্রুপগুলো দেখাবে
-        final myGroups = list.where((item) => 
-          item.isGroup && 
-          item.participants.any((p) => p.sId == LocalStorage.userId)
-        ).toList();
-        
+        final myGroups = list
+            .where((item) =>
+        item.isGroup &&
+            item.participants.any((p) => p.sId == LocalStorage.userId))
+            .toList();
         chats.addAll(myGroups);
         filteredChats = chats;
       } else {
         singleChats.clear();
         singleChats.addAll(list.where((item) => !item.isGroup).toList());
+
+        // ✅ Chat load হওয়ার পর friendship status check করো
+        await _markFriendStatus();
       }
     } catch (e) {
       print(">>>>>>>>>>>> ❌ getChatRepos Error: $e <<<<<<<<<<<<");
     } finally {
-      if (isGroup) isGroupLoading = false; else isSingleLoading = false;
+      if (isGroup) {
+        isGroupLoading = false;
+      } else {
+        isSingleLoading = false;
+      }
       isLoading = isSingleLoading || isGroupLoading;
       update();
     }
+  }
+
+  // ================================================
+  // ✅ প্রতিটা single chat participant এর friendship
+  // status parallel এ check করো এবং ChatModel update করো
+  // ================================================
+  Future<void> _markFriendStatus() async {
+    if (singleChats.isEmpty) return;
+
+    final List<Future> checks = singleChats.map((chat) async {
+      if (chat.participant.sId.isEmpty) return;
+
+      try {
+        final response = await ApiService.get(
+          "${ApiEndPoint.checkFriendStatus}${chat.participant.sId}",
+        );
+
+        bool isFriend = false;
+        if (response.statusCode == 200) {
+          final data = response.data['data'];
+          isFriend = data['isAlreadyFriend'] == true;
+        }
+        // 400 = not friends → isFriend stays false
+
+        final index = singleChats.indexWhere((c) => c.id == chat.id);
+        if (index != -1) {
+          singleChats[index] =
+              singleChats[index].copyWith(isFriend: isFriend);
+        }
+      } catch (_) {
+        // error হলে false রাখো (white দেখাবে)
+        final index = singleChats.indexWhere((c) => c.id == chat.id);
+        if (index != -1) {
+          singleChats[index] =
+              singleChats[index].copyWith(isFriend: false);
+        }
+      }
+    }).toList();
+
+    await Future.wait(checks);
+    update();
   }
 
   Status get status {
@@ -111,11 +163,11 @@ class ChatController extends GetxController {
 
   Future<void> listenChat() async {
     SocketServices.on("chat:update", (data) {
-      getChatRepos(showLoading: false, isGroup: false);
+      getChatRepos(showLoading: false);
       getChatRepos(showLoading: false, isGroup: true);
     });
 
-    String eventName = "update-chatlist::${LocalStorage.userId}";
+    final String eventName = "update-chatlist::${LocalStorage.userId}";
     SocketServices.on(eventName, (data) {
       page = 0;
       chats.clear();
@@ -127,7 +179,6 @@ class ChatController extends GetxController {
         try {
           final chat = ChatModel.fromJson(item);
           if (chat.isGroup) {
-            // ✅ সকেট ডেটাতেও ফিল্টার প্রয়োগ করুন
             if (chat.participants.any((p) => p.sId == LocalStorage.userId)) {
               chats.add(chat);
             }
@@ -141,22 +192,21 @@ class ChatController extends GetxController {
 
       filteredChats = chats;
       update();
+      _markFriendStatus(); // socket update এও re-check
     });
   }
 
   void markChatAsSeen(String chatId) {
     int index = singleChats.indexWhere((chat) => chat.id == chatId);
     if (index != -1) {
-      final oldChat = singleChats[index];
-      singleChats[index] = oldChat.copyWith(unreadCount: 0);
+      singleChats[index] = singleChats[index].copyWith(unreadCount: 0);
       update();
       return;
     }
 
     index = chats.indexWhere((chat) => chat.id == chatId);
     if (index != -1) {
-      final oldChat = chats[index];
-      chats[index] = oldChat.copyWith(unreadCount: 0);
+      chats[index] = chats[index].copyWith(unreadCount: 0);
       filteredChats = chats;
       update();
     }
@@ -171,8 +221,8 @@ class ChatController extends GetxController {
 
   Future<void> fetchInitialData() async {
     await Future.wait([
-      getChatRepos(isGroup: false),
-      getChatRepos(isGroup: true, showLoading: true),
+      getChatRepos(),
+      getChatRepos(isGroup: true),
     ]);
   }
 }

@@ -11,8 +11,8 @@ class CommonPostCards extends StatelessWidget {
     required this.userAvatar,
     required this.timeAgo,
     required this.location,
-    required this.images,
-    required this.description,
+    this.images,
+    this.description, // ✅ nullable
     required this.isFriend,
     required this.privacyImage,
     required this.clickerType,
@@ -24,8 +24,8 @@ class CommonPostCards extends StatelessWidget {
   final String userAvatar;
   final String timeAgo;
   final String location;
-  final List<String> images;
-  final String description;
+  final List<String>? images; // ✅ nullable
+  final String? description;  // ✅ nullable
   final bool isFriend;
   final String privacyImage;
   final String clickerType;
@@ -136,11 +136,15 @@ class CommonPostCards extends StatelessWidget {
             ),
           ),
 
-          /// ================= Image Slider
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 12.w),
-            child: _PostImageSlider(images: images, onTapPhoto: onTapPhoto),
-          ),
+          /// ================= Image Slider (only if images exist)
+          if (images != null && images!.isNotEmpty)
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 12.w),
+              child: _PostImageSlider(
+                images: images!,
+                onTapPhoto: onTapPhoto,
+              ),
+            ),
 
           /// ================= Clicker Type
           Padding(
@@ -152,16 +156,17 @@ class CommonPostCards extends StatelessWidget {
             ),
           ),
 
-          /// ================= Description
-          Padding(
-            padding: EdgeInsets.fromLTRB(12.w, 6.h, 12.w, 12.h),
-            child: CommonText(
-              text: description,
-              fontSize: 12,
-              color: AppColors.textColorFirst,
-              maxLines: 6,
+          /// ================= Description (only if not null or empty)
+          if (description != null && description!.isNotEmpty)
+            Padding(
+              padding: EdgeInsets.fromLTRB(12.w, 6.h, 12.w, 12.h),
+              child: CommonText(
+                text: description!,
+                fontSize: 12,
+                color: AppColors.textColorFirst,
+                maxLines: 6,
+              ),
             ),
-          ),
         ],
       ),
     );
@@ -176,7 +181,10 @@ class _PostImageSlider extends StatefulWidget {
   final List<String> images;
   final VoidCallback onTapPhoto;
 
-  const _PostImageSlider({required this.images, required this.onTapPhoto});
+  const _PostImageSlider({
+    required this.images,
+    required this.onTapPhoto,
+  });
 
   @override
   State<_PostImageSlider> createState() => _PostImageSliderState();
@@ -213,8 +221,6 @@ class _PostImageSliderState extends State<_PostImageSlider> {
           ),
         ),
 
-        /// ================= Dot Indicator
-        /// ================= Dot Indicator
         if (widget.images.length > 1)
           Padding(
             padding: EdgeInsets.only(top: 10.h),
@@ -233,21 +239,20 @@ class _PostImageSliderState extends State<_PostImageSlider> {
                     borderRadius: BorderRadius.circular(20.r),
                     gradient: isActive
                         ? const LinearGradient(
-                            colors: [Color(0xFFFF0000), Color(0xFFF43C3C)],
-                          )
+                      colors: [Color(0xFFFF0000), Color(0xFFF43C3C)],
+                    )
                         : null,
                     color: isActive
                         ? null
                         : Colors.grey.withValues(alpha: 0.35),
                     boxShadow: isActive
                         ? [
-                            BoxShadow(
-                              color: const Color(0xFFF66666),
-
-                              blurRadius: 6.r,
-                              offset: const Offset(0, 2),
-                            ),
-                          ]
+                      BoxShadow(
+                        color: const Color(0xFFF66666),
+                        blurRadius: 6.r,
+                        offset: const Offset(0, 2),
+                      ),
+                    ]
                         : [],
                   ),
                 );

@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:get/get_rx/src/rx_types/rx_types.dart';
 import 'package:get/get_state_manager/src/simple/get_controllers.dart';
+import 'package:giolee78/services/storage/storage_services.dart';
 
 import '../../../../config/api/api_end_point.dart';
 import '../../../../services/api/api_service.dart';
@@ -23,6 +24,8 @@ class ChatNearbyProfileController extends GetxController {
       checkFriendship(userId),
     ]);
   }
+
+
 
   Future<void> sendGreeting(TextEditingController controller) async {
     try {
@@ -82,14 +85,17 @@ class ChatNearbyProfileController extends GetxController {
       isLoading.value = true;
       error.value = '';
 
-      final response =
-      await ApiService.get(ApiEndPoint.getUserSingleProfileById + userId);
+      final lat = LocalStorage.lat.toDouble();
+      final lng = LocalStorage.long.toDouble();
+
+      final response = await ApiService.get(
+        "${ApiEndPoint.getUserSingleProfileById +userId}?lat=$lat&lng=$lng",
+      );
 
       if (response.statusCode == 200) {
         final data = response.data['data'];
         userProfile.value = Map<String, dynamic>.from(data);
 
-        // 👇 friend status from profile response
         if (data['isAlreadyFriend'] == true) {
           friendStatus.value = FriendStatus.friends;
         } else if (data['pendingFriendRequest'] != null) {

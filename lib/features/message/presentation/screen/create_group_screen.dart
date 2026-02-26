@@ -3,7 +3,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:giolee78/component/button/common_button.dart';
 import 'package:giolee78/component/text/common_text.dart';
-import 'package:giolee78/config/route/app_routes.dart';
 import 'package:giolee78/utils/constants/app_colors.dart';
 
 import '../../../../config/api/api_end_point.dart';
@@ -93,7 +92,7 @@ class CreateGroupScreen extends StatelessWidget {
                   ),
                   child: Obx(() {
                     return DropdownButtonFormField<String>(
-                      value: controller.privacyOptions[controller.selectedPrivacyType.value],
+                      initialValue: controller.privacyOptions[controller.selectedPrivacyType.value],
                       items: controller.privacyTypes.map((String type) {
                         return DropdownMenuItem<String>(
                           value: type,

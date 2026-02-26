@@ -41,7 +41,6 @@ class _ChatListScreenState extends State<ChatListScreen> {
           }
         },
         child: Scaffold(
-          /// App Bar Section Starts here
           appBar: AppBar(
             centerTitle: true,
             elevation: 0,
@@ -63,12 +62,10 @@ class _ChatListScreenState extends State<ChatListScreen> {
                     icon: const Icon(Icons.add, color: Colors.black),
                     onPressed: () {
                       final TabController tabController =
-                          DefaultTabController.of(context);
+                      DefaultTabController.of(context);
                       if (tabController.index == 0) {
-                        // Chat tab is selected
                         Get.toNamed(AppRoutes.searchScreen);
                       } else {
-                        // Group tab is selected
                         Get.to(() => const CreateGroupScreen());
                       }
                     },
@@ -80,31 +77,24 @@ class _ChatListScreenState extends State<ChatListScreen> {
               preferredSize: Size.fromHeight(48.h),
               child: Builder(
                 builder: (context) {
-                  final TabController tabController = DefaultTabController.of(
-                    context,
-                  );
+                  final TabController tabController =
+                  DefaultTabController.of(context);
                   return AnimatedBuilder(
                     animation: tabController,
                     builder: (context, _) {
                       Tab buildTab(String title, int index) {
                         final bool isSelected = tabController.index == index;
-                        final Color bgColor = isSelected
-                            ? AppColors.primaryColor
-                            : Colors.transparent;
-                        final Color textColor = isSelected
-                            ? Colors.white
-                            : Colors.black;
-
                         return Tab(
                           child: Container(
                             width: double.infinity,
                             margin: EdgeInsets.symmetric(horizontal: 10.w),
                             decoration: ShapeDecoration(
-                              color: bgColor,
+                              color: isSelected
+                                  ? AppColors.primaryColor
+                                  : Colors.transparent,
                               shape: RoundedRectangleBorder(
-                                side: const BorderSide(
-                                  color: Color(0xFFBAC3C6),
-                                ),
+                                side:
+                                const BorderSide(color: Color(0xFFBAC3C6)),
                                 borderRadius: BorderRadius.circular(4),
                               ),
                             ),
@@ -113,7 +103,8 @@ class _ChatListScreenState extends State<ChatListScreen> {
                               text: title,
                               fontSize: 14.sp,
                               fontWeight: FontWeight.w500,
-                              color: textColor,
+                              color:
+                              isSelected ? Colors.white : Colors.black,
                             ),
                           ),
                         );
@@ -121,9 +112,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
 
                       return Padding(
                         padding: EdgeInsets.symmetric(
-                          horizontal: 20.w,
-                          vertical: 8.h,
-                        ),
+                            horizontal: 20.w, vertical: 8.h),
                         child: SizedBox(
                           height: 40.h,
                           child: TabBar(
@@ -145,39 +134,32 @@ class _ChatListScreenState extends State<ChatListScreen> {
             ),
           ),
 
-          /// Body Section Starts here
           body: GetBuilder<ChatController>(
             init: con,
             builder: (controller) {
               return Padding(
-                padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
+                padding: EdgeInsets.symmetric(
+                    horizontal: 20.w, vertical: 10.h),
                 child: Column(
                   children: [
-                    /// User Search bar here
+                    /// Search bar
                     TextField(
                       controller: controller.searchController,
                       onChanged: (value) => controller.searchChats(value),
                       decoration: InputDecoration(
                         hintText: AppString.search,
                         hintStyle: TextStyle(
-                          fontSize: 14.sp,
-                          color: Colors.grey[400],
-                        ),
-                        prefixIcon: Icon(
-                          Icons.search,
-                          color: Colors.grey[600],
-                          size: 22.sp,
-                        ),
-                        suffixIcon:
-                            controller.searchController.text.trim().isNotEmpty
+                            fontSize: 14.sp, color: Colors.grey[400]),
+                        prefixIcon: Icon(Icons.search,
+                            color: Colors.grey[600], size: 22.sp),
+                        suffixIcon: controller.searchController.text
+                            .trim()
+                            .isNotEmpty
                             ? IconButton(
-                                icon: Icon(
-                                  Icons.clear,
-                                  color: Colors.grey[600],
-                                  size: 20.sp,
-                                ),
-                                onPressed: () => controller.clearSearch(),
-                              )
+                          icon: Icon(Icons.clear,
+                              color: Colors.grey[600], size: 20.sp),
+                          onPressed: () => controller.clearSearch(),
+                        )
                             : null,
                         filled: true,
                         fillColor: Colors.grey[100],
@@ -192,13 +174,10 @@ class _ChatListScreenState extends State<ChatListScreen> {
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8.r),
                           borderSide: const BorderSide(
-                            color: AppColors.primaryColor,
-                          ),
+                              color: AppColors.primaryColor),
                         ),
                         contentPadding: EdgeInsets.symmetric(
-                          horizontal: 16.w,
-                          vertical: 12.h,
-                        ),
+                            horizontal: 16.w, vertical: 12.h),
                       ),
                     ),
 
@@ -208,63 +187,70 @@ class _ChatListScreenState extends State<ChatListScreen> {
                     Expanded(
                       child: TabBarView(
                         children: [
-                          /// Chat Tab
+                          // ─── Chat Tab ───────────────────────────────
                           controller.isSingleLoading
                               ? const CommonLoader()
                               : controller.singleChats.isEmpty
                               ? SizedBox(
-                                  height: Get.height,
-                                  width: Get.width,
-                                  child: Center(
-                                    child: Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        CommonImage(
-                                          imageSrc: "assets/images/noData.png",
-                                          height: 100.h,
-                                          width: 100.w,
-                                        ),
-                                        SizedBox(height: 20.h),
-                                        CommonText(
-                                          text: "No Chat List Found",
-                                          fontSize: 24.sp,
-                                          fontWeight: FontWeight.w600,
-                                          color: Colors.black,
-                                        ),
-                                      ],
-                                    ),
+                            height: Get.height,
+                            width: Get.width,
+                            child: Center(
+                              child: Column(
+                                mainAxisAlignment:
+                                MainAxisAlignment.center,
+                                children: [
+                                  CommonImage(
+                                    imageSrc:
+                                    "assets/images/noData.png",
+                                    height: 100.h,
+                                    width: 100.w,
                                   ),
-                                )
+                                  SizedBox(height: 20.h),
+                                  CommonText(
+                                    text: "No Chat List Found",
+                                    fontSize: 24.sp,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          )
                               : ListView.builder(
-                                  itemCount: controller.singleChats.length,
-                                  padding: EdgeInsets.only(top: 16.h),
-                                  itemBuilder: (context, index) {
-                                    final ChatModel item =
-                                        controller.singleChats[index];
-                                    return GestureDetector(
-                                      onTap: () {
-                                        // controller.markChatAsSeen(item.id);
-                                        Get.toNamed(
-                                          AppRoutes.message,
-                                          parameters: {
-                                            "chatId": item.id,
-                                            "name": item.isGroup
-                                                ? (item.chatName ??
-                                                      "Unnamed Group")
-                                                : item.participant.fullName,
-                                            "image": item.isGroup
-                                                ? (item.chatImage ?? "")
-                                                : item.participant.image,
-                                          },
-                                        );
-                                      },
-                                      child: chatListItem(item: item),
-                                    );
-                                  },
-                                ),
+                            itemCount:
+                            controller.singleChats.length,
+                            padding: EdgeInsets.only(top: 16.h),
+                            itemBuilder: (context, index) {
+                              final ChatModel item =
+                              controller.singleChats[index];
 
-                          /// Group Tab (CORRECTED NAVIGATION HERE)
+                              return GestureDetector(
+                                onTap: () {
+                                  Get.toNamed(
+                                    AppRoutes.message,
+                                    parameters: {
+                                      "userId":
+                                      item.participant.sId,
+                                      "chatId": item.id,
+                                      "name": item.isGroup
+                                          ? (item.chatName ??
+                                          "Unnamed Group")
+                                          : item.participant
+                                          .fullName,
+                                      "image": item.isGroup
+                                          ? (item.chatImage ?? "")
+                                          : item.participant.image,
+                                    },
+                                  );
+                                },
+                                child: chatListItem(
+                                  item: item,
+                                  isFriend: item.isFriend, // ✅
+                                ),
+                              );
+                            },
+                          ),
+
+                          // ─── Group Tab ──────────────────────────────
                           switch (controller.status) {
                             Status.loading => const CommonLoader(),
                             Status.error => SizedBox(
@@ -272,10 +258,12 @@ class _ChatListScreenState extends State<ChatListScreen> {
                               width: Get.width,
                               child: Center(
                                 child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  mainAxisAlignment:
+                                  MainAxisAlignment.center,
                                   children: [
                                     CommonImage(
-                                      imageSrc: "assets/images/noData.png",
+                                      imageSrc:
+                                      "assets/images/noData.png",
                                       height: 100.h,
                                       width: 100.w,
                                     ),
@@ -290,62 +278,59 @@ class _ChatListScreenState extends State<ChatListScreen> {
                               ),
                             ),
                             Status.completed =>
-                              controller.filteredChats.isEmpty
-                                  ? Center(
-                                      child: Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Icon(
-                                            Icons.search_off,
-                                            size: 60.sp,
-                                            color: Colors.grey[400],
-                                          ),
-                                          SizedBox(height: 16.h),
-                                          CommonText(
-                                            text: "No results found",
-                                            fontSize: 18.sp,
-                                            fontWeight: FontWeight.w500,
-                                            color: Colors.grey,
-                                          ),
-                                          SizedBox(height: 8.h),
-                                          CommonText(
-                                            text:
-                                                "Try searching with different keywords",
-                                            fontSize: 14.sp,
-                                            color: Colors.grey,
-                                          ),
-                                        ],
-                                      ),
-                                    )
-                                  : ListView.builder(
-                                      itemCount:
-                                          controller.filteredChats.length,
-                                      padding: EdgeInsets.only(top: 16.h),
-                                      itemBuilder: (context, index) {
-                                        final ChatModel item =
-                                            controller.filteredChats[index];
-                                        return GestureDetector(
-                                          onTap: () {
-                                            // Mark as seen
-                                            // controller.markChatAsSeen(item.id);
-                                            // CORRECTED: Direct navigation to GroupMessageScreen with correct arguments
-                                            Get.to(
-                                              () => const GroupMessageScreen(),
-                                              arguments: {
-                                                "chatId": item.id,
-                                                "groupName":
-                                                    item.chatName ??
-                                                    "Unnamed Group",
-                                                "memberCount": item.memberCount,
-                                                "image": item.chatImage ?? "",
-                                              },
-                                            );
-                                          },
-                                          child: chatListItem(item: item),
-                                        );
+                            controller.filteredChats.isEmpty
+                                ? Center(
+                              child: Column(
+                                mainAxisAlignment:
+                                MainAxisAlignment.center,
+                                children: [
+                                  Icon(Icons.search_off,
+                                      size: 60.sp,
+                                      color: Colors.grey[400]),
+                                  SizedBox(height: 16.h),
+                                  CommonText(
+                                    text: "No results found",
+                                    fontSize: 18.sp,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.grey,
+                                  ),
+                                  SizedBox(height: 8.h),
+                                  CommonText(
+                                    text:
+                                    "Try searching with different keywords",
+                                    fontSize: 14.sp,
+                                    color: Colors.grey,
+                                  ),
+                                ],
+                              ),
+                            )
+                                : ListView.builder(
+                              itemCount:
+                              controller.filteredChats.length,
+                              padding: EdgeInsets.only(top: 16.h),
+                              itemBuilder: (context, index) {
+                                final ChatModel item =
+                                controller.filteredChats[index];
+                                return GestureDetector(
+                                  onTap: () {
+                                    Get.to(
+                                          () =>
+                                      const GroupMessageScreen(),
+                                      arguments: {
+                                        "chatId": item.id,
+                                        "groupName": item.chatName ??
+                                            "Unnamed Group",
+                                        "memberCount":
+                                        item.memberCount,
+                                        "image":
+                                        item.chatImage ?? "",
                                       },
-                                    ),
+                                    );
+                                  },
+                                  child: chatListItem(item: item),
+                                );
+                              },
+                            ),
                           },
                         ],
                       ),

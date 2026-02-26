@@ -94,7 +94,7 @@ class AppRoutes {
     GetPage(name: homeNav, page: () => HomeNav()),
     GetPage(name: homeScreen, page: () => const HomeScreen()),
     GetPage(name: myPostScreen, page: () => const MyPostScreen()),
-    GetPage(name: serviceProviderInfo, page: () => ServiceProviderInfoScreen()),
+    GetPage(name: serviceProviderInfo, page: () => const ServiceProviderInfoScreen()),
     GetPage(name: editProfileScreen, page: () => EditProfileScreen()),
     GetPage(name: editPost, page: () => EditPostScreen()),
     GetPage(name: stripeWebViewScreen, page: () => StripeWebViewPage(checkoutUrl: Get.arguments),),

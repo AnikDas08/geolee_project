@@ -24,10 +24,10 @@ class SocketServices {
     }
 
     // Standardize URL joining
-    String namespacePath = namespace == "/"
+    final String namespacePath = namespace == "/"
         ? ""
         : (namespace.startsWith("/") ? namespace : "/$namespace");
-    String fullUrl = "$baseUrl$namespacePath";
+    final String fullUrl = "$baseUrl$namespacePath";
 
     print(
       ">>>>>>>>>>>> 🔌 Connecting to Namespace: '$namespace' via $fullUrl <<<<<<<<<<<<",

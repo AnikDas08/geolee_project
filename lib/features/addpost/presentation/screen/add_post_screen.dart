@@ -19,7 +19,7 @@ class AddPostScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-      onWillPop: ()async{
+      onWillPop: () async {
         Get.offAllNamed(AppRoutes.homeNav);
         return false;
       },
@@ -32,9 +32,12 @@ class AddPostScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  CustomAppBar(title: "Create Clicker",onBackTap: (){
-                    Get.offAllNamed(AppRoutes.homeNav);
-                  },),
+                  CustomAppBar(
+                    title: "Create Clicker",
+                    onBackTap: () {
+                      Get.offAllNamed(AppRoutes.homeNav);
+                    },
+                  ),
                   SizedBox(height: 20.h),
 
                   // Upload Image Section
@@ -74,16 +77,22 @@ class AddPostScreen extends StatelessWidget {
                             Expanded(
                               child: _buildPricingOption(
                                 title: "Great Vibes",
-                                isSelected: controller.selectedPricingOption.value == 'Great Vibes',
-                                onTap: () => controller.selectPricingOption('Great Vibes'),
+                                isSelected:
+                                controller.selectedPricingOption.value ==
+                                    'Great Vibes',
+                                onTap: () =>
+                                    controller.selectPricingOption('Great Vibes'),
                               ),
                             ),
                             SizedBox(width: 8.w),
                             Expanded(
                               child: _buildPricingOption(
                                 title: "Off Vibes",
-                                isSelected: controller.selectedPricingOption.value == 'Off Vibes',
-                                onTap: () => controller.selectPricingOption('Off Vibes'),
+                                isSelected:
+                                controller.selectedPricingOption.value ==
+                                    'Off Vibes',
+                                onTap: () =>
+                                    controller.selectPricingOption('Off Vibes'),
                               ),
                             ),
                           ],
@@ -95,16 +104,22 @@ class AddPostScreen extends StatelessWidget {
                             Expanded(
                               child: _buildPricingOption(
                                 title: "Charming Gentleman",
-                                isSelected: controller.selectedPricingOption.value == 'Charming Gentleman',
-                                onTap: () => controller.selectPricingOption('Charming Gentleman'),
+                                isSelected:
+                                controller.selectedPricingOption.value ==
+                                    'Charming Gentleman',
+                                onTap: () => controller
+                                    .selectPricingOption('Charming Gentleman'),
                               ),
                             ),
                             SizedBox(width: 8.w),
                             Expanded(
                               child: _buildPricingOption(
                                 title: "Lovely Lady",
-                                isSelected: controller.selectedPricingOption.value == 'Lovely Lady',
-                                onTap: () => controller.selectPricingOption('Lovely Lady'),
+                                isSelected:
+                                controller.selectedPricingOption.value ==
+                                    'Lovely Lady',
+                                onTap: () =>
+                                    controller.selectPricingOption('Lovely Lady'),
                               ),
                             ),
                           ],
@@ -115,7 +130,7 @@ class AddPostScreen extends StatelessWidget {
 
                   SizedBox(height: 16.h),
 
-                  // Priority Level
+                  // Priority Level / Privacy Dropdown
                   CommonText(
                     text: "Privacy",
                     fontSize: 14.sp,
@@ -123,7 +138,7 @@ class AddPostScreen extends StatelessWidget {
                   ),
                   SizedBox(height: 8.h),
                   Obx(
-                        () => _buildDropdown(
+                        () => _buildDropdownWithIcons(
                       value: controller.selectedPriorityLevel.value.isEmpty
                           ? null
                           : controller.selectedPriorityLevel.value,
@@ -139,7 +154,9 @@ class AddPostScreen extends StatelessWidget {
                   // Post Button
                   Obx(() {
                     return CommonButton(
-                      titleText: controller.isLoading.value ? "Posting..." : "CLICKER COUNT",
+                      titleText: controller.isLoading.value
+                          ? "Posting..."
+                          : "CLICKER COUNT",
                       onTap: () => controller.createPost(),
                     );
                   }),
@@ -415,63 +432,91 @@ class AddPostScreen extends StatelessWidget {
     );
   }
 
-  // Dropdown
-  Widget _buildDropdown({
+  // ✅ DROPDOWN WITH DIFFERENT ICONS FOR EACH PRIVACY LEVEL
+// ✅ DROPDOWN WITH IMAGE ASSET FOR EACH PRIVACY LEVEL
+  Widget _buildDropdownWithIcons({
     required String? value,
     required String hint,
-    IconData? icon,
     required List<String> items,
     required void Function(String?)? onChanged,
   }) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
+      padding: EdgeInsets.symmetric(horizontal: 12.w),
       decoration: BoxDecoration(
         color: Colors.transparent,
         borderRadius: BorderRadius.circular(8.r),
         border: Border.all(color: AppColors.textSecond),
       ),
-      child: Row(
-        children: [
-          if (icon != null) ...[
-            Icon(icon, size: 20.sp, color: Colors.grey[700]),
-            SizedBox(width: 12.w),
-          ],
-          Expanded(
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton<String>(
-                dropdownColor: Colors.white,
-                borderRadius: BorderRadius.circular(4.r),
-
-                value: value,
-                hint: Text(
-                  hint,
-                  style: TextStyle(fontSize: 14.sp, color: Colors.grey[400]),
-                ),
-                isExpanded: true,
-                icon: Icon(Icons.keyboard_arrow_down, color: Colors.grey[600]),
-                items: items.isEmpty
-                    ? null
-                    : items.map((String item) {
-                  return DropdownMenuItem<String>(
-                    value: item,
-                    child: Text(
-                      item,
-                      style: TextStyle(
-                        fontSize: 14.sp,
-                        color: Colors.black,
-                      ),
-                    ),
-                  );
-                }).toList(),
-                onChanged: items.isEmpty ? null : onChanged,
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          dropdownColor: Colors.white,
+          borderRadius: BorderRadius.circular(4.r),
+          value: value,
+          hint: Row(
+            children: [
+              SizedBox(width: 4.w),
+              Text(
+                hint,
+                style: TextStyle(fontSize: 14.sp, color: Colors.grey[400]),
               ),
-            ),
+            ],
           ),
-        ],
+          isExpanded: true,
+          icon: Icon(Icons.keyboard_arrow_down,
+              color: Colors.grey[600], size: 20.sp),
+
+          /// ✅ Selected item UI
+          selectedItemBuilder: (BuildContext context) {
+            return items.map<Widget>((String item) {
+              return Row(
+                children: [
+                  Image.asset(
+                    controller.getPrivacyImage(item),
+                    width: 20.w,
+                    height: 20.h,
+                    fit: BoxFit.contain,
+                  ),
+                  SizedBox(width: 12.w),
+                  Text(
+                    controller.toTitleCase(item),
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      color: Colors.black,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              );
+            }).toList();
+          },
+
+          /// ✅ Dropdown list items
+          items: items.map((String item) {
+            return DropdownMenuItem<String>(
+              value: item,
+              child: Row(
+                children: [
+                  Image.asset(
+                    controller.getPrivacyImage(item),
+                    width: 20.w,
+                    height: 20.h,
+                    fit: BoxFit.contain,
+                  ),
+                  SizedBox(width: 12.w),
+                  Text(
+                    controller.toTitleCase(item),
+                    style: TextStyle(fontSize: 14.sp),
+                  ),
+                ],
+              ),
+            );
+          }).toList(),
+
+          onChanged: onChanged,
+        ),
       ),
     );
   }
-
   // Pricing Option Button
   Widget _buildPricingOption({
     required String title,

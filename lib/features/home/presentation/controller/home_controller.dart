@@ -572,9 +572,11 @@ class HomeController extends GetxController {
   Future<void> updateProfile(double longitude, double latitude) async {
     try {
       final String? address = await getAddressFromCoordinate(latitude, longitude);
-      final response = await ApiService.patch("users/profile", body: {
+      final response = await ApiService.patch( ApiEndPoint.updateProfile,body: {
+        "isLocationVisible": true,
         "location": [longitude, latitude],
         "address": address ?? "Location Unavailable",
+
       });
       if (response.statusCode == 200) {
         debugPrint('Profile location updated');

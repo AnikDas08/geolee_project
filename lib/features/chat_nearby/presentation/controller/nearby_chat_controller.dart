@@ -23,12 +23,40 @@ class NearbyChatController extends GetxController {
     super.onInit();
     debugPrint("📍 Lat: ${LocalStorage.lat} | Long: ${LocalStorage.long}");
     getNearbyChat();
+    updateProfileAndLocationVisible();
   }
+
+  Future<void> updateProfileAndLocationVisible() async {
+    try {
+
+      final latitude = LocalStorage.lat.toDouble();
+      final longitude=LocalStorage.long.toDouble();
+
+      // API call
+      final response = await ApiService.patch(
+
+        ApiEndPoint.updateProfile,
+
+        body: {
+          'isLocationVisible': true,
+          "location": [longitude, latitude],
+        },
+      );
+
+      if (response.statusCode == 200) {
+        debugPrint('Profile location updated');
+      } else {
+        debugPrint('Failed to update profile: ${response.message}');
+      }
+    } catch (e) {
+      debugPrint('Error updating profile: $e');
+    }
+  }
+
 
   // ================= FETCH NEARBY CHAT =================
   Future<void> getNearbyChat({bool isRefresh = true}) async {
     try {
-      // Reset pagination on refresh
       if (isRefresh) {
         _currentPage = 1;
         nearbyChatList.clear();

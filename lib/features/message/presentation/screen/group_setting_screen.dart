@@ -106,7 +106,7 @@ class GroupSettingsScreen extends StatelessWidget {
                   child: TextField(
                     controller: textController,
                     autofocus: true,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       border: InputBorder.none,
                       hintText: "Enter new group name",
                     ),
@@ -168,7 +168,7 @@ class GroupSettingsScreen extends StatelessWidget {
                               ? SizedBox(
                                   height: 18.h,
                                   width: 18.h,
-                                  child: CircularProgressIndicator(
+                                  child: const CircularProgressIndicator(
                                     color: Colors.white,
                                     strokeWidth: 2,
                                   ),
@@ -241,7 +241,7 @@ class GroupSettingsScreen extends StatelessWidget {
                           if (controller.isSaving.value) {
                             return CircleAvatar(
                               radius: 50.r,
-                              child: CircularProgressIndicator(),
+                              child: const CircularProgressIndicator(),
                             );
                           }
 
@@ -267,7 +267,7 @@ class GroupSettingsScreen extends StatelessWidget {
                                               if (!baseUrl.endsWith('/')) {
                                                 baseUrl = '$baseUrl/';
                                               }
-                                              String cleanPath =
+                                              final String cleanPath =
                                                   avatarPath.startsWith('/')
                                                   ? avatarPath.substring(1)
                                                   : avatarPath;

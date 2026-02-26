@@ -60,6 +60,33 @@ class ClickerController extends GetxController {
   var friendStatus = FriendStatus.none.obs;
   var pendingRequestId = ''.obs;
 
+  Future<void> updateProfileAndLocationVisible() async {
+    try {
+
+      final latitude = LocalStorage.lat.toDouble();
+      final longitude=LocalStorage.long.toDouble();
+
+      // API call
+      final response = await ApiService.patch(
+
+        ApiEndPoint.updateProfile,
+
+        body: {
+          'isLocationVisible': true,
+          "location": [longitude, latitude],
+        },
+      );
+
+      if (response.statusCode == 200) {
+        debugPrint('Profile location updated');
+      } else {
+        debugPrint('Failed to update profile: ${response.message}');
+      }
+    } catch (e) {
+      debugPrint('Error updating profile: $e');
+    }
+  }
+
 
   @override
   void onInit() {
@@ -67,6 +94,7 @@ class ClickerController extends GetxController {
     getAllPosts();
     _getUniqueDeviceId();
     getCurrentLocation();
+    updateProfileAndLocationVisible();
     if (LocalStorage.token.isNotEmpty) {
       getBanners();
       searchController.addListener(_onSearchChanged);
@@ -96,7 +124,7 @@ class ClickerController extends GetxController {
 
       if (response.isSuccess) {
         final data = response.data["data"];
-        String chatId = data["_id"] ?? "";
+        final String chatId = data["_id"] ?? "";
 
         if (chatId.isNotEmpty) {
           Get.toNamed(

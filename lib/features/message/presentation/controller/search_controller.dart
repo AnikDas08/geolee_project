@@ -32,7 +32,7 @@ class SearchFriendController extends GetxController {
 
       if (response.isSuccess) {
         final List data = response.data['data'] ?? [];
-        List<SearchFriendUserModel> fetchedUsers = data.map((e) => SearchFriendUserModel.fromJson(e)).toList();
+        final List<SearchFriendUserModel> fetchedUsers = data.map((e) => SearchFriendUserModel.fromJson(e)).toList();
 
         searchFriendList.value = fetchedUsers;
 
@@ -90,7 +90,7 @@ class SearchFriendController extends GetxController {
 
   Future<void> cancelRequest(SearchFriendUserModel user) async {
     try {
-      String requestId = user.pendingRequestId.value;
+      final String requestId = user.pendingRequestId.value;
       if (requestId.isEmpty) return;
 
       final response = await ApiService.patch(

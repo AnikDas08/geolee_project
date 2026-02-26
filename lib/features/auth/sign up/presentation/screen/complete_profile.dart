@@ -20,6 +20,12 @@ class CompleteProfile extends StatefulWidget {
 class _CompleteProfileState extends State<CompleteProfile> {
   final SignUpController controller = Get.find<SignUpController>();
 
+  /// Helper function to convert string to Title Case (First letter capital only)
+  String toTitleCase(String str) {
+    if (str.isEmpty) return str;
+    return str[0].toUpperCase() + str.substring(1).toLowerCase();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -69,13 +75,13 @@ class _CompleteProfileState extends State<CompleteProfile> {
                           child: ClipOval(
                             child: controller.image != null
                                 ? CommonImage(
-                                    imageSrc: controller.image!,
-                                    fill: BoxFit.cover,
-                                  )
+                              imageSrc: controller.image!,
+                              fill: BoxFit.cover,
+                            )
                                 : const CommonImage(
-                                    imageSrc: AppImages.profile,
-                                    fill: BoxFit.cover,
-                                  ),
+                              imageSrc: AppImages.profile,
+                              fill: BoxFit.cover,
+                            ),
                           ),
                         ),
                         Positioned(
@@ -123,8 +129,7 @@ class _CompleteProfileState extends State<CompleteProfile> {
               ),
               CommonTextField(
                 controller: controller.bioController,
-                hintText:
-                    'Type...',
+                hintText: 'Type...',
                 hintTextColor: Colors.grey,
                 textColor: AppColors.black,
                 maxLines: 2,
@@ -204,14 +209,23 @@ class _CompleteProfileState extends State<CompleteProfile> {
                   items: controller.genderOptions.map((String gender) {
                     return DropdownMenuItem<String>(
                       value: gender,
-                      child: Text(gender),
+                      // Display with title case (First letter capital)
+                      child: Text(toTitleCase(gender)),
                     );
                   }).toList(),
                   onChanged: (String? newValue) {
-                    controller.selectedGender = newValue!;
-                    controller.update();
+                    if (newValue != null) {
+                      controller.selectedGender = newValue;
+                      controller.update();
+                    }
                   },
-                  hint: const Text("Select Gender", style: TextStyle(color: AppColors.grey)),
+                  hint: Text(
+                    "Select Gender",
+                    style: TextStyle(
+                      color: AppColors.grey,
+                      fontSize: 14.sp,
+                    ),
+                  ),
                 ),
               ),
 
@@ -222,7 +236,6 @@ class _CompleteProfileState extends State<CompleteProfile> {
                 titleText: 'Confirm',
                 onTap: () {
                   controller.updateProfile();
-                  // Handle confirm action
                 },
                 buttonHeight: 48.h,
                 titleSize: 16,
@@ -269,7 +282,7 @@ class _CompleteProfileState extends State<CompleteProfile> {
             'Public',
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: Color(0xFF373737) /* Primary-Text */,
+              color: Color(0xFF373737),
               fontSize: 12,
               fontFamily: 'Poppins',
               fontWeight: FontWeight.w400,

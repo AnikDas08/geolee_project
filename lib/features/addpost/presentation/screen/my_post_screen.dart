@@ -35,8 +35,8 @@ class _MyPostScreenState extends State<MyPostScreen> with WidgetsBindingObserver
   }
 
   String _removeNumbersFromLocation(String address) {
-    String firstPart = address.split(',')[0].trim();
-    String cleaned = firstPart.replaceAll(RegExp(r'[0-9]'), '');
+    final String firstPart = address.split(',')[0].trim();
+    final String cleaned = firstPart.replaceAll(RegExp(r'[0-9]'), '');
     return cleaned.replaceAll(RegExp(r'\s+'), ' ').trim();
   }
 
@@ -113,7 +113,7 @@ class _MyPostScreenState extends State<MyPostScreen> with WidgetsBindingObserver
                       ? _removeNumbersFromLocation(data.address)
                       : "",
 
-                  images: postImages, // <-- Corrected list passed here
+                  images: postImages,
                   description: data.description ?? "No description",
                   privacyImage: data.privacy == "public"
                       ? AppIcons.public

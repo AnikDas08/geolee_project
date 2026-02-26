@@ -70,7 +70,7 @@ class SignUpController extends GetxController {
   final TextEditingController bioController = TextEditingController();
 
   String? selectedGender;
-  final List<String> genderOptions = ['male', 'female', 'other'];
+  final List<String> genderOptions = ['Male', 'Female', 'Other'];
 
   Future<void> selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(

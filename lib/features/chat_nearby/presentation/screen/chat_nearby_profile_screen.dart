@@ -2,10 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:giolee78/config/api/api_end_point.dart';
-import 'package:giolee78/config/route/app_routes.dart';
 import 'package:giolee78/features/chat_nearby/data/nearby_friends_model.dart';
 import 'package:giolee78/features/chat_nearby/presentation/controller/chat_nearby_profile_controller.dart';
-import 'package:timeago/timeago.dart';
+import 'package:giolee78/features/clicker/presentation/controller/clicker_controller.dart' hide FriendStatus; // ✅ Import ClickerController
 
 import '../../../../component/button/common_button.dart';
 import '../../../../component/image/common_image.dart';
@@ -34,14 +33,16 @@ class ChatNearbyProfileScreen extends StatefulWidget {
 
 class _ChatNearbyProfileScreenState extends State<ChatNearbyProfileScreen> {
   late ChatNearbyProfileController controller;
+  late ClickerController clickerController;
   late TextEditingController greetingsController;
+  bool _navigationHandled = false;
 
   @override
   void initState() {
     super.initState();
 
-    // ✅ Initialize controllers once
     greetingsController = TextEditingController();
+    clickerController = Get.put(ClickerController());
 
     // ✅ Get or create controller with tag
     controller = Get.put(
@@ -49,20 +50,35 @@ class _ChatNearbyProfileScreenState extends State<ChatNearbyProfileScreen> {
       tag: widget.user.id.toString(),
     );
 
-    // ✅ Load data after frame is rendered
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         controller.fetchUserProfile(widget.user.id.toString());
         controller.checkFriendship(widget.user.id.toString());
+
+        _monitorFriendStatus();
+      }
+    });
+  }
+
+
+  void _monitorFriendStatus() {
+    ever<FriendStatus>(controller.friendStatus, (status) {
+      if (!_navigationHandled && mounted && status == FriendStatus.friends) {
+        _navigationHandled = true;
+        debugPrint("User is already a friend - Creating chat and navigating");
+
+        clickerController.createOrGetChatAndGo(
+          receiverId: widget.user.id.toString(),
+          name: widget.user.name,
+          image: widget.user.image ?? '',
+        );
       }
     });
   }
 
   @override
   void dispose() {
-    // ✅ Dispose controllers to prevent memory leaks
     greetingsController.dispose();
-    // Don't dispose GetX controller here - GetX manages it
     super.dispose();
   }
 
@@ -84,7 +100,6 @@ class _ChatNearbyProfileScreenState extends State<ChatNearbyProfileScreen> {
       ),
       body: SafeArea(
         child: Obx(() {
-          // Show loading state
           if (controller.isLoading.value) {
             return const Center(
               child: CircularProgressIndicator(
@@ -195,7 +210,19 @@ class _ChatNearbyProfileAppBar extends StatelessWidget {
                     color: Colors.red,
                     size: 22.sp,
                   ),
-                ),
+                )
+              else if (status == FriendStatus.friends)
+                // ✅ Show message icon when already friends
+                  IconButton(
+                    onPressed: () {
+                      debugPrint("💬 Already friends - Message icon visible");
+                    },
+                    icon: Icon(
+                      Icons.chat_bubble_outline,
+                      color: AppColors.primaryColor,
+                      size: 22.sp,
+                    ),
+                  ),
             ],
           ),
         ),
@@ -215,7 +242,7 @@ class _ProfileHeader extends StatelessWidget {
     final bio = userProfile?['bio'] ?? 'No bio available';
     final imageUrl = userProfile?['image'] ?? '';
     final location = userProfile?['address'] ?? 'Location not available';
-    final distance = "0";
+    final distance = userProfile?['distance'] ?? 0.0;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -250,6 +277,7 @@ class _ProfileHeader extends StatelessWidget {
           top: 4,
         ),
         SizedBox(height: 8.h),
+        if(distance !=null)
         CommonText(
           text: 'Within $distance KM',
           fontSize: 12,

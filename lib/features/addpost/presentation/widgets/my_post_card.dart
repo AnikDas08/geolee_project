@@ -8,7 +8,6 @@ import 'package:giolee78/features/profile/presentation/controller/post_controlle
 import 'package:giolee78/utils/constants/app_colors.dart';
 import 'confirm_delete_dialog.dart';
 
-// Enum for post actions
 enum PostAction { edit, delete, privacy }
 
 class MyPostCard extends StatefulWidget {
@@ -18,8 +17,8 @@ class MyPostCard extends StatefulWidget {
     required this.userAvatar,
     required this.timeAgo,
     required this.location,
-    required this.images,
-    required this.description,
+    this.images,        // ✅ nullable
+    this.description,  // ✅ nullable
     this.isMyPost = false,
     required this.clickerType,
     required this.privacyImage,
@@ -33,8 +32,8 @@ class MyPostCard extends StatefulWidget {
   final String userAvatar;
   final String timeAgo;
   final String location;
-  final List<String> images;
-  final String description;
+  final List<String>? images;  // ✅ nullable
+  final String? description;   // ✅ nullable
   final bool isMyPost;
   final String clickerType;
   final String privacyImage;
@@ -112,11 +111,9 @@ class _MyPostCardState extends State<MyPostCard> {
                             SizedBox(height: 4.h),
                             Row(
                               children: [
-                                Icon(
-                                  Icons.access_time,
-                                  size: 12.sp,
-                                  color: AppColors.secondaryText,
-                                ),
+                                Icon(Icons.access_time,
+                                    size: 12.sp,
+                                    color: AppColors.secondaryText),
                                 SizedBox(width: 4.w),
                                 CommonText(
                                   text: widget.timeAgo,
@@ -133,11 +130,9 @@ class _MyPostCardState extends State<MyPostCard> {
                                   ),
                                 ),
                                 SizedBox(width: 6.w),
-                                Icon(
-                                  Icons.location_on_outlined,
-                                  size: 12.sp,
-                                  color: AppColors.secondaryText,
-                                ),
+                                Icon(Icons.location_on_outlined,
+                                    size: 12.sp,
+                                    color: AppColors.secondaryText),
                                 SizedBox(width: 4.w),
                                 Expanded(
                                   child: Row(
@@ -170,16 +165,18 @@ class _MyPostCardState extends State<MyPostCard> {
             ),
           ),
 
-          /// Image Slider with dot indicator
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 12.w),
-            child: _PostImageSlider(
-              images: widget.images,
-              onTapPhoto: widget.onTapPhoto,
-              currentIndex: currentIndex,
-              onPageChanged: (index) => setState(() => currentIndex = index),
+          /// ✅ Image slider only if images exist
+          if (widget.images != null && widget.images!.isNotEmpty)
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 12.w),
+              child: _PostImageSlider(
+                images: widget.images!,
+                onTapPhoto: widget.onTapPhoto,
+                currentIndex: currentIndex,
+                onPageChanged: (index) =>
+                    setState(() => currentIndex = index),
+              ),
             ),
-          ),
 
           /// Clicker type
           Padding(
@@ -187,15 +184,16 @@ class _MyPostCardState extends State<MyPostCard> {
             child: CommonText(text: widget.clickerType, fontSize: 12),
           ),
 
-          /// Description
-          Padding(
-            padding: EdgeInsets.fromLTRB(12.w, 6.h, 12.w, 12.h),
-            child: CommonText(
-              text: widget.description,
-              fontSize: 12,
-              maxLines: 6,
+          /// ✅ Description only if not null or empty
+          if (widget.description != null && widget.description!.isNotEmpty)
+            Padding(
+              padding: EdgeInsets.fromLTRB(12.w, 6.h, 12.w, 12.h),
+              child: CommonText(
+                text: widget.description!,
+                fontSize: 12,
+                maxLines: 6,
+              ),
             ),
-          ),
         ],
       ),
     );
@@ -206,11 +204,8 @@ class _MyPostCardState extends State<MyPostCard> {
 
     return PopupMenuButton<PostAction>(
       color: Colors.white,
-      icon: Icon(
-        Icons.more_vert_rounded,
-        size: 24.sp,
-        color: AppColors.secondaryText,
-      ),
+      icon: Icon(Icons.more_vert_rounded,
+          size: 24.sp, color: AppColors.secondaryText),
       itemBuilder: (context) => [
         _popupItem(PostAction.edit, Icons.edit_outlined, "Edit Post", () {
           Navigator.pop(context);
@@ -222,7 +217,8 @@ class _MyPostCardState extends State<MyPostCard> {
           Navigator.pop(context);
           showDeletePostDialog(
             context,
-            onConfirmDelete: () => myPostController.deletePost(widget.postId),
+            onConfirmDelete: () =>
+                myPostController.deletePost(widget.postId),
           );
         }),
       ],
@@ -230,11 +226,7 @@ class _MyPostCardState extends State<MyPostCard> {
   }
 
   PopupMenuItem<PostAction> _popupItem(
-    PostAction value,
-    IconData icon,
-    String title,
-    VoidCallback onTap,
-  ) {
+      PostAction value, IconData icon, String title, VoidCallback onTap) {
     return PopupMenuItem<PostAction>(
       value: value,
       child: GestureDetector(
@@ -251,9 +243,7 @@ class _MyPostCardState extends State<MyPostCard> {
   }
 }
 
-/// =======================================================
-/// IMAGE SLIDER WITH DOT INDICATOR
-/// =======================================================
+/// ================= IMAGE SLIDER =================
 class _PostImageSlider extends StatelessWidget {
   final List<String> images;
   final VoidCallback onTapPhoto;
@@ -291,58 +281,29 @@ class _PostImageSlider extends StatelessWidget {
           ),
         ),
 
-        ///Indicator===========================
         if (images.length > 1)
           Padding(
             padding: EdgeInsets.only(top: 10.h),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(
-                images.length,
-                    (index) {
-                  final isActive = currentIndex == index;
+              children: List.generate(images.length, (index) {
+                final isActive = currentIndex == index;
 
-                  return AnimatedScale(
-                    scale: isActive ? 1.1 : 1,
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.easeOutCubic,
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 350),
-                      curve: Curves.easeOutCubic,
-                      margin: EdgeInsets.symmetric(horizontal: 4.w),
-                      height: 6.h,
-                      width: isActive ? 26.w : 8.w,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(20.r),
-                        gradient: isActive
-                            ? LinearGradient(
-                          colors: [
-                            AppColors.primaryColor,
-                            AppColors.primaryColor.withOpacity(0.7),
-                          ],
-                        )
-                            : null,
-                        color: isActive
-                            ? null
-                            : AppColors.secondaryText.withOpacity(0.25),
-                        boxShadow: isActive
-                            ? [
-                          BoxShadow(
-                            color: AppColors.primaryColor
-                                .withOpacity(0.4),
-                            blurRadius: 6.r,
-                            offset: const Offset(0, 2),
-                          )
-                        ]
-                            : [],
-                      ),
-                    ),
-                  );
-                },
-              ),
+                return AnimatedContainer(
+                  duration: const Duration(milliseconds: 350),
+                  margin: EdgeInsets.symmetric(horizontal: 4.w),
+                  height: 6.h,
+                  width: isActive ? 26.w : 8.w,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20.r),
+                    color: isActive
+                        ? AppColors.primaryColor
+                        : AppColors.secondaryText.withOpacity(0.25),
+                  ),
+                );
+              }),
             ),
           ),
-
       ],
     );
   }

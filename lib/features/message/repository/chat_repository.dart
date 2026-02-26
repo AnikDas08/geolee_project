@@ -10,7 +10,7 @@ Future<List<ChatModel>> chatRepository(
   bool isGroup,
 ) async {
   appLog("naimul");
-  String url =
+  final String url =
       "${ApiEndPoint.chats}/my-chats?page=$page&isGroupChat=${isGroup ? "true" : "false"}";
 
   // Temporarily disabling searchTerm for debugging as per user request

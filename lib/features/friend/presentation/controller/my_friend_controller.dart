@@ -39,7 +39,8 @@ class MyFriendController extends GetxController {
   RxList<MyFriendsData> myFriendsList = <MyFriendsData>[].obs;
 
   // ================= Suggested Friends (Nearby)
-  RxList<SuggestedFriendUserModel> suggestedFriendList = <SuggestedFriendUserModel>[].obs;
+  RxList<SuggestedFriendUserModel> suggestedFriendList =
+      <SuggestedFriendUserModel>[].obs;
 
   RxBool isNearbyChatLoading = false.obs;
   RxString nearbyChatError = ''.obs;
@@ -58,9 +59,21 @@ class MyFriendController extends GetxController {
   final RxMap<String, String> pendingRequestIdMap = <String, String>{}.obs;
   final RxSet<String> loadingUserIds = <String>{}.obs;
 
+  // ================= Search
+  final RxString searchQuery = ''.obs;
+
+  List<MyFriendsData> get filteredFriendsList {
+    if (searchQuery.value.isEmpty) return myFriendsList;
+    return myFriendsList
+        .where((data) => (data.friend?.name ?? '')
+        .toLowerCase()
+        .contains(searchQuery.value.toLowerCase()))
+        .toList();
+  }
+
   // ================= Lifecycle
   @override
-  Future<void> onInit()async {
+  Future<void> onInit() async {
     super.onInit();
 
     debugPrint("🚀 MyFriendController onInit called");
@@ -93,7 +106,6 @@ class MyFriendController extends GetxController {
   }
 
   // ================= Get My All Friends
-
   Future<void> getMyAllFriends() async {
     try {
       isLoading.value = true;
@@ -105,8 +117,6 @@ class MyFriendController extends GetxController {
       update();
     }
   }
-
-
 
   Future<void> createOrGetChatAndGo({
     required String receiverId,
@@ -125,7 +135,7 @@ class MyFriendController extends GetxController {
 
       if (response.isSuccess) {
         final data = response.data["data"];
-        String chatId = data["_id"] ?? "";
+        final String chatId = data["_id"] ?? "";
 
         if (chatId.isNotEmpty) {
           Get.toNamed(
@@ -145,30 +155,25 @@ class MyFriendController extends GetxController {
     }
   }
 
-
-
   Future<void> removeFriend(String friendshipId) async {
     try {
-      // 👉 আগে index বের করো
       final index = myFriendsList.indexWhere(
             (data) => data.id == friendshipId,
       );
 
       if (index == -1) return;
       final removedFriend = myFriendsList.removeAt(index);
-      myFriendsList.refresh(); // 🔥 UI refresh
+      myFriendsList.refresh();
 
       final response = await ApiService.delete(
         ApiEndPoint.unfriend + friendshipId,
       );
 
       if (response.statusCode != 200) {
-        // ❌ API fail হলে আবার add back
         myFriendsList.insert(index, removedFriend);
         myFriendsList.refresh();
         throw Exception("Failed to remove friend");
       }
-
     } catch (e) {
       print("Error removing friend: $e");
     }
@@ -249,12 +254,10 @@ class MyFriendController extends GetxController {
     }
   }
 
-
   Future<void> _initLocationThenFetch() async {
     try {
       debugPrint("🔄 _initLocationThenFetch started");
 
-      // ─── Step 1: LocalStorage check ───
       final double? storedLat = LocalStorage.lat;
       final double? storedLng = LocalStorage.long;
 
@@ -269,7 +272,6 @@ class MyFriendController extends GetxController {
         return;
       }
 
-      // ─── Step 2: Permission check ───
       debugPrint("📡 No stored location, requesting...");
 
       LocationPermission permission = await Geolocator.checkPermission();
@@ -281,7 +283,8 @@ class MyFriendController extends GetxController {
       }
 
       if (permission == LocationPermission.deniedForever) {
-        nearbyChatError.value = "Location permission permanently denied.\nPlease enable from settings.";
+        nearbyChatError.value =
+        "Location permission permanently denied.\nPlease enable from settings.";
         debugPrint("❌ Permission denied forever");
         return;
       }
@@ -292,7 +295,6 @@ class MyFriendController extends GetxController {
         return;
       }
 
-      // ─── Step 3: Get position ───
       debugPrint("📡 Getting position...");
       final Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
@@ -304,9 +306,9 @@ class MyFriendController extends GetxController {
         },
       );
 
-      debugPrint("✅ Got position: ${position.latitude}, ${position.longitude}");
+      debugPrint(
+          "✅ Got position: ${position.latitude}, ${position.longitude}");
 
-      // ─── Step 4: Save & fetch ───
       LocalStorage.lat = position.latitude;
       LocalStorage.long = position.longitude;
 
@@ -314,11 +316,11 @@ class MyFriendController extends GetxController {
     } catch (e) {
       debugPrint("❌ _initLocationThenFetch error: $e");
 
-      // ─── Fallback: last known position ───
       try {
         final Position? lastKnown = await Geolocator.getLastKnownPosition();
         if (lastKnown != null) {
-          debugPrint("📍 Using last known: ${lastKnown.latitude}, ${lastKnown.longitude}");
+          debugPrint(
+              "📍 Using last known: ${lastKnown.latitude}, ${lastKnown.longitude}");
           LocalStorage.lat = lastKnown.latitude;
           LocalStorage.long = lastKnown.longitude;
           await getSuggestedFriend();
@@ -345,12 +347,15 @@ class MyFriendController extends GetxController {
 
       if (lat == 0.0 || lng == 0.0) {
         nearbyChatError.value =
-            "Location not available. Please enable location.";
+        "Location not available. Please enable location.";
         debugPrint("❌ Invalid coordinates - Lat: $lat, Lng: $lng");
         return;
       }
 
-      final url = "${ApiEndPoint.nearbyChat}?lat=$lat&lng=$lng&page=$_currentPage&limit=20";debugPrint("🌐 Fetching Nearby - URL: $url | Page: $_currentPage");
+      final url =
+          "${ApiEndPoint.nearbyChat}?lat=$lat&lng=$lng&page=$_currentPage&limit=20";
+      debugPrint(
+          "🌐 Fetching Nearby - URL: $url | Page: $_currentPage");
 
       if (isRefresh) {
         isNearbyChatLoading.value = true;
@@ -363,7 +368,6 @@ class MyFriendController extends GetxController {
       debugPrint("✅ Status: ${response.statusCode}");
 
       if (response.isSuccess) {
-        // ── Parse Pagination ──────────────────────────────────
         final pagination = response.data['pagination'];
         if (pagination != null) {
           _totalPages = pagination['totalPage'] ?? 1;
@@ -373,7 +377,6 @@ class MyFriendController extends GetxController {
           );
         }
 
-        // ── Parse Data ────────────────────────────────────────
         final rawList = response.data['data'];
         if (rawList == null) {
           nearbyChatError.value = "No data found";
@@ -399,7 +402,6 @@ class MyFriendController extends GetxController {
 
         debugPrint("✅ Parsed: ${parsedList.length} / ${data.length} users");
 
-        // ── Add to List ───────────────────────────────────────
         if (isRefresh) {
           suggestedFriendList.value = parsedList;
         } else {
@@ -408,8 +410,6 @@ class MyFriendController extends GetxController {
 
         debugPrint("📋 Total in list: ${suggestedFriendList.length}");
 
-        // ✅ Page load হওয়ার সাথে সাথে প্রতিটা user এর
-        // friendship status check করো — parallel এ চলবে
         for (final user in parsedList) {
           checkFriendship(user.id);
         }
@@ -472,7 +472,7 @@ class MyFriendController extends GetxController {
   Future<void> onTapAddFriendButton(String userId) async {
     try {
       loadingUserIds.add(userId);
-      loadingUserIds.refresh(); // ✅
+      loadingUserIds.refresh();
 
       final response = await ApiService.post(
         ApiEndPoint.createFriendRequest,
@@ -480,15 +480,14 @@ class MyFriendController extends GetxController {
       );
 
       if (response.statusCode == 200) {
-        // Store pending request ID if API returns it
         final requestId = response.data['data']?['_id'];
         if (requestId != null) {
           pendingRequestIdMap[userId] = requestId;
-          pendingRequestIdMap.refresh(); // ✅
+          pendingRequestIdMap.refresh();
         }
 
         friendStatusMap[userId] = FriendStatus.requested;
-        friendStatusMap.refresh(); // ✅
+        friendStatusMap.refresh();
 
         Utils.successSnackBar("Sent", "Friend request sent");
       }
@@ -496,7 +495,7 @@ class MyFriendController extends GetxController {
       Utils.errorSnackBar("Error", e.toString());
     } finally {
       loadingUserIds.remove(userId);
-      loadingUserIds.refresh(); // ✅
+      loadingUserIds.refresh();
     }
   }
 
@@ -504,7 +503,7 @@ class MyFriendController extends GetxController {
   Future<void> cancelFriendRequest(String userId) async {
     try {
       loadingUserIds.add(userId);
-      loadingUserIds.refresh(); // ✅
+      loadingUserIds.refresh();
 
       final idToUse = (pendingRequestIdMap[userId]?.isNotEmpty == true)
           ? pendingRequestIdMap[userId]!

@@ -1,10 +1,14 @@
+// ============================================================
+// chat_list_model.dart  — isFriend field added
+// ============================================================
+
 class ChatModel {
   final String id;
   final bool isGroup;
   final String? chatName;
   final String? chatImage;
   final Participant participant;
-  final List<Participant> participants; // ✅ Added full participants list
+  final List<Participant> participants;
   final LatestMessage latestMessage;
   final int unreadCount;
   final bool isDeleted;
@@ -13,13 +17,16 @@ class ChatModel {
   final DateTime updatedAt;
   final int memberCount;
 
+  /// ✅ নতুন field — API তে না থাকলে default true (group chat এর জন্যও true)
+  final bool isFriend;
+
   ChatModel({
     required this.id,
     required this.isGroup,
     this.chatName,
     this.chatImage,
     required this.participant,
-    required this.participants, // ✅ Added to constructor
+    required this.participants,
     required this.latestMessage,
     required this.unreadCount,
     required this.isDeleted,
@@ -27,9 +34,9 @@ class ChatModel {
     required this.createdAt,
     required this.updatedAt,
     this.memberCount = 0,
+    this.isFriend = true, // default true — group বা unknown এর জন্য
   });
 
-  // ✅ Added copyWith for state updates
   ChatModel copyWith({
     String? id,
     bool? isGroup,
@@ -44,6 +51,7 @@ class ChatModel {
     DateTime? createdAt,
     DateTime? updatedAt,
     int? memberCount,
+    bool? isFriend, // ✅
   }) {
     return ChatModel(
       id: id ?? this.id,
@@ -59,6 +67,7 @@ class ChatModel {
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       memberCount: memberCount ?? this.memberCount,
+      isFriend: isFriend ?? this.isFriend, // ✅
     );
   }
 
@@ -73,9 +82,9 @@ class ChatModel {
   }
 
   factory ChatModel.fromJson(Map<String, dynamic> json) {
-    bool isGroupFromFlag = json['isGroup'] ?? json['isGroupChat'] ?? false;
-    String? cName = _parseStringOrFirstInList(json['chatName']);
-    bool isGroup = isGroupFromFlag || (cName != null && cName.isNotEmpty);
+    final bool isGroupFromFlag = json['isGroup'] ?? json['isGroupChat'] ?? false;
+    final String? cName = _parseStringOrFirstInList(json['chatName']);
+    final bool isGroup = isGroupFromFlag || (cName != null && cName.isNotEmpty);
 
     var participantJson = json['anotherParticipant'];
     if (participantJson == null &&
@@ -85,37 +94,52 @@ class ChatModel {
       participantJson = (json['participants'] as List).first;
     }
 
-    // ✅ Parse full participants list
     List<Participant> allParticipants = [];
     if (json['participants'] != null && json['participants'] is List) {
       allParticipants = (json['participants'] as List)
-          .map((p) => Participant.fromJson(p is Map<String, dynamic> ? p : {"_id": p.toString()}))
+          .map((p) => Participant.fromJson(
+          p is Map<String, dynamic> ? p : {"_id": p.toString()}))
           .toList();
     }
 
-    final dynamic rawUnseen = json['unseenCount'] ?? json['unSeenCount'] ?? json['unseen_count'] ?? json['unreadCount'];
-    final int finalUnreadCount = rawUnseen != null ? int.tryParse(rawUnseen.toString()) ?? 0 : 0;
+    final dynamic rawUnseen = json['unseenCount'] ??
+        json['unSeenCount'] ??
+        json['unseen_count'] ??
+        json['unreadCount'];
+    final int finalUnreadCount =
+    rawUnseen != null ? int.tryParse(rawUnseen.toString()) ?? 0 : 0;
+
+    // ✅ API তে isFriend/isAlreadyFriend থাকলে নাও, না থাকলে group এর জন্য true
+    final dynamic friendRaw =
+        json['isFriend'] ?? json['isAlreadyFriend'] ?? json['is_friend'];
+    final bool isFriend = isGroup
+        ? true // group chat এ friend check দরকার নেই
+        : (friendRaw != null ? (friendRaw == true || friendRaw == 1) : true);
 
     return ChatModel(
       id: json['_id']?.toString() ?? '',
       isGroup: isGroup,
       chatName: cName,
-      chatImage: _parseStringOrFirstInList(json['avatarUrl'] ?? json['image']),
+      chatImage:
+      _parseStringOrFirstInList(json['avatarUrl'] ?? json['image']),
       participant: Participant.fromJson(participantJson ?? {}),
-      participants: allParticipants, // ✅ Correctly assigned
+      participants: allParticipants,
       latestMessage: LatestMessage.fromJson(json['latestMessage'] ?? {}),
       unreadCount: finalUnreadCount,
       isDeleted: json['isDeleted'] ?? false,
       isOnline: json['isOnline'] ?? false,
-      createdAt: DateTime.tryParse(json['createdAt']?.toString() ?? '') ?? DateTime.now(),
-      updatedAt: DateTime.tryParse(json['updatedAt']?.toString() ?? '') ?? DateTime.now(),
+      createdAt: DateTime.tryParse(json['createdAt']?.toString() ?? '') ??
+          DateTime.now(),
+      updatedAt: DateTime.tryParse(json['updatedAt']?.toString() ?? '') ??
+          DateTime.now(),
       memberCount: allParticipants.length,
+      isFriend: isFriend, // ✅
     );
   }
 }
 
 class Participant {
-  final String sId; // Match your filter property name
+  final String sId;
   final String fullName;
   final String image;
 
@@ -144,12 +168,16 @@ class LatestMessage {
   });
 
   factory LatestMessage.fromJson(Map<String, dynamic> json) {
-    final String rawText = json['text']?.toString() ?? json['content']?.toString() ?? json['message']?.toString() ?? '';
+    final String rawText = json['text']?.toString() ??
+        json['content']?.toString() ??
+        json['message']?.toString() ??
+        '';
     final String type = json['type']?.toString() ?? 'text';
     String displayText = rawText;
-    
-    if (type == 'image') displayText = '📷 Image';
-    else if (type == 'document') displayText = '📄 Document';
+
+    if (type == 'image') {
+      displayText = '📷 Image';
+    } else if (type == 'document') displayText = '📄 Document';
     else if (type == 'media') displayText = '🎥 Media';
     else if (type == 'audio') displayText = '🎵 Audio';
 
@@ -157,7 +185,9 @@ class LatestMessage {
       id: json['_id']?.toString() ?? '',
       sender: json['sender']?.toString() ?? '',
       text: displayText,
-      createdAt: DateTime.tryParse(json['createdAt']?.toString() ?? '') ?? DateTime.now(),
+      createdAt:
+      DateTime.tryParse(json['createdAt']?.toString() ?? '') ??
+          DateTime.now(),
     );
   }
 }

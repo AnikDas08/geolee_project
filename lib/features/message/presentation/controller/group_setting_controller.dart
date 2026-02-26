@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:giolee78/features/message/presentation/controller/chat_controller.dart';
@@ -102,9 +101,7 @@ class GroupSettingsController extends GetxController {
 
       final response = await ApiService.multipartUpdate(
         endpoint,
-        method: 'PATCH',
         body: body,
-        imageName: 'image',
         imagePath: imageFile?.path,
       );
 
@@ -131,7 +128,7 @@ class GroupSettingsController extends GetxController {
 
     // ✅ FIXED: Correctly include mandatory 'participants' list in constructor
     void updateList(List<ChatModel> list) {
-      int index = list.indexWhere((chat) => chat.id == chatId);
+      final int index = list.indexWhere((chat) => chat.id == chatId);
       if (index != -1) {
         final oldChat = list[index];
         list[index] = ChatModel(
@@ -216,7 +213,7 @@ class GroupSettingsController extends GetxController {
               SizedBox(height: 12.h),
               Text("Leave Group", style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold)),
               SizedBox(height: 8.h),
-              Text("Are you sure you want to leave?", textAlign: TextAlign.center),
+              const Text("Are you sure you want to leave?", textAlign: TextAlign.center),
               SizedBox(height: 20.h),
               Row(
                 children: [
@@ -255,7 +252,7 @@ class GroupSettingsController extends GetxController {
               SizedBox(height: 12.h),
               Text("Delete Group", style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold)),
               SizedBox(height: 8.h),
-              Text("Permanently DELETE this group?", textAlign: TextAlign.center),
+              const Text("Permanently DELETE this group?", textAlign: TextAlign.center),
               SizedBox(height: 20.h),
               Row(
                 children: [
@@ -265,8 +262,11 @@ class GroupSettingsController extends GetxController {
                     onPressed: isDeleting.value ? null : () async {
                       isDeleting.value = true;
                       final res = await ApiService.delete(ApiEndPoint.deleteChatById(chatId));
-                      if (res.statusCode == 200) Get.offAllNamed(AppRoutes.homeNav);
-                      else Get.snackbar('Error', 'You are not the author.');
+                      if (res.statusCode == 200) {
+                        Get.offAllNamed(AppRoutes.homeNav);
+                      } else {
+                        Get.snackbar('Error', 'You are not the author.');
+                      }
                       isDeleting.value = false;
                     },
                     style: ElevatedButton.styleFrom(backgroundColor: AppColors.primaryColor),

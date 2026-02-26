@@ -9,12 +9,17 @@ import 'package:giolee78/utils/helpers/other_helper.dart';
 import 'dart:io'; // Import for File
 import '../controller/provider_complete_profile_controller.dart';
 
-class ServiceProviderInfoScreen extends StatelessWidget {
-  ServiceProviderInfoScreen({super.key});
+class ServiceProviderInfoScreen extends StatefulWidget {
+  const ServiceProviderInfoScreen({super.key});
 
-  final ServiceProviderController controller = Get.put(
-    ServiceProviderController(),
-  );
+  @override
+  State<ServiceProviderInfoScreen> createState() =>
+      _ServiceProviderInfoScreenState();
+}
+
+class _ServiceProviderInfoScreenState extends State<ServiceProviderInfoScreen> {
+  final ServiceProviderController controller =
+  Get.put(ServiceProviderController());
 
   @override
   Widget build(BuildContext context) {
@@ -52,10 +57,11 @@ class ServiceProviderInfoScreen extends StatelessWidget {
                         child: ClipOval(
                           child: controller.profileImagePath.value.isEmpty
                               ? const CommonImage(
-
-                            imageSrc: "assets/images/profilePlaceholder.jpg",
+                            imageSrc:
+                            "assets/images/profilePlaceholder.jpg",
                             size: 100,
-                            defaultImage: "assets/images/profilePlaceholder.jpg",
+                            defaultImage:
+                            "assets/images/profilePlaceholder.jpg",
                           )
                               : Image.file(
                             File(controller.profileImagePath.value),
@@ -93,6 +99,7 @@ class ServiceProviderInfoScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // Business Name Field
                     const Text(
                       'Business Name',
                       style: TextStyle(
@@ -105,11 +112,12 @@ class ServiceProviderInfoScreen extends StatelessWidget {
                     CommonTextField(
                       controller: controller.businessNameController,
                       hintText: 'Business Name',
+                      validator: OtherHelper.validator,
                     ),
 
                     const SizedBox(height: 20),
 
-                    // Experience TextField
+                    // Bio Field
                     const Text(
                       'Bio',
                       style: TextStyle(
@@ -123,12 +131,13 @@ class ServiceProviderInfoScreen extends StatelessWidget {
                       controller: controller.bioController,
                       hintText: 'Bio',
                       maxLines: 2,
+                      validator: OtherHelper.validator,
                     ),
                     const SizedBox(height: 20),
 
-                    // Experience TextField
+                    // Phone Number Field - ✅ WITH PROPER VALIDATOR (10-15 digits)
                     const Text(
-                      'Phone Number',
+                      'Phone Number (10-15 digits)',
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
@@ -137,14 +146,29 @@ class ServiceProviderInfoScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                     CommonTextField(
-                      validator: OtherHelper.phoneNumberValidator,
                       controller: controller.phoneNumberController,
-                      hintText: 'Phone Number',
+                      hintText: 'e.g., +8801865965581',
+                      keyboardType: TextInputType.phone,
+                      validator: OtherHelper.phoneNumberValidator,
+                      prefixIcon: const Icon(
+                        Icons.phone,
+                        color: AppColors.primaryColor,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    const Text(
+                      '• Minimum 10 digits, Maximum 15 digits\n• Optional + sign at the beginning',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey,
+                        fontStyle: FontStyle.italic,
+                      ),
                     ),
                     const SizedBox(height: 20),
 
+                    // Business License Number
                     const Text(
-                      'Business License Number ',
+                      'Business License Number',
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
@@ -153,13 +177,13 @@ class ServiceProviderInfoScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                     CommonTextField(
-
                       controller: controller.businessLicenseNumberController,
                       hintText: 'Business License Number',
+                      validator: OtherHelper.validator,
                     ),
                     const SizedBox(height: 20),
 
-                    // Sub Category Dropdown
+                    // Business Type Field
                     const Text(
                       'Business Type',
                       style: TextStyle(
@@ -172,24 +196,31 @@ class ServiceProviderInfoScreen extends StatelessWidget {
                     CommonTextField(
                       controller: controller.businessTypeController,
                       hintText: 'Business Type',
+                      validator: OtherHelper.validator,
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 40),
                   ],
                 ),
               ),
-
-              // Experience TextField
-              const SizedBox(height: 20),
 
               // Confirm Button
               Obx(() => CommonButton(
                 isLoading: controller.isLoading.value,
                 titleText: "Confirm",
-                buttonHeight: 40,
+                buttonHeight: 50,
                 onTap: () {
-                  controller.completeAdvertiserInfo();
+                  // ✅ VALIDATE FORM BEFORE SUBMITTING
+                  if (controller.formKey.currentState!.validate()) {
+                    // All validations passed
+                    controller.completeAdvertiserInfo();
+                  } else {
+                    // Show error if validation fails
+                    debugPrint("❌ Form validation failed");
+                  }
                 },
               )),
+
+              const SizedBox(height: 24),
             ],
           ),
         ),

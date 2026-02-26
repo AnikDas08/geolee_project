@@ -96,7 +96,7 @@ class AddMemberController extends GetxController {
         appLog("📊 Total friends from API: ${friendsResponse.data.length}");
 
         // Convert to Participant list
-        List<Participant> friends = [];
+        final List<Participant> friends = [];
         for (var i = 0; i < friendsResponse.data.length; i++) {
           final friendData = friendsResponse.data[i];
           friends.add(Participant(
@@ -114,9 +114,9 @@ class AddMemberController extends GetxController {
 
         // Filter out already added members
         appLog("🔍 Filtering...");
-        List<Participant> filtered = [];
+        final List<Participant> filtered = [];
         for (var friend in friends) {
-          bool isAlreadyMember = currentMembers.any((member) => member.id == friend.id);
+          final bool isAlreadyMember = currentMembers.any((member) => member.id == friend.id);
           if (isAlreadyMember) {
             appLog("   🚫 Filtered out: ${friend.name} (already member)");
           } else {
@@ -261,7 +261,7 @@ class AddMemberController extends GetxController {
                             ? SizedBox(
                           height: 18.h,
                           width: 18.h,
-                          child: CircularProgressIndicator(
+                          child: const CircularProgressIndicator(
                             color: Colors.white,
                             strokeWidth: 2,
                           ),

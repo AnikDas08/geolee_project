@@ -24,12 +24,24 @@ String _formatTime(DateTime dateTime) {
   }
 }
 
-Widget chatListItem({required ChatModel item}) {
+/// [isFriend] — true হলে normal background, false হলে white (not-friend indicator)
+Widget chatListItem({required ChatModel item, bool isFriend = true}) {
   final bool hasUnseenMessages = item.unreadCount > 0;
 
-  final Color backgroundColor = hasUnseenMessages
+  // যদি friend না হয় → সাদা, friend হলে → unseen check করে color
+  final Color backgroundColor = !isFriend
+      ? Colors.white
+      : hasUnseenMessages
       ? const Color(0xFFFDFAF5)
       : Colors.white;
+
+  // friend না হলে name ও message একটু dim করা
+  final Color nameColor = !isFriend ? Colors.grey[500]! : Colors.black;
+  final Color messageColor = !isFriend
+      ? Colors.grey[400]!
+      : hasUnseenMessages
+      ? Colors.black87
+      : AppColors.secondaryText;
 
   return Container(
     padding: const EdgeInsets.all(8),
@@ -47,22 +59,34 @@ Widget chatListItem({required ChatModel item}) {
     ),
     child: Row(
       children: [
-        /// image
+        /// Avatar
         Stack(
           children: [
             CircleAvatar(
               radius: 35.sp,
               child: ClipOval(
-                child: CommonImage(
-                  imageSrc: item.isGroup
-                      ? "${ApiEndPoint.imageUrl}${item.chatImage ?? ""}"
-                      : "${ApiEndPoint.imageUrl}${item.participant.image}",
-                  fill: BoxFit.fill,
-                  size: 70,
+                child: ColorFiltered(
+                  // friend না হলে avatar grayscale
+                  colorFilter: !isFriend
+                      ? const ColorFilter.matrix(<double>[
+                    0.2126, 0.7152, 0.0722, 0, 0,
+                    0.2126, 0.7152, 0.0722, 0, 0,
+                    0.2126, 0.7152, 0.0722, 0, 0,
+                    0,      0,      0,      1, 0,
+                  ])
+                      : const ColorFilter.mode(
+                      Colors.transparent, BlendMode.multiply),
+                  child: CommonImage(
+                    imageSrc: item.isGroup
+                        ? "${ApiEndPoint.imageUrl}${item.chatImage ?? ""}"
+                        : "${ApiEndPoint.imageUrl}${item.participant.image}",
+                    fill: BoxFit.fill,
+                    size: 70,
+                  ),
                 ),
               ),
             ),
-            if (item.isOnline && !item.isGroup)
+            if (item.isOnline && !item.isGroup && isFriend)
               Positioned(
                 bottom: 6,
                 right: 2,
@@ -92,24 +116,21 @@ Widget chatListItem({required ChatModel item}) {
                       text: item.isGroup
                           ? (item.chatName ?? "Unnamed Group")
                           : item.participant.fullName,
-                      fontWeight: hasUnseenMessages
+                      fontWeight: hasUnseenMessages && isFriend
                           ? FontWeight.w700
                           : FontWeight.w600,
                       fontSize: 18,
+                      color: nameColor,
                     ),
                     CommonText(
                       text: item.latestMessage.text.isNotEmpty
                           ? item.latestMessage.text
                           : "Tap to view messages",
-                      fontWeight: hasUnseenMessages
+                      fontWeight: hasUnseenMessages && isFriend
                           ? FontWeight.w500
                           : FontWeight.w400,
                       fontSize: 12,
-                      color: hasUnseenMessages
-                          ? Colors.black87
-                          : AppColors.secondaryText,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                      color: messageColor,
                     ),
                   ],
                 ),
@@ -121,14 +142,31 @@ Widget chatListItem({required ChatModel item}) {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   if (!item.isGroup)
-                  CommonText(
-                    text: _formatTime(item.latestMessage.createdAt),
-                    fontSize: 12,
-                    color: hasUnseenMessages
-                        ? const Color(0xFFE88D67)
-                        : AppColors.secondaryText,
-                  ),
-
+                    CommonText(
+                      text: _formatTime(item.latestMessage.createdAt),
+                      fontSize: 12,
+                      color: hasUnseenMessages && isFriend
+                          ? const Color(0xFFE88D67)
+                          : AppColors.secondaryText,
+                    ),
+                  // friend না হলে ছোট "Not friend" badge
+                  if (!isFriend)
+                    Container(
+                      margin: EdgeInsets.only(top: 4.h),
+                      padding: EdgeInsets.symmetric(
+                          horizontal: 6.w, vertical: 2.h),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[200],
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        "Not friend",
+                        style: TextStyle(
+                          fontSize: 10.sp,
+                          color: Colors.grey[500],
+                        ),
+                      ),
+                    ),
                 ],
               ),
             ],
