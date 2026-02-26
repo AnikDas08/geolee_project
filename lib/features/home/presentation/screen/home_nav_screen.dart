@@ -26,7 +26,6 @@ class HomeNav extends StatelessWidget {
     const ChatListScreen(),
   ];
 
-  // Index 0: Home (Shared), Index 1: CreateAds, Index 2: Dashboard
   final List<Widget> advertiseScreens = [
     const HomeScreen(),
     const CreateAdsScreen(),
@@ -36,7 +35,6 @@ class HomeNav extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // IndexedStack switches between lists based on isUserScreenActive
       body: Obx(() {
         return IndexedStack(
           index: controller.currentIndex.value,
@@ -89,7 +87,7 @@ class HomeNav extends StatelessWidget {
                 // RIGHT BUTTON: Message or Dashboard
                 _buildNavItem(
                   index: 2,
-                  iconPath: isUser ? AppIcons.chatIcon : AppIcons.chatIcon, // Assuming you have a dashboard icon
+                  iconPath: isUser ? AppIcons.chatIcon : AppIcons.chatIcon,
                   label: isUser ? 'Message' : 'Dashboard',
                 ),
               ],

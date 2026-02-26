@@ -25,20 +25,17 @@ class SignInScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final formKey = GlobalKey<FormState>();
     return Scaffold(
-      /// App Bar Sections Starts here
       appBar: AppBar(
         actions: [
-          // Skip text added to the right side of the AppBar
+
           GestureDetector(
             onTap: () {
-              // Using Get.offNamed to navigate to the home screen and remove the current route from the stack.
-              // Assuming AppRoutes.home is the main route after skipping.
               Get.offNamed(AppRoutes.homeNav);
             },
             child: Padding(
               padding: EdgeInsets.only(right: 20.w),
               child: const CommonText(
-                text: 'Skip', // Using a literal string for the skip text
+                text: 'Skip',
                 color: AppColors.primaryColor,
                 fontWeight: FontWeight.w600,
               ),

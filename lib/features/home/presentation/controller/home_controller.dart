@@ -158,9 +158,8 @@ class HomeController extends GetxController {
     return Colors.red;
   }
 
-  // ─────────────────────────────────────────
   //  Marker Icon — cached + disposed
-  // ─────────────────────────────────────────
+
 
   void clearMarkerCache() => _markerIconCache.clear();
 
@@ -607,9 +606,7 @@ class HomeController extends GetxController {
     }
   }
 
-  // ─────────────────────────────────────────
-  //  Search
-  // ─────────────────────────────────────────
+
 
   void searchPosts(String query) {
     try {
@@ -673,7 +670,7 @@ class HomeController extends GetxController {
 
   @override
   void onClose() {
-    _refreshDebounce?.cancel(); // ✅ timer cancel
+    _refreshDebounce?.cancel();
     clearMarkerCache();
     super.onClose();
   }

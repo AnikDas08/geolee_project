@@ -93,7 +93,7 @@ class _HomeDetailsState extends State<HomeDetails> {
         return Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            /// LEFT PROFILE (তোর original UI)
+
             Expanded(
               child: Row(
                 children: [
@@ -158,8 +158,9 @@ class _HomeDetailsState extends State<HomeDetails> {
               ),
             ),
 
-            /// 🔔 Notification Section (FIXED)
-            Obx(
+
+            LocalStorage.token.isNotEmpty
+                ? Obx(
                   () => Stack(
                 clipBehavior: Clip.none,
                 children: [
@@ -194,6 +195,10 @@ class _HomeDetailsState extends State<HomeDetails> {
                     ),
                 ],
               ),
+            )
+                : IconButton(
+              icon: const Icon(Icons.arrow_back),
+              onPressed: () => Get.back(),
             ),
           ],
         );
