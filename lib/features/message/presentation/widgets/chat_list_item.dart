@@ -121,13 +121,6 @@ Widget chatListItem({required ChatModel item}) {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   if (!item.isGroup)
-                    CommonText(
-                      text: "Distance 30 km",
-                      fontSize: 12,
-                      color: const Color(0xFFE88D67),
-                      fontWeight: FontWeight.w600,
-                    ),
-
                   CommonText(
                     text: _formatTime(item.latestMessage.createdAt),
                     fontSize: 12,

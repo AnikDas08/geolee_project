@@ -69,7 +69,9 @@ class GroupSettingsController extends GetxController {
         memberCount.value = (data['participants'] as List?)?.length ?? 0;
 
         if (data['avatarUrl'] != null && data['avatarUrl'].isNotEmpty) {
-          avatarFilePath.value = data['avatarUrl'];
+          // ✅ Add timestamp to force cache bust
+          final timestamp = DateTime.now().millisecondsSinceEpoch;
+          avatarFilePath.value = "${data['avatarUrl']}?t=$timestamp";
         }
       }
     } catch (e) {
@@ -107,6 +109,10 @@ class GroupSettingsController extends GetxController {
       );
 
       if (response.statusCode == 200) {
+        // ✅ Clear image cache
+        imageCache.clear();
+        imageCache.clearLiveImages();
+
         await fetchGroupDetails();
         Get.find<ChatController>().getChatRepos();
         Get.snackbar('Success', 'Group updated successfully!');

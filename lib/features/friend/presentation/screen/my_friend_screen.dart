@@ -43,7 +43,7 @@ class MyFriendScreen extends StatelessWidget {
       ),
       body: SafeArea(
         child: Obx(
-          () => ListView(
+              () => ListView(
             physics: const BouncingScrollPhysics(),
             padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
             children: [
@@ -178,22 +178,31 @@ class _SuggestedFriendCard extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Row(
-              children: [
-                CircleAvatar(
-                  radius: 22.r,
-                  backgroundImage: (avatar != null && avatar!.isNotEmpty)
-                      ? NetworkImage(avatar!)
-                      : const AssetImage(AppImages.profileImage) as ImageProvider,
-                ),
-                SizedBox(width: 12.w),
-                CommonText(
-                  text: userName,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                ),
-              ],
+            Expanded(
+              child: Row(
+                children: [
+                  CircleAvatar(
+                    radius: 22.r,
+                    backgroundImage: (avatar != null && avatar!.isNotEmpty)
+                        ? NetworkImage(avatar!)
+                        : const AssetImage(AppImages.profileImage) as ImageProvider,
+                  ),
+                  SizedBox(width: 12.w),
+                  // ✅ Wrap with Expanded + add maxLines + overflow
+                  Expanded(
+                    child: CommonText(
+                      text: userName,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
             ),
+
+            SizedBox(width: 8.w),
 
             if (userId != LocalStorage.userId)
               Obx(() {
@@ -241,11 +250,11 @@ class _SuggestedFriendCard extends StatelessWidget {
 Widget _buildButton({
   required String title,
   required String image,
-  required VoidCallback onTap, // This was being passed but ignored
+  required VoidCallback onTap,
   required Color color,
 }) {
   return GestureDetector(
-    onTap: onTap, // <--- Add this!
+    onTap: onTap,
     child: Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: ShapeDecoration(
@@ -305,23 +314,33 @@ class _FriendListItem extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Row(
-              children: [
-                CircleAvatar(
-                  radius: 22.r,
-                  backgroundImage:
-                  (avatar != null && avatar!.startsWith('http'))
-                      ? NetworkImage(avatar!)
-                      : const AssetImage(AppImages.profileImage) as ImageProvider,
-                ),
-                SizedBox(width: 12.w),
-                CommonText(
-                  text: userName,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                ),
-              ],
+            Expanded(
+              child: Row(
+                children: [
+                  CircleAvatar(
+                    radius: 22.r,
+                    backgroundImage:
+                    (avatar != null && avatar!.startsWith('http'))
+                        ? NetworkImage(avatar!)
+                        : const AssetImage(AppImages.profileImage) as ImageProvider,
+                  ),
+                  SizedBox(width: 12.w),
+                  // ✅ Wrap with Expanded + add maxLines + overflow
+                  Expanded(
+                    child: CommonText(
+                      text: userName,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
             ),
+
+            SizedBox(width: 8.w),
+
             Row(
               children: [
                 GestureDetector(

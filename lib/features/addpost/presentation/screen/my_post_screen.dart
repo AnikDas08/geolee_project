@@ -34,6 +34,12 @@ class _MyPostScreenState extends State<MyPostScreen> with WidgetsBindingObserver
     super.dispose();
   }
 
+  String _removeNumbersFromLocation(String address) {
+    String firstPart = address.split(',')[0].trim();
+    String cleaned = firstPart.replaceAll(RegExp(r'[0-9]'), '');
+    return cleaned.replaceAll(RegExp(r'\s+'), ' ').trim();
+  }
+
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
@@ -104,7 +110,7 @@ class _MyPostScreenState extends State<MyPostScreen> with WidgetsBindingObserver
                   userAvatar: "${ApiEndPoint.imageUrl}${data.user.image}",
                   timeAgo: _formatPostTime(DateTime.parse(data.createdAt.toString())),
                   location: data.address.isNotEmpty
-                      ? data.address.split(',')[0]
+                      ? _removeNumbersFromLocation(data.address)
                       : "",
 
                   images: postImages, // <-- Corrected list passed here
