@@ -19,20 +19,17 @@ class GroupMessageScreen extends StatefulWidget {
 }
 
 class _GroupMessageScreenState extends State<GroupMessageScreen> {
-  // ─── ইমেজ ইউআরএল হ্যান্ডেলার ─────────────────────────────
+
   String getImageUrl(String? path) {
     if (path == null || path.isEmpty) return "";
 
-    // যদি অলরেডি পূর্ণ ইউআরএল থাকে
     if (path.startsWith('http')) return path;
 
-    // বেস ইউআরএল ঠিক করা (স্ল্যাশ হ্যান্ডেল করা)
     String baseUrl = ApiEndPoint.imageUrl;
     if (!baseUrl.endsWith('/')) {
       baseUrl = '$baseUrl/';
     }
 
-    // পাথের শুরু থেকে স্ল্যাশ সরিয়ে ফেলা
     String cleanPath = path.startsWith('/') ? path.substring(1) : path;
 
     return "$baseUrl$cleanPath";
@@ -72,14 +69,17 @@ class _GroupMessageScreenState extends State<GroupMessageScreen> {
                   Obx(() {
                     final String path = controller.avatarFilePath.value;
                     if (path.isNotEmpty) {
-                      bool isActuallyLocalFile = path.startsWith('/data/') || path.startsWith('/storage/') || path.startsWith('file://');
+                      bool isActuallyLocalFile = path.startsWith('/data/') ||
+                          path.startsWith('/storage/') ||
+                          path.startsWith('file://');
 
                       return CircleAvatar(
                         radius: 18.r,
                         backgroundColor: Colors.grey.shade300,
                         backgroundImage: isActuallyLocalFile
                             ? FileImage(File(path)) as ImageProvider
-                            : NetworkImage(getImageUrl(path)), // এখানে getImageUrl ব্যবহার করা হয়েছে
+                            : NetworkImage(getImageUrl(path))
+                          ..evict(),
                       );
                     } else {
                       return CircleAvatar(

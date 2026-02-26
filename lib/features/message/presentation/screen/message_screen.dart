@@ -18,7 +18,7 @@ class MessageScreen extends StatefulWidget {
 
 class _MessageScreenState extends State<MessageScreen> {
 
-  // ─── ইমেজ ইউআরএল হ্যান্ডেলার ─────────────────────────────
+
   String _getImageUrl(String? path) {
     if (path == null || path.isEmpty) return "";
     if (path.startsWith('http')) return path;

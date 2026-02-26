@@ -6,8 +6,9 @@ import 'package:giolee78/config/api/api_end_point.dart';
 import 'package:giolee78/services/api/api_service.dart';
 import 'package:giolee78/utils/log/app_log.dart';
 import 'package:giolee78/utils/app_utils.dart';
-// Assuming your model is in this path
 import '../../data/model/add_friend_model.dart';
+import '../../data/model/friend_response_model.dart';
+
 
 
 class AddMemberController extends GetxController {
@@ -16,19 +17,19 @@ class AddMemberController extends GetxController {
   String chatId = '';
   Timer? _debounce;
 
-  // List for search results (users found in global search)
   final RxList<Participant> searchResults = <Participant>[].obs;
-
-  // List for existing group members
   final RxList<Participant> currentMembers = <Participant>[].obs;
+
+  List<Participant> allFriendsList = [];
 
   @override
   void onInit() {
     super.onInit();
-    // Getting chatId passed from previous screen via Get.toNamed(..., arguments: {'chatId': '...'})
     chatId = Get.arguments?['chatId'] ?? '';
+    appLog("🔍 ChatID: $chatId");
+
     if (chatId.isNotEmpty) {
-      fetchCurrentMembers();
+      loadData();
     }
   }
 
@@ -38,95 +39,170 @@ class AddMemberController extends GetxController {
     super.onClose();
   }
 
-  /// 1. Fetch current members of the group
-  Future<void> fetchCurrentMembers() async {
+  /// Load both current members and friends
+  Future<void> loadData() async {
     try {
       isLoading.value = true;
-      final response = await ApiService.get("${ApiEndPoint.getSingleChatById}/$chatId");
+      appLog("🔄 Loading data...");
 
-      if (response.statusCode == 200) {
-        final groupData = TotalMemberResponseModelById.fromJson(response.data as Map<String,dynamic>);
-        currentMembers.assignAll(groupData.data.participants);
-      }
+      // First fetch current members
+      await fetchCurrentMembers();
+
+      // Then fetch friends
+      await fetchMyFriends();
+
+      appLog("✅ Data loading complete");
     } catch (e) {
-      appLog("❌ Error fetching members: $e");
+      appLog("❌ Error in loadData: $e");
     } finally {
       isLoading.value = false;
     }
   }
 
-  /// 2. Search users with Debounce (Wait 500ms after user stops typing)
+  /// Fetch current members
+  Future<void> fetchCurrentMembers() async {
+    try {
+      appLog("📥 Fetching current members...");
+      final response = await ApiService.get("${ApiEndPoint.getSingleChatById}/$chatId");
+
+      appLog("📊 Members Response Status: ${response.statusCode}");
+
+      if (response.statusCode == 200) {
+        final groupData = TotalMemberResponseModelById.fromJson(response.data as Map<String, dynamic>);
+        currentMembers.assignAll(groupData.data.participants);
+
+        appLog("✅ Current members count: ${currentMembers.length}");
+        for (var member in currentMembers) {
+          appLog("   📍 Member: ${member.name} (${member.id})");
+        }
+      }
+    } catch (e) {
+      appLog("❌ Error fetching members: $e");
+    }
+  }
+
+  /// Fetch friends from API
+  Future<void> fetchMyFriends() async {
+    try {
+      appLog("📥 Fetching friends...");
+      final response = await ApiService.get(ApiEndPoint.getMyAllFriend);
+
+      appLog("📊 Friends Response Status: ${response.statusCode}");
+
+      if (response.statusCode == 200) {
+        // Parse response using model
+        final friendsResponse = FriendsResponse.fromJson(response.data as Map<String, dynamic>);
+
+        appLog("📊 Total friends from API: ${friendsResponse.data.length}");
+
+        // Convert to Participant list
+        List<Participant> friends = [];
+        for (var i = 0; i < friendsResponse.data.length; i++) {
+          final friendData = friendsResponse.data[i];
+          friends.add(Participant(
+            id: friendData.friend.id,
+            name: friendData.friend.name,
+            image: friendData.friend.image,
+          ));
+          appLog("   👤 Friend $i: ${friendData.friend.name} (${friendData.friend.id})");
+        }
+
+        appLog("📊 Current members in list: ${currentMembers.length}");
+        for (var member in currentMembers) {
+          appLog("   📍 Current: ${member.name} (${member.id})");
+        }
+
+        // Filter out already added members
+        appLog("🔍 Filtering...");
+        List<Participant> filtered = [];
+        for (var friend in friends) {
+          bool isAlreadyMember = currentMembers.any((member) => member.id == friend.id);
+          if (isAlreadyMember) {
+            appLog("   🚫 Filtered out: ${friend.name} (already member)");
+          } else {
+            appLog("   ✅ Keeping: ${friend.name}");
+            filtered.add(friend);
+          }
+        }
+
+        allFriendsList = filtered;
+        appLog("✅ Available friends (after filtering): ${allFriendsList.length}");
+
+        // Show all friends initially
+        searchResults.assignAll(allFriendsList);
+      }
+    } catch (e) {
+      appLog("❌ Error fetching friends: $e");
+      Utils.errorSnackBar("Error", "Failed to load friends");
+    }
+  }
+
+  /// Search/Filter friends
   void onSearchChanged(String value) {
     searchKeyword.value = value.trim();
+
     if (_debounce?.isActive ?? false) _debounce!.cancel();
 
-    _debounce = Timer(const Duration(milliseconds: 500), () {
-      if (searchKeyword.value.isNotEmpty) {
-        searchUsers(searchKeyword.value);
+    _debounce = Timer(const Duration(milliseconds: 300), () {
+      if (searchKeyword.value.isEmpty) {
+        searchResults.assignAll(allFriendsList);
       } else {
-        searchResults.clear();
+        final filtered = allFriendsList
+            .where((friend) => friend.name.toLowerCase()
+            .contains(searchKeyword.value.toLowerCase()))
+            .toList();
+        appLog("🔎 Search for '${searchKeyword.value}': found ${filtered.length}");
+        searchResults.assignAll(filtered);
       }
     });
   }
 
-  Future<void> searchUsers(String query) async {
+  /// Add member to group
+  /// Add member to group
+  Future<void> onAddMember(Participant friend) async {
     try {
-      // We don't set global isLoading to true here to avoid flickering the whole screen
-      final response = await ApiService.get(ApiEndPoint.getMyChat(query));
-      if (response.statusCode == 200) {
-        final List<dynamic> data = response.data['data'] ?? [];
-
-        // Convert dynamic list to Participant list
-        List<Participant> results = data.map((e) {
-          // Handling your specific JSON structure where user info is in 'anotherParticipant'
-          final p = e['anotherParticipant'];
-          return Participant(
-            id: p?['_id'] ?? e['_id'] ?? '',
-            name: p?['name'] ?? e['name'] ?? 'Unknown',
-            image: p?['image'] ?? e['image'] ?? '',
-          );
-        }).toList();
-
-        // Filter out users who are already in the group
-        results.removeWhere((res) => currentMembers.any((m) => m.id == res.id));
-        searchResults.assignAll(results);
+      if (chatId.isEmpty) {
+        appLog("❌ Error: Chat ID is empty");
+        return;
       }
-    } catch (e) {
-      appLog("❌ Search error: $e");
-    }
-  }
 
-  /// 3. Add member
-  Future<void> onAddMember(Participant user) async {
-    try {
-      final url="${ApiEndPoint.addMember}${user.id}";
+      appLog("➕ Adding: ${friend.name} to Chat: $chatId");
+
+
+      final url = "${ApiEndPoint.addMember}$chatId";
+
+      appLog("📤 Sending payload: {members: [${friend.id}]}");
+
       final response = await ApiService.patch(
         url,
-        body: {"members": user.id},
+        body: {
+          "members": [friend.id] // Friend ID array hishebe body-te jabe
+        },
       );
 
+      appLog("📊 Add response: ${response.statusCode}");
+
       if (response.statusCode == 200) {
-        currentMembers.add(user);
-        searchResults.removeWhere((u) => u.id == user.id);
-        Utils.successSnackBar("Success", "${user.name} added to group");
+        currentMembers.add(friend);
+        allFriendsList.removeWhere((f) => f.id == friend.id);
+        searchResults.removeWhere((f) => f.id == friend.id);
+
+        Utils.successSnackBar("Success", "${friend.name} added to group");
+        appLog("✅ ${friend.name} added successfully");
       }
     } catch (e) {
+      appLog("❌ Error adding member: $e");
       Utils.errorSnackBar("Error", "Could not add member");
     }
   }
 
-
-
-
-  /// 4. Remove member
+  /// Remove member dialog
   void showRemoveMemberDialog(Participant member) {
-    final RxBool isLoading = false.obs;
+    final RxBool isRemoving = false.obs;
 
     Get.dialog(
       Obx(() => Dialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         insetPadding: EdgeInsets.symmetric(horizontal: 24.w),
         child: Container(
           padding: EdgeInsets.all(20.w),
@@ -137,34 +213,21 @@ class AddMemberController extends GetxController {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
-                Icons.person_remove,
-                size: 50.sp,
-                color: Colors.red.shade700,
-              ),
+              Icon(Icons.person_remove, size: 50.sp, color: Colors.red.shade700),
               SizedBox(height: 12.h),
               Text(
                 "Remove Member",
-                style: TextStyle(
-                  fontSize: 20.sp,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 8.h),
               Text(
                 "Remove ${member.name} from the group?",
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 14.sp,
-                  color: Colors.grey.shade700,
-                ),
+                style: TextStyle(fontSize: 14.sp, color: Colors.grey.shade700),
               ),
               SizedBox(height: 20.h),
-
-              // Buttons Row (Container taps)
               Row(
                 children: [
-                  // Cancel Button
                   Expanded(
                     child: GestureDetector(
                       onTap: () => Get.back(),
@@ -178,44 +241,15 @@ class AddMemberController extends GetxController {
                         alignment: Alignment.center,
                         child: Text(
                           "Cancel",
-                          style: TextStyle(
-                            fontSize: 14.sp,
-                            color: Colors.grey.shade800,
-                          ),
+                          style: TextStyle(fontSize: 14.sp, color: Colors.grey.shade800),
                         ),
                       ),
                     ),
                   ),
                   SizedBox(width: 12.w),
-
-                  // Remove Button
                   Expanded(
                     child: GestureDetector(
-                      onTap: isLoading.value
-                          ? null
-                          : () async {
-                        try {
-                          isLoading.value = true;
-                          Get.back(); // Close dialog first
-
-                          final response = await ApiService.patch(
-                            "${ApiEndPoint.removeMember}${chatId}",
-                            body: {"member": member.id},
-                          );
-
-                          if (response.statusCode == 200) {
-                            currentMembers
-                                .removeWhere((m) => m.id == member.id);
-                            Utils.successSnackBar(
-                                "Removed", "${member.name} removed");
-                          }
-                        } catch (e) {
-                          Utils.errorSnackBar(
-                              "Error", "Could not remove member");
-                        } finally {
-                          isLoading.value = false;
-                        }
-                      },
+                      onTap: isRemoving.value ? null : () => _removeMember(member, isRemoving),
                       child: Container(
                         padding: EdgeInsets.symmetric(vertical: 12.h),
                         decoration: BoxDecoration(
@@ -223,7 +257,7 @@ class AddMemberController extends GetxController {
                           color: Colors.red.shade700,
                         ),
                         alignment: Alignment.center,
-                        child: isLoading.value
+                        child: isRemoving.value
                             ? SizedBox(
                           height: 18.h,
                           width: 18.h,
@@ -250,5 +284,36 @@ class AddMemberController extends GetxController {
         ),
       )),
     );
+  }
+
+  /// Helper to remove member
+  Future<void> _removeMember(Participant member, RxBool isRemoving) async {
+    try {
+      isRemoving.value = true;
+      Get.back();
+
+      appLog("🗑️ Removing: ${member.name}");
+
+      final response = await ApiService.patch(
+        "${ApiEndPoint.removeMember}$chatId",
+        body: {"member": member.id},
+      );
+
+      appLog("📊 Remove response: ${response.statusCode}");
+
+      if (response.statusCode == 200) {
+        currentMembers.removeWhere((m) => m.id == member.id);
+        allFriendsList.add(member);
+        searchResults.add(member);
+
+        Utils.successSnackBar("Removed", "${member.name} removed");
+        appLog("✅ ${member.name} removed successfully");
+      }
+    } catch (e) {
+      appLog("❌ Error removing member: $e");
+      Utils.errorSnackBar("Error", "Could not remove member");
+    } finally {
+      isRemoving.value = false;
+    }
   }
 }

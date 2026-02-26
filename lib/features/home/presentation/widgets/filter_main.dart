@@ -113,7 +113,7 @@ class _FilterDialogState extends State<FilterDialog>
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
       child: Container(
-        padding: EdgeInsets.all(20.w),
+        padding: EdgeInsets.all(10.w),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(12.r),
@@ -226,7 +226,7 @@ class _FilterDialogState extends State<FilterDialog>
 
             // ─── Tab Content ───
             SizedBox(
-              height: 195.h,
+              height: 205.h,
               child: TabBarView(
                 controller: _tabController,
                 children: [_buildPeriodTab(), _buildDateRangeTab()],
