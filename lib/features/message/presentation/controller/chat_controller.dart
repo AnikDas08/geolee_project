@@ -10,18 +10,28 @@ import '../../../../services/api/api_service.dart';
 
 class ChatController extends GetxController {
   List<ChatModel> singleChats = [];
-  List<ChatModel> chats = []; // all groups (original)
-  List<ChatModel> filteredChats = []; // filtered groups
-  List<ChatModel> filteredSingleChats = []; // ✅ filtered single chats
+  List<ChatModel> chats = [];
+  List<ChatModel> filteredChats = [];
+  List<ChatModel> filteredSingleChats = [];
 
   bool isSingleLoading = false;
   bool isGroupLoading = false;
   bool isLoading = false;
   bool isLoadingMore = false;
+  bool isLoadingMoreSingle = false; // ✅
   bool hasNoData = false;
+  bool hasNoSingleData = false; // ✅
   int page = 0;
+  int singlePage = 0; // ✅
+
+  // ✅ Pagination tracking
+  int _groupTotalPages = 1;
+  int _singleTotalPages = 1;
+  bool get hasMoreGroups => page < _groupTotalPages;
+  bool get hasMoreSingles => singlePage < _singleTotalPages;
 
   ScrollController scrollController = ScrollController();
+  ScrollController singleScrollController = ScrollController();
   TextEditingController searchController = TextEditingController();
 
   static ChatController get instance => Get.put(ChatController());
@@ -29,11 +39,10 @@ class ChatController extends GetxController {
   void clearSearch() {
     searchController.clear();
     filteredChats = List.from(chats);
-    filteredSingleChats = List.from(singleChats); // ✅
+    filteredSingleChats = List.from(singleChats);
     update();
   }
 
-  // ✅ Local search — name বা email দিয়ে filter
   void searchChats(String query) {
     final q = query.trim().toLowerCase();
 
@@ -41,14 +50,12 @@ class ChatController extends GetxController {
       filteredChats = List.from(chats);
       filteredSingleChats = List.from(singleChats);
     } else {
-      // Single chats — participant name বা email দিয়ে filter
       filteredSingleChats = singleChats.where((chat) {
         final name = chat.participant.fullName.toLowerCase();
-        final email = chat.participant.email.toLowerCase(); // ✅ email
+        final email = chat.participant.email.toLowerCase();
         return name.contains(q) || email.contains(q);
       }).toList();
 
-      // Group chats — group name দিয়ে filter
       filteredChats = chats.where((chat) {
         final groupName = (chat.chatName ?? '').toLowerCase();
         return groupName.contains(q);
@@ -58,27 +65,107 @@ class ChatController extends GetxController {
     update();
   }
 
-  void moreChats() {
+  void setupGroupPagination() {
     scrollController.addListener(() async {
-      if (scrollController.position.pixels ==
-          scrollController.position.maxScrollExtent) {
-        if (isLoadingMore || hasNoData) return;
-        isLoadingMore = true;
-        update();
-        page++;
-        final List<ChatModel> list = await chatRepository(
-          page,
-          searchController.text.trim(),
-          true,
-        );
-
-        final allGroups = list.where((item) => item.isGroup).toList();
-        chats.addAll(allGroups);
-        filteredChats = List.from(chats);
-        isLoadingMore = false;
-        update();
+      if (scrollController.position.pixels >=
+          scrollController.position.maxScrollExtent - 200) {
+        if (isLoadingMore || !hasMoreGroups) return;
+        await _loadMoreGroups();
       }
     });
+  }
+
+  // ✅ Single chat pagination
+  void setupSinglePagination() {
+    singleScrollController.addListener(() async {
+      if (singleScrollController.position.pixels >=
+          singleScrollController.position.maxScrollExtent - 200) {
+        if (isLoadingMoreSingle || !hasMoreSingles) return;
+        await _loadMoreSingles();
+      }
+    });
+  }
+
+  Future<void> _loadMoreGroups() async {
+    if (isLoadingMore || !hasMoreGroups) {
+      debugPrint("⏸️ _loadMoreGroups skipped: isLoading=$isLoadingMore, hasMore=$hasMoreGroups");
+      return;
+    }
+    isLoadingMore = true;
+    update();
+
+    try {
+      page++;
+      debugPrint("📄 Loading groups page: $page (total pages available: $_groupTotalPages)");
+
+      final response = await chatRepository(
+        page,
+        searchController.text.trim(),
+        true,
+      );
+
+      _groupTotalPages = response.totalPage;
+      debugPrint("📊 Updated _groupTotalPages to: $_groupTotalPages");
+
+      final allGroups = response.data.where((item) => item.isGroup).toList();
+      debugPrint("➕ Adding ${allGroups.length} groups to existing ${chats.length}");
+      chats.addAll(allGroups);
+
+      if (searchController.text.trim().isEmpty) {
+        filteredChats = List.from(chats);
+      } else {
+        searchChats(searchController.text.trim());
+      }
+      debugPrint("✅ _loadMoreGroups completed. Total chats: ${chats.length}");
+    } catch (e) {
+      print("❌ loadMoreGroups Error: $e");
+      page--; // Revert page on error
+    } finally {
+      isLoadingMore = false;
+      update();
+    }
+  }
+
+  Future<void> _loadMoreSingles() async {
+    if (isLoadingMoreSingle || !hasMoreSingles) {
+      debugPrint("⏸️ _loadMoreSingles skipped: isLoading=$isLoadingMoreSingle, hasMore=$hasMoreSingles");
+      return;
+    }
+    isLoadingMoreSingle = true;
+    update();
+
+    try {
+      singlePage++;
+      debugPrint("📄 Loading singles page: $singlePage (total pages available: $_singleTotalPages)");
+
+      final response = await chatRepository(
+        singlePage,
+        searchController.text.trim(),
+        false,
+      );
+
+      _singleTotalPages = response.totalPage;
+      debugPrint("📊 Updated _singleTotalPages to: $_singleTotalPages");
+
+      final singles = response.data.where((item) => !item.isGroup).toList();
+      debugPrint("➕ Adding ${singles.length} singles to existing ${singleChats.length}");
+      singleChats.addAll(singles);
+
+      if (searchController.text.trim().isEmpty) {
+        filteredSingleChats = List.from(singleChats);
+      } else {
+        searchChats(searchController.text.trim());
+      }
+
+      await _markFriendStatusForList(singles);
+      debugPrint("✅ _loadMoreSingles completed. Total singles: ${singleChats.length}");
+    } catch (e) {
+      print("❌ loadMoreSingles Error: $e");
+      singlePage--; // Revert page on error
+    } finally {
+      isLoadingMoreSingle = false;
+      update();
+    }
   }
 
   Future<void> getChatRepos({
@@ -96,26 +183,36 @@ class ChatController extends GetxController {
         update();
       }
 
-      page = 1;
-      final List<ChatModel> list = await chatRepository(
-        page,
-        '', // ✅ API তে search না পাঠিয়ে local filter করব
+      if (isGroup) {
+        page = 1;
+      } else {
+        singlePage = 1;
+      }
+
+      final response = await chatRepository(
+        isGroup ? page : singlePage,
+        '',
         isGroup,
       );
 
       if (isGroup) {
         chats.clear();
-        final allGroups = list.where((item) => item.isGroup).toList();
+        _groupTotalPages = response.totalPage;
+        debugPrint("📊 Groups: totalPage=$_groupTotalPages, received=${response.data.length}");
+
+        final allGroups = response.data.where((item) => item.isGroup).toList();
         chats.addAll(allGroups);
-        filteredChats = List.from(chats); // ✅
+        filteredChats = List.from(chats);
       } else {
         singleChats.clear();
-        singleChats.addAll(list.where((item) => !item.isGroup).toList());
-        filteredSingleChats = List.from(singleChats); // ✅
+        _singleTotalPages = response.totalPage;
+        debugPrint("📊 Singles: totalPage=$_singleTotalPages, received=${response.data.length}");
+
+        singleChats.addAll(response.data.where((item) => !item.isGroup).toList());
+        filteredSingleChats = List.from(singleChats);
         await _markFriendStatus();
       }
 
-      // ✅ Search text থাকলে re-apply filter
       if (searchController.text.trim().isNotEmpty) {
         searchChats(searchController.text.trim());
       }
@@ -133,9 +230,14 @@ class ChatController extends GetxController {
   }
 
   Future<void> _markFriendStatus() async {
-    if (singleChats.isEmpty) return;
+    await _markFriendStatusForList(singleChats);
+  }
 
-    final List<Future> checks = singleChats.map((chat) async {
+  // ✅ Reusable — specific list এর জন্য
+  Future<void> _markFriendStatusForList(List<ChatModel> targetList) async {
+    if (targetList.isEmpty) return;
+
+    final List<Future> checks = targetList.map((chat) async {
       if (chat.participant.sId.isEmpty) return;
 
       try {
@@ -152,10 +254,10 @@ class ChatController extends GetxController {
         final index = singleChats.indexWhere((c) => c.id == chat.id);
         if (index != -1) {
           singleChats[index] = singleChats[index].copyWith(isFriend: isFriend);
-          // ✅ filteredSingleChats ও update করো
           final fIndex = filteredSingleChats.indexWhere((c) => c.id == chat.id);
           if (fIndex != -1) {
-            filteredSingleChats[fIndex] = filteredSingleChats[fIndex].copyWith(isFriend: isFriend);
+            filteredSingleChats[fIndex] =
+                filteredSingleChats[fIndex].copyWith(isFriend: isFriend);
           }
         }
       } catch (_) {
@@ -164,7 +266,8 @@ class ChatController extends GetxController {
           singleChats[index] = singleChats[index].copyWith(isFriend: false);
           final fIndex = filteredSingleChats.indexWhere((c) => c.id == chat.id);
           if (fIndex != -1) {
-            filteredSingleChats[fIndex] = filteredSingleChats[fIndex].copyWith(isFriend: false);
+            filteredSingleChats[fIndex] =
+                filteredSingleChats[fIndex].copyWith(isFriend: false);
           }
         }
       }
@@ -189,10 +292,11 @@ class ChatController extends GetxController {
     final String eventName = "update-chatlist::${LocalStorage.userId}";
     SocketServices.on(eventName, (data) {
       page = 0;
+      singlePage = 0;
       chats.clear();
       singleChats.clear();
       filteredChats.clear();
-      filteredSingleChats.clear(); // ✅
+      filteredSingleChats.clear();
       hasNoData = false;
 
       for (var item in data) {
@@ -209,7 +313,7 @@ class ChatController extends GetxController {
       }
 
       filteredChats = List.from(chats);
-      filteredSingleChats = List.from(singleChats); // ✅
+      filteredSingleChats = List.from(singleChats);
       update();
       _markFriendStatus();
     });
@@ -219,10 +323,10 @@ class ChatController extends GetxController {
     int index = singleChats.indexWhere((chat) => chat.id == chatId);
     if (index != -1) {
       singleChats[index] = singleChats[index].copyWith(unreadCount: 0);
-      // ✅ filteredSingleChats ও update
       final fIndex = filteredSingleChats.indexWhere((c) => c.id == chatId);
       if (fIndex != -1) {
-        filteredSingleChats[fIndex] = filteredSingleChats[fIndex].copyWith(unreadCount: 0);
+        filteredSingleChats[fIndex] =
+            filteredSingleChats[fIndex].copyWith(unreadCount: 0);
       }
       update();
       return;
@@ -241,6 +345,14 @@ class ChatController extends GetxController {
     super.onInit();
     fetchInitialData();
     listenChat();
+    setupGroupPagination();
+    setupSinglePagination(); // ✅
+  }
+
+  @override
+  void onClose() {
+    singleScrollController.dispose(); // ✅
+    super.onClose();
   }
 
   Future<void> fetchInitialData() async {

@@ -252,35 +252,40 @@ class _ChatListScreenState extends State<ChatListScreen> {
                                   ),
                                 )
                               : ListView.builder(
-                                 itemCount: controller.filteredSingleChats.length,
-                                  padding: EdgeInsets.only(top: 16.h),
-                                  itemBuilder: (context, index) {
-                                    final ChatModel item = controller.filteredSingleChats[index];
-
-                                    return GestureDetector(
-                                      onTap: () {
-                                        Get.toNamed(
-                                          AppRoutes.message,
-                                          parameters: {
-                                            "userId": item.participant.sId,
-                                            "chatId": item.id,
-                                            "name": item.isGroup
-                                                ? (item.chatName ??
-                                                      "Unnamed Group")
-                                                : item.participant.fullName,
-                                            "image": item.isGroup
-                                                ? (item.chatImage ?? "")
-                                                : item.participant.image,
-                                          },
-                                        );
-                                      },
-                                      child: chatListItem(
-                                        item: item,
-                                        isFriend: item.isFriend,
-                                      ),
-                                    );
-                                  },
-                                ),
+                            controller: controller.singleScrollController,
+                            itemCount: controller.filteredSingleChats.length +
+                                (controller.isLoadingMoreSingle ? 1 : 0),
+                            padding: EdgeInsets.only(top: 16.h),
+                            itemBuilder: (context, index) {
+                              if (index == controller.filteredSingleChats.length) {
+                                return Padding(
+                                  padding: EdgeInsets.all(16.h),
+                                  child: const Center(
+                                    child: CircularProgressIndicator(color: AppColors.primaryColor),
+                                  ),
+                                );
+                              }
+                              final ChatModel item = controller.filteredSingleChats[index];
+                              return GestureDetector(
+                                onTap: () {
+                                  Get.toNamed(
+                                    AppRoutes.message,
+                                    parameters: {
+                                      "userId": item.participant.sId,
+                                      "chatId": item.id,
+                                      "name": item.isGroup
+                                          ? (item.chatName ?? "Unnamed Group")
+                                          : item.participant.fullName,
+                                      "image": item.isGroup
+                                          ? (item.chatImage ?? "")
+                                          : item.participant.image,
+                                    },
+                                  );
+                                },
+                                child: chatListItem(item: item, isFriend: item.isFriend),
+                              );
+                            },
+                          ),
 
                           // ─── Group Tab ──────────────────────────────
                           switch (controller.status) {
@@ -337,14 +342,23 @@ class _ChatListScreenState extends State<ChatListScreen> {
                                       ),
                                     )
                                   : ListView.builder(
-                                itemCount: controller.filteredChats.length,
+                                controller: controller.scrollController,
+                                itemCount: controller.filteredChats.length +
+                                    (controller.isLoadingMore ? 1 : 0),
                                 padding: EdgeInsets.only(top: 16.h),
                                 itemBuilder: (context, index) {
+                                  if (index == controller.filteredChats.length) {
+                                    return Padding(
+                                      padding: EdgeInsets.all(16.h),
+                                      child: const Center(
+                                        child: CircularProgressIndicator(color: AppColors.primaryColor),
+                                      ),
+                                    );
+                                  }
                                   final ChatModel item = controller.filteredChats[index];
                                   return GestureDetector(
                                     onTap: () {
                                       if (!item.amIAParticipant) return;
-
                                       Get.to(
                                             () => const GroupMessageScreen(),
                                         arguments: {
