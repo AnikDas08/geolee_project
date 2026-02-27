@@ -16,20 +16,10 @@ import '../../../../utils/enum/enum.dart';
 import '../../data/my_friends_model.dart';
 
 class MyFriendController extends GetxController {
-  // ================= Static/Dummy Data
-  final RxList<Map<String, dynamic>> suggestedFriends = <Map<String, dynamic>>[
-    {'id': '1', 'name': 'Arlene McCoy', 'avatar': AppImages.profileImage},
-    {'id': '2', 'name': 'Brooklyn Simmons', 'avatar': AppImages.profileImage},
-  ].obs;
+
+
 
   final RxMap<String, bool> friendRequestSent = <String, bool>{}.obs;
-
-  final RxList<Map<String, dynamic>> friendsList = <Map<String, dynamic>>[
-    {'id': '3', 'name': 'Wade Warren', 'avatar': AppImages.profileImage},
-    {'id': '4', 'name': 'Esther Howard', 'avatar': AppImages.profileImage},
-    {'id': '5', 'name': 'Cameron Williamson', 'avatar': AppImages.profileImage},
-    {'id': '6', 'name': 'Robert Fox', 'avatar': AppImages.profileImage},
-  ].obs;
 
   // ================= Friend Requests
   var requests = <FriendData>[].obs;
@@ -64,11 +54,15 @@ class MyFriendController extends GetxController {
 
   List<MyFriendsData> get filteredFriendsList {
     if (searchQuery.value.isEmpty) return myFriendsList;
-    return myFriendsList
-        .where((data) => (data.friend?.name ?? '')
-        .toLowerCase()
-        .contains(searchQuery.value.toLowerCase()))
-        .toList();
+
+    final query = searchQuery.value.toLowerCase();
+
+    return myFriendsList.where((data) {
+      final name = (data.friend?.name ?? '').toLowerCase();
+      final email = (data.friend?.email ?? '').toLowerCase();
+
+      return name.contains(query) || email.contains(query);
+    }).toList();
   }
 
   // ================= Lifecycle
@@ -186,18 +180,30 @@ class MyFriendController extends GetxController {
     try {
       isLoading.value = true;
       final url = ApiEndPoint.getMyFriendRequest;
+      debugPrint("🔄 Fetching friend requests from: $url");
+
       final response = await ApiService.get(url);
 
+      debugPrint("📦 Friend Requests API Status: ${response.statusCode}");
+      debugPrint("📦 Friend Requests API Response: ${response.data}");
+
       if (response.statusCode == 200) {
-        debugPrint("fetchFriendRequests =====> ${response.data}");
         final model = FriendModel.fromJson(
           response.data as Map<String, dynamic>,
         );
+
+        debugPrint("✅ Parsed ${model.data.length} friend requests");
+        model.data.forEach((req) {
+          debugPrint("  - Request ID: ${req.id}, Status: ${req.status}, Sender: ${req.sender.name}");
+        });
+
         requests.value = model.data;
+        debugPrint("📝 Requests list updated. Now has ${requests.length} items");
       } else {
-        debugPrint("fetchFriendRequests error =====> ${response.data}");
+        debugPrint("❌ fetchFriendRequests error =====> ${response.data}");
       }
     } catch (e) {
+      debugPrint("❌ fetchFriendRequests Exception: $e");
       Get.snackbar('Error', e.toString());
     } finally {
       isLoading.value = false;
@@ -490,6 +496,9 @@ class MyFriendController extends GetxController {
         friendStatusMap.refresh();
 
         Utils.successSnackBar("Sent", "Friend request sent");
+
+        // 🔄 Refresh friend requests to update badge on home screen
+        await fetchFriendRequests();
       }
     } catch (e) {
       Utils.errorSnackBar("Error", e.toString());

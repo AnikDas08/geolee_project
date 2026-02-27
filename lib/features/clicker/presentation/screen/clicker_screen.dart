@@ -3,6 +3,7 @@ import 'package:dots_indicator/dots_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:giolee78/services/storage/storage_services.dart';
 import 'package:intl/intl.dart';
 
 import 'package:giolee78/component/image/common_image.dart';
@@ -73,9 +74,7 @@ class _ClickerScreenState extends State<ClickerScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: const CustomAppBar(notificationCount: 0,
-        // notificationCount: notificationsController.unreadCount,
-      ),
+      appBar: const CustomAppBar(notificationCount: 0),
       body: Obx(() {
         // Initial loading state (empty list)
         if (controller.isLoading.value && controller.posts.isEmpty) {
@@ -85,10 +84,10 @@ class _ClickerScreenState extends State<ClickerScreen> {
         return RefreshIndicator(
           onRefresh: () async {
             await controller.getBanners();
-            await controller.getAllPosts(); // Fresh load resets page to 1
+            await controller.getAllPosts();
           },
           child: SingleChildScrollView(
-            controller: _scrollController, // Attach scroll controller
+            controller: _scrollController,
             physics: const AlwaysScrollableScrollPhysics(),
             padding: EdgeInsets.symmetric(horizontal: 16.w),
             child: Column(
@@ -96,22 +95,22 @@ class _ClickerScreenState extends State<ClickerScreen> {
               children: [
                 SizedBox(height: 16.h),
 
-                // ── Search Bar ──────────────────────────────────────────
-                CommonTextField(
-                  controller: controller.searchController,
-                  prefixIcon: const Icon(Icons.search),
-                  hintText: "Search",
-                  borderRadius: 20.r,
-                  suffixIcon: controller.searchText.value.isNotEmpty
-                      ? IconButton(
-                          icon: const Icon(Icons.clear),
-                          onPressed: () {
-                            controller.searchController.clear();
-                            FocusScope.of(context).unfocus();
-                          },
-                        )
-                      : const SizedBox.shrink(),
-                ),
+                if (LocalStorage.token.isNotEmpty)
+                  CommonTextField(
+                    controller: controller.searchController,
+                    prefixIcon: const Icon(Icons.search),
+                    hintText: "Search",
+                    borderRadius: 20.r,
+                    suffixIcon: controller.searchText.value.isNotEmpty
+                        ? IconButton(
+                            icon: const Icon(Icons.clear),
+                            onPressed: () {
+                              controller.searchController.clear();
+                              FocusScope.of(context).unfocus();
+                            },
+                          )
+                        : const SizedBox.shrink(),
+                  ),
                 SizedBox(height: 16.h),
 
                 // ── Banner Slider ───────────────────────────────────────
@@ -188,7 +187,6 @@ class _ClickerScreenState extends State<ClickerScreen> {
                 SizedBox(height: 16.h),
 
                 // ── Posts List ──────────────────────────────────────────
-
                 controller.filteredPosts.isEmpty
                     ? _buildEmptyState()
                     : ListView.separated(
@@ -208,18 +206,20 @@ class _ClickerScreenState extends State<ClickerScreen> {
                             onTapPhoto: () {
                               if (postImages.isNotEmpty) {
                                 Get.to(
-                                  () => FullScreenImageView(
-                                    images: postImages,
-                                  ),
+                                  () => FullScreenImageView(images: postImages),
                                 );
                               }
                             },
-                            onTapProfile: () => Get.to(
-                              () => ViewFriendScreen(
-                                userId: data.user.id,
-                                isFriend: false,
-                              ),
-                            ),
+                            onTapProfile: () {
+
+                              if(LocalStorage.token.isNotEmpty)
+                              Get.to(
+                                () => ViewFriendScreen(
+                                  userId: data.user.id,
+                                  isFriend: false,
+                                ),
+                              );
+                            },
                             clickerType: data.clickerType,
                             userName: data.user.name,
                             userAvatar:
@@ -273,7 +273,6 @@ class _ClickerScreenState extends State<ClickerScreen> {
       }),
     );
   }
-
 
   Widget _buildEmptyState() {
     return Padding(

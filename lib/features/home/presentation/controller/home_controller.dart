@@ -72,16 +72,20 @@ class HomeController extends GetxController {
   Future<void> onInit() async {
     super.onInit();
     try {
-      argument = Get.arguments;
-      Get.find<HomeNavController>().refresh();
-      Get.find<MyProfileController>().refresh();
-      await myProfileController.getUserData();
-      await getUserData();
 
-      // ✅ default All
+
+
+
       clickerCount.value = "All";
 
       if (LocalStorage.token.isNotEmpty) {
+
+        argument = Get.arguments;
+        Get.find<HomeNavController>().refresh();
+        Get.find<MyProfileController>().refresh();
+        await myProfileController.getUserData();
+        await getUserData();
+
         getCurrentLocationAndUpdateProfile();
         fetchPosts();
         myProfileController.getUserData();
@@ -419,9 +423,6 @@ class HomeController extends GetxController {
     }
   }
 
-  // ─────────────────────────────────────────
-  //  API
-  // ─────────────────────────────────────────
 
   Future<void> fetchPostsWithFilter() async {
     try {

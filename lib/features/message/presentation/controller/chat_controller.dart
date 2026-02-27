@@ -10,8 +10,9 @@ import '../../../../services/api/api_service.dart';
 
 class ChatController extends GetxController {
   List<ChatModel> singleChats = [];
-  List<ChatModel> chats = [];
-  List<ChatModel> filteredChats = [];
+  List<ChatModel> chats = []; // all groups (original)
+  List<ChatModel> filteredChats = []; // filtered groups
+  List<ChatModel> filteredSingleChats = []; // ✅ filtered single chats
 
   bool isSingleLoading = false;
   bool isGroupLoading = false;
@@ -27,12 +28,34 @@ class ChatController extends GetxController {
 
   void clearSearch() {
     searchController.clear();
-    filteredChats = chats;
+    filteredChats = List.from(chats);
+    filteredSingleChats = List.from(singleChats); // ✅
     update();
   }
 
-  void searchChats(v) {
-    getChatRepos(showLoading: false);
+  // ✅ Local search — name বা email দিয়ে filter
+  void searchChats(String query) {
+    final q = query.trim().toLowerCase();
+
+    if (q.isEmpty) {
+      filteredChats = List.from(chats);
+      filteredSingleChats = List.from(singleChats);
+    } else {
+      // Single chats — participant name বা email দিয়ে filter
+      filteredSingleChats = singleChats.where((chat) {
+        final name = chat.participant.fullName.toLowerCase();
+        final email = chat.participant.email.toLowerCase(); // ✅ email
+        return name.contains(q) || email.contains(q);
+      }).toList();
+
+      // Group chats — group name দিয়ে filter
+      filteredChats = chats.where((chat) {
+        final groupName = (chat.chatName ?? '').toLowerCase();
+        return groupName.contains(q);
+      }).toList();
+    }
+
+    update();
   }
 
   void moreChats() {
@@ -49,14 +72,9 @@ class ChatController extends GetxController {
           true,
         );
 
-        final joinedGroups = list
-            .where((item) =>
-        item.isGroup &&
-            item.participants.any((p) => p.sId == LocalStorage.userId))
-            .toList();
-
-        chats.addAll(joinedGroups);
-        filteredChats = chats;
+        final allGroups = list.where((item) => item.isGroup).toList();
+        chats.addAll(allGroups);
+        filteredChats = List.from(chats);
         isLoadingMore = false;
         update();
       }
@@ -81,25 +99,25 @@ class ChatController extends GetxController {
       page = 1;
       final List<ChatModel> list = await chatRepository(
         page,
-        searchController.text.trim(),
+        '', // ✅ API তে search না পাঠিয়ে local filter করব
         isGroup,
       );
 
       if (isGroup) {
         chats.clear();
-        final myGroups = list
-            .where((item) =>
-        item.isGroup &&
-            item.participants.any((p) => p.sId == LocalStorage.userId))
-            .toList();
-        chats.addAll(myGroups);
-        filteredChats = chats;
+        final allGroups = list.where((item) => item.isGroup).toList();
+        chats.addAll(allGroups);
+        filteredChats = List.from(chats); // ✅
       } else {
         singleChats.clear();
         singleChats.addAll(list.where((item) => !item.isGroup).toList());
-
-        // ✅ Chat load হওয়ার পর friendship status check করো
+        filteredSingleChats = List.from(singleChats); // ✅
         await _markFriendStatus();
+      }
+
+      // ✅ Search text থাকলে re-apply filter
+      if (searchController.text.trim().isNotEmpty) {
+        searchChats(searchController.text.trim());
       }
     } catch (e) {
       print(">>>>>>>>>>>> ❌ getChatRepos Error: $e <<<<<<<<<<<<");
@@ -114,10 +132,6 @@ class ChatController extends GetxController {
     }
   }
 
-  // ================================================
-  // ✅ প্রতিটা single chat participant এর friendship
-  // status parallel এ check করো এবং ChatModel update করো
-  // ================================================
   Future<void> _markFriendStatus() async {
     if (singleChats.isEmpty) return;
 
@@ -134,19 +148,24 @@ class ChatController extends GetxController {
           final data = response.data['data'];
           isFriend = data['isAlreadyFriend'] == true;
         }
-        // 400 = not friends → isFriend stays false
 
         final index = singleChats.indexWhere((c) => c.id == chat.id);
         if (index != -1) {
-          singleChats[index] =
-              singleChats[index].copyWith(isFriend: isFriend);
+          singleChats[index] = singleChats[index].copyWith(isFriend: isFriend);
+          // ✅ filteredSingleChats ও update করো
+          final fIndex = filteredSingleChats.indexWhere((c) => c.id == chat.id);
+          if (fIndex != -1) {
+            filteredSingleChats[fIndex] = filteredSingleChats[fIndex].copyWith(isFriend: isFriend);
+          }
         }
       } catch (_) {
-        // error হলে false রাখো (white দেখাবে)
         final index = singleChats.indexWhere((c) => c.id == chat.id);
         if (index != -1) {
-          singleChats[index] =
-              singleChats[index].copyWith(isFriend: false);
+          singleChats[index] = singleChats[index].copyWith(isFriend: false);
+          final fIndex = filteredSingleChats.indexWhere((c) => c.id == chat.id);
+          if (fIndex != -1) {
+            filteredSingleChats[fIndex] = filteredSingleChats[fIndex].copyWith(isFriend: false);
+          }
         }
       }
     }).toList();
@@ -173,15 +192,14 @@ class ChatController extends GetxController {
       chats.clear();
       singleChats.clear();
       filteredChats.clear();
+      filteredSingleChats.clear(); // ✅
       hasNoData = false;
 
       for (var item in data) {
         try {
           final chat = ChatModel.fromJson(item);
           if (chat.isGroup) {
-            if (chat.participants.any((p) => p.sId == LocalStorage.userId)) {
-              chats.add(chat);
-            }
+            chats.add(chat);
           } else {
             singleChats.add(chat);
           }
@@ -190,9 +208,10 @@ class ChatController extends GetxController {
         }
       }
 
-      filteredChats = chats;
+      filteredChats = List.from(chats);
+      filteredSingleChats = List.from(singleChats); // ✅
       update();
-      _markFriendStatus(); // socket update এও re-check
+      _markFriendStatus();
     });
   }
 
@@ -200,6 +219,11 @@ class ChatController extends GetxController {
     int index = singleChats.indexWhere((chat) => chat.id == chatId);
     if (index != -1) {
       singleChats[index] = singleChats[index].copyWith(unreadCount: 0);
+      // ✅ filteredSingleChats ও update
+      final fIndex = filteredSingleChats.indexWhere((c) => c.id == chatId);
+      if (fIndex != -1) {
+        filteredSingleChats[fIndex] = filteredSingleChats[fIndex].copyWith(unreadCount: 0);
+      }
       update();
       return;
     }
@@ -207,7 +231,7 @@ class ChatController extends GetxController {
     index = chats.indexWhere((chat) => chat.id == chatId);
     if (index != -1) {
       chats[index] = chats[index].copyWith(unreadCount: 0);
-      filteredChats = chats;
+      filteredChats = List.from(chats);
       update();
     }
   }

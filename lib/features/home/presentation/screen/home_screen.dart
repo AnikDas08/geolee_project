@@ -29,14 +29,41 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   final Completer<GoogleMapController> _mapController =
       Completer<GoogleMapController>();
-  final myFriendController = Get.put(MyFriendController());
 
-  late final pendingRequests = myFriendController.requests
-      .where((r) => r.status == "pending")
-      .toList();
+  late final MyFriendController myFriendController;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+
+    // Get or create the controller - don't recreate it if it already exists
+    if (Get.isRegistered<MyFriendController>()) {
+      myFriendController = Get.find<MyFriendController>();
+      debugPrint("♻️ Using existing MyFriendController");
+    } else {
+      myFriendController = Get.put(MyFriendController());
+      debugPrint("🆕 Created new MyFriendController");
+    }
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      // Refresh friend requests when app comes back into focus
+      debugPrint("👁️ HomeScreen resumed - refreshing friend requests");
+      myFriendController.fetchFriendRequests();
+    }
+  }
 
   CameraPosition get _initialPosition => CameraPosition(
     target: LatLng(
@@ -379,20 +406,32 @@ class _HomeScreenState extends State<HomeScreen> {
               },
             ),
             Obx(
-              () => Item(
-                imageSrc: AppIcons.friend,
-                title: 'Friend Request',
-                badgeText: pendingRequests.isEmpty
-                    ? null
-                    : pendingRequests.length.toString(),
-                onTap: () {
-                  try {
-                    Get.to(() => FriendRequestScreen());
-                  } catch (e) {
-                    Get.snackbar('Error', 'Failed to open Friend Request');
-                  }
-                },
-              ),
+              () {
+                // 🔄 Calculate pending requests dynamically
+                debugPrint("📋 Total requests: ${myFriendController.requests.length}");
+                debugPrint("📋 All requests: ${myFriendController.requests.map((r) => "status=${r.status}").toList()}");
+
+                final pendingRequests = myFriendController.requests
+                    .where((r) => r.status == "pending")
+                    .toList();
+
+                debugPrint("⏳ Pending requests: ${pendingRequests.length}");
+
+                return Item(
+                  imageSrc: AppIcons.friend,
+                  title: 'Friend Request',
+                  badgeText: pendingRequests.isEmpty
+                      ? null
+                      : pendingRequests.length.toString(),
+                  onTap: () {
+                    try {
+                      Get.to(() => FriendRequestScreen());
+                    } catch (e) {
+                      Get.snackbar('Error', 'Failed to open Friend Request');
+                    }
+                  },
+                );
+              },
             ),
           ],
         ],
@@ -529,12 +568,5 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  @override
-  void dispose() {
-    try {
-      super.dispose();
-    } catch (e) {
-      debugPrint('Error in dispose: $e');
-    }
-  }
+
 }

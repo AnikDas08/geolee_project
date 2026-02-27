@@ -6,7 +6,6 @@ class ApiEndPoint {
   static const String socketUrl = "http://148.230.126.149:5000";
 
 
-  //Local URL
 
   // static const String baseUrl = "http://10.10.7.7:5006/api/v1";
   // static const String imageUrl = "http://10.10.7.7:5006";
@@ -47,11 +46,11 @@ class ApiEndPoint {
   static const String deletePost = "$baseUrl/posts/delete/";
 
   // Friend =========================================
+
   static const String createFriendRequest = "$baseUrl/friend-requests/create/";
   static const String friendStatusUpdate = "$baseUrl/friend-requests/update/";
   static const String rejectedFriendRequest = "$baseUrl/friendships/";
-  static const String getMyFriendRequest =
-      "$baseUrl/friend-requests/my-requests";
+  static const String getMyFriendRequest = "$baseUrl/friend-requests/my-requests";
   static const String getMyAllFriend = "$baseUrl/friendships/my-friends";
   static const String checkFriendStatus = "$baseUrl/friendships/check/";
   static const String cancelFriendRequest = "$baseUrl/friend-requests/update/";
@@ -73,6 +72,7 @@ class ApiEndPoint {
   static const String getSingleChatById = "$baseUrl/chats/single";
 
   static const String createAds = "$baseUrl/advertisements/create";
+  static const String createJoinRequest = "$baseUrl/join-requests/create";
   static const String getAdvertisementMe = "$baseUrl/advertisements/me";
   static const String getAdvertisementById = "$baseUrl/advertisements/single/";
   static const String updateAdvertisementById =

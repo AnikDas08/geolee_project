@@ -10,8 +10,8 @@ class NearbyChatController extends GetxController {
   RxList<NearbyChatUserModel> nearbyChatList = <NearbyChatUserModel>[].obs;
   RxBool isNearbyChatLoading = false.obs;
   RxString nearbyChatError = ''.obs;
+  RxMap<String, bool> friendStatusMap = <String, bool>{}.obs; // ✅ NEW
 
-  // ================= PAGINATION =================
   int _currentPage = 1;
   int _totalPages = 1;
   int _totalUsers = 0;
@@ -28,15 +28,11 @@ class NearbyChatController extends GetxController {
 
   Future<void> updateProfileAndLocationVisible() async {
     try {
-
       final latitude = LocalStorage.lat.toDouble();
-      final longitude=LocalStorage.long.toDouble();
+      final longitude = LocalStorage.long.toDouble();
 
-      // API call
       final response = await ApiService.patch(
-
         ApiEndPoint.updateProfile,
-
         body: {
           'isLocationVisible': true,
           "location": [longitude, latitude],
@@ -53,28 +49,44 @@ class NearbyChatController extends GetxController {
     }
   }
 
+  Future<void> checkAllFriendships() async {
+    for (var user in nearbyChatList) {
+      try {
+        final response = await ApiService.get(
+          "${ApiEndPoint.baseUrl}/friendships/check/${user.id}",
+        );
+        if (response.statusCode == 200) {
+          friendStatusMap[user.id] =
+              response.data['data']['isAlreadyFriend'] ?? false;
+        } else {
+          friendStatusMap[user.id] = false;
+        }
+      } catch (e) {
+        friendStatusMap[user.id] = false;
+        debugPrint("❌ Friendship check failed for ${user.id}: $e");
+      }
+    }
+  }
 
-  // ================= FETCH NEARBY CHAT =================
   Future<void> getNearbyChat({bool isRefresh = true}) async {
     try {
       if (isRefresh) {
         _currentPage = 1;
         nearbyChatList.clear();
+        friendStatusMap.clear(); // ✅ Clear on refresh
       }
 
       final double lat = LocalStorage.lat ?? 0.0;
       final double lng = LocalStorage.long ?? 0.0;
 
       if (lat == 0.0 || lng == 0.0) {
-        nearbyChatError.value = "Location not available. Please enable location.";
-        debugPrint("❌ Invalid coordinates - Lat: $lat, Lng: $lng");
+        nearbyChatError.value =
+        "Location not available. Please enable location.";
         return;
       }
 
-      final url = "${ApiEndPoint.nearbyChat}?lat=$lat&lng=$lng&page=$_currentPage&limit=20";
-
-      debugPrint("🌐 Fetching Nearby Chat - URL: $url");
-      debugPrint("📄 Page: $_currentPage");
+      final url =
+          "${ApiEndPoint.nearbyChat}?lat=$lat&lng=$lng&page=$_currentPage&limit=20";
 
       isRefresh
           ? isNearbyChatLoading.value = true
@@ -83,58 +95,41 @@ class NearbyChatController extends GetxController {
 
       final ApiResponseModel response = await ApiService.get(url);
 
-      debugPrint("📦 Full Response: ${response.data}");
-      debugPrint("✅ Status: ${response.statusCode}");
-
       if (response.isSuccess) {
-        // ========== PARSE PAGINATION ==========
         final pagination = response.data['pagination'];
         if (pagination != null) {
           _totalPages = pagination['totalPage'] ?? 1;
           _totalUsers = pagination['total'] ?? 0;
-          debugPrint("📊 Total Users: $_totalUsers | Total Pages: $_totalPages | Current Page: $_currentPage");
         }
 
-        // ========== PARSE DATA WITH PER-ITEM ERROR HANDLING ==========
         final rawList = response.data['data'];
-
         if (rawList == null) {
           nearbyChatError.value = "No data found";
-          debugPrint("❌ Data is null in response");
           return;
         }
 
         final List data = rawList as List;
-        debugPrint("📋 Raw list count: ${data.length}");
-
         final List<NearbyChatUserModel> parsedList = [];
 
         for (int i = 0; i < data.length; i++) {
           try {
             final user = NearbyChatUserModel.fromJson(data[i]);
             parsedList.add(user);
-            debugPrint("✅ Parsed user [$i]: ${user.name} | Role: ${user.role} | Distance: ${user.distance}");
           } catch (e) {
-            // ✅ Skip broken items instead of stopping all parsing
             debugPrint("❌ Failed to parse user at index [$i]: $e");
-            debugPrint("❌ Raw data: ${data[i]}");
           }
         }
 
-        debugPrint("✅ Successfully parsed: ${parsedList.length} / ${data.length} users");
-
-        // ========== ADD TO LIST ==========
         if (isRefresh) {
           nearbyChatList.value = parsedList;
         } else {
           nearbyChatList.addAll(parsedList);
         }
 
-        debugPrint("📋 Total in list now: ${nearbyChatList.length}");
+        await checkAllFriendships();
 
       } else {
         nearbyChatError.value = response.message ?? "Something went wrong";
-        debugPrint("❌ API Error: ${response.message}");
       }
     } catch (e) {
       nearbyChatError.value = e.toString();
@@ -145,11 +140,9 @@ class NearbyChatController extends GetxController {
     }
   }
 
-  // ================= LOAD MORE (PAGINATION) =================
   Future<void> loadMore() async {
     if (!hasMoreData || isPaginationLoading.value) return;
     _currentPage++;
-    debugPrint("📄 Loading page: $_currentPage");
     await getNearbyChat(isRefresh: false);
   }
 }

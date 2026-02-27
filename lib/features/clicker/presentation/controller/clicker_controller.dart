@@ -6,6 +6,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:giolee78/features/clicker/data/all_post_model.dart';
 import 'package:giolee78/features/clicker/data/single_user_model.dart';
+import 'package:giolee78/features/friend/presentation/controller/my_friend_controller.dart';
 import 'package:giolee78/services/api/api_service.dart';
 import 'package:giolee78/services/storage/storage_services.dart';
 import 'package:giolee78/utils/app_utils.dart';
@@ -117,9 +118,7 @@ class ClickerController extends GetxController {
 
       final response = await ApiService.post(
         ApiEndPoint.createOneToOneChat,
-        body: {
-          "participant": receiverId,
-        },
+        body: {"participant": receiverId},
       );
 
       if (response.isSuccess) {
@@ -133,10 +132,9 @@ class ClickerController extends GetxController {
               "chatId": chatId,
               "name": name,
               "image": image,
+              "userId": receiverId,
             },
           );
-        } else {
-          print("Chat ID null or empty");
         }
       }
     } finally {
@@ -425,6 +423,11 @@ class ClickerController extends GetxController {
       if (response.statusCode == 200) {
         friendStatus.value = FriendStatus.requested;
         Utils.successSnackBar("Sent", "Friend request sent");
+
+        // 🔄 Refresh friend requests in MyFriendController so badge updates on home screen
+        if (Get.isRegistered<MyFriendController>()) {
+          Get.find<MyFriendController>().fetchFriendRequests();
+        }
       }
     } catch (e) {
       Utils.errorSnackBar("Error", e.toString());

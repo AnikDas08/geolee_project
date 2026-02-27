@@ -8,7 +8,7 @@ import 'package:giolee78/features/chat_nearby/presentation/controller/nearby_cha
 import 'package:giolee78/features/chat_nearby/presentation/controller/chat_nearby_profile_controller.dart';
 import 'package:giolee78/features/chat_nearby/presentation/screen/chat_nearby_profile_screen.dart';
 import 'package:giolee78/features/clicker/presentation/controller/clicker_controller.dart'
-    hide FriendStatus; // ✅ Import ClickerController
+    hide FriendStatus;
 import 'package:giolee78/utils/constants/app_images.dart';
 
 import '../../../../component/image/common_image.dart';
@@ -23,7 +23,7 @@ class ChatNearbyScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.put(NearbyChatController());
-    final clickerController = Get.put(ClickerController(),);
+    final clickerController = Get.put(ClickerController());
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -60,7 +60,6 @@ class ChatNearbyScreen extends StatelessWidget {
           );
         }
 
-        // Handle empty state
         if (controller.nearbyChatList.isEmpty) {
           return Center(
             child: Column(
@@ -77,7 +76,6 @@ class ChatNearbyScreen extends StatelessWidget {
           );
         }
 
-        // Display list with pagination
         return RefreshIndicator(
           onRefresh: () => controller.getNearbyChat(),
           child: NotificationListener<ScrollNotification>(
@@ -90,20 +88,20 @@ class ChatNearbyScreen extends StatelessWidget {
             },
             child: ListView.separated(
               padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
-              itemCount: controller.nearbyChatList.length + 1, // +1 for loader
+              itemCount: controller.nearbyChatList.length + 1,
               separatorBuilder: (context, index) => SizedBox(height: 12.h),
               itemBuilder: (context, index) {
                 if (index == controller.nearbyChatList.length) {
                   return Obx(
-                    () => controller.isPaginationLoading.value
+                        () => controller.isPaginationLoading.value
                         ? Center(
-                            child: Padding(
-                              padding: EdgeInsets.all(16.h),
-                              child: const CircularProgressIndicator(
-                                color: AppColors.primaryColor,
-                              ),
-                            ),
-                          )
+                      child: Padding(
+                        padding: EdgeInsets.all(16.h),
+                        child: const CircularProgressIndicator(
+                          color: AppColors.primaryColor,
+                        ),
+                      ),
+                    )
                         : const SizedBox.shrink(),
                   );
                 }
@@ -111,8 +109,8 @@ class ChatNearbyScreen extends StatelessWidget {
                 final user = controller.nearbyChatList[index];
                 return _NearbyUserCard(
                   nearbyChatUser: user,
-                  clickerController:
-                      clickerController, // ✅ Pass ClickerController
+                  clickerController: clickerController,
+                  controller: controller, // ✅ pass controller
                 );
               },
             ),
@@ -124,19 +122,13 @@ class ChatNearbyScreen extends StatelessWidget {
 }
 
 class _ChatNearbyAppBar extends StatelessWidget {
-
-
   Future<void> updateProfileAndLocationVisible() async {
     try {
-
       final latitude = LocalStorage.lat.toDouble();
-      final longitude=LocalStorage.long.toDouble();
+      final longitude = LocalStorage.long.toDouble();
 
-      // API call
       final response = await ApiService.patch(
-
         ApiEndPoint.updateProfile,
-
         body: {
           'isLocationVisible': false,
           "location": [longitude, latitude],
@@ -168,9 +160,7 @@ class _ChatNearbyAppBar extends StatelessWidget {
             children: [
               IconButton(
                 icon: const Icon(Icons.arrow_back_ios_new_rounded),
-                onPressed: () {
-                  Navigator.pop(context);
-                },
+                onPressed: () => Navigator.pop(context),
               ),
               Expanded(
                 child: Center(
@@ -186,18 +176,17 @@ class _ChatNearbyAppBar extends StatelessWidget {
                 onSelected: (String result) {
                   if (result == 'clear_data') {
                     updateProfileAndLocationVisible();
-                   Get.back();
+                    Get.back();
                   }
                 },
-                itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                itemBuilder: (BuildContext context) =>
+                <PopupMenuEntry<String>>[
                   PopupMenuItem<String>(
                     value: 'clear_data',
                     child: Row(
                       children: [
-                        const Icon(
-                          Icons.delete_outline_rounded,
-                          color: AppColors.black,
-                        ),
+                        const Icon(Icons.delete_outline_rounded,
+                            color: AppColors.black),
                         SizedBox(width: 8.w),
                         CommonText(text: 'Clear Data', fontSize: 14.sp),
                       ],
@@ -218,18 +207,16 @@ class _ChatNearbyAppBar extends StatelessWidget {
 class _NearbyUserCard extends StatelessWidget {
   const _NearbyUserCard({
     required this.nearbyChatUser,
-    required this.clickerController, // ✅ Add parameter
+    required this.clickerController,
+    required this.controller,
   });
 
   final NearbyChatUserModel nearbyChatUser;
-  final ClickerController clickerController; // ✅ Add property
+  final ClickerController clickerController;
+  final NearbyChatController controller;
 
-  /// ✅ Smart navigation based on friend status
-  /// If already friends → Create chat and go to MessageScreen
-  /// If not friends → Show greeting/profile screen
   Future<void> _handleUserTap(BuildContext context) async {
     try {
-      // Show loading dialog
       Get.dialog(
         const Center(
           child: CircularProgressIndicator(color: AppColors.primaryColor),
@@ -237,108 +224,125 @@ class _NearbyUserCard extends StatelessWidget {
         barrierDismissible: false,
       );
 
-
       final tempController = ChatNearbyProfileController();
       await tempController.checkFriendship(nearbyChatUser.id.toString());
 
-
       Get.back();
 
-
       if (tempController.friendStatus.value == FriendStatus.friends) {
-        debugPrint(
-          " Already friends with ${nearbyChatUser.name} - Creating chat",
-        );
-
         await clickerController.createOrGetChatAndGo(
           receiverId: nearbyChatUser.id.toString(),
           name: nearbyChatUser.name,
           image: nearbyChatUser.image ?? '',
         );
       } else {
-        debugPrint(
-          "❌ Not friends with ${nearbyChatUser.name} - Showing profile with greeting",
-        );
         Get.to(() => ChatNearbyProfileScreen(user: nearbyChatUser));
       }
     } catch (e) {
-      // Close loading dialog if it's still open
-      if (Get.isDialogOpen ?? false) {
-        Get.back();
-      }
+      if (Get.isDialogOpen ?? false) Get.back();
       debugPrint("Error checking friend status: $e");
-      // Fallback to profile screen on error
       Get.to(() => ChatNearbyProfileScreen(user: nearbyChatUser));
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => _handleUserTap(context),
-      child: Container(
-        decoration: ShapeDecoration(
-          color: Colors.white,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          shadows: const [
-            BoxShadow(
-              color: Color(0x0C000000),
-              blurRadius: 4,
-              offset: Offset(0, 2),
+    return Obx(() {
+      // ✅ Reactive friend status
+      final isFriend =
+          controller.friendStatusMap[nearbyChatUser.id] ?? false;
+
+      return GestureDetector(
+        onTap: () => _handleUserTap(context),
+        child: Container(
+          decoration: ShapeDecoration(
+            //=======================if user is friend show This UI
+            color: isFriend
+                ? AppColors.primaryColor2.withOpacity(0.08)
+                : Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+              side: isFriend
+                  ? const BorderSide(
+                color: AppColors.primaryColor,
+                width: 0.05,
+              )
+                  : BorderSide.none,
             ),
-          ],
-        ),
-        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
-        child: Row(
-          children: [
-            CircleAvatar(
-              radius: 20.r,
-              backgroundColor: AppColors.primaryColor2.withOpacity(0.1),
-              child: nearbyChatUser.privacy == "public"
-                  ? ClipOval(
-                      child:
-                          nearbyChatUser.image != null &&
-                              nearbyChatUser.image!.isNotEmpty
-                          ? CommonImage(
-                              imageSrc:
-                                  ApiEndPoint.imageUrl + nearbyChatUser.image!,
-                              size: 40.r,
-                              fill: BoxFit.cover,
-                            )
-                          : CommonImage(
-                              imageSrc: "assets/images/profile_image.png",
-                              size: 40.r,
-                              fill: BoxFit.cover,
-                            ),
-                    )
-                  : Image.asset(AppImages.private),
-            ),
-            SizedBox(width: 16.w),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  CommonText(
-                    text: nearbyChatUser.name,
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.w500,
-                    textAlign: TextAlign.start,
-                  ),
-                  SizedBox(height: 4.h),
-                  CommonText(
-                    text:
-                        "Within ${nearbyChatUser.distance?.toStringAsFixed(2) ?? "0"} KM",
-                    fontSize: 12.sp,
-                    color: AppColors.primaryColor2,
-                    textAlign: TextAlign.start,
-                  ),
-                ],
+            shadows: const [
+              BoxShadow(
+                color: Color(0x0C000000),
+                blurRadius: 4,
+                offset: Offset(0, 2),
               ),
-            ),
-          ],
+            ],
+          ),
+          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+          child: Row(
+            children: [
+              CircleAvatar(
+                radius: 20.r,
+                backgroundColor: AppColors.primaryColor2.withOpacity(0.1),
+                child: nearbyChatUser.privacy == "public"
+                    ? ClipOval(
+                  child: nearbyChatUser.image != null &&
+                      nearbyChatUser.image!.isNotEmpty
+                      ? CommonImage(
+                    imageSrc: ApiEndPoint.imageUrl +
+                        nearbyChatUser.image!,
+                    size: 40.r,
+                    fill: BoxFit.cover,
+                  )
+                      : CommonImage(
+                    imageSrc: "assets/images/profile_image.png",
+                    size: 40.r,
+                    fill: BoxFit.cover,
+                  ),
+                )
+                    : Image.asset(AppImages.private),
+              ),
+              SizedBox(width: 16.w),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    CommonText(
+                      text: nearbyChatUser.name,
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w500,
+                      textAlign: TextAlign.start,
+                    ),
+                    SizedBox(height: 4.h),
+                    CommonText(
+                      text:
+                      "Within ${nearbyChatUser.distance?.toStringAsFixed(2) ?? "0"} KM",
+                      fontSize: 12.sp,
+                      color: AppColors.primaryColor2,
+                      textAlign: TextAlign.start,
+                    ),
+                  ],
+                ),
+              ),
+              // if (isFriend)
+              //   Container(
+              //     padding:
+              //     EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+              //     decoration: BoxDecoration(
+              //       color: AppColors.primaryColor,
+              //       borderRadius: BorderRadius.circular(12),
+              //     ),
+              //     child: CommonText(
+              //       text: "Friend",
+              //       fontSize: 10.sp,
+              //       color: Colors.white,
+              //       fontWeight: FontWeight.w600,
+              //     ),
+              //   ),
+            ],
+          ),
         ),
-      ),
-    );
+      );
+    });
   }
 }

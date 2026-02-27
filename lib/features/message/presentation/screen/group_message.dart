@@ -37,6 +37,7 @@ class _GroupMessageScreenState extends State<GroupMessageScreen> {
 
   @override
   Widget build(BuildContext context) {
+
     final arguments = Get.arguments ?? {};
     final String chatId = arguments['chatId'] ?? '';
     final String groupName = arguments['groupName'] ?? 'Group';

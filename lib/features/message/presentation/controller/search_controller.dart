@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:giolee78/features/friend/presentation/controller/my_friend_controller.dart';
 import 'package:giolee78/features/message/data/model/search_friend_model.dart';
 import '../../../../config/api/api_end_point.dart';
 import '../../../../services/api/api_response_model.dart';
@@ -82,6 +83,11 @@ class SearchFriendController extends GetxController {
         }
         searchFriendList.refresh();
         Utils.successSnackBar("Success", "Friend request sent!");
+
+        // 🔄 Refresh friend requests in MyFriendController so badge updates on home screen
+        if (Get.isRegistered<MyFriendController>()) {
+          Get.find<MyFriendController>().fetchFriendRequests();
+        }
       }
     } catch (e) {
       Utils.errorSnackBar("Error", "Failed to send request");

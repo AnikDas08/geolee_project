@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
-import 'package:get/get_rx/src/rx_types/rx_types.dart';
-import 'package:get/get_state_manager/src/simple/get_controllers.dart';
+import 'package:get/get.dart';
+import 'package:giolee78/features/friend/presentation/controller/my_friend_controller.dart';
 import 'package:giolee78/services/storage/storage_services.dart';
 
 import '../../../../config/api/api_end_point.dart';
@@ -150,6 +150,11 @@ class ChatNearbyProfileController extends GetxController {
         friendStatus.value = FriendStatus.requested;
         Utils.successSnackBar(
             "Sent", "Friend request sent");
+
+        // 🔄 Refresh friend requests in MyFriendController so badge updates on home screen
+        if (Get.isRegistered<MyFriendController>()) {
+          Get.find<MyFriendController>().fetchFriendRequests();
+        }
       } else {
 
         debugPrint(response.message);

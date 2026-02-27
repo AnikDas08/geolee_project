@@ -38,7 +38,6 @@ class OtherHelper {
     return null;
   }
 
-  /// ✅ STRICT PHONE VALIDATOR - Minimum 10 digits, Maximum 15 digits
   static String? phoneNumberValidator(value) {
     if (value == null || value.isEmpty) {
       return "Phone number is required";

@@ -4,6 +4,7 @@ import '../../../../config/api/api_end_point.dart';
 import '../../../../config/route/app_routes.dart';
 import '../../../../services/api/api_response_model.dart';
 import '../../../../services/api/api_service.dart';
+import '../screen/group_message.dart';
 import 'chat_controller.dart';
 
 // ============================================
@@ -36,7 +37,7 @@ class GroupMember {
   }
 }
 
-enum PrivacyType { public, private, restricted }
+enum PrivacyType { public, private, }
 
 class CreateGroupController extends GetxController {
   // Text controllers
@@ -54,13 +55,12 @@ class CreateGroupController extends GetxController {
   final privacyTypes = [
     "Public Group",
     "Private Group",
-    "Admin Approval Group",
   ];
 
   final privacyOptions = {
     PrivacyType.public: "Public Group",
     PrivacyType.private: "Private Group",
-    PrivacyType.restricted: "Admin Approval Group",
+
   };
 
   // Members
@@ -76,8 +76,6 @@ class CreateGroupController extends GetxController {
         return 'public';
       case PrivacyType.private:
         return 'private';
-      case PrivacyType.restricted:
-        return 'restricted';
     }
   }
 
@@ -95,9 +93,7 @@ class CreateGroupController extends GetxController {
       case "Private Group":
         selectedPrivacyType.value = PrivacyType.private;
         break;
-      case "Admin Approval Group":
-        selectedPrivacyType.value = PrivacyType.restricted;
-        break;
+
     }
     update();
   }
@@ -214,7 +210,7 @@ class CreateGroupController extends GetxController {
     }
   }
 
-  // Create group API
+
   Future<void> createGroup() async {
     if (!_validateInputs()) return;
 
@@ -228,51 +224,87 @@ class CreateGroupController extends GetxController {
         "privacy": privacyValue,
       };
 
-      debugPrint("Creating group with: $body");
-
-      final ApiResponseModel response = await ApiService.post(
+      final response = await ApiService.post(
         ApiEndPoint.createGroup,
         body: body,
       );
 
       if (response.statusCode == 200 || response.data['success'] == true) {
-        final createdGroupId = response.data['data']['_id'];
-        final createdGroupName = groupNameController.text.trim();
-        final createdGroupImage = response.data['data']['avatarUrl'] ?? "";
+        final data = response.data['data'];
 
-        // Navigate before clearing form
-        Get.toNamed(AppRoutes.message, parameters: {
-          "chatId": createdGroupId,
-          "name": createdGroupName,
-          "image": createdGroupImage,
-        });
+        final createdGroupId = data?['_id'] ?? "";
+        final createdGroupName = data?['chatName'] ?? groupNameController.text.trim();
+        final memberCount = selectedMembers.length;
 
-        // Snackbar
+        debugPrint("✅ Group created successfully!");
+        debugPrint("Group ID: $createdGroupId");
+        debugPrint("Group Name: $createdGroupName");
+        debugPrint("Member Count: $memberCount");
+
+        // Show success snackbar first
         Get.snackbar(
           "Success",
           "Group created successfully",
           backgroundColor: Colors.green,
           colorText: Colors.white,
+          duration: const Duration(seconds: 2),
         );
 
-        // Clear form after navigation
+        // Clear form fields
         groupNameController.clear();
         descriptionController.clear();
         searchController.clear();
         selectedMembers.clear();
         selectedPrivacyType.value = PrivacyType.public;
 
-        // Refresh group list
-        ChatController.instance.getChatRepos();
+        // Refresh chat list if controller exists
+        if (Get.isRegistered<ChatController>()) {
+          Get.find<ChatController>().getChatRepos();
+        }
+
+        // Navigate to group message screen after a brief delay
+        Future.delayed(const Duration(milliseconds: 500), () {
+          if (createdGroupId.isNotEmpty) {
+            debugPrint("🚀 Navigating to group message screen...");
+            Get.offNamed(
+              AppRoutes.groupMessageScreen,
+              arguments: {
+                "chatId": createdGroupId,
+                "groupName": createdGroupName,
+                "memberCount": memberCount,
+              },
+            );
+          } else {
+            Get.snackbar(
+              "Error",
+              "Failed to navigate: Group ID is empty",
+              backgroundColor: Colors.red,
+              colorText: Colors.white,
+            );
+          }
+        });
+      } else {
+        debugPrint("❌ Group creation failed: Status ${response.statusCode}");
+        debugPrint("Response: ${response.data}");
+
+        Get.snackbar(
+          "Error",
+          response.data['message'] ?? "Failed to create group",
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
       }
-    } catch (e) {
-      debugPrint("Error creating group: $e");
+    } catch (e, stack) {
+      debugPrint("CREATE GROUP ERROR => $e");
+      debugPrintStack(stackTrace: stack);
+
       Get.snackbar(
         "Error",
-        "Something went wrong: $e",
+        "Something went wrong",
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );
+
     } finally {
       isCreating.value = false;
     }

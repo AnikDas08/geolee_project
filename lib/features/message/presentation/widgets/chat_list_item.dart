@@ -24,18 +24,13 @@ String _formatTime(DateTime dateTime) {
   }
 }
 
-/// [isFriend] — true হলে normal background, false হলে white (not-friend indicator)
-Widget chatListItem({required ChatModel item, bool isFriend = true}) {
+Widget chatListItem({
+  required ChatModel item,
+  bool isFriend = true,
+  VoidCallback? onJoinTap, // ✅
+}) {
   final bool hasUnseenMessages = item.unreadCount > 0;
-
-  // যদি friend না হয় → সাদা, friend হলে → unseen check করে color
-  final Color backgroundColor = !isFriend
-      ? Colors.white
-      : hasUnseenMessages
-      ? const Color(0xFFFDFAF5)
-      : Colors.white;
-
-  // friend না হলে name ও message একটু dim করা
+  final Color backgroundColor = !isFriend ? Colors.white : hasUnseenMessages ? const Color(0xFFFFFFFF) : Colors.white;
   final Color nameColor = !isFriend ? Colors.grey[500]! : Colors.black;
   final Color messageColor = !isFriend
       ? Colors.grey[400]!
@@ -50,11 +45,7 @@ Widget chatListItem({required ChatModel item, bool isFriend = true}) {
       color: backgroundColor,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       shadows: const [
-        BoxShadow(
-          color: Color(0x11000000),
-          blurRadius: 2,
-          offset: Offset(0, 2),
-        ),
+        BoxShadow(color: Color(0x11000000), blurRadius: 2, offset: Offset(0, 2)),
       ],
     ),
     child: Row(
@@ -66,16 +57,14 @@ Widget chatListItem({required ChatModel item, bool isFriend = true}) {
               radius: 35.sp,
               child: ClipOval(
                 child: ColorFiltered(
-                  // friend না হলে avatar grayscale
                   colorFilter: !isFriend
                       ? const ColorFilter.matrix(<double>[
                     0.2126, 0.7152, 0.0722, 0, 0,
                     0.2126, 0.7152, 0.0722, 0, 0,
                     0.2126, 0.7152, 0.0722, 0, 0,
-                    0,      0,      0,      1, 0,
+                    0, 0, 0, 1, 0,
                   ])
-                      : const ColorFilter.mode(
-                      Colors.transparent, BlendMode.multiply),
+                      : const ColorFilter.mode(Colors.transparent, BlendMode.multiply),
                   child: CommonImage(
                     imageSrc: item.isGroup
                         ? "${ApiEndPoint.imageUrl}${item.chatImage ?? ""}"
@@ -116,9 +105,7 @@ Widget chatListItem({required ChatModel item, bool isFriend = true}) {
                       text: item.isGroup
                           ? (item.chatName ?? "Unnamed Group")
                           : item.participant.fullName,
-                      fontWeight: hasUnseenMessages && isFriend
-                          ? FontWeight.w700
-                          : FontWeight.w600,
+                      fontWeight: hasUnseenMessages && isFriend ? FontWeight.w700 : FontWeight.w600,
                       fontSize: 18,
                       color: nameColor,
                     ),
@@ -126,9 +113,7 @@ Widget chatListItem({required ChatModel item, bool isFriend = true}) {
                       text: item.latestMessage.text.isNotEmpty
                           ? item.latestMessage.text
                           : "Tap to view messages",
-                      fontWeight: hasUnseenMessages && isFriend
-                          ? FontWeight.w500
-                          : FontWeight.w400,
+                      fontWeight: hasUnseenMessages && isFriend ? FontWeight.w500 : FontWeight.w400,
                       fontSize: 12,
                       color: messageColor,
                     ),
@@ -141,32 +126,49 @@ Widget chatListItem({required ChatModel item, bool isFriend = true}) {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  if (!item.isGroup)
-                    CommonText(
-                      text: _formatTime(item.latestMessage.createdAt),
-                      fontSize: 12,
-                      color: hasUnseenMessages && isFriend
-                          ? const Color(0xFFE88D67)
-                          : AppColors.secondaryText,
-                    ),
-                  // friend না হলে ছোট "Not friend" badge
-                  if (!isFriend)
-                    Container(
-                      margin: EdgeInsets.only(top: 4.h),
-                      padding: EdgeInsets.symmetric(
-                          horizontal: 6.w, vertical: 2.h),
-                      decoration: BoxDecoration(
-                        color: Colors.grey[200],
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Text(
-                        "Not friend",
-                        style: TextStyle(
-                          fontSize: 10.sp,
-                          color: Colors.grey[500],
+                  // ✅ Group + not participant → Join button
+                  if (item.isGroup && !item.amIAParticipant)
+                    GestureDetector(
+                      onTap: onJoinTap,
+                      child: Container(
+                        padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
+                        decoration: BoxDecoration(
+                          color: AppColors.primaryColor,
+                          borderRadius: BorderRadius.circular(6.r),
+                        ),
+                        child: Text(
+                          'Join',
+                          style: TextStyle(
+                            fontSize: 12.sp,
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
-                    ),
+                    )
+                  else ...[
+                    if (!item.isGroup)
+                      CommonText(
+                        text: _formatTime(item.latestMessage.createdAt),
+                        fontSize: 12,
+                        color: hasUnseenMessages && isFriend
+                            ? const Color(0xFFE88D67)
+                            : AppColors.secondaryText,
+                      ),
+                    if (!isFriend)
+                      Container(
+                        margin: EdgeInsets.only(top: 4.h),
+                        padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[200],
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          "Not friend",
+                          style: TextStyle(fontSize: 10.sp, color: Colors.grey[500]),
+                        ),
+                      ),
+                  ],
                 ],
               ),
             ],

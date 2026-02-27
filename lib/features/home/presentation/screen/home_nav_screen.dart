@@ -19,7 +19,8 @@ class HomeNav extends StatelessWidget {
 
   final HomeNavController controller = Get.put(HomeNavController());
 
-  // Index 0: Home, Index 1: AddPost, Index 2: Chat
+  bool get isGuest => LocalStorage.token.isEmpty;
+
   final List<Widget> userScreens = [
     const HomeScreen(),
     AddPostScreen(),
@@ -45,25 +46,39 @@ class HomeNav extends StatelessWidget {
       }),
 
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+
+      // ✅ FAB with guest restriction
       floatingActionButton: Obx(() {
         if (!controller.showNavBar.value) return const SizedBox.shrink();
+
         return SizedBox(
           height: 70.w,
           width: 70.w,
           child: FloatingActionButton(
-            backgroundColor: AppColors.primaryColor,
+            backgroundColor: isGuest ? Colors.grey : AppColors.primaryColor,
             elevation: 4,
             shape: const CircleBorder(),
-            onPressed: () => controller.changeIndex(1), // Middle Button
-            child: const Center(child: CommonImage(imageSrc: AppIcons.add)),
+            onPressed: () {
+              if (isGuest) {
+                Get.snackbar(
+                  "Login required",
+                  "Please login to use this feature",
+                );
+                return;
+              }
+              controller.changeIndex(1);
+            },
+            child: const Center(
+              child: CommonImage(imageSrc: AppIcons.add),
+            ),
           ),
         );
       }),
 
+      // ✅ Bottom Nav with guest restriction
       bottomNavigationBar: Obx(() {
         if (!controller.showNavBar.value) return const SizedBox.shrink();
 
-        // CORRECT WAY TO CHECK ROLE
         final bool isUser = LocalStorage.role == "user";
 
         return BottomAppBar(
@@ -75,19 +90,17 @@ class HomeNav extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                // LEFT BUTTON: Home
                 _buildNavItem(
                   index: 0,
                   iconPath: AppIcons.homeIcon,
                   label: 'Home',
                 ),
 
-                SizedBox(width: 40.w), // Space for FAB
+                SizedBox(width: 40.w),
 
-                // RIGHT BUTTON: Message or Dashboard
                 _buildNavItem(
                   index: 2,
-                  iconPath: isUser ? AppIcons.chatIcon : AppIcons.chatIcon,
+                  iconPath: AppIcons.chatIcon,
                   label: isUser ? 'Message' : 'Dashboard',
                 ),
               ],
@@ -98,6 +111,7 @@ class HomeNav extends StatelessWidget {
     );
   }
 
+  // ✅ Nav item with disable logic
   Widget _buildNavItem({
     required int index,
     required String iconPath,
@@ -105,30 +119,43 @@ class HomeNav extends StatelessWidget {
   }) {
     return Obx(() {
       final bool isSelected = controller.currentIndex.value == index;
+
       return GestureDetector(
-        onTap: () => controller.changeIndex(index),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SvgPicture.asset(
-              iconPath,
-              height: 24.w,
-              width: 24.w,
-              colorFilter: ColorFilter.mode(
-                isSelected ? AppColors.primaryColor : Colors.black,
-                BlendMode.srcIn,
+        onTap: () {
+          if (isGuest && index != 0) {
+            Get.snackbar(
+              "Login required",
+              "Please login to access this feature",
+            );
+            return;
+          }
+          controller.changeIndex(index);
+        },
+        child: Opacity(
+          opacity: (isGuest && index != 0) ? 0.4 : 1,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SvgPicture.asset(
+                iconPath,
+                height: 24.w,
+                width: 24.w,
+                colorFilter: ColorFilter.mode(
+                  isSelected ? AppColors.primaryColor : Colors.black,
+                  BlendMode.srcIn,
+                ),
               ),
-            ),
-            SizedBox(height: 4.h),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 12.sp,
-                color: isSelected ? AppColors.primaryColor : Colors.black,
-                fontWeight: FontWeight.w600,
+              SizedBox(height: 4.h),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 12.sp,
+                  color: isSelected ? AppColors.primaryColor : Colors.black,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       );
     });

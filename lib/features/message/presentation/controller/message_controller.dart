@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:giolee78/config/api/api_end_point.dart';
+import 'package:giolee78/features/friend/presentation/controller/my_friend_controller.dart';
 import 'package:giolee78/features/message/data/model/chat_message.dart';
 import 'package:giolee78/services/api/api_service.dart';
 import 'package:giolee78/services/socket/socket_service.dart';
@@ -651,6 +652,11 @@ class MessageController extends GetxController {
         hasPendingRequest.value = true;
         friendStatusValue.value = 'pending';
         Utils.successSnackBar("Sent", "Friend request sent successfully");
+
+        // 🔄 Refresh friend requests in MyFriendController so badge updates on home screen
+        if (Get.isRegistered<MyFriendController>()) {
+          Get.find<MyFriendController>().fetchFriendRequests();
+        }
       } else {
         debugPrint("❌ Error sending friend request: ${response.message}");
         Utils.errorSnackBar(

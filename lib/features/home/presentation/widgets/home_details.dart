@@ -97,6 +97,19 @@ class _HomeDetailsState extends State<HomeDetails> {
             Expanded(
               child: Row(
                 children: [
+
+                  if (LocalStorage.token.isEmpty)
+                    IconButton(
+                      icon: const Icon(Icons.arrow_back),
+                      onPressed: () {
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          Get.offAllNamed(AppRoutes.signIn);
+                        });
+                      },
+                    ),
+
+                  if (LocalStorage.token.isEmpty) 4.width,
+
                   GestureDetector(
                     onTap: () {
                       if (LocalStorage.token.isNotEmpty) {
@@ -118,15 +131,18 @@ class _HomeDetailsState extends State<HomeDetails> {
                       ),
                     ),
                   ),
+
                   12.width,
+
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         CommonText(
-                          text: controller.userName.isNotEmpty
+                          text: controller.userName.isNotEmpty &&
+                              LocalStorage.token.isNotEmpty
                               ? controller.userName
-                              : "Guest",
+                              : "Guest User",
                           color: AppColors.textColorFirst,
                           fontWeight: FontWeight.w600,
                         ),
@@ -158,7 +174,7 @@ class _HomeDetailsState extends State<HomeDetails> {
               ),
             ),
 
-
+            /// 👉 RIGHT SIDE
             LocalStorage.token.isNotEmpty
                 ? Obx(
                   () => Stack(
@@ -196,10 +212,7 @@ class _HomeDetailsState extends State<HomeDetails> {
                 ],
               ),
             )
-                : IconButton(
-              icon: const Icon(Icons.arrow_back),
-              onPressed: () => Get.back(),
-            ),
+                : const SizedBox(),
           ],
         );
       },

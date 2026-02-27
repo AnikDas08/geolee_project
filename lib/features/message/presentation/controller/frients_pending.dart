@@ -4,25 +4,31 @@ import 'package:giolee78/config/api/api_end_point.dart';
 import 'package:giolee78/services/api/api_response_model.dart';
 import 'package:giolee78/services/api/api_service.dart';
 
-class User {
+class PendingRequest {
   final String id;
-  final String name;
-  final String avatarUrl;
+  final String userId;
+  final String status;
 
-  User({required this.id, required this.name, required this.avatarUrl});
+  PendingRequest({
+    required this.id,
+    required this.userId,
+    required this.status,
+  });
 
-  factory User.fromJson(Map<String, dynamic> json) {
-    return User(
-      id: json['id'] ?? '',
-      name: json['name'] ?? '',
-      avatarUrl: json['avatarUrl'] ?? '',
+  factory PendingRequest.fromJson(Map<String, dynamic> json) {
+    return PendingRequest(
+      id: json['_id'] ?? '',
+      userId: json['user'] ?? '',
+      status: json['status'] ?? '',
     );
   }
 }
 
 class PendingRequestController extends GetxController {
+  final String chatId = Get.arguments ?? '';
+
   final RxBool isLoading = false.obs;
-  final RxList<User> pendingRequests = <User>[].obs;
+  final RxList<PendingRequest> pendingRequests = <PendingRequest>[].obs;
 
   @override
   void onInit() {
@@ -30,88 +36,63 @@ class PendingRequestController extends GetxController {
     fetchPendingRequests();
   }
 
-  /// Fetch pending requests from server
   Future<void> fetchPendingRequests() async {
     try {
       isLoading.value = true;
-      final url = ApiEndPoint.getPendingRequest; // ex: {{BASE_URL}}/join-requests/
-      final ApiResponseModel response = await ApiService.get(url);
 
-      if (response.statusCode == 200 && response.data['data'] != null) {
-        final List data = response.data['data'];
-        pendingRequests.value = data.map((e) => User.fromJson(e)).toList();
-        debugPrint("✅ Pending Requests Loaded: ${pendingRequests.length}");
-      } else {
-        debugPrint("❌ Failed to load pending requests");
+      final url = "${ApiEndPoint.getPendingRequest}$chatId";
+
+      final response = await ApiService.get(url);
+
+      if (response.statusCode == 200) {
+        final List data = response.data['data']['data'];
+        pendingRequests.value =
+            data.map((e) => PendingRequest.fromJson(e)).toList();
       }
     } catch (e) {
-      debugPrint("❌ Error fetching pending requests: $e");
+      Get.snackbar("Error", "Failed to load pending requests");
     } finally {
       isLoading.value = false;
     }
   }
 
-  /// Update join request status
-  Future<void> updateRequestStatus(User user, String status) async {
+
+  Future<void> updateRequestStatus(
+      PendingRequest request,
+      String status,
+      ) async {
     try {
-      final url = "${ApiEndPoint.baseUrl}/join-requests/update/${user.id}";
-      final body = {"status": status}; // accepted | rejected | cancelled
       isLoading.value = true;
 
-      final ApiResponseModel response = await ApiService.patch(
+      final url =
+          "${ApiEndPoint.baseUrl}/join-requests/update/${request.id}";
+
+      final response = await ApiService.patch(
         url,
-        body: body,
+        body: {"status": status},
       );
 
       if (response.statusCode == 200) {
-        pendingRequests.removeWhere((p) => p.id == user.id);
+        pendingRequests.removeWhere((e) => e.id == request.id);
+
         Get.snackbar(
           status == "accepted" ? "Accepted" : "Rejected",
-          "${user.name} request has been ${status}!",
+          "Request Accepted",
           snackPosition: SnackPosition.BOTTOM,
         );
-      } else {
-        Get.snackbar("Error", "Failed to update request status");
       }
     } catch (e) {
-      debugPrint("❌ Error updating request: $e");
-      Get.snackbar("Error", "Error updating request: $e");
+      Get.snackbar("Error", "Update failed");
     } finally {
       isLoading.value = false;
     }
   }
 
-
-  void onAcceptRequest(User user) {
-    Get.defaultDialog(
-      title: "Accept Request",
-      middleText: "Are you sure you want to accept ${user.name}?",
-      textConfirm: "Accept",
-      textCancel: "Cancel",
-      confirmTextColor: Colors.white,
-      buttonColor: Colors.green,
-      onConfirm: () async {
-        await updateRequestStatus(user, "accepted");
-        Get.back();
-      },
-      onCancel: () => Get.back(),
-    );
+  void onAcceptRequest(PendingRequest request) {
+    updateRequestStatus(request, "accepted");
   }
 
-  /// Reject request
-  void onRejectRequest(User user) {
-    Get.defaultDialog(
-      title: "Reject Request",
-      middleText: "Are you sure you want to reject ${user.name}'s request?",
-      textConfirm: "Reject",
-      textCancel: "Cancel",
-      confirmTextColor: Colors.white,
-      buttonColor: Colors.red,
-      onConfirm: () async {
-        await updateRequestStatus(user, "rejected");
-        Get.back();
-      },
-      onCancel: () => Get.back(),
-    );
+  void onRejectRequest(PendingRequest request) {
+    updateRequestStatus(request, "rejected");
   }
 }

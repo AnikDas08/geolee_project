@@ -2,13 +2,16 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:giolee78/component/pop_up/common_pop_menu.dart';
+import 'package:giolee78/config/route/app_routes.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:giolee78/services/api/api_service.dart';
 import 'package:giolee78/services/api/api_response_model.dart';
 import 'package:giolee78/services/storage/storage_services.dart';
 import '../../../../config/api/api_end_point.dart';
 import '../../../../services/storage/storage_keys.dart';
+import '../../../../utils/enum/enum.dart';
 import '../../../home/presentation/screen/home_nav_screen.dart';
+import '../screen/admin_approval_screen.dart';
 import '../screen/verify_user.dart';
 
 class ServiceProviderController extends GetxController {
@@ -27,7 +30,11 @@ class ServiceProviderController extends GetxController {
   var isResendEnabled = false.obs;
   Timer? _timer;
 
-  var isLoading = false.obs; // ✅ RxBool
+  var isLoading = false.obs;
+
+  // for number country code
+  String countryCode = "+65";
+  String fullPhoneNumber = '';
 
   // Text controllers
   var businessNameController = TextEditingController();
@@ -143,11 +150,11 @@ class ServiceProviderController extends GetxController {
 
 
 
-        // await LocalStorage.setString(LocalStorageKeys.token, "");
+        await LocalStorage.setString(LocalStorageKeys.token, "");
 
         await LocalStorage.setString(LocalStorageKeys.role,"advertise");
-
         Get.offAll(ProviderVerifyUser());
+
         startTimer();
       } else {
         isLoading.value=false;
@@ -226,14 +233,14 @@ class ServiceProviderController extends GetxController {
         final data=response.data;
         await LocalStorage.setString(LocalStorageKeys.role, "advertise");
 
-        /*LocalStorage.myRole = UserType.advertiser.name;
-        LocalStorage.setString(LocalStorageKeys.myRole, LocalStorage.myRole);
-*/
+        LocalStorage.role = UserType.advertiser.name;
+        LocalStorage.setString(LocalStorageKeys.role, LocalStorage.role);
+
         await LocalStorage.setString(LocalStorage.token, data["data"]["accessToken"]);
         LocalStorage.token=data["data"]["accessToken"];
 
         successPopUps(message: 'Verify Success', onTap: (){
-          Get.offAll(HomeNav());
+          Get.offAll(AppRoutes.homeNav);
 
         }, buttonTitle: "Go To Dashboard");
 

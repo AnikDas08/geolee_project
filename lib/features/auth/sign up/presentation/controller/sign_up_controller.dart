@@ -19,8 +19,7 @@ import '../../../../../utils/app_utils.dart';
 
 class SignUpController extends GetxController {
 
-  /// Sign Up Form Key
-  ///
+
   bool isPopUpOpen = false;
   bool isLoading = false;
   bool isLoadingVerify = false;
@@ -53,15 +52,9 @@ class SignUpController extends GetxController {
     text: kDebugMode ? "Md Ibrahim Nazmul" : "",
   );
   TextEditingController emailController = TextEditingController();
-  TextEditingController passwordController = TextEditingController(
-    text: kDebugMode ? 'password123' : '',
-  );
-  TextEditingController confirmPasswordController = TextEditingController(
-    text: kDebugMode ? 'password123' : '',
-  );
-  TextEditingController numberController = TextEditingController(
-    text: kDebugMode ? '1865965581' : '',
-  );
+  TextEditingController passwordController = TextEditingController(text: kDebugMode ? 'password123' : '',);
+  TextEditingController confirmPasswordController = TextEditingController(text: kDebugMode ? 'password123' : '',);
+  TextEditingController numberController = TextEditingController(text: kDebugMode ? '1865965581' : '',);
   TextEditingController otpController = TextEditingController();
 
   final TextEditingController dateController = TextEditingController();

@@ -1,7 +1,3 @@
-// ============================================================
-// chat_list_model.dart  — isFriend field added
-// ============================================================
-
 class ChatModel {
   final String id;
   final bool isGroup;
@@ -16,9 +12,8 @@ class ChatModel {
   final DateTime createdAt;
   final DateTime updatedAt;
   final int memberCount;
-
-  /// ✅ নতুন field — API তে না থাকলে default true (group chat এর জন্যও true)
   final bool isFriend;
+  final bool amIAParticipant;
 
   ChatModel({
     required this.id,
@@ -34,7 +29,8 @@ class ChatModel {
     required this.createdAt,
     required this.updatedAt,
     this.memberCount = 0,
-    this.isFriend = true, // default true — group বা unknown এর জন্য
+    this.isFriend = true,
+    this.amIAParticipant = true,
   });
 
   ChatModel copyWith({
@@ -51,7 +47,8 @@ class ChatModel {
     DateTime? createdAt,
     DateTime? updatedAt,
     int? memberCount,
-    bool? isFriend, // ✅
+    bool? isFriend,
+    bool? amIAParticipant,
   }) {
     return ChatModel(
       id: id ?? this.id,
@@ -67,7 +64,8 @@ class ChatModel {
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       memberCount: memberCount ?? this.memberCount,
-      isFriend: isFriend ?? this.isFriend, // ✅
+      isFriend: isFriend ?? this.isFriend,
+      amIAParticipant: amIAParticipant ?? this.amIAParticipant,
     );
   }
 
@@ -109,19 +107,19 @@ class ChatModel {
     final int finalUnreadCount =
     rawUnseen != null ? int.tryParse(rawUnseen.toString()) ?? 0 : 0;
 
-    // ✅ API তে isFriend/isAlreadyFriend থাকলে নাও, না থাকলে group এর জন্য true
     final dynamic friendRaw =
         json['isFriend'] ?? json['isAlreadyFriend'] ?? json['is_friend'];
     final bool isFriend = isGroup
-        ? true // group chat এ friend check দরকার নেই
+        ? true
         : (friendRaw != null ? (friendRaw == true || friendRaw == 1) : true);
+
+    final bool amIAParticipant = json['amIAParticipant'] ?? true;
 
     return ChatModel(
       id: json['_id']?.toString() ?? '',
       isGroup: isGroup,
       chatName: cName,
-      chatImage:
-      _parseStringOrFirstInList(json['avatarUrl'] ?? json['image']),
+      chatImage: _parseStringOrFirstInList(json['avatarUrl'] ?? json['image']),
       participant: Participant.fromJson(participantJson ?? {}),
       participants: allParticipants,
       latestMessage: LatestMessage.fromJson(json['latestMessage'] ?? {}),
@@ -133,7 +131,8 @@ class ChatModel {
       updatedAt: DateTime.tryParse(json['updatedAt']?.toString() ?? '') ??
           DateTime.now(),
       memberCount: allParticipants.length,
-      isFriend: isFriend, // ✅
+      isFriend: isFriend,
+      amIAParticipant: amIAParticipant,
     );
   }
 }
@@ -142,14 +141,21 @@ class Participant {
   final String sId;
   final String fullName;
   final String image;
+  final String email; // ✅
 
-  Participant({required this.sId, required this.fullName, required this.image});
+  Participant({
+    required this.sId,
+    required this.fullName,
+    required this.image,
+    this.email = '', // ✅
+  });
 
   factory Participant.fromJson(Map<String, dynamic> json) {
     return Participant(
       sId: json['_id']?.toString() ?? '',
       fullName: json['name']?.toString() ?? '',
       image: ChatModel._parseStringOrFirstInList(json['image']) ?? '',
+      email: json['email']?.toString() ?? '', // ✅
     );
   }
 }
@@ -177,16 +183,19 @@ class LatestMessage {
 
     if (type == 'image') {
       displayText = '📷 Image';
-    } else if (type == 'document') displayText = '📄 Document';
-    else if (type == 'media') displayText = '🎥 Media';
-    else if (type == 'audio') displayText = '🎵 Audio';
+    } else if (type == 'document') {
+      displayText = '📄 Document';
+    } else if (type == 'media') {
+      displayText = '🎥 Media';
+    } else if (type == 'audio') {
+      displayText = '🎵 Audio';
+    }
 
     return LatestMessage(
       id: json['_id']?.toString() ?? '',
       sender: json['sender']?.toString() ?? '',
       text: displayText,
-      createdAt:
-      DateTime.tryParse(json['createdAt']?.toString() ?? '') ??
+      createdAt: DateTime.tryParse(json['createdAt']?.toString() ?? '') ??
           DateTime.now(),
     );
   }

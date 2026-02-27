@@ -19,7 +19,6 @@ class ProviderVerifyUser extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     controller.startTimer();
 
     return Scaffold(
@@ -46,13 +45,13 @@ class ProviderVerifyUser extends StatelessWidget {
               ),
               Center(
                 child: CommonText(
-                  text:
-                  "${AppString.codeHasBeenSendTo} ${controller.phoneNumberController.text}",
+                  text: "Code Has been send to your reqistration Email",
                   fontSize: 14,
                   bottom: 40,
                   maxLines: 3,
                   color: AppColors.secondaryText,
-                )),
+                ),
+              ),
 
               /// OTP field
               PinCodeTextField(
@@ -88,21 +87,23 @@ class ProviderVerifyUser extends StatelessWidget {
               SizedBox(height: 20.h),
 
               /// Timer or Resend OTP
-              Obx(() => GestureDetector(
-                onTap: controller.isResendEnabled.value
-                    ? controller.resendOtp
-                    : null,
-                child: CommonText(
-                  text: controller.isResendEnabled.value
-                      ? AppString.resendCode
-                      : "${AppString.resendCodeIn} ${controller.time.value}",
-                  bottom: 20,
-                  fontSize: 18,
-                  color: controller.isResendEnabled.value
-                      ? AppColors.primaryColor
-                      : AppColors.textPrimary,
+              Obx(
+                () => GestureDetector(
+                  onTap: controller.isResendEnabled.value
+                      ? controller.resendOtp
+                      : null,
+                  child: CommonText(
+                    text: controller.isResendEnabled.value
+                        ? AppString.resendCode
+                        : "${AppString.resendCodeIn} ${controller.time.value}",
+                    bottom: 20,
+                    fontSize: 18,
+                    color: controller.isResendEnabled.value
+                        ? AppColors.primaryColor
+                        : AppColors.textPrimary,
+                  ),
                 ),
-              )),
+              ),
 
               SizedBox(height: 20.h),
 

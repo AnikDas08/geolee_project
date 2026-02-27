@@ -7,6 +7,7 @@ import 'package:giolee78/features/ads/presentation/screen/view_ads_screen.dart';
 
 import '../../../../component/image/common_image.dart';
 import '../../../../component/text/common_text.dart';
+import '../../../../config/route/app_routes.dart';
 import '../../../../services/storage/storage_services.dart';
 import '../../../../utils/constants/app_colors.dart';
 import '../../../../utils/constants/app_icons.dart';
@@ -169,10 +170,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
             color: AppColors.white,
             borderRadius: BorderRadius.circular(12.r),
           ),
-          child: Icon(
-            Icons.notifications_none,
-            size: 20.w,
-            color: AppColors.textColorFirst,
+          child: InkWell(
+            onTap: (){
+              Get.toNamed(AppRoutes.notifications);
+            },
+            child: Icon(
+              Icons.notifications_none,
+              size: 20.w,
+              color: AppColors.textColorFirst,
+            ),
           ),
         ),
       ],

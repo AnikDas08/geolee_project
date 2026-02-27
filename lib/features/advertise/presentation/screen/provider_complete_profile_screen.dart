@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:giolee78/component/button/common_button.dart';
@@ -6,6 +7,7 @@ import 'package:giolee78/component/image/common_image.dart';
 import 'package:giolee78/component/text_field/common_text_field.dart';
 import 'package:giolee78/utils/constants/app_colors.dart';
 import 'package:giolee78/utils/helpers/other_helper.dart';
+import 'package:intl_phone_field/intl_phone_field.dart';
 import 'dart:io'; // Import for File
 import '../controller/provider_complete_profile_controller.dart';
 
@@ -18,8 +20,9 @@ class ServiceProviderInfoScreen extends StatefulWidget {
 }
 
 class _ServiceProviderInfoScreenState extends State<ServiceProviderInfoScreen> {
-  final ServiceProviderController controller =
-  Get.put(ServiceProviderController());
+  final ServiceProviderController controller = Get.put(
+    ServiceProviderController(),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -57,18 +60,18 @@ class _ServiceProviderInfoScreenState extends State<ServiceProviderInfoScreen> {
                         child: ClipOval(
                           child: controller.profileImagePath.value.isEmpty
                               ? const CommonImage(
-                            imageSrc:
-                            "assets/images/profilePlaceholder.jpg",
-                            size: 100,
-                            defaultImage:
-                            "assets/images/profilePlaceholder.jpg",
-                          )
+                                  imageSrc:
+                                      "assets/images/profilePlaceholder.jpg",
+                                  size: 100,
+                                  defaultImage:
+                                      "assets/images/profilePlaceholder.jpg",
+                                )
                               : Image.file(
-                            File(controller.profileImagePath.value),
-                            width: 100.w,
-                            height: 100.h,
-                            fit: BoxFit.cover,
-                          ),
+                                  File(controller.profileImagePath.value),
+                                  width: 100.w,
+                                  height: 100.h,
+                                  fit: BoxFit.cover,
+                                ),
                         ),
                       );
                     }),
@@ -99,7 +102,6 @@ class _ServiceProviderInfoScreenState extends State<ServiceProviderInfoScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Business Name Field
                     const Text(
                       'Business Name',
                       style: TextStyle(
@@ -135,9 +137,8 @@ class _ServiceProviderInfoScreenState extends State<ServiceProviderInfoScreen> {
                     ),
                     const SizedBox(height: 20),
 
-                    // Phone Number Field - ✅ WITH PROPER VALIDATOR (10-15 digits)
                     const Text(
-                      'Phone Number (10-15 digits)',
+                      'Phone Number',
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
@@ -145,30 +146,77 @@ class _ServiceProviderInfoScreenState extends State<ServiceProviderInfoScreen> {
                       ),
                     ),
                     const SizedBox(height: 8),
-                    CommonTextField(
+                    IntlPhoneField(
                       controller: controller.phoneNumberController,
-                      hintText: 'e.g., +8801865965581',
-                      keyboardType: TextInputType.phone,
-                      validator: OtherHelper.phoneNumberValidator,
-                      prefixIcon: const Icon(
-                        Icons.phone,
-                        color: AppColors.primaryColor,
+                      initialCountryCode: 'SG',
+                      disableLengthCheck: true,
+
+                      // আমরা নিজেই length control করবো
+                      decoration: InputDecoration(
+                        hintText: '8123 4567',
+                        labelText: 'Phone Number',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 14,
+                        ),
                       ),
+
+                      keyboardType: TextInputType.phone,
+
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly,
+                        LengthLimitingTextInputFormatter(15), // 👉 max 15 digit
+                      ],
+
+                      validator: (phone) {
+                        if (phone == null || phone.number.trim().isEmpty) {
+                          return "Phone number is required";
+                        }
+
+                        final length = phone.number.length;
+
+                        if (length < 8) {
+                          return "Minimum 8 digits required";
+                        }
+
+                        if (length > 15) {
+                          return "Maximum 15 digits allowed";
+                        }
+
+                        if (!phone.isValidNumber()) {
+                          return "Invalid phone number";
+                        }
+
+                        return null;
+                      },
+
+                      onChanged: (phone) {
+                        controller.countryCode = phone.countryCode;
+                        controller.fullPhoneNumber = phone.completeNumber;
+                      },
+
+                      onCountryChanged: (country) {
+                        controller.countryCode = '+${country.dialCode}';
+                      },
                     ),
-                    const SizedBox(height: 4),
+                    SizedBox(height: 4),
+
                     const Text(
-                      '• Minimum 10 digits, Maximum 15 digits\n• Optional + sign at the beginning',
+                      '• Minimum 10 digits, Maximum 15 digits \n• Optional + sign at the beginning',
                       style: TextStyle(
                         fontSize: 12,
                         color: Colors.grey,
                         fontStyle: FontStyle.italic,
                       ),
                     ),
+
                     const SizedBox(height: 20),
 
-                    // Business License Number
                     const Text(
-                      'Business License Number',
+                      'Business License Number (UEN)',
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
@@ -182,8 +230,6 @@ class _ServiceProviderInfoScreenState extends State<ServiceProviderInfoScreen> {
                       validator: OtherHelper.validator,
                     ),
                     const SizedBox(height: 20),
-
-                    // Business Type Field
                     const Text(
                       'Business Type',
                       style: TextStyle(
@@ -203,22 +249,20 @@ class _ServiceProviderInfoScreenState extends State<ServiceProviderInfoScreen> {
                 ),
               ),
 
-              // Confirm Button
-              Obx(() => CommonButton(
-                isLoading: controller.isLoading.value,
-                titleText: "Confirm",
-                buttonHeight: 50,
-                onTap: () {
-                  // ✅ VALIDATE FORM BEFORE SUBMITTING
-                  if (controller.formKey.currentState!.validate()) {
-                    // All validations passed
-                    controller.completeAdvertiserInfo();
-                  } else {
-                    // Show error if validation fails
-                    debugPrint("❌ Form validation failed");
-                  }
-                },
-              )),
+              Obx(
+                () => CommonButton(
+                  isLoading: controller.isLoading.value,
+                  titleText: "Confirm",
+                  buttonHeight: 50,
+                  onTap: () {
+                    if (controller.formKey.currentState!.validate()) {
+                      controller.completeAdvertiserInfo();
+                    } else {
+                      debugPrint("Form validation failed");
+                    }
+                  },
+                ),
+              ),
 
               const SizedBox(height: 24),
             ],

@@ -143,7 +143,7 @@ class _SearchField extends StatelessWidget {
       hintText: 'Search friends...',
       paddingHorizontal: 14,
       paddingVertical: 12,
-      onSubmitted: (value) => controller.searchQuery.value = value,
+      onChanged: (value) => controller.searchQuery.value = value,
       prefixIcon: Padding(
         padding: EdgeInsets.symmetric(horizontal: 12.w),
         child: Icon(Icons.search, size: 18.sp, color: AppColors.textFiledColor),
@@ -152,7 +152,6 @@ class _SearchField extends StatelessWidget {
   }
 }
 
-/// ================= Suggested Friend Card =================
 class _SuggestedFriendCard extends StatelessWidget {
   const _SuggestedFriendCard({
     required this.userId,
@@ -169,39 +168,56 @@ class _SuggestedFriendCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () =>
-          Get.to(() => ViewFriendScreen(isFriend: false, userId: userId)),
+      onTap: () => Get.to(() => ViewFriendScreen(isFriend: false, userId: userId)),
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
         decoration: BoxDecoration(
           color: AppColors.white,
-          borderRadius: BorderRadius.circular(14.r),
+          borderRadius: BorderRadius.circular(16.r),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
+            // ── Avatar ──
+            CircleAvatar(
+              radius: 26.r,
+              backgroundColor: AppColors.primaryColor.withOpacity(0.1),
+              backgroundImage: (avatar != null && avatar!.isNotEmpty)
+                  ? NetworkImage(avatar!)
+                  : const AssetImage(AppImages.profileImage) as ImageProvider,
+            ),
+
+            SizedBox(width: 12.w),
+
+            // ── Name & subtitle ──
             Expanded(
-              child: Row(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  CircleAvatar(
-                    radius: 22.r,
-                    backgroundImage: (avatar != null && avatar!.isNotEmpty)
-                        ? NetworkImage(avatar!)
-                        : const AssetImage(AppImages.profileImage)
-                    as ImageProvider,
+                  CommonText(
+                    text: userName,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
                   ),
-                  SizedBox(width: 12.w),
-                  Expanded(
-                    child: CommonText(
-                      text: userName,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                    ),
+                  SizedBox(height: 2.h),
+                  CommonText(
+                    text: 'People you may know',
+                    fontSize: 11,
+                    color: AppColors.secondaryText,
                   ),
                 ],
               ),
             ),
+
             SizedBox(width: 8.w),
+
+            // ── Action Button ──
             if (userId != LocalStorage.userId)
               Obx(() {
                 final status = controller.getFriendStatus(userId);
@@ -209,32 +225,32 @@ class _SuggestedFriendCard extends StatelessWidget {
 
                 switch (status) {
                   case FriendStatus.requested:
-                    return _buildButton(
-                      title: loading ? 'Cancelling...' : 'Cancel Request',
-                      color: Colors.grey,
+                    return _StatusButton(
+                      title: loading ? 'Cancelling...' : 'Requested',
+                      icon: Icons.hourglass_top_rounded,
+                      color: Colors.orange,
                       onTap: loading
                           ? () {}
                           : () => controller.cancelFriendRequest(userId),
-                      image: '',
                     );
 
                   case FriendStatus.friends:
-                    return _buildButton(
+                    return _StatusButton(
                       title: 'Friends',
+                      icon: Icons.check_rounded,
                       color: Colors.green,
                       onTap: () {},
-                      image: '',
                     );
 
                   case FriendStatus.none:
                   default:
-                    return _buildButton(
+                    return _StatusButton(
                       title: loading ? 'Sending...' : 'Add Friend',
+                      icon: Icons.person_add_alt_1_rounded,
                       color: AppColors.primaryColor,
                       onTap: loading
                           ? () {}
                           : () => controller.onTapAddFriendButton(userId),
-                      image: '',
                     );
                 }
               }),
@@ -245,39 +261,49 @@ class _SuggestedFriendCard extends StatelessWidget {
   }
 }
 
-Widget _buildButton({
-  required String title,
-  required String image,
-  required VoidCallback onTap,
-  required Color color,
-}) {
-  return GestureDetector(
-    onTap: onTap,
-    child: Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: ShapeDecoration(
-        color: color,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const SizedBox(width: 6),
-          Text(
-            title,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 16,
-              fontFamily: 'Poppins',
-              fontWeight: FontWeight.w600,
-              height: 1.50,
+class _StatusButton extends StatelessWidget {
+  const _StatusButton({
+    required this.title,
+    required this.icon,
+    required this.color,
+    required this.onTap,
+  });
+
+  final String title;
+  final IconData icon;
+  final Color color;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 7.h),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(8.r),
+          border: Border.all(color: color.withOpacity(0.4)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 14.sp, color: color),
+            SizedBox(width: 4.w),
+            Text(
+              title,
+              style: TextStyle(
+                color: color,
+                fontSize: 12.sp,
+                fontFamily: 'Poppins',
+                fontWeight: FontWeight.w600,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
-    ),
-  );
+    );
+  }
 }
 
 /// ================= Friend List Item =================
@@ -304,93 +330,191 @@ class _FriendListItem extends StatelessWidget {
         userId: userId,
       )),
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
         decoration: BoxDecoration(
           color: AppColors.white,
-          borderRadius: BorderRadius.circular(14.r),
+          borderRadius: BorderRadius.circular(16.r),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Expanded(
-              child: Row(
-                children: [
-                  CircleAvatar(
-                    radius: 22.r,
-                    backgroundImage:
-                    (avatar != null && avatar!.startsWith('http'))
-                        ? NetworkImage(avatar!)
-                        : const AssetImage(AppImages.profileImage)
-                    as ImageProvider,
-                  ),
-                  SizedBox(width: 12.w),
-                  Expanded(
-                    child: CommonText(
-                      text: userName,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
+            // ── Avatar with online indicator ──
+            Stack(
+              children: [
+                CircleAvatar(
+                  radius: 26.r,
+                  backgroundColor: AppColors.primaryColor.withOpacity(0.1),
+                  backgroundImage: (avatar != null && avatar!.startsWith('http'))
+                      ? NetworkImage(avatar!)
+                      : const AssetImage(AppImages.profileImage) as ImageProvider,
+                ),
+                Positioned(
+                  bottom: 0,
+                  right: 0,
+                  child: Container(
+                    width: 12.w,
+                    height: 12.h,
+                    decoration: BoxDecoration(
+                      color: Colors.green,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white, width: 2),
                     ),
+                  ),
+                ),
+              ],
+            ),
+
+            SizedBox(width: 12.w),
+
+            // ── Name ──
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  CommonText(
+                    text: userName,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  SizedBox(height: 2.h),
+                  CommonText(
+                    text: 'Tap to view profile',
+                    fontSize: 11,
+                    color: AppColors.secondaryText,
                   ),
                 ],
               ),
             ),
-            SizedBox(width: 8.w),
+
+            // ── Action Buttons ──
             Row(
               children: [
-                GestureDetector(
-                  onTap: () {
-                    controller.createOrGetChatAndGo(
-                      receiverId: userId,
-                      name: userName,
-                      image: avatar ?? "",
-                    );
-                  },
-                  child: Icon(Icons.chat_bubble_outline, size: 20.sp),
+                // Message button
+                _ActionButton(
+                  icon: Icons.chat_bubble_outline_rounded,
+                  color: AppColors.primaryColor,
+                  onTap: () => controller.createOrGetChatAndGo(
+                    receiverId: userId,
+                    name: userName,
+                    image: avatar ?? "",
+                  ),
                 ),
-                SizedBox(width: 12.w),
-                GestureDetector(
-                  onTap: () {
-                    Get.dialog(
-                      Dialog(
-                        child: Padding(
-                          padding: EdgeInsets.all(20.r),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Text("Remove Friend?"),
-                              SizedBox(height: 20.h),
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: ElevatedButton(
-                                      onPressed: () => Get.back(),
-                                      child: const Text("Cancel"),
+
+                SizedBox(width: 8.w),
+
+                // Unfriend button
+                _ActionButton(
+                  icon: Icons.person_remove_outlined,
+                  color: Colors.redAccent,
+                  onTap: () => Get.dialog(
+                    Dialog(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16.r),
+                      ),
+                      child: Padding(
+                        padding: EdgeInsets.all(24.r),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.person_remove_outlined,
+                              size: 40.sp,
+                              color: Colors.redAccent,
+                            ),
+                            SizedBox(height: 12.h),
+                            CommonText(
+                              text: 'Remove Friend?',
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                            SizedBox(height: 6.h),
+                            CommonText(
+                              text: 'Are you sure you want to\nremove $userName?',
+                              fontSize: 13,
+                              color: AppColors.secondaryText,
+                              maxLines: 2,
+                            ),
+                            SizedBox(height: 20.h),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: OutlinedButton(
+                                    onPressed: () => Get.back(),
+                                    style: OutlinedButton.styleFrom(
+                                      padding: EdgeInsets.symmetric(vertical: 12.h),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(8.r),
+                                      ),
+                                    ),
+                                    child: const Text('Cancel'),
+                                  ),
+                                ),
+                                SizedBox(width: 12.w),
+                                Expanded(
+                                  child: ElevatedButton(
+                                    onPressed: () {
+                                      controller.removeFriend(friendshipId);
+                                      Get.back();
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.redAccent,
+                                      padding: EdgeInsets.symmetric(vertical: 12.h),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(8.r),
+                                      ),
+                                    ),
+                                    child: const Text(
+                                      'Unfriend',
+                                      style: TextStyle(color: Colors.white),
                                     ),
                                   ),
-                                  SizedBox(width: 12.w),
-                                  Expanded(
-                                    child: ElevatedButton(
-                                      onPressed: () {
-                                        controller.removeFriend(friendshipId);
-                                        Get.back();
-                                      },
-                                      child: const Text("Unfriend"),
-                                    ),
-                                  ),
-                                ],
-                              )
-                            ],
-                          ),
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
                       ),
-                    );
-                  },
-                  child: Icon(Icons.close, size: 20.sp),
+                    ),
+                  ),
                 ),
               ],
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+// ── Reusable action button ──
+class _ActionButton extends StatelessWidget {
+  const _ActionButton({
+    required this.icon,
+    required this.color,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final Color color;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: EdgeInsets.all(8.r),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(8.r),
+        ),
+        child: Icon(icon, size: 18.sp, color: color),
       ),
     );
   }

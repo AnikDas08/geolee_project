@@ -94,11 +94,28 @@ class AddMemberScreen extends StatelessWidget {
                           onPressed: () => controller.onAddMember(friend),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.primaryColor,
-                            minimumSize: Size(60.w, 30.h),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
+                            minimumSize: Size(70.w, 34.h),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8.r),
+                            ),
                             elevation: 0,
+                            shadowColor: Colors.transparent,
                           ),
-                          child: const Text('Add', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.person_add_alt_1_rounded, size: 14.sp, color: Colors.white),
+                              SizedBox(width: 4.w),
+                              Text(
+                                'Add',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12.sp,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       );
                     },
@@ -141,9 +158,21 @@ class AddMemberScreen extends StatelessWidget {
                     return _buildPersonItem(
                       imageUrl: imageUrl,
                       name: member.name,
-                      trailing: IconButton(
-                        icon: Icon(Icons.remove_circle_outline, color: Colors.red.shade300, size: 24.sp),
-                        onPressed: () => controller.showRemoveMemberDialog(member),
+                      trailing: GestureDetector(
+                        onTap: () => controller.showRemoveMemberDialog(member),
+                        child: Container(
+                          padding: EdgeInsets.all(7.r),
+                          decoration: BoxDecoration(
+                            color: Colors.red.withOpacity(0.08),
+                            borderRadius: BorderRadius.circular(8.r),
+                            border: Border.all(color: Colors.red.withOpacity(0.2)),
+                          ),
+                          child: Icon(
+                            Icons.person_remove_outlined,
+                            color: Colors.redAccent,
+                            size: 18.sp,
+                          ),
+                        ),
                       ),
                     );
                   },

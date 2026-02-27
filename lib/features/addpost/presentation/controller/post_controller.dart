@@ -179,9 +179,9 @@ class PostController extends GetxController {
 
   @override
   void onClose() {
-    description.dispose();
-    priceController.dispose();
-    serviceTimeController.dispose();
+    // description.dispose();
+    // priceController.dispose();
+    // serviceTimeController.dispose();
     super.onClose();
   }
 }

@@ -154,11 +154,10 @@ class _CustomAppBarState extends State<CustomAppBar> {
                           CommonText(
                             text: (LocalStorage.myName.isNotEmpty && LocalStorage.token.isNotEmpty)
                                 ? LocalStorage.myName
-                                : "User",
+                                : "Guest User",
                             color: AppColors.textColorFirst,
                             fontWeight: FontWeight.w600,
                           ),
-                          // Matches HomeDetails display style
                           Text(
                             displayLocation,
                             maxLines: 1,
@@ -177,6 +176,7 @@ class _CustomAppBarState extends State<CustomAppBar> {
               ),
 
               /// Notification Stack
+              if(LocalStorage.token.isNotEmpty)
               Stack(
                 clipBehavior: Clip.none,
                 children: [

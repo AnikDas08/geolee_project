@@ -24,13 +24,13 @@ class _VerifyUserState extends State<VerifyUser> {
   @override
   void initState() {
     SignUpController.instance.startTimer();
+    debugPrint(SignUpController.instance.emailController.text);
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      /// App Bar Section starts here
       appBar: AppBar(
         title: const CommonText(
           text: AppString.otpVerify,
@@ -39,8 +39,6 @@ class _VerifyUserState extends State<VerifyUser> {
           color: AppColors.primaryColor,
         ),
       ),
-
-      /// Body Section starts here
       body: GetBuilder<SignUpController>(
         builder: (controller) {
           return SafeArea(

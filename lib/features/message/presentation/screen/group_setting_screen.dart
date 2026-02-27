@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -370,6 +371,43 @@ class GroupSettingsScreen extends StatelessWidget {
                   _SettingsTile(
                     title: 'Privacy Settings',
                     onTap: controller.onPrivacySettings,
+                  ),
+
+                  // ✅ Admin Approval Switch tile
+                  Obx(
+                    () => Container(
+                      height: 56.h,
+                      margin: EdgeInsets.only(bottom: 12.h),
+                      decoration: BoxDecoration(
+                        color: AppColors.white,
+                        borderRadius: BorderRadius.circular(10.r),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.05),
+                            blurRadius: 5.r,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      padding: EdgeInsets.symmetric(horizontal: 16.w),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          CommonText(
+                            text: 'Admin Approval',
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.w500,
+                            color: AppColors.black,
+                          ),
+                          CupertinoSwitch(
+                            value: controller.accessType.value == 'restricted',
+                            activeColor: AppColors.primaryColor,
+                            onChanged: (value) =>
+                                controller.toggleAdminApproval(value),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                   _SettingsTile(
                     title: 'Leave Group',
