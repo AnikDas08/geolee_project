@@ -30,9 +30,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
-  final Completer<GoogleMapController> _mapController =
-      Completer<GoogleMapController>();
-
+  final Completer<GoogleMapController> _mapController = Completer<GoogleMapController>();
   late final MyFriendController myFriendController;
 
   @override
@@ -219,7 +217,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               ),
             ),
 
-            // Overlay buttons
             Positioned(
               top: 16.h,
               right: 16.w,
@@ -274,7 +271,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             onTap: () {
               Get.dialog(FilterDialog(onApply: controller.applyFilter));
             },
-            // ✅ filter active থাকলে dot দেখাবে
+
             child: Obx(
               () => Row(
                 children: [
@@ -408,8 +405,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             Obx(
               () {
                 // 🔄 Calculate pending requests dynamically
-                debugPrint("📋 Total requests: ${myFriendController.requests.length}");
-                debugPrint("📋 All requests: ${myFriendController.requests.map((r) => "status=${r.status}").toList()}");
+                debugPrint("Total requests: ${myFriendController.requests.length}");
+                debugPrint("All requests: ${myFriendController.requests.map((r) => "status=${r.status}").toList()}");
 
                 final pendingRequests = myFriendController.requests
                     .where((r) => r.status == "pending")

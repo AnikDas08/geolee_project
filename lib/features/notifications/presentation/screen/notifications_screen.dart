@@ -32,11 +32,9 @@ class NotificationScreen extends StatelessWidget {
         ],
       ),
       body: GetBuilder<NotificationsController>(
-        // ✅ Ensure controller is available and data is loaded when screen opens
         init: Get.isRegistered<NotificationsController>() ? null : NotificationsController(),
         builder: (controller) {
-          
-          // Show loader if it's the very first load
+
           if (controller.isLoading && controller.notifications.isEmpty) {
             return const Center(child: CircularProgressIndicator());
           }

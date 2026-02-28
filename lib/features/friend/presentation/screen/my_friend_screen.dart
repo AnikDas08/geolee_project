@@ -46,10 +46,11 @@ class MyFriendScreen extends StatelessWidget {
             physics: const BouncingScrollPhysics(),
             padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
             children: [
-              _SearchField(),
+               _SearchField(),
+
               SizedBox(height: 16.h),
 
-              /// ================= Suggested Friends =================
+              // ================= Suggested Friends =================
 
               const CommonText(
                 text: 'Suggested Friends',
@@ -80,7 +81,7 @@ class MyFriendScreen extends StatelessWidget {
                 SizedBox(height: 20.h),
               ],
 
-              /// ================= My Friends =================
+              // ================= My Friends =================
               CommonText(
                 text: 'Total Friend (${controller.filteredFriendsList.length})',
                 fontSize: 14,
@@ -139,7 +140,7 @@ class _SearchField extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = Get.find<MyFriendController>(); // directly find here
     return CommonTextField(
-      hintText: 'Search friends...',
+      hintText: 'Search friends',
       paddingHorizontal: 14,
       paddingVertical: 12,
       onChanged: (value) => controller.searchQuery.value = value,

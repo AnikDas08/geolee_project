@@ -76,11 +76,9 @@ class _ClickerScreenState extends State<ClickerScreen> {
       backgroundColor: AppColors.background,
       appBar: const CustomAppBar(notificationCount: 0),
       body: Obx(() {
-        // Initial loading state (empty list)
         if (controller.isLoading.value && controller.posts.isEmpty) {
           return const Center(child: CircularProgressIndicator());
         }
-
         return RefreshIndicator(
           onRefresh: () async {
             await controller.getBanners();
@@ -113,7 +111,7 @@ class _ClickerScreenState extends State<ClickerScreen> {
                   ),
                 SizedBox(height: 16.h),
 
-                // ── Banner Slider ───────────────────────────────────────
+                // ── Banner Slider=============================
                 if (controller.adList.isNotEmpty) ...[
                   CarouselSlider(
                     items: controller.adList.map((ad) {
@@ -170,7 +168,7 @@ class _ClickerScreenState extends State<ClickerScreen> {
 
                 SizedBox(height: 16.h),
 
-                // ── Header & Filter ─────────────────────────────────────
+                // ── Header & Filter===================================
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -186,7 +184,7 @@ class _ClickerScreenState extends State<ClickerScreen> {
                 ),
                 SizedBox(height: 16.h),
 
-                // ── Posts List ──────────────────────────────────────────
+                // Posts List ========================================
                 controller.filteredPosts.isEmpty
                     ? _buildEmptyState()
                     : ListView.separated(
@@ -211,19 +209,18 @@ class _ClickerScreenState extends State<ClickerScreen> {
                               }
                             },
                             onTapProfile: () {
-
-                              if(LocalStorage.token.isNotEmpty)
-                              Get.to(
-                                () => ViewFriendScreen(
-                                  userId: data.user.id,
-                                  isFriend: false,
-                                ),
-                              );
+                              //condition for guest mood====================
+                              if (LocalStorage.token.isNotEmpty) {
+                                Get.to(() => ViewFriendScreen(
+                                    userId: data.user.id,
+                                    isFriend: false,
+                                  ),
+                                );
+                              }
                             },
                             clickerType: data.clickerType,
                             userName: data.user.name,
-                            userAvatar:
-                                "${ApiEndPoint.imageUrl}${data.user.image}",
+                            userAvatar: "${ApiEndPoint.imageUrl}${data.user.image}",
                             timeAgo: _formatPostTime(data.createdAt),
                             location: data.address.isNotEmpty
                                 ? data.address.split(',')[0]
@@ -247,7 +244,7 @@ class _ClickerScreenState extends State<ClickerScreen> {
                       child: const Center(child: CircularProgressIndicator()),
                     );
                   }
-                  // Show "end of posts" message only when all pages loaded
+                  // Show "end of posts" message only when all pages loaded=============
                   if (!controller.isLoading.value &&
                       controller.filteredPosts.isNotEmpty &&
                       controller.currentPage.value >=

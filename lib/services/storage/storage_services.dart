@@ -23,8 +23,8 @@ class LocalStorage {
   static String myImage = "";
   static String myName = "";
   static String myEmail = "";
-  static String myRole = ""; // User's specific role
-  static String role = ""; // General role
+  static String myRole = "";
+  static String role = "";
   static String activeRole = "";
   static String mobile = "";
   static String dateOfBirth = "";
@@ -48,13 +48,6 @@ class LocalStorage {
     return preferences!;
   }
 
-  /// ----------------------------------------------------------
-  /// COOKIE HANDLING (Token Extraction)
-  /// ----------------------------------------------------------
-
-  /// ----------------------------------------------------------
-  /// READ DATA
-  /// ----------------------------------------------------------
   static Future<void> getAllPrefData() async {
     final localStorage = await _getStorage();
 
@@ -76,17 +69,12 @@ class LocalStorage {
     bio = localStorage.getString(LocalStorageKeys.bio) ?? "";
     lat = localStorage.getDouble(LocalStorageKeys.lat) ?? 0.0;
     long = localStorage.getDouble(LocalStorageKeys.long) ?? 0.0;
-    accountInfoStatus =
-        localStorage.getBool(LocalStorageKeys.accountInfoStatus) ?? false;
+    accountInfoStatus = localStorage.getBool(LocalStorageKeys.accountInfoStatus) ?? false;
     createdAt = localStorage.getString(LocalStorageKeys.createdAt) ?? "";
     updatedAt = localStorage.getString(LocalStorageKeys.updatedAt) ?? "";
-
     appLog(token, source: "Local Storage Data Loaded");
   }
 
-  /// ----------------------------------------------------------
-  /// WRITE DATA (Fixed Role Saving)
-  /// ----------------------------------------------------------
 
   static Future<void> setString(String key, String value) async {
     final localStorage = await _getStorage();
@@ -117,12 +105,12 @@ class LocalStorage {
   /// ----------------------------------------------------------
   /// LOGOUT & RESET
   /// ----------------------------------------------------------
+  ///
   static Future<void> removeAllPrefData() async {
     final localStorage = await _getStorage();
     await localStorage.clear();
 
     try {
-      // ✅ Disk থেকেও cookie folder delete করুন
       final dir = await getApplicationDocumentsDirectory();
       final cookieDir = Directory("${dir.path}/.cookies/");
       if (await cookieDir.exists()) {

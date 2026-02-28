@@ -12,7 +12,7 @@ class CommonPostCards extends StatelessWidget {
     required this.timeAgo,
     required this.location,
     this.images,
-    this.description, // ✅ nullable
+    this.description,
     required this.isFriend,
     required this.privacyImage,
     required this.clickerType,
@@ -24,8 +24,8 @@ class CommonPostCards extends StatelessWidget {
   final String userAvatar;
   final String timeAgo;
   final String location;
-  final List<String>? images; // ✅ nullable
-  final String? description;  // ✅ nullable
+  final List<String>? images;
+  final String? description;
   final bool isFriend;
   final String privacyImage;
   final String clickerType;

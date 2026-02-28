@@ -35,7 +35,7 @@ class _CustomAppBarState extends State<CustomAppBar> {
     _getCurrentLocationAndAddress();
   }
 
-  /// Same location logic as HomeDetails
+  //Same location logic as HomeDetails==============================
   Future<void> _getCurrentLocationAndAddress() async {
     try {
       final bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
@@ -108,7 +108,6 @@ class _CustomAppBarState extends State<CustomAppBar> {
       });
     }
   }
-
   @override
   Widget build(BuildContext context) {
     return Material(
@@ -175,7 +174,7 @@ class _CustomAppBarState extends State<CustomAppBar> {
                 ),
               ),
 
-              /// Notification Stack
+              //condition for guest mood=============================
               if(LocalStorage.token.isNotEmpty)
               Stack(
                 clipBehavior: Clip.none,
