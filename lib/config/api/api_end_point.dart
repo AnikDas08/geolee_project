@@ -1,10 +1,9 @@
 class ApiEndPoint {
 
-  //Live URL
-  static const String baseUrl = "http://148.230.126.149:5000/api/v1";
-  static const String imageUrl = "http://148.230.126.149:5000";
-  static const String socketUrl = "http://148.230.126.149:5000";
-
+  // //Live URL
+  static const String baseUrl = "https://rahad5000.naimulhassan.me/api/v1";
+  static const String imageUrl = "https://rahad5000.naimulhassan.me";
+  static const String socketUrl = "https://rahad5000.naimulhassan.me";
 
 
   // static const String baseUrl = "http://10.10.7.7:5006/api/v1";

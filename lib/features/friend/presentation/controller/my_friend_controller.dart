@@ -122,9 +122,7 @@ class MyFriendController extends GetxController {
 
       final response = await ApiService.post(
         ApiEndPoint.createOneToOneChat,
-        body: {
-          "participant": receiverId,
-        },
+        body: {"participant": receiverId},
       );
 
       if (response.isSuccess) {
@@ -138,10 +136,9 @@ class MyFriendController extends GetxController {
               "chatId": chatId,
               "name": name,
               "image": image,
+              "userId": receiverId,
             },
           );
-        } else {
-          print("Chat ID null or empty");
         }
       }
     } finally {

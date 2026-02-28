@@ -141,13 +141,13 @@ class Participant {
   final String sId;
   final String fullName;
   final String image;
-  final String email; // ✅
+  final String email;
 
   Participant({
     required this.sId,
     required this.fullName,
     required this.image,
-    this.email = '', // ✅
+    this.email = '',
   });
 
   factory Participant.fromJson(Map<String, dynamic> json) {
@@ -155,7 +155,7 @@ class Participant {
       sId: json['_id']?.toString() ?? '',
       fullName: json['name']?.toString() ?? '',
       image: ChatModel._parseStringOrFirstInList(json['image']) ?? '',
-      email: json['email']?.toString() ?? '', // ✅
+      email: json['email']?.toString() ?? '',
     );
   }
 }

@@ -48,7 +48,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 children: [
                   _buildHeader(),
                   SizedBox(height: 20.h),
-                  _buildStatsGrid(controller), // ✅ Pass the controller from builder
+                  _buildStatsGrid(controller),
                   SizedBox(height: 24.h),
                   const CommonText(
                     text: 'My Active Ads',

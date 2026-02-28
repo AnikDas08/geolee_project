@@ -240,7 +240,7 @@ class ServiceProviderController extends GetxController {
         LocalStorage.token=data["data"]["accessToken"];
 
         successPopUps(message: 'Verify Success', onTap: (){
-          Get.offAll(AppRoutes.homeNav);
+          Get.toNamed(AppRoutes.homeNav);
 
         }, buttonTitle: "Go To Dashboard");
 

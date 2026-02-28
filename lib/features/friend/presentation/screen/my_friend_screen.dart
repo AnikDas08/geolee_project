@@ -46,10 +46,11 @@ class MyFriendScreen extends StatelessWidget {
             physics: const BouncingScrollPhysics(),
             padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
             children: [
-              _SearchField(controller: controller),
+              _SearchField(),
               SizedBox(height: 16.h),
 
               /// ================= Suggested Friends =================
+
               const CommonText(
                 text: 'Suggested Friends',
                 fontSize: 14,
@@ -131,14 +132,12 @@ class MyFriendScreen extends StatelessWidget {
   }
 }
 
-/// ================= Search =================
 class _SearchField extends StatelessWidget {
-  const _SearchField({required this.controller});
-
-  final MyFriendController controller;
+  const _SearchField({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final controller = Get.find<MyFriendController>(); // directly find here
     return CommonTextField(
       hintText: 'Search friends...',
       paddingHorizontal: 14,
@@ -399,12 +398,23 @@ class _FriendListItem extends StatelessWidget {
                 _ActionButton(
                   icon: Icons.chat_bubble_outline_rounded,
                   color: AppColors.primaryColor,
-                  onTap: () => controller.createOrGetChatAndGo(
-                    receiverId: userId,
-                    name: userName,
-                    image: avatar ?? "",
-                  ),
+                  onTap: () {
+                    controller.createOrGetChatAndGo(
+                        receiverId: userId,
+                        name: userName,
+                        image: avatar ?? "",
+                    );
+
+
+                  },
                 ),
+
+
+        // controller.createOrGetChatAndGo(
+        //   receiverId: widget.userId,
+        //   name: user?.name ?? "",
+        //   image: user?.image ?? "",
+        // );
 
                 SizedBox(width: 8.w),
 

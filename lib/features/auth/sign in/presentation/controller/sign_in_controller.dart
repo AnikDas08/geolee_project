@@ -45,10 +45,9 @@ class SignInController extends GetxController {
         final data = response.data;
 
         Get.snackbar(barBlur: 0.5, "Welcome Back", "Logged In Successfully");
-        await LocalStorage.setString(
-          LocalStorageKeys.token,
-          data["data"]['accessToken'],
-        );
+        final token = data["data"]?['accessToken'] ?? '';
+        LocalStorage.token = token;
+        await LocalStorage.setString(LocalStorageKeys.token, token);
 
         LocalStorage.isLogIn = true;
 
@@ -65,8 +64,8 @@ class SignInController extends GetxController {
         );
         await getUserData();
 
+        Get.snackbar(barBlur: 0.5, "Welcome Back", "Logged In Successfully");
         Get.toNamed(AppRoutes.homeNav);
-        // Get.to(() => const HistoryAdsScreen());
 
         emailController.clear();
         passwordController.clear();

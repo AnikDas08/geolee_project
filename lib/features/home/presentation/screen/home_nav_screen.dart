@@ -3,6 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:giolee78/features/home/presentation/controller/home_nav_controller.dart';
+import 'package:giolee78/features/message/presentation/controller/chat_controller.dart';
 
 import '../../../../component/image/common_image.dart';
 import '../../../../services/storage/storage_services.dart';
@@ -14,9 +15,14 @@ import '../../../dashboard/presentation/screen/dashboard_screen.dart';
 import '../../../message/presentation/screen/chat_screen.dart';
 import 'home_screen.dart';
 
-class HomeNav extends StatelessWidget {
+class HomeNav extends StatefulWidget {
   HomeNav({super.key});
 
+  @override
+  State<HomeNav> createState() => _HomeNavState();
+}
+
+class _HomeNavState extends State<HomeNav> {
   final HomeNavController controller = Get.put(HomeNavController());
 
   bool get isGuest => LocalStorage.token.isEmpty;
@@ -37,6 +43,11 @@ class HomeNav extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Obx(() {
+        if (controller.currentIndex.value == 2) {
+     WidgetsBinding.instance.addPostFrameCallback((_) {
+            ChatController.instance.getChatRepos();
+          });
+        }
         return IndexedStack(
           index: controller.currentIndex.value,
           children: controller.isUserScreenActive.value
@@ -68,9 +79,7 @@ class HomeNav extends StatelessWidget {
               }
               controller.changeIndex(1);
             },
-            child: const Center(
-              child: CommonImage(imageSrc: AppIcons.add),
-            ),
+            child: const Center(child: CommonImage(imageSrc: AppIcons.add)),
           ),
         );
       }),

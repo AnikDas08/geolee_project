@@ -164,13 +164,6 @@
             </list>
           </value>
         </entry>
-        <entry key="cookie_jar">
-          <value>
-            <list>
-              <option value="$PROJECT_DIR$/../../flutter_pub_cache/hosted/pub.dev/cookie_jar-4.0.8/lib" />
-            </list>
-          </value>
-        </entry>
         <entry key="coverage">
           <value>
             <list>
@@ -287,13 +280,6 @@
           <value>
             <list>
               <option value="$PROJECT_DIR$/../../flutter_pub_cache/hosted/pub.dev/dio-5.9.0/lib" />
-            </list>
-          </value>
-        </entry>
-        <entry key="dio_cookie_manager">
-          <value>
-            <list>
-              <option value="$PROJECT_DIR$/../../flutter_pub_cache/hosted/pub.dev/dio_cookie_manager-3.3.0/lib" />
             </list>
           </value>
         </entry>
@@ -1459,13 +1445,6 @@
             </list>
           </value>
         </entry>
-        <entry key="universal_io">
-          <value>
-            <list>
-              <option value="$PROJECT_DIR$/../../flutter_pub_cache/hosted/pub.dev/universal_io-2.3.1/lib" />
-            </list>
-          </value>
-        </entry>
         <entry key="url_launcher">
           <value>
             <list>
@@ -1728,7 +1707,6 @@
       <root url="file://$PROJECT_DIR$/../../flutter_pub_cache/hosted/pub.dev/collection-1.19.1/lib" />
       <root url="file://$PROJECT_DIR$/../../flutter_pub_cache/hosted/pub.dev/completion-1.0.2/lib" />
       <root url="file://$PROJECT_DIR$/../../flutter_pub_cache/hosted/pub.dev/convert-3.1.2/lib" />
-      <root url="file://$PROJECT_DIR$/../../flutter_pub_cache/hosted/pub.dev/cookie_jar-4.0.8/lib" />
       <root url="file://$PROJECT_DIR$/../../flutter_pub_cache/hosted/pub.dev/coverage-1.15.0/lib" />
       <root url="file://$PROJECT_DIR$/../../flutter_pub_cache/hosted/pub.dev/cross_file-0.3.5/lib" />
       <root url="file://$PROJECT_DIR$/../../flutter_pub_cache/hosted/pub.dev/crypto-3.0.7/lib" />
@@ -1746,7 +1724,6 @@
       <root url="file://$PROJECT_DIR$/../../flutter_pub_cache/hosted/pub.dev/device_info_plus_platform_interface-7.0.3/lib" />
       <root url="file://$PROJECT_DIR$/../../flutter_pub_cache/hosted/pub.dev/devtools_shared-12.0.0/lib" />
       <root url="file://$PROJECT_DIR$/../../flutter_pub_cache/hosted/pub.dev/dio-5.9.0/lib" />
-      <root url="file://$PROJECT_DIR$/../../flutter_pub_cache/hosted/pub.dev/dio_cookie_manager-3.3.0/lib" />
       <root url="file://$PROJECT_DIR$/../../flutter_pub_cache/hosted/pub.dev/dio_web_adapter-2.1.1/lib" />
       <root url="file://$PROJECT_DIR$/../../flutter_pub_cache/hosted/pub.dev/dots_indicator-3.1.0/lib" />
       <root url="file://$PROJECT_DIR$/../../flutter_pub_cache/hosted/pub.dev/dotted_border-2.1.0/lib" />
@@ -1909,7 +1886,6 @@
       <root url="file://$PROJECT_DIR$/../../flutter_pub_cache/hosted/pub.dev/timezone-0.10.1/lib" />
       <root url="file://$PROJECT_DIR$/../../flutter_pub_cache/hosted/pub.dev/typed_data-1.4.0/lib" />
       <root url="file://$PROJECT_DIR$/../../flutter_pub_cache/hosted/pub.dev/unified_analytics-8.0.10/lib" />
-      <root url="file://$PROJECT_DIR$/../../flutter_pub_cache/hosted/pub.dev/universal_io-2.3.1/lib" />
       <root url="file://$PROJECT_DIR$/../../flutter_pub_cache/hosted/pub.dev/url_launcher-6.3.2/lib" />
       <root url="file://$PROJECT_DIR$/../../flutter_pub_cache/hosted/pub.dev/url_launcher_android-6.3.28/lib" />
       <root url="file://$PROJECT_DIR$/../../flutter_pub_cache/hosted/pub.dev/url_launcher_ios-6.3.6/lib" />

@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
+import 'package:giolee78/services/storage/storage_keys.dart';
+import 'package:giolee78/services/storage/storage_services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:intl_phone_field/countries.dart';
@@ -125,12 +127,11 @@ class SignUpController extends GetxController {
       print("📦 Response Data: ${response.data}");
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        // Start OTP timer
         startTimer();
 
         Utils.successSnackBar("Success", "OTP has been sent to your email");
-
         Get.toNamed(AppRoutes.verifyUser);
+
       } else {
         Utils.errorSnackBar(response.statusCode.toString(), response.message);
       }
@@ -179,6 +180,8 @@ class SignUpController extends GetxController {
           _timer?.cancel();
 
           final String bearerToken = data['data']['accessToken'];
+          LocalStorage.token=bearerToken;
+          LocalStorage.setString(LocalStorageKeys.token, bearerToken);
 
           Utils.successSnackBar("Success", "Email verified successfully");
 
@@ -190,7 +193,7 @@ class SignUpController extends GetxController {
         Utils.errorSnackBar(response.statusCode.toString(), response.message);
       }
     } catch (e) {
-      print("❌ Verify OTP Error: $e");
+      debugPrint("Verify OTP Error: $e");
       Get.snackbar("Error", e.toString());
     } finally {
       isLoadingVerify = false;
@@ -200,7 +203,6 @@ class SignUpController extends GetxController {
 
   ///===================================================Resend OTP
   Future<void> resendOtp() async {
-    // Don't allow resend if timer is still running
     if (start > 0) {
       Utils.errorSnackBar("Please Wait", "You can resend OTP in $time");
       return;
@@ -220,16 +222,13 @@ class SignUpController extends GetxController {
       print("📦 Response Data: ${response.data}");
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        // Clear current OTP
         otpController.clear();
-
-        // Restart timer
         startTimer();
-
         Utils.successSnackBar(
           "OTP Resent",
           "A new OTP has been sent to your email",
         );
+
       } else {
         Utils.errorSnackBar(
           "Error ${response.statusCode}",
@@ -239,7 +238,7 @@ class SignUpController extends GetxController {
     } catch (e) {
       print("❌ Resend OTP Error: $e");
 
-      // If resend endpoint doesn't exist, try using signup endpoint
+
       try {
         print("📤 Trying alternative resend method...");
 
@@ -266,7 +265,7 @@ class SignUpController extends GetxController {
           );
         }
       } catch (alternativeError) {
-        print("❌ Alternative Resend Error: $alternativeError");
+        print("Alternative Resend Error: $alternativeError");
         Utils.errorSnackBar("Error", "Failed to resend OTP");
       }
     } finally {
@@ -275,7 +274,7 @@ class SignUpController extends GetxController {
     }
   }
 
-  ///===================================================Update Profile and Complete Profile
+  ///========================================== Update Profile and Complete Profile
   Future<void> updateProfile() async {
     isLoading = true;
     update();
@@ -304,7 +303,6 @@ class SignUpController extends GetxController {
     }
 
 
-
     if (dateController.text.isNotEmpty) {
       try {
         final DateTime parsedDate = DateFormat(
@@ -316,8 +314,6 @@ class SignUpController extends GetxController {
         formattedDob = "";
       }
     }
-
-
 
 
     final Map<String, String> body = {

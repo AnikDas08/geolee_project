@@ -5,8 +5,8 @@ import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../config/route/app_routes.dart';
+import '../../features/message/presentation/controller/chat_controller.dart';
 import '../../utils/log/app_log.dart';
-import '../api/api_service.dart';
 import 'storage_keys.dart';
 
 class LocalStorage {
@@ -24,7 +24,7 @@ class LocalStorage {
   static String myName = "";
   static String myEmail = "";
   static String myRole = ""; // User's specific role
-  static String role = "";   // General role
+  static String role = ""; // General role
   static String activeRole = "";
   static String mobile = "";
   static String dateOfBirth = "";
@@ -51,47 +51,15 @@ class LocalStorage {
   /// ----------------------------------------------------------
   /// COOKIE HANDLING (Token Extraction)
   /// ----------------------------------------------------------
-  static Future<void> printAllCookiesFromDisk() async {
-    try {
-      final dir = await getApplicationDocumentsDirectory();
-      final cookieDir = Directory("${dir.path}/.cookies/");
-      if (!await cookieDir.exists()) return;
-
-      await for (final entity in cookieDir.list(recursive: true)) {
-        if (entity is File) {
-          final content = await entity.readAsString();
-          final accessToken = extractAccessToken(content);
-          if (accessToken != null) {
-            token = accessToken;
-            break;
-          }
-        }
-      }
-    } catch (e) {
-      debugPrint("printAllCookiesFromDisk Error: $e");
-    }
-  }
-
-  static String? extractAccessToken(String cookieFileContent) {
-    try {
-      final Map<String, dynamic> json = jsonDecode(cookieFileContent);
-      final raw = json['/']?['accessToken'] as String?;
-      if (raw == null) return null;
-      final tokenPart = raw.split(';').first;
-      return tokenPart.split('=').last;
-    } catch (e) {
-      return null;
-    }
-  }
 
   /// ----------------------------------------------------------
   /// READ DATA
   /// ----------------------------------------------------------
   static Future<void> getAllPrefData() async {
     final localStorage = await _getStorage();
-    await printAllCookiesFromDisk();
 
     isLogIn = localStorage.getBool(LocalStorageKeys.isLogIn) ?? false;
+    token = localStorage.getString(LocalStorageKeys.token) ?? "";
     userId = localStorage.getString(LocalStorageKeys.userId) ?? "";
     myImage = localStorage.getString(LocalStorageKeys.myImage) ?? "";
     myName = localStorage.getString(LocalStorageKeys.myName) ?? "";
@@ -108,7 +76,8 @@ class LocalStorage {
     bio = localStorage.getString(LocalStorageKeys.bio) ?? "";
     lat = localStorage.getDouble(LocalStorageKeys.lat) ?? 0.0;
     long = localStorage.getDouble(LocalStorageKeys.long) ?? 0.0;
-    accountInfoStatus = localStorage.getBool(LocalStorageKeys.accountInfoStatus) ?? false;
+    accountInfoStatus =
+        localStorage.getBool(LocalStorageKeys.accountInfoStatus) ?? false;
     createdAt = localStorage.getString(LocalStorageKeys.createdAt) ?? "";
     updatedAt = localStorage.getString(LocalStorageKeys.updatedAt) ?? "";
 
@@ -152,15 +121,24 @@ class LocalStorage {
     final localStorage = await _getStorage();
     await localStorage.clear();
 
-    // Clear Cookies
-    try { await cookieJar.deleteAll(); } catch (_) {}
+    try {
+      // ✅ Disk থেকেও cookie folder delete করুন
+      final dir = await getApplicationDocumentsDirectory();
+      final cookieDir = Directory("${dir.path}/.cookies/");
+      if (await cookieDir.exists()) {
+        await cookieDir.delete(recursive: true);
+        debugPrint("🗑️ Cookie directory deleted from disk");
+      }
+    } catch (e) {
+      debugPrint("❌ Cookie clear error: $e");
+    }
 
     _resetLocalStorageData();
+    Get.delete<ChatController>(force: true);
     Get.offAllNamed(AppRoutes.signIn);
   }
 
   static void _resetLocalStorageData() {
-    // Reset memory variables to prevent data leaks after logout
     token = "";
     role = "";
     myRole = "";
@@ -170,6 +148,5 @@ class LocalStorage {
     myName = "";
     myEmail = "";
     balance = 0.0;
-    // ... reset any others as needed
   }
 }

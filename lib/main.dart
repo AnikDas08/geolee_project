@@ -23,7 +23,6 @@ Future<void> init() async {
   SocketServices.connectToSocket();
 
   await Future.wait([
-    cookieJarInit(),
     NotificationService.initLocalNotification(),
     dotenv.load().catchError((error) {
       debugPrint("Warning: Failed to load .env file - $error");
