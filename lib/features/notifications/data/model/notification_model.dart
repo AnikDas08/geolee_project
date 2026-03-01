@@ -13,7 +13,6 @@ class NotificationModel {
     required this.createdAt,
   });
 
-  // ✅ Add this
   NotificationModel copyWith({
     String? id,
     String? title,
@@ -31,12 +30,19 @@ class NotificationModel {
   }
 
   factory NotificationModel.fromJson(Map<String, dynamic> json) {
+    // Handle nested 'data' if it exists in the response
+    final Map<String, dynamic> data = (json.containsKey('data') && json['data'] is Map)
+        ? json['data'] as Map<String, dynamic>
+        : json;
+
     return NotificationModel(
-      id: json['_id'] ?? '',
-      title: json['title'] ?? '',
-      message: json['message'] ?? '',
-      read: json['isRead'] ?? false,
-      createdAt: DateTime.parse(json['createdAt']),
+      id: data['_id'] ?? data['id'] ?? '',
+      title: data['title'] ?? '',
+      message: data['message'] ?? '',
+      read: data['isRead'] ?? data['read'] ?? false,
+      createdAt: data['createdAt'] != null
+          ? DateTime.parse(data['createdAt'].toString())
+          : DateTime.now(),
     );
   }
 }

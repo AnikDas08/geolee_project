@@ -342,11 +342,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.9),
+          color: Colors.white.withValues(alpha: 0.9),
           borderRadius: BorderRadius.circular(8.r),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.1),
+              color: Colors.black.withValues(alpha: 0.1),
               blurRadius: 4,
               offset: const Offset(0, 2),
             ),
@@ -509,7 +509,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                 'GPS Disabled',
                                 'Please enable GPS/Location services',
                                 snackPosition: SnackPosition.BOTTOM,
-                                backgroundColor: Colors.orange.withOpacity(0.7),
+                                backgroundColor: Colors.orange.withValues(alpha: 0.7),
                                 colorText: Colors.white,
                               );
                               return;
@@ -540,7 +540,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                             'Error',
                             'Failed to request location permission',
                             snackPosition: SnackPosition.BOTTOM,
-                            backgroundColor: Colors.red.withOpacity(0.7),
+                            backgroundColor: Colors.red.withValues(alpha: 0.7),
                             colorText: Colors.white,
                           );
                         }

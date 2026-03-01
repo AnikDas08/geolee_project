@@ -39,7 +39,6 @@ class NotificationScreen extends StatelessWidget {
             return const Center(child: CircularProgressIndicator());
           }
 
-          // Show empty state if no notifications
           if (controller.notifications.isEmpty) {
             return Center(
               child: Column(

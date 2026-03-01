@@ -11,15 +11,13 @@ import '../../../../../services/storage/storage_services.dart';
 import '../../../../../services/socket/socket_service.dart';
 
 class SignInController extends GetxController {
-  /// Sign in Button Loading variable
   bool isLoading = false;
 
-  /// email and password Controller here
   TextEditingController emailController = TextEditingController(
     text: kDebugMode ? 'ebrahimnazmul20032@gmail.com' : '',
   );
   TextEditingController passwordController = TextEditingController(
-    text: kDebugMode ? 'password1234' : "",
+    text: kDebugMode ? 'password123' : "",
   );
 
   // Sign in Api call here
@@ -43,28 +41,22 @@ class SignInController extends GetxController {
 
       if (response.statusCode == 200) {
         final data = response.data;
-
-        Get.snackbar(barBlur: 0.5, "Welcome Back", "Logged In Successfully");
         final token = data["data"]?['accessToken'] ?? '';
         LocalStorage.token = token;
         await LocalStorage.setString(LocalStorageKeys.token, token);
 
         LocalStorage.isLogIn = true;
 
-        await LocalStorage.setBool(
-          LocalStorageKeys.isLogIn,
-          LocalStorage.isLogIn,
-        );
+        await LocalStorage.setBool(LocalStorageKeys.isLogIn, LocalStorage.isLogIn,);
         await LocalStorage.setString(LocalStorageKeys.role, "user");
         LocalStorage.getAllPrefData();
         SocketServices.connectToSocket();
 
-        print(
-          "My Token Is :===========================💕💕💕💕💕💕 ${LocalStorage.token.toString()}",
-        );
-        await getUserData();
+        debugPrint("My Token Is :===============💕💕💕 ${LocalStorage.token.toString()}",);
 
+        await getUserData();
         Get.snackbar(barBlur: 0.5, "Welcome Back", "Logged In Successfully");
+
         Get.toNamed(AppRoutes.homeNav);
 
         emailController.clear();
@@ -109,10 +101,10 @@ class SignInController extends GetxController {
         LocalStorage.setString(LocalStorageKeys.myName, LocalStorage.myName);
         LocalStorage.setString(LocalStorageKeys.myEmail, LocalStorage.myEmail);
       } else {
-        Get.snackbar(response.statusCode.toString(), response.message);
+        // Get.snackbar(response.statusCode.toString(), response.message);
       }
     } catch (e) {
-      Get.snackbar("Error", e.toString());
+      // Get.snackbar("Error", e.toString());
     } finally {
       isLoading = false;
       update();

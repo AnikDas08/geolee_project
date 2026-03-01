@@ -23,8 +23,9 @@ class _VerifyUserState extends State<VerifyUser> {
 
   @override
   void initState() {
-    SignUpController.instance.startTimer();
-    debugPrint(SignUpController.instance.emailController.text);
+    final controller = Get.find<SignUpController>();
+    controller.startTimer();
+
     super.initState();
   }
 

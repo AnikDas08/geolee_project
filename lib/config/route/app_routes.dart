@@ -77,7 +77,7 @@ class AppRoutes {
   static List<GetPage> routes = [
     GetPage(name: splash, page: () => const SplashScreen()),
     GetPage(name: onboarding, page: () => const OnboardingScreen()),
-    GetPage(name: signUp, page: () => const SignUpScreen()),
+    GetPage(name: signUp, page: () =>  SignUpScreen()),
     GetPage(name: verifyUser, page: () => const VerifyUser()),
     GetPage(name: completeProfile, page: () => const CompleteProfile()),
     GetPage(name: addLocation, page: () => const AddLocation()),

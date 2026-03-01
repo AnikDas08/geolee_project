@@ -1,7 +1,6 @@
 import 'dart:math';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
-
 class NotificationService {
   static FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
@@ -26,6 +25,13 @@ class NotificationService {
   }
 
   static Future<void> showNotification(dynamic message) async {
+    // Handle nested 'data' if it exists
+    final Map<String, dynamic> data = (message is Map && message.containsKey('data') && message['data'] is Map)
+        ? message['data'] as Map<String, dynamic>
+        : (message as Map<String, dynamic>);
+
+    final String title = data['title'] ?? message['message'] ?? "New Notification";
+    final String body = data['message'] ?? "";
 
     final AndroidNotificationChannel channel = AndroidNotificationChannel(
         Random.secure().nextInt(10000).toString(),
@@ -48,7 +54,7 @@ class NotificationService {
 
     Future.delayed(Duration.zero, () {
       flutterLocalNotificationsPlugin.show(
-          0, message['message'], message['type'], notificationDetails);
+          Random.secure().nextInt(10000), title, body, notificationDetails);
     });
   }
 }

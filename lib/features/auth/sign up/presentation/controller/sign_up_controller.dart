@@ -40,7 +40,7 @@ class SignUpController extends GetxController {
 
   String time = "";
 
-  List selectedOption = ["User", "Consultant"];
+  List<dynamic> selectedOption = ["User", "Consultant"];
 
   String selectRole = "USER";
   String countryCode = "+880";
@@ -48,7 +48,7 @@ class SignUpController extends GetxController {
 
   String signUpToken = '';
 
-  static SignUpController get instance => Get.put(SignUpController());
+  static SignUpController get instance => Get.find();
 
   TextEditingController nameController = TextEditingController(
     text: kDebugMode ? "Md Ibrahim Nazmul" : "",
@@ -119,25 +119,39 @@ class SignUpController extends GetxController {
         "password": passwordController.text.trim(),
       };
 
-      print("📤 Signing up user: ${body['email']}");
+      debugPrint("📤 Signing up user: ${body['email']}");
 
       final response = await ApiService.post(ApiEndPoint.signUp, body: body);
 
-      print("📦 Sign Up Response: ${response.statusCode}");
-      print("📦 Response Data: ${response.data}");
+      debugPrint("📦 Sign Up Response: ${response.statusCode}");
+      debugPrint("📦 Response Data: ${response.data}");
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         startTimer();
-
-        Utils.successSnackBar("Success", "OTP has been sent to your email");
         Get.toNamed(AppRoutes.verifyUser);
 
+      } else if (response.statusCode == 400) {
+        Utils.errorSnackBar("Invalid Data", "Please check your information and try again");
+
+      } else if (response.statusCode == 401) {
+        Utils.errorSnackBar("Unauthorized", "You are not allowed to perform this action");
+
+      } else if (response.statusCode == 409) {
+        Utils.errorSnackBar("Account Exists", "This email is already registered");
+
+      } else if (response.statusCode >= 500) {
+        Utils.errorSnackBar("Server Error", "Something went wrong. Please try later");
+
       } else {
-        Utils.errorSnackBar(response.statusCode.toString(), response.message);
+        Utils.errorSnackBar("Sign Up Failed", response.message);
       }
+
     } catch (e) {
-      print("❌ Sign Up Error: $e");
-      Utils.errorSnackBar("Error", e.toString());
+      debugPrint("Sign Up Error: $e");
+      Utils.errorSnackBar(
+        "Connection Error",
+        "Unable to connect. Check your internet connection",
+      );
     } finally {
       isLoading = false;
       update();
@@ -169,8 +183,8 @@ class SignUpController extends GetxController {
         header: header,
       );
 
-      print("📦 Verify OTP Response: ${response.statusCode}");
-      print("📦 Response Data: ${response.data}");
+      debugPrint("📦 Verify OTP Response: ${response.statusCode}");
+      debugPrint("📦 Response Data: ${response.data}");
 
       if (response.statusCode == 200) {
         final data = response.data;
@@ -202,6 +216,7 @@ class SignUpController extends GetxController {
   }
 
   ///===================================================Resend OTP
+  ///
   Future<void> resendOtp() async {
     if (start > 0) {
       Utils.errorSnackBar("Please Wait", "You can resend OTP in $time");
@@ -212,14 +227,14 @@ class SignUpController extends GetxController {
     update();
 
     try {
-      print("📤 Resending OTP to: ${emailController.text}");
+      debugPrint("📤 Resending OTP to: ${emailController.text}");
 
       final Map<String, String> body = {"email": emailController.text.trim()};
 
       final response = await ApiService.post(ApiEndPoint.resendOtp, body: body);
 
-      print("📦 Resend OTP Response: ${response.statusCode}");
-      print("📦 Response Data: ${response.data}");
+      debugPrint("Resend OTP Response: ${response.statusCode}");
+      debugPrint("Response Data: ${response.data}");
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         otpController.clear();
@@ -230,17 +245,14 @@ class SignUpController extends GetxController {
         );
 
       } else {
-        Utils.errorSnackBar(
-          "Error ${response.statusCode}",
-          response.message ?? "Failed to resend OTP",
-        );
+        Utils.errorSnackBar("Error ", response.message ,);
       }
     } catch (e) {
-      print("❌ Resend OTP Error: $e");
+      debugPrint("❌ Resend OTP Error: $e");
 
 
       try {
-        print("📤 Trying alternative resend method...");
+        debugPrint("📤 Trying alternative resend method...");
 
         final Map<String, String> body = {
           "name": nameController.text.trim(),
@@ -259,13 +271,10 @@ class SignUpController extends GetxController {
             "A new OTP has been sent to your email",
           );
         } else {
-          Utils.errorSnackBar(
-            "Error",
-            response.message ?? "Failed to resend OTP",
-          );
+          Utils.errorSnackBar("Error", response.message,);
         }
       } catch (alternativeError) {
-        print("Alternative Resend Error: $alternativeError");
+        debugPrint("Alternative Resend Error: $alternativeError");
         Utils.errorSnackBar("Error", "Failed to resend OTP");
       }
     } finally {
@@ -339,7 +348,7 @@ class SignUpController extends GetxController {
           method: "PATCH",
         );
       } else {
-        debugPrint("⚠️ No image selected, updating profile without image");
+        debugPrint(" No image selected, updating profile without image");
         response = await ApiService.patch(
           ApiEndPoint.updateProfile,
           body: body,
@@ -370,7 +379,7 @@ class SignUpController extends GetxController {
 
   void startTimer() {
     _timer?.cancel();
-    start = 180; // 3 minutes
+    start = 300; //  5minutes
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (start > 0) {
         start--;
@@ -403,7 +412,7 @@ class SignUpController extends GetxController {
         Get.snackbar(
           "Permission Denied",
           "Location permission is needed to show your position",
-          backgroundColor: AppColors.red.withOpacity(0.9),
+          backgroundColor: AppColors.red.withValues(alpha: 0.9),
           colorText: AppColors.white,
           duration: const Duration(seconds: 4),
           isDismissible: true,
@@ -450,7 +459,7 @@ class SignUpController extends GetxController {
       Get.snackbar(
         "Getting Location",
         "Please wait...",
-        backgroundColor: AppColors.secondary.withOpacity(0.8),
+        backgroundColor: AppColors.secondary.withValues(alpha: 0.8),
         colorText: AppColors.white,
         duration: const Duration(seconds: 1),
         showProgressIndicator: true,

@@ -74,7 +74,6 @@ class EditProfile extends StatelessWidget {
     );
   }
 
-  /// Profile Image Widget - ✅ FIXED
   Widget _buildProfileImage(ProfileController controller) {
     return Stack(
       children: [
@@ -150,9 +149,8 @@ class EditProfile extends StatelessWidget {
       );
     }
 
-    // Default placeholder image
     return CommonImage(
-      imageSrc: "assets/images/profile_image.png",
+      imageSrc: "assets/images/profilePlaceholder.jpg",
       width: 100.w,
       height: 100.h,
       fill: BoxFit.cover,

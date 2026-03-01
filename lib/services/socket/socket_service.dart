@@ -1,37 +1,33 @@
 import 'package:giolee78/services/storage/storage_services.dart';
 import 'package:socket_io_client/socket_io_client.dart' as io;
 import '../../config/api/api_end_point.dart';
+import '../../features/notifications/data/model/notification_model.dart';
+import '../../features/notifications/presentation/controller/notifications_controller.dart';
 import '../notification/notification_service.dart';
+import 'package:get/get.dart';
 
 class SocketServices {
   static final Map<String, io.Socket> _sockets = {};
 
-  /// Get or create a socket for a specific namespace
   static io.Socket getSocket(String namespace) {
-    // If a namespace fails, we should ideally fallback to root
-    // For now, let's try to return the requested one or root if it's messaging/notification
     if (_sockets[namespace] == null || !_sockets[namespace]!.connected) {
       connectToNamespace(namespace);
     }
     return _sockets[namespace]!;
   }
 
-  ///<<<============ Connect with namespace ====================>>>
   static void connectToNamespace(String namespace) {
     String baseUrl = ApiEndPoint.socketUrl;
     if (baseUrl.endsWith("/")) {
       baseUrl = baseUrl.substring(0, baseUrl.length - 1);
     }
 
-    // Standardize URL joining
     final String namespacePath = namespace == "/"
         ? ""
         : (namespace.startsWith("/") ? namespace : "/$namespace");
     final String fullUrl = "$baseUrl$namespacePath";
 
-    print(
-      ">>>>>>>>>>>> 🔌 Connecting to Namespace: '$namespace' via $fullUrl <<<<<<<<<<<<",
-    );
+    print(">>>>>>>>>>>> 🔌 Connecting to Namespace: '$namespace' via $fullUrl <<<<<<<<<<<<");
 
     _sockets[namespace]?.dispose();
 
@@ -48,15 +44,11 @@ class SocketServices {
     );
 
     socket.on('connect', (data) {
-      print(
-        ">>>>>>>>>>>> 🌐 Socket Connected [$namespace]: ID=${socket.id} <<<<<<<<<<<<",
-      );
+      print(">>>>>>>>>>>> 🌐 Socket Connected [$namespace]: ID=${socket.id} <<<<<<<<<<<<");
     });
 
     socket.on('connect_error', (data) {
-      print(
-        ">>>>>>>>>>>> ❌ Socket Connection Error [$namespace]: $data <<<<<<<<<<<<",
-      );
+      print(">>>>>>>>>>>> ❌ Socket Connection Error [$namespace]: $data <<<<<<<<<<<<");
     });
 
     socket.on('error', (data) {
@@ -64,23 +56,18 @@ class SocketServices {
     });
 
     socket.on('disconnect', (data) {
-      print(
-        ">>>>>>>>>>>> 🔌 Socket Disconnected [$namespace]: $data <<<<<<<<<<<<",
-      );
+      print(">>>>>>>>>>>> 🔌 Socket Disconnected [$namespace]: $data <<<<<<<<<<<<");
     });
 
-    // Unified Event Listeners (Setup on all sockets as redundancy, but primarily targeted at '/')
+
     socket.on("notification:new", (data) {
-      print(
-        ">>>>>>>>>>>> 🔔 New Notification via socket [$namespace]: $data <<<<<<<<<<<<",
-      );
+      print(">>>>>>>>>>>> 🔔 New Notification via socket [$namespace]: $data <<<<<<<<<<<<");
       NotificationService.showNotification(data);
+      _handleNewNotification(data); // 👈 Added
     });
 
     socket.on("message:new", (data) {
-      print(
-        ">>>>>>>>>>>> 📩 New Message via socket [$namespace]: $data <<<<<<<<<<<<",
-      );
+      print(">>>>>>>>>>>> 📩 New Message via socket [$namespace]: $data <<<<<<<<<<<<");
     });
 
     socket.on("chat:update", (data) {
@@ -91,32 +78,37 @@ class SocketServices {
     socket.connect();
   }
 
-  /// Compatibility methods for existing code that uses the root namespace
+  // ✅ CORRECT PLACE — inside the class, outside connectToNamespace
+  static void _handleNewNotification(dynamic data) {
+    try {
+      if (Get.isRegistered<NotificationsController>()) {
+        final controller = Get.find<NotificationsController>();
+        final newNotification = NotificationModel.fromJson(data as Map<String, dynamic>);
+        controller.notifications.insert(0, newNotification);
+        controller.unreadCount.value++;
+        controller.update();
+      }
+    } catch (e) {
+      print("Error handling new notification in controller: $e");
+    }
+  }
+
   static io.Socket get socket => getSocket("/");
 
   static void connectToSocket() {
-    // Connect to prioritized namespaces
     connectToNamespace("/");
-    // We still try these as per user request, but logic will fallback in usage
     connectToNamespace("messaging");
     connectToNamespace("notification");
   }
 
-  ///<<<============ Join Chat Room ====================>>>
   static void joinRoom(String chatId) {
-    print(
-      ">>>>>>>>>>>> 🚪 Joining Room: $chatId (Primary: root socket) <<<<<<<<<<<<",
-    );
-    // Emit on root as well because namespaces are failin
+    print(">>>>>>>>>>>> 🚪 Joining Room: $chatId <<<<<<<<<<<<");
     getSocket("/").emit("room:join", chatId);
-
-    // Also try messaging if it happens to connect later
     if (_sockets["messaging"]?.connected ?? false) {
       _sockets["messaging"]?.emit("room:join", chatId);
     }
   }
 
-  ///<<<============ Leave Chat Room ====================>>>
   static void leaveRoom(String chatId) {
     print(">>>>>>>>>>>> 🚪 Leaving Room: $chatId <<<<<<<<<<<<");
     getSocket("/").emit("room:leave", chatId);
@@ -125,16 +117,9 @@ class SocketServices {
     }
   }
 
-  static void on(
-    String event,
-    Function(dynamic data) handler, {
-    String namespace = "/",
-  }) {
-    // If requested namespace is not connected, use root as fallback
+  static void on(String event, Function(dynamic data) handler, {String namespace = "/"}) {
     if (namespace != "/" && _sockets[namespace]?.connected != true) {
-      print(
-        ">>>>>>>>>>>> ⚠️ Namespace $namespace not connected, listening on root for $event <<<<<<<<<<<<",
-      );
+      print(">>>>>>>>>>>> ⚠️ Namespace $namespace not connected, listening on root for $event <<<<<<<<<<<<");
       getSocket("/").on(event, handler);
     } else {
       getSocket(namespace).on(event, handler);
@@ -149,12 +134,7 @@ class SocketServices {
     }
   }
 
-  static void emitWithAck(
-    String event,
-    dynamic data,
-    Function(dynamic data) handler, {
-    String namespace = "/",
-  }) {
+  static void emitWithAck(String event, dynamic data, Function(dynamic data) handler, {String namespace = "/"}) {
     if (namespace != "/" && _sockets[namespace]?.connected != true) {
       getSocket("/").emitWithAck(event, data, ack: handler);
     } else {

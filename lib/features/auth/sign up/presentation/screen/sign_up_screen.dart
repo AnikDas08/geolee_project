@@ -12,16 +12,16 @@ import '../widget/already_accunt_rich_text.dart';
 import '../widget/sign_up_all_filed.dart';
 
 class SignUpScreen extends StatelessWidget {
-  const SignUpScreen({super.key});
-
+   SignUpScreen({super.key});
+  final controller = Get.put(SignUpController());
   @override
   Widget build(BuildContext context) {
+
     final signUpFormKey = GlobalKey<FormState>();
     return Scaffold(
 
       appBar: AppBar(leading: const SizedBox()),
 
-      /// Body Section Starts Here
       body: GetBuilder<SignUpController>(
         builder: (controller) {
           return SingleChildScrollView(

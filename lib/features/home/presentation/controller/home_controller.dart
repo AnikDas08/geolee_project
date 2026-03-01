@@ -29,17 +29,18 @@ class HomeController extends GetxController {
   var clickerCount = RxnString();
   var filterOption = RxnString();
 
-  // ─── Filter parameters ───
+
   var selectedPeriod = ''.obs;
   Rxn<DateTime> startDate = Rxn<DateTime>();
   Rxn<DateTime> endDate = Rxn<DateTime>();
   RxBool isDateFilterActive = false.obs;
   String? argument;
 
-  // ─── Heatmap ───
+
   RxSet<Heatmap> heatmaps = <Heatmap>{}.obs;
 
-  // ─── Map refresh — single trigger with debounce ───
+  // ─── Map refresh — single trigger with debounce
+
   RxInt mapRefreshTrigger = 0.obs;
   Timer? _refreshDebounce;
 
@@ -72,14 +73,8 @@ class HomeController extends GetxController {
   Future<void> onInit() async {
     super.onInit();
     try {
-
-
-
-
       clickerCount.value = "All";
-
       if (LocalStorage.token.isNotEmpty) {
-
         argument = Get.arguments;
         Get.find<HomeNavController>().refresh();
         Get.find<MyProfileController>().refresh();
@@ -102,6 +97,7 @@ class HomeController extends GetxController {
   }
 
   // ─── Debounced map refresh ───
+
   void _scheduleMapRefresh() {
     _refreshDebounce?.cancel();
     _refreshDebounce = Timer(const Duration(milliseconds: 300), () {
@@ -415,7 +411,7 @@ class HomeController extends GetxController {
 
   Future<void> applyClickerFilter(String? clickerType) async {
     try {
-      clearMarkerCache(); // ✅ cache clear on filter change
+      clearMarkerCache();
       clickerCount.value = clickerType;
       await fetchPostsWithFilter();
     } catch (e) {
@@ -518,19 +514,15 @@ class HomeController extends GetxController {
         LocalStorage.setString(LocalStorageKeys.myName, LocalStorage.myName);
         LocalStorage.setString(LocalStorageKeys.myEmail, LocalStorage.myEmail);
       } else {
-        Get.snackbar(response.statusCode.toString(), response.message);
+
       }
     } catch (e) {
-      Get.snackbar("Error", e.toString());
+      // Get.snackbar("Error", e.toString());
     } finally {
       isLoading = false;
       update();
     }
   }
-
-  // ─────────────────────────────────────────
-  //  Location
-  // ─────────────────────────────────────────
 
   Future<Position?> getCurrentLocation() async {
     try {

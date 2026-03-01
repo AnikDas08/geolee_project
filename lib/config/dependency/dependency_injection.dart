@@ -35,7 +35,10 @@ class DependencyInjection extends Bindings {
     Get.lazyPut(() => SignInController(), fenix: true);
     Get.lazyPut(() => ForgetPasswordController(), fenix: true);
     Get.lazyPut(() => ChangePasswordController(), fenix: true);
-    Get.lazyPut(() => NotificationsController(), fenix: true);
+    
+    // Changed to permanent to ensure socket listeners can always find it
+    Get.put(NotificationsController(), permanent: true);
+    
     Get.lazyPut(() => ChatController(), fenix: true);
     Get.lazyPut(() => MessageController(), fenix: true);
     Get.lazyPut(() => ProfileController(), fenix: true);
@@ -60,6 +63,5 @@ class DependencyInjection extends Bindings {
     Get.lazyPut(() => UpdateAdsController(), fenix: true);
     Get.lazyPut(() => ChatNearbyProfileController(), fenix: true);
     Get.lazyPut(() => MyFriendController(), fenix: true);
-
   }
 }

@@ -168,13 +168,11 @@ class MyProfileController extends GetxController {
           ),
         ]);
 
-
-
       } else {
-        Get.snackbar(
-          response.statusCode.toString(),
-          response.message ?? "Something went wrong",
-        );
+        // Get.snackbar(
+        //   response.statusCode.toString(),
+        //   response.message ?? "Something went wrong",
+        // );
       }
     } catch (e) {
       debugPrint("Faile To Load Profile${e.toString()}");
