@@ -30,11 +30,14 @@ class ServiceProviderController extends GetxController {
   var isResendEnabled = false.obs;
   Timer? _timer;
 
-  var isLoading = false.obs;
-
   // for number country code
   String countryCode = "+65";
   String fullPhoneNumber = '';
+
+  var isLoading = false.obs;
+
+  // for number country code
+
 
   // Text controllers
   var businessNameController = TextEditingController();

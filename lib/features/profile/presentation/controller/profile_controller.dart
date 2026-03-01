@@ -13,6 +13,7 @@ import '../../../../config/api/api_end_point.dart';
 import '../../../../config/route/app_routes.dart';
 import '../../../../services/api/api_service.dart';
 import '../../../../utils/app_utils.dart';
+import '../../../../utils/constants/app_colors.dart';
 import '../../../../utils/log/app_log.dart';
 import '../../../home/presentation/controller/home_nav_controller.dart';
 
@@ -157,6 +158,7 @@ class ProfileController extends GetxController {
   /// Pick date of birth
   Future<void> pickDateOfBirth() async {
     final DateTime? pickedDate = await showDatePicker(
+
       context: Get.context!,
       initialDate: DateTime(2000),
       firstDate: DateTime(1950),
@@ -165,18 +167,18 @@ class ProfileController extends GetxController {
 
     if (pickedDate != null) {
       dateOfBirthController.text =
-          "${pickedDate.year}-${pickedDate.month.toString().padLeft(2, '0')}-${pickedDate.day.toString().padLeft(2, '0')}";
+      "${pickedDate.year}-${pickedDate.month.toString().padLeft(2, '0')}-${pickedDate.day.toString().padLeft(2, '0')}";
       update();
     }
   }
 
-  /// Select gender
+  // Select gender==================================
   void selectGender(String gender) {
     genderController.text = gender;
     update();
   }
 
-  /// Edit profile API
+  // Edit profile API================================
   Future<void> editProfileRepo() async {
     if (!formKey.currentState!.validate()) return;
     if (!LocalStorage.isLogIn) return;
@@ -199,7 +201,8 @@ class ProfileController extends GetxController {
         "name": nameController.text.trim(),
         "bio": aboutController.text.trim(),
         "dob": formattedDob,
-        "gender": genderController.text.trim(),
+        "gender": genderController.text.toLowerCase().trim(),
+
       };
 
       final response = await ApiService.multipart(
@@ -226,7 +229,6 @@ class ProfileController extends GetxController {
           LocalStorage.setString(LocalStorageKeys.dateOfBirth, LocalStorage.dateOfBirth),
         ]);
 
-        // ✅ FIXED: Use Get.find to update the actual UI controller instance
         if (Get.isRegistered<MyProfileController>()) {
           Get.find<MyProfileController>().getUserData();
         }

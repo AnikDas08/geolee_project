@@ -492,9 +492,6 @@ class MyFriendController extends GetxController {
         friendStatusMap[userId] = FriendStatus.requested;
         friendStatusMap.refresh();
 
-        Utils.successSnackBar("Sent", "Friend request sent");
-
-        // 🔄 Refresh friend requests to update badge on home screen
         await fetchFriendRequests();
       }
     } catch (e) {
@@ -528,7 +525,6 @@ class MyFriendController extends GetxController {
         pendingRequestIdMap.remove(userId);
         pendingRequestIdMap.refresh();
 
-        Utils.successSnackBar("Cancelled", "Friend request cancelled");
       }
     } catch (e) {
       Utils.errorSnackBar("Error", e.toString());

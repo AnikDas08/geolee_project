@@ -15,6 +15,7 @@ class MyProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
     return GetBuilder<MyProfileController>(
       init: MyProfileController(),
       builder: (controller) {
@@ -159,16 +160,22 @@ class MyProfileScreen extends StatelessWidget {
 
   /// Profile Details Widget
   Widget _buildProfileDetails(MyProfileController controller) {
+
+    // String capitalizeFirst(String text) {
+    //   if (text.isEmpty) return text;
+    //   return text[0].toUpperCase() + text.substring(1).toLowerCase();
+    // }
+
     return Column(
       children: [
-        // Uncomment if mobile is available in the API
-        // _buildDetailRow('Mobile', controller.mobile),
+
+        //  _buildDetailRow('Mobile', controller.mobile),
         // 16.height,
         _buildDetailRow('E-mail', controller.userEmail),
         16.height,
         _buildDetailRow('Date of Birth', controller.dateOfBirth),
         16.height,
-        _buildDetailRow('Gender', controller.gender),
+        _buildDetailRow('Gender',controller.gender[0].toUpperCase() + controller.gender.substring(1).toLowerCase()),
       ],
     );
   }

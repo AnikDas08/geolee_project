@@ -102,27 +102,26 @@ class LocalStorage {
     if (key == LocalStorageKeys.balance) balance = value;
   }
 
-  /// ----------------------------------------------------------
-  /// LOGOUT & RESET
-  /// ----------------------------------------------------------
-  ///
+  /// ===========================================
+  // LOGOUT & RESET
+  ///============================================
+
   static Future<void> removeAllPrefData() async {
+
+
+    // ১. Clear SharedPreferences
     final localStorage = await _getStorage();
     await localStorage.clear();
 
-    try {
-      final dir = await getApplicationDocumentsDirectory();
-      final cookieDir = Directory("${dir.path}/.cookies/");
-      if (await cookieDir.exists()) {
-        await cookieDir.delete(recursive: true);
-        debugPrint("🗑️ Cookie directory deleted from disk");
-      }
-    } catch (e) {
-      debugPrint("❌ Cookie clear error: $e");
+    _resetLocalStorageData();
+
+
+
+    if (Get.isRegistered<ChatController>()) {
+      Get.delete<ChatController>(force: true);
     }
 
-    _resetLocalStorageData();
-    Get.delete<ChatController>(force: true);
+
     Get.offAllNamed(AppRoutes.signIn);
   }
 
@@ -135,6 +134,26 @@ class LocalStorage {
     isLogIn = false;
     myName = "";
     myEmail = "";
+    myImage = "";
+    businessLicenceNumber = "";
+    forgotPasswordToken = "";
+    businessName = "";
+    businessType = "";
+    businessLogo = "";
+    phone = "";
+    address = "";
     balance = 0.0;
+    verified = false;
+    bio = "";
+    advertiserBio = '';
+    lat = 90.4125;
+    long = 23.8103;
+    radius = "5";
+    accountInfoStatus = false;
+    createdAt = "";
+    updatedAt = "";
+    dateOfBirth = "";
+    gender = "";
+    experience = "";
   }
 }

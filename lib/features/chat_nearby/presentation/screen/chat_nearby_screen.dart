@@ -110,7 +110,7 @@ class ChatNearbyScreen extends StatelessWidget {
                 return _NearbyUserCard(
                   nearbyChatUser: user,
                   clickerController: clickerController,
-                  controller: controller, // ✅ pass controller
+                  controller: controller,
                 );
               },
             ),
@@ -248,7 +248,6 @@ class _NearbyUserCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      // ✅ Reactive friend status
       final isFriend =
           controller.friendStatusMap[nearbyChatUser.id] ?? false;
 
@@ -294,7 +293,7 @@ class _NearbyUserCard extends StatelessWidget {
                     fill: BoxFit.cover,
                   )
                       : CommonImage(
-                    imageSrc: "assets/images/profile_image.png",
+                    imageSrc: "assets/images/profilePlaceholder.jpg",
                     size: 40.r,
                     fill: BoxFit.cover,
                   ),

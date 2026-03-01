@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
+import 'package:giolee78/services/socket/socket_service.dart';
 import 'package:giolee78/services/storage/storage_keys.dart';
 import 'package:giolee78/services/storage/storage_services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -31,7 +32,7 @@ class SignUpController extends GetxController {
   Position? currentPosition;
   var markers = <Marker>{};
   var initialCameraPosition = const CameraPosition(
-    target: LatLng(23.8103, 90.4125), // Dhaka, Bangladesh default
+    target: LatLng(23.8103, 90.4125),
     zoom: 14.0,
   ).obs;
 
@@ -51,7 +52,7 @@ class SignUpController extends GetxController {
   static SignUpController get instance => Get.find();
 
   TextEditingController nameController = TextEditingController(
-    text: kDebugMode ? "Md Ibrahim Nazmul" : "",
+    text: kDebugMode ? "MD IBRAHIM  NAZMUL" : "",
   );
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController(text: kDebugMode ? 'password123' : '',);
@@ -196,6 +197,9 @@ class SignUpController extends GetxController {
           final String bearerToken = data['data']['accessToken'];
           LocalStorage.token=bearerToken;
           LocalStorage.setString(LocalStorageKeys.token, bearerToken);
+          
+          // Connect Socket immediately after verification
+          SocketServices.connectToSocket();
 
           Utils.successSnackBar("Success", "Email verified successfully");
 

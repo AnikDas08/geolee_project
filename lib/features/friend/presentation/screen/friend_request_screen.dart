@@ -58,7 +58,6 @@ class FriendRequestScreen extends StatelessWidget {
                   ClipRRect(
                     borderRadius: BorderRadius.circular(50.r),
                     child: CachedNetworkImage(
-                      // Recommended over NetworkImage for better UX
                       imageUrl: "${ApiEndPoint.imageUrl}${friendInfo.image}",
                       height: 50.h,
                       width: 50.w,
@@ -66,12 +65,11 @@ class FriendRequestScreen extends StatelessWidget {
                       placeholder: (context, url) =>
                           const CircularProgressIndicator(),
                       errorWidget: (context, url, error) =>
-                          Image.asset(AppImages.profileImage),
+                          Image.asset("assets/images/profilePlaceholder.jpg"),
                     ),
                   ),
                   SizedBox(width: 12.w),
 
-                  // Details Column
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,

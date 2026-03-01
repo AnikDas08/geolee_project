@@ -103,7 +103,7 @@ class AppRoutes {
     GetPage(name: searchScreen, page: () => const SearchFriendScreen()),
     GetPage(name: groupSetting, page: () => const GroupSettingsScreen()),
     GetPage(name: addMemberScreen, page: () => const AddMemberScreen()),
-    GetPage(name: friendPendingScreenHere, page: () => const PendingRequestScreen()),
+    GetPage(name: friendPendingScreenHere, page: () => const GroupUserPendingRequestScreen()),
     GetPage(name: groupMessageScreen, page: () => const GroupMessageScreen()),
   ];
 }

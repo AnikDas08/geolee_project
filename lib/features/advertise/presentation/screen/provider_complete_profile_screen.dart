@@ -151,7 +151,6 @@ class _ServiceProviderInfoScreenState extends State<ServiceProviderInfoScreen> {
                       initialCountryCode: 'SG',
                       disableLengthCheck: true,
 
-                      // আমরা নিজেই length control করবো
                       decoration: InputDecoration(
                         hintText: '8123 4567',
                         labelText: 'Phone Number',
@@ -168,7 +167,7 @@ class _ServiceProviderInfoScreenState extends State<ServiceProviderInfoScreen> {
 
                       inputFormatters: [
                         FilteringTextInputFormatter.digitsOnly,
-                        LengthLimitingTextInputFormatter(15), // 👉 max 15 digit
+                        LengthLimitingTextInputFormatter(15),
                       ],
 
                       validator: (phone) {

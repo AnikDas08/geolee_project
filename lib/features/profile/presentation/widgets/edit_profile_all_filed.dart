@@ -17,26 +17,24 @@ class EditProfileAllFiled extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        /// Full Name Field
         _buildLabel('Full Name'),
         8.height,
         CommonTextField(
           controller: controller.nameController,
           validator: OtherHelper.validator,
-          hintText: 'Shakir Ahmed',
+          hintText: 'Enter Your Full Name',
           hintTextColor: AppColors.secondaryText,
           textColor: AppColors.black,
         ),
 
         16.height,
 
-        /// About Field
+        //About Field==========================
         _buildLabel('Bio'),
         8.height,
         CommonTextField(
           controller: controller.aboutController,
-          hintText:
-              'Skilled professionals offering reliable, on-demand services..',
+          hintText: 'Skilled professionals offering reliable, on-demand services..',
           keyboardType: TextInputType.multiline,
           maxLines: 3,
           hintTextColor: AppColors.secondaryText,
@@ -45,7 +43,7 @@ class EditProfileAllFiled extends StatelessWidget {
 
         16.height,
 
-        /// Date of Birth Field
+        // Date of Birth Field=====================
         _buildLabel('Date Of Birth'),
         8.height,
         CommonTextField(
@@ -63,7 +61,7 @@ class EditProfileAllFiled extends StatelessWidget {
 
         16.height,
 
-        /// Gender Field
+        // Gender Field=============================
         _buildLabel('Gender'),
         8.height,
         _buildGenderDropdown(),
@@ -85,7 +83,7 @@ class EditProfileAllFiled extends StatelessWidget {
 
   /// Build Gender Dropdown
   Widget _buildGenderDropdown() {
-    final genderOptions = ['male', 'female', 'other'];
+    final genderOptions = ['Male', 'Female', 'Other'];
 
     // Normalize the current value to match dropdown items
     String? currentValue;
@@ -111,6 +109,8 @@ class EditProfileAllFiled extends StatelessWidget {
         ],
       ),
       child: DropdownButtonFormField<String>(
+        borderRadius: BorderRadius.circular(4),
+        dropdownColor: AppColors.white,
         initialValue: currentValue,
         decoration: InputDecoration(
           hintText: 'Male',

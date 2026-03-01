@@ -28,6 +28,15 @@ class AdvertiserEditProfileController extends GetxController {
   late TextEditingController phoneNumberController;
   late TextEditingController bioController;
 
+
+  String countryCode = "+65";
+  String countryIsoCode = "SG";
+  String fullPhoneNumber = '';
+  String phoneNumberOnly = '';
+
+  // ✅ Key to force rebuild IntlPhoneField when data loads
+  Key phoneFieldKey = UniqueKey();
+
   // ================= ON INIT =================
   @override
   void onInit() {
@@ -46,33 +55,25 @@ class AdvertiserEditProfileController extends GetxController {
   }
 
   // ================= FETCH ADVERTISER PROFILE =================
-
   Future<void> fetchAdvertiserProfile() async {
     isLoading = true;
     update();
 
     try {
-      print("🌐 Fetching advertiser profile...");
-
       final response = await ApiService.get(ApiEndPoint.advertiserProfile);
-
-      print("📦 Response Status: ${response.statusCode}");
-      print("📦 Response Data: ${response.data}");
 
       if (response.statusCode == 200) {
         final advertiserData = response.data['data'] ?? {};
 
-
-        debugPrint(" Advertiser Response Data Is: ${response.data}");
-
-        // ========== UPDATE TEXT CONTROLLERS ==========
         businessNameController.text = advertiserData["businessName"] ?? '';
         businessLicenceController.text = advertiserData["licenseNumber"] ?? '';
         businessTypeController.text = advertiserData["businessType"] ?? '';
-        phoneNumberController.text = advertiserData["phone"] ?? '';
         bioController.text = advertiserData["bio"] ?? '';
 
-        // ========== SAVE TO LOCAL STORAGE ==========
+        // ✅ Parse phone number and country code properly
+        final phoneFull = advertiserData["phone"] ?? '';
+        _parseAndSetPhone(phoneFull);
+
         await _saveToLocalStorage(advertiserData);
 
         print("✅ Profile data loaded and saved successfully");
@@ -82,8 +83,6 @@ class AdvertiserEditProfileController extends GetxController {
       }
     } catch (e) {
       print("❌ Fetch Profile Error: $e");
-      // Utils.errorSnackBar("Error", "Failed to load profile data");
-      // Load from local storage as fallback
       _loadFromLocalStorage();
     } finally {
       isLoading = false;
@@ -91,10 +90,169 @@ class AdvertiserEditProfileController extends GetxController {
     }
   }
 
+
+  void _parseAndSetPhone(String phoneFull) {
+    if (phoneFull.isEmpty) {
+      countryCode = "+65";
+      countryIsoCode = "SG";
+      phoneNumberOnly = '';
+      fullPhoneNumber = '';
+      phoneNumberController.text = '';
+      // Regenerate key so IntlPhoneField rebuilds with default
+      phoneFieldKey = UniqueKey();
+      return;
+    }
+
+    if (phoneFull.startsWith('+')) {
+      // Map of common dial codes to ISO codes
+      // Add more as needed for your user base
+      final Map<String, String> dialToIso = {
+        '+1': 'US',
+        '+7': 'RU',
+        '+20': 'EG',
+        '+27': 'ZA',
+        '+30': 'GR',
+        '+31': 'NL',
+        '+32': 'BE',
+        '+33': 'FR',
+        '+34': 'ES',
+        '+36': 'HU',
+        '+39': 'IT',
+        '+40': 'RO',
+        '+41': 'CH',
+        '+43': 'AT',
+        '+44': 'GB',
+        '+45': 'DK',
+        '+46': 'SE',
+        '+47': 'NO',
+        '+48': 'PL',
+        '+49': 'DE',
+        '+51': 'PE',
+        '+52': 'MX',
+        '+53': 'CU',
+        '+54': 'AR',
+        '+55': 'BR',
+        '+56': 'CL',
+        '+57': 'CO',
+        '+58': 'VE',
+        '+60': 'MY',
+        '+61': 'AU',
+        '+62': 'ID',
+        '+63': 'PH',
+        '+64': 'NZ',
+        '+65': 'SG',
+        '+66': 'TH',
+        '+81': 'JP',
+        '+82': 'KR',
+        '+84': 'VN',
+        '+86': 'CN',
+        '+90': 'TR',
+        '+91': 'IN',
+        '+92': 'PK',
+        '+93': 'AF',
+        '+94': 'LK',
+        '+95': 'MM',
+        '+98': 'IR',
+        '+212': 'MA',
+        '+213': 'DZ',
+        '+216': 'TN',
+        '+218': 'LY',
+        '+220': 'GM',
+        '+221': 'SN',
+        '+234': 'NG',
+        '+251': 'ET',
+        '+254': 'KE',
+        '+255': 'TZ',
+        '+256': 'UG',
+        '+260': 'ZM',
+        '+263': 'ZW',
+        '+351': 'PT',
+        '+352': 'LU',
+        '+353': 'IE',
+        '+354': 'IS',
+        '+355': 'AL',
+        '+356': 'MT',
+        '+357': 'CY',
+        '+358': 'FI',
+        '+359': 'BG',
+        '+370': 'LT',
+        '+371': 'LV',
+        '+372': 'EE',
+        '+380': 'UA',
+        '+381': 'RS',
+        '+385': 'HR',
+        '+386': 'SI',
+        '+420': 'CZ',
+        '+421': 'SK',
+        '+880': 'BD',
+        '+960': 'MV',
+        '+966': 'SA',
+        '+971': 'AE',
+        '+972': 'IL',
+        '+973': 'BH',
+        '+974': 'QA',
+        '+975': 'BT',
+        '+976': 'MN',
+        '+977': 'NP',
+        '+992': 'TJ',
+        '+993': 'TM',
+        '+994': 'AZ',
+        '+995': 'GE',
+        '+996': 'KG',
+        '+998': 'UZ',
+      };
+
+      // Try to match longest dial code first (4 digits → 3 → 2 → 1)
+      String? matchedCode;
+      String? matchedIso;
+
+      for (int len in [4, 3, 2, 1]) {
+        if (phoneFull.length > len) {
+          final candidate = phoneFull.substring(0, len + 1); // e.g. "+880"
+          if (dialToIso.containsKey(candidate)) {
+            matchedCode = candidate;
+            matchedIso = dialToIso[candidate];
+            break;
+          }
+        }
+      }
+
+      if (matchedCode != null && matchedIso != null) {
+        countryCode = matchedCode;
+        countryIsoCode = matchedIso;
+        phoneNumberOnly = phoneFull.substring(matchedCode.length);
+      } else {
+        // Fallback: use regex for 1-4 digit code
+        final reg = RegExp(r'^\+(\d{1,4})');
+        final match = reg.firstMatch(phoneFull);
+        if (match != null) {
+          countryCode = '+${match.group(1)}';
+          countryIsoCode = "SG"; // fallback ISO
+          phoneNumberOnly = phoneFull.replaceFirst(countryCode, '');
+        } else {
+          countryCode = "+65";
+          countryIsoCode = "SG";
+          phoneNumberOnly = phoneFull;
+        }
+      }
+    } else {
+      countryCode = "+65";
+      countryIsoCode = "SG";
+      phoneNumberOnly = phoneFull;
+    }
+
+    fullPhoneNumber = phoneFull;
+    phoneNumberController.text = phoneNumberOnly;
+
+    // ✅ Regenerate key so IntlPhoneField rebuilds with correct initialCountryCode
+    phoneFieldKey = UniqueKey();
+
+    debugPrint(" Parsed → countryCode: $countryCode | isoCode: $countryIsoCode | number: $phoneNumberOnly");
+  }
+
   // ================= SAVE TO LOCAL STORAGE =================
   Future<void> _saveToLocalStorage(Map<String, dynamic> advertiserData) async {
     try {
-      // Update LocalStorage variables
       LocalStorage.userId = advertiserData["_id"] ?? LocalStorage.userId;
       LocalStorage.businessName = advertiserData["businessName"] ?? '';
       LocalStorage.businessType = advertiserData["businessType"] ?? '';
@@ -103,7 +261,6 @@ class AdvertiserEditProfileController extends GetxController {
       LocalStorage.advertiserBio = advertiserData["bio"] ?? '';
       LocalStorage.businessLogo = advertiserData["logo"] ?? '';
 
-      // Save to SharedPreferences
       await Future.wait([
         LocalStorage.setString(LocalStorageKeys.userId, LocalStorage.userId),
         LocalStorage.setString(LocalStorageKeys.businessName, LocalStorage.businessName),
@@ -120,15 +277,16 @@ class AdvertiserEditProfileController extends GetxController {
     }
   }
 
-  // ================= LOAD FROM LOCAL STORAGE (FALLBACK) =================
   void _loadFromLocalStorage() {
     businessNameController.text = LocalStorage.businessName;
     businessLicenceController.text = LocalStorage.businessLicenceNumber;
     businessTypeController.text = LocalStorage.businessType;
-    phoneNumberController.text = LocalStorage.phone;
     bioController.text = LocalStorage.advertiserBio;
 
-    print("📂 Loaded data from local storage");
+
+    _parseAndSetPhone(LocalStorage.phone);
+
+    debugPrint("Loaded data from local storage");
   }
 
   // ================= IMAGE PICKER =================
@@ -252,18 +410,22 @@ class AdvertiserEditProfileController extends GetxController {
     update();
 
     try {
-      print("📤 Updating advertiser profile...");
+      debugPrint(" Updating advertiser profile...");
+
+      final String phoneToSend = fullPhoneNumber.isNotEmpty
+          ? fullPhoneNumber
+          : '$countryCode${phoneNumberController.text.trim()}';
 
       final Map<String, String> body = {
         "businessName": businessNameController.text.trim(),
         "businessType": businessTypeController.text.trim(),
         "licenseNumber": businessLicenceController.text.trim(),
-        "phone": phoneNumberController.text.trim(),
-        "bio": bioController.text.trim(),
+        "phone": phoneToSend,
+        "bio": bioController.text.trim().isEmpty ? " " : bioController.text.trim(),
       };
 
-      print("📦 Update Body: $body");
-      print("🖼️ Image Path: ${selectedImage?.path}");
+      debugPrint("📦 Update Body: $body");
+      debugPrint("🖼️ Image Path: ${selectedImage?.path}");
 
       final response = await ApiService.multipartUpdate(
         ApiEndPoint.advertiserUpdate,
@@ -271,17 +433,14 @@ class AdvertiserEditProfileController extends GetxController {
         imagePath: selectedImage?.path,
       );
 
-      print("📦📦📦📦📦📦📦 Response Status: ${response.statusCode}");
-      print("📦📦📦📦📦📦📦 Response Data: ${response.data}");
+      debugPrint("📦 Response Status: ${response.statusCode}");
+      debugPrint("📦 Response Data: ${response.data}");
 
       if (response.statusCode == 200) {
         final advertiserData = response.data['data'] ?? {};
 
-        // ========== SAVE TO LOCAL STORAGE ==========
-
         await _saveToLocalStorage(advertiserData);
 
-        // If image was uploaded, save the local path too
         if (selectedImage?.path != null) {
           LocalStorage.myImage = selectedImage!.path;
           await LocalStorage.setString(LocalStorageKeys.myImage, LocalStorage.myImage);
@@ -297,7 +456,7 @@ class AdvertiserEditProfileController extends GetxController {
         Get.to(const DashBoardProfile());
       } else {
         Utils.errorSnackBar(
-          response.statusCode.toString(),
+         "Error",
           response.data['message'] ?? "Failed to update profile",
         );
       }
@@ -311,13 +470,13 @@ class AdvertiserEditProfileController extends GetxController {
   }
 
   // ================= LIFE CYCLE =================
-  // @override
-  // void onClose() {
-  //   businessNameController.dispose();
-  //   bioController.dispose();
-  //   phoneNumberController.dispose();
-  //   businessLicenceController.dispose();
-  //   businessTypeController.dispose();
-  //   super.onClose();
-  // }
+  @override
+  void onClose() {
+    businessNameController.dispose();
+    bioController.dispose();
+    phoneNumberController.dispose();
+    businessLicenceController.dispose();
+    businessTypeController.dispose();
+    super.onClose();
+  }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:giolee78/component/button/common_button.dart';
@@ -9,6 +10,7 @@ import 'package:giolee78/features/advertise/presentation/controller/advertiser_e
 import 'package:giolee78/services/storage/storage_services.dart';
 import 'package:giolee78/utils/constants/app_colors.dart';
 import 'package:giolee78/utils/extensions/extension.dart';
+import 'package:intl_phone_field/intl_phone_field.dart';
 
 import '../../../../component/text_field/common_text_field.dart';
 import '../../../../utils/helpers/other_helper.dart';
@@ -19,12 +21,13 @@ class AdvertiserEditProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetBuilder<AdvertiserEditProfileController>(
-      init: AdvertiserEditProfileController(),
+      init: Get.isRegistered<AdvertiserEditProfileController>()
+          ? null
+          : AdvertiserEditProfileController(),
       builder: (controller) {
         return Scaffold(
           backgroundColor: AppColors.background,
-
-          /// App Bar
+          // AppBar=======================
           appBar: AppBar(
             centerTitle: true,
             title: CommonText(
@@ -34,7 +37,6 @@ class AdvertiserEditProfileScreen extends StatelessWidget {
             ),
           ),
 
-          /// Body
           body: SafeArea(
             child: SingleChildScrollView(
               child: Padding(
@@ -52,14 +54,15 @@ class AdvertiserEditProfileScreen extends StatelessWidget {
 
                       Align(
                         alignment: Alignment.centerLeft,
-                          child: _buildLabel('Business Name')),
+                        child: _buildLabel('Business Name'),
+                      ),
 
                       6.height,
 
                       CommonTextField(
                         controller: controller.businessNameController,
                         validator: OtherHelper.validator,
-                        hintText: 'Shakir Ahmed',
+                        hintText: 'Enter your Business Name',
                         hintTextColor: AppColors.secondaryText,
                         textColor: AppColors.black,
                       ),
@@ -67,8 +70,9 @@ class AdvertiserEditProfileScreen extends StatelessWidget {
                       10.height,
 
                       Align(
-                          alignment: Alignment.centerLeft,
-                          child: _buildLabel('Bio')),
+                        alignment: Alignment.centerLeft,
+                        child: _buildLabel('Bio'),
+                      ),
 
                       6.height,
 
@@ -76,7 +80,8 @@ class AdvertiserEditProfileScreen extends StatelessWidget {
                         controller: controller.bioController,
                         validator: OtherHelper.validator,
                         maxLines: 4,
-                        hintText: 'Skilled professionals offering reliable, on-demand services to meet your everyday needs quickly and efficiently.',
+                        hintText:
+                        'Skilled professionals offering reliable, on-demand services...',
                         hintTextColor: AppColors.secondaryText,
                         textColor: AppColors.black,
                       ),
@@ -84,41 +89,93 @@ class AdvertiserEditProfileScreen extends StatelessWidget {
                       10.height,
 
                       Align(
-                          alignment: Alignment.centerLeft,
-                          child: _buildLabel('Phone Number')),
+                        alignment: Alignment.centerLeft,
+                        child: _buildLabel('Phone Number'),
+                      ),
 
                       6.height,
 
-                      CommonTextField(
+
+                      IntlPhoneField(
+                        key: controller.phoneFieldKey,
                         controller: controller.phoneNumberController,
-                        validator: OtherHelper.phoneNumberValidator,
-                        hintText: '01787000000',
-                        hintTextColor: AppColors.secondaryText,
-                        textColor: AppColors.black,
+
+
+                        initialCountryCode: controller.countryIsoCode,
+
+                        disableLengthCheck: true,
+
+                        decoration: InputDecoration(
+                          hintText: '8123 4567',
+                          labelText: 'Phone Number',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 14,
+                          ),
+                        ),
+
+                        keyboardType: TextInputType.phone,
+
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                          LengthLimitingTextInputFormatter(15),
+                        ],
+
+                        validator: (phone) {
+                          if (phone == null || phone.number.trim().isEmpty) {
+                            return "Phone number is required";
+                          }
+                          final length = phone.number.length;
+                          if (length < 6) {
+                            return "Minimum 6 digits required";
+                          }
+                          if (length > 15) {
+                            return "Maximum 15 digits allowed";
+                          }
+                          return null;
+                        },
+
+                        onChanged: (phone) {
+                          controller.countryCode = phone.countryCode;
+                          controller.fullPhoneNumber = phone.completeNumber;
+                          controller.phoneNumberOnly = phone.number;
+                        },
+
+                        onCountryChanged: (country) {
+
+                          controller.countryCode = '+${country.dialCode}';
+                          controller.countryIsoCode = country.code;
+                          controller.fullPhoneNumber =
+                          '+${country.dialCode}${controller.phoneNumberController.text.trim()}';
+                        },
                       ),
+
                       10.height,
 
                       Align(
-                          alignment: Alignment.centerLeft,
-                          child: _buildLabel('Business Licence Number')),
+                        alignment: Alignment.centerLeft,
+                        child: _buildLabel('Business Licence Number'),
+                      ),
 
                       6.height,
 
                       CommonTextField(
                         controller: controller.businessLicenceController,
                         validator: OtherHelper.validator,
-                        hintText: '511256015',
+                        hintText: 'Enter Your Business Licence Number EUN',
                         hintTextColor: AppColors.secondaryText,
                         textColor: AppColors.black,
                       ),
 
-
-
                       10.height,
 
                       Align(
-                          alignment: Alignment.centerLeft,
-                          child: _buildLabel('Business Type')),
+                        alignment: Alignment.centerLeft,
+                        child: _buildLabel('Business Type'),
+                      ),
 
                       6.height,
 
@@ -130,12 +187,8 @@ class AdvertiserEditProfileScreen extends StatelessWidget {
                         textColor: AppColors.black,
                       ),
 
-
-
-
-
-
                       32.height,
+
                       CommonButton(
                         titleText: 'Update',
                         onTap: controller.editProfileRepo,
@@ -157,7 +210,7 @@ class AdvertiserEditProfileScreen extends StatelessWidget {
     );
   }
 
-  /// Profile Image Widget - ✅ FIXED
+  /// Profile Image Widget
   Widget _buildProfileImage(AdvertiserEditProfileController controller) {
     return Stack(
       children: [
@@ -175,12 +228,8 @@ class AdvertiserEditProfileScreen extends StatelessWidget {
               ),
             ],
           ),
-          child: ClipOval(
-            child: _buildImage(controller),
-          ),
+          child: ClipOval(child: _buildImage(controller)),
         ),
-
-        /// Edit Icon
         Positioned(
           bottom: 0,
           right: 0,
@@ -202,7 +251,6 @@ class AdvertiserEditProfileScreen extends StatelessWidget {
     );
   }
 
-  /// Build Label Widget
   Widget _buildLabel(String text) {
     return CommonText(
       text: text,
@@ -212,10 +260,7 @@ class AdvertiserEditProfileScreen extends StatelessWidget {
     );
   }
 
-
-  /// ✅ FIXED: Build Image Widget
   Widget _buildImage(AdvertiserEditProfileController controller) {
-    // Check if new image is selected
     if (controller.selectedImage != null) {
       return Image.file(
         controller.selectedImage!,
@@ -223,17 +268,13 @@ class AdvertiserEditProfileScreen extends StatelessWidget {
         height: 100.h,
         fit: BoxFit.cover,
         errorBuilder: (context, error, stackTrace) {
-          print('Error loading selected image: $error');
           return _buildNetworkOrDefaultImage();
         },
       );
     }
-
-    // Show existing network image or default
     return _buildNetworkOrDefaultImage();
   }
 
-  /// Build Network or Default Image
   Widget _buildNetworkOrDefaultImage() {
     if (LocalStorage.myImage.isNotEmpty) {
       return CommonImage(
@@ -243,8 +284,6 @@ class AdvertiserEditProfileScreen extends StatelessWidget {
         fill: BoxFit.cover,
       );
     }
-
-    // Default placeholder image
     return CommonImage(
       imageSrc: "assets/images/profile_image.png",
       width: 100.w,
