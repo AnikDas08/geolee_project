@@ -22,6 +22,7 @@ import '../widgets/clicker_main.dart';
 import '../widgets/filter_main.dart';
 import '../widgets/home_details.dart';
 
+
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -37,14 +38,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-
-    // Get or create the controller - don't recreate it if it already exists
     if (Get.isRegistered<MyFriendController>()) {
       myFriendController = Get.find<MyFriendController>();
-      debugPrint("♻️ Using existing MyFriendController");
+      debugPrint("Using existing MyFriendController");
     } else {
       myFriendController = Get.put(MyFriendController());
-      debugPrint("🆕 Created new MyFriendController");
+      debugPrint("Created new MyFriendController");
     }
   }
 
@@ -57,8 +56,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      // Refresh friend requests when app comes back into focus
-      debugPrint("👁️ HomeScreen resumed - refreshing friend requests");
+      debugPrint("HomeScreen resumed - refreshing friend requests");
       myFriendController.fetchFriendRequests();
     }
   }

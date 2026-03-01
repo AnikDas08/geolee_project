@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:get/get.dart';
 import 'package:giolee78/config/api/api_end_point.dart';
@@ -170,7 +171,7 @@ class HomeController extends GetxController {
       return _markerIconCache[cacheKey]!;
     }
     try {
-      const double size = 60;
+      const double size = 30;
       final ui.PictureRecorder recorder = ui.PictureRecorder();
       final Canvas canvas = Canvas(recorder);
 
@@ -188,9 +189,9 @@ class HomeController extends GetxController {
       final TextPainter tp = TextPainter(
         text: TextSpan(
           text: count.toString(),
-          style: const TextStyle(
+          style: TextStyle(
             color: Colors.white,
-            fontSize: 22, // ✅ static — no .sp OOM
+            fontSize: 22.sp,
             fontWeight: FontWeight.bold,
           ),
         ),

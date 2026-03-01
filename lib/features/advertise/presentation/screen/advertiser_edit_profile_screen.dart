@@ -11,7 +11,6 @@ import 'package:giolee78/services/storage/storage_services.dart';
 import 'package:giolee78/utils/constants/app_colors.dart';
 import 'package:giolee78/utils/extensions/extension.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
-
 import '../../../../component/text_field/common_text_field.dart';
 import '../../../../utils/helpers/other_helper.dart';
 
@@ -20,14 +19,16 @@ class AdvertiserEditProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
+    if (Get.isRegistered<AdvertiserEditProfileController>()) {
+      Get.delete<AdvertiserEditProfileController>();
+    }
+
     return GetBuilder<AdvertiserEditProfileController>(
-      init: Get.isRegistered<AdvertiserEditProfileController>()
-          ? null
-          : AdvertiserEditProfileController(),
+      init: AdvertiserEditProfileController(),
       builder: (controller) {
         return Scaffold(
           backgroundColor: AppColors.background,
-          // AppBar=======================
           appBar: AppBar(
             centerTitle: true,
             title: CommonText(
@@ -36,7 +37,6 @@ class AdvertiserEditProfileScreen extends StatelessWidget {
               fontWeight: FontWeight.w600,
             ),
           ),
-
           body: SafeArea(
             child: SingleChildScrollView(
               child: Padding(
@@ -95,18 +95,13 @@ class AdvertiserEditProfileScreen extends StatelessWidget {
 
                       6.height,
 
-
                       IntlPhoneField(
                         key: controller.phoneFieldKey,
                         controller: controller.phoneNumberController,
-
-
                         initialCountryCode: controller.countryIsoCode,
-
                         disableLengthCheck: true,
-
                         decoration: InputDecoration(
-                          hintText: '8123 4567',
+                          hintText: 'e.x 8123 4567',
                           labelText: 'Phone Number',
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8),
@@ -116,14 +111,11 @@ class AdvertiserEditProfileScreen extends StatelessWidget {
                             vertical: 14,
                           ),
                         ),
-
                         keyboardType: TextInputType.phone,
-
                         inputFormatters: [
                           FilteringTextInputFormatter.digitsOnly,
                           LengthLimitingTextInputFormatter(15),
                         ],
-
                         validator: (phone) {
                           if (phone == null || phone.number.trim().isEmpty) {
                             return "Phone number is required";
@@ -137,15 +129,12 @@ class AdvertiserEditProfileScreen extends StatelessWidget {
                           }
                           return null;
                         },
-
                         onChanged: (phone) {
                           controller.countryCode = phone.countryCode;
                           controller.fullPhoneNumber = phone.completeNumber;
                           controller.phoneNumberOnly = phone.number;
                         },
-
                         onCountryChanged: (country) {
-
                           controller.countryCode = '+${country.dialCode}';
                           controller.countryIsoCode = country.code;
                           controller.fullPhoneNumber =
@@ -210,7 +199,6 @@ class AdvertiserEditProfileScreen extends StatelessWidget {
     );
   }
 
-  /// Profile Image Widget
   Widget _buildProfileImage(AdvertiserEditProfileController controller) {
     return Stack(
       children: [

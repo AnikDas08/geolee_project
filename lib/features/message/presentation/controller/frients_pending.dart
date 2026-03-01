@@ -29,6 +29,7 @@ class PendingRequest {
   }
 }
 
+
 class PendingRequestController extends GetxController {
   final String chatId = Get.arguments ?? '';
 
@@ -59,7 +60,6 @@ class PendingRequestController extends GetxController {
 
   Future<void> fetchPendingRequests() async {
     if (isLoading.value) return;
-
     try {
       isLoading.value = true;
 
@@ -84,12 +84,11 @@ class PendingRequestController extends GetxController {
     }
   }
 
+
   Future<void> fetchMorePendingRequests() async {
     if (isLoadingMore.value || hasNoMoreData.value) return;
-
     page++;
     isLoadingMore.value = true;
-
     try {
       final url =
           "${ApiEndPoint.getPendingRequest}$chatId?page=$page&limit=$limit";

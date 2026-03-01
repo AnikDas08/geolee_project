@@ -43,21 +43,19 @@ class OtherHelper {
       return "Phone number is required";
     }
 
-    // Remove all spaces and hyphens for validation
+
     String cleanValue = value.replaceAll(' ', '').replaceAll('-', '');
 
-    // Check if starts with +
+
     final bool hasPlus = cleanValue.startsWith('+');
     if (hasPlus) {
-      cleanValue = cleanValue.substring(1); // Remove the + for digit counting
+      cleanValue = cleanValue.substring(1);
     }
 
-    // Check if all remaining characters are digits
     if (!RegExp(r'^[0-9]+$').hasMatch(cleanValue)) {
       return "Phone number can only contain digits (and optional +)";
     }
 
-    // Check digit count (10-15)
     final int digitCount = cleanValue.length;
     if (digitCount < 10) {
       return "Phone number must be at least 10 digits";
@@ -66,7 +64,7 @@ class OtherHelper {
       return "Phone number cannot exceed 15 digits";
     }
 
-    return null; // Valid
+    return null;
   }
 
   static String? emailValidator(value) {

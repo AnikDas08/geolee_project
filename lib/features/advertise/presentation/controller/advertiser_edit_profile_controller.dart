@@ -14,7 +14,8 @@ import '../../../profile/presentation/screen/dashboard_profile.dart';
 class AdvertiserEditProfileController extends GetxController {
   // ================= VARIABLES =================
   List<String> languages = ["English", "French", "Arabic"];
-  final formKey = GlobalKey<FormState>();
+  late GlobalKey<FormState> formKey;
+
   String selectedLanguage = "English";
   File? selectedImage;
   bool isLoading = false;
@@ -28,19 +29,18 @@ class AdvertiserEditProfileController extends GetxController {
   late TextEditingController phoneNumberController;
   late TextEditingController bioController;
 
-
   String countryCode = "+65";
   String countryIsoCode = "SG";
   String fullPhoneNumber = '';
   String phoneNumberOnly = '';
 
-  // ✅ Key to force rebuild IntlPhoneField when data loads
   Key phoneFieldKey = UniqueKey();
 
   // ================= ON INIT =================
   @override
   void onInit() {
     super.onInit();
+    formKey = GlobalKey<FormState>(); // ✅ Fresh key every time controller is created
     _initializeControllers();
     fetchAdvertiserProfile();
   }
@@ -70,26 +70,24 @@ class AdvertiserEditProfileController extends GetxController {
         businessTypeController.text = advertiserData["businessType"] ?? '';
         bioController.text = advertiserData["bio"] ?? '';
 
-        // ✅ Parse phone number and country code properly
         final phoneFull = advertiserData["phone"] ?? '';
         _parseAndSetPhone(phoneFull);
 
         await _saveToLocalStorage(advertiserData);
 
-        print("✅ Profile data loaded and saved successfully");
+        debugPrint("✅ Profile data loaded and saved successfully");
       } else {
-        print("❌ Failed to fetch profile: ${response.message}");
+        debugPrint("❌ Failed to fetch profile: ${response.message}");
         _loadFromLocalStorage();
       }
     } catch (e) {
-      print("❌ Fetch Profile Error: $e");
+      debugPrint("❌ Fetch Profile Error: $e");
       _loadFromLocalStorage();
     } finally {
       isLoading = false;
       update();
     }
   }
-
 
   void _parseAndSetPhone(String phoneFull) {
     if (phoneFull.isEmpty) {
@@ -98,14 +96,11 @@ class AdvertiserEditProfileController extends GetxController {
       phoneNumberOnly = '';
       fullPhoneNumber = '';
       phoneNumberController.text = '';
-      // Regenerate key so IntlPhoneField rebuilds with default
       phoneFieldKey = UniqueKey();
       return;
     }
 
     if (phoneFull.startsWith('+')) {
-      // Map of common dial codes to ISO codes
-      // Add more as needed for your user base
       final Map<String, String> dialToIso = {
         '+1': 'US',
         '+7': 'RU',
@@ -202,13 +197,12 @@ class AdvertiserEditProfileController extends GetxController {
         '+998': 'UZ',
       };
 
-      // Try to match longest dial code first (4 digits → 3 → 2 → 1)
       String? matchedCode;
       String? matchedIso;
 
       for (int len in [4, 3, 2, 1]) {
         if (phoneFull.length > len) {
-          final candidate = phoneFull.substring(0, len + 1); // e.g. "+880"
+          final candidate = phoneFull.substring(0, len + 1);
           if (dialToIso.containsKey(candidate)) {
             matchedCode = candidate;
             matchedIso = dialToIso[candidate];
@@ -222,12 +216,11 @@ class AdvertiserEditProfileController extends GetxController {
         countryIsoCode = matchedIso;
         phoneNumberOnly = phoneFull.substring(matchedCode.length);
       } else {
-        // Fallback: use regex for 1-4 digit code
         final reg = RegExp(r'^\+(\d{1,4})');
         final match = reg.firstMatch(phoneFull);
         if (match != null) {
           countryCode = '+${match.group(1)}';
-          countryIsoCode = "SG"; // fallback ISO
+          countryIsoCode = "SG";
           phoneNumberOnly = phoneFull.replaceFirst(countryCode, '');
         } else {
           countryCode = "+65";
@@ -243,11 +236,9 @@ class AdvertiserEditProfileController extends GetxController {
 
     fullPhoneNumber = phoneFull;
     phoneNumberController.text = phoneNumberOnly;
-
-    // ✅ Regenerate key so IntlPhoneField rebuilds with correct initialCountryCode
     phoneFieldKey = UniqueKey();
 
-    debugPrint(" Parsed → countryCode: $countryCode | isoCode: $countryIsoCode | number: $phoneNumberOnly");
+    debugPrint("Parsed → countryCode: $countryCode | isoCode: $countryIsoCode | number: $phoneNumberOnly");
   }
 
   // ================= SAVE TO LOCAL STORAGE =================
@@ -271,9 +262,9 @@ class AdvertiserEditProfileController extends GetxController {
         LocalStorage.setString(LocalStorageKeys.businessLogo, LocalStorage.businessLogo),
       ]);
 
-      print("✅ Data saved to local storage");
+      debugPrint("✅ Data saved to local storage");
     } catch (e) {
-      print("❌ Error saving to local storage: $e");
+      debugPrint("❌ Error saving to local storage: $e");
     }
   }
 
@@ -282,7 +273,6 @@ class AdvertiserEditProfileController extends GetxController {
     businessLicenceController.text = LocalStorage.businessLicenceNumber;
     businessTypeController.text = LocalStorage.businessType;
     bioController.text = LocalStorage.advertiserBio;
-
 
     _parseAndSetPhone(LocalStorage.phone);
 
@@ -410,7 +400,7 @@ class AdvertiserEditProfileController extends GetxController {
     update();
 
     try {
-      debugPrint(" Updating advertiser profile...");
+      debugPrint("Updating advertiser profile...");
 
       final String phoneToSend = fullPhoneNumber.isNotEmpty
           ? fullPhoneNumber
@@ -421,7 +411,7 @@ class AdvertiserEditProfileController extends GetxController {
         "businessType": businessTypeController.text.trim(),
         "licenseNumber": businessLicenceController.text.trim(),
         "phone": phoneToSend,
-        "bio": bioController.text.trim().isEmpty ? " " : bioController.text.trim(),
+        "bio": bioController.text.trim().isEmpty ? "  " : bioController.text.trim(),
       };
 
       debugPrint("📦 Update Body: $body");
@@ -451,17 +441,17 @@ class AdvertiserEditProfileController extends GetxController {
           response.data['message'] ?? "Profile Updated Successfully",
         );
 
-        print("✅ Profile updated successfully");
+        debugPrint(" Profile updated successfully");
 
         Get.to(const DashBoardProfile());
       } else {
         Utils.errorSnackBar(
-         "Error",
+          "Error",
           response.data['message'] ?? "Failed to update profile",
         );
       }
     } catch (e) {
-      print("❌ Update Profile Error: $e");
+      debugPrint("❌ Update Profile Error: $e");
       Utils.errorSnackBar("Error", "Failed to update profile: $e");
     } finally {
       isLoading = false;
