@@ -62,9 +62,7 @@ class PendingRequestController extends GetxController {
     if (isLoading.value) return;
     try {
       isLoading.value = true;
-
-      final url =
-          "${ApiEndPoint.getPendingRequest}$chatId?page=$page&limit=$limit";
+      final url = "${ApiEndPoint.getPendingRequest}$chatId?page=$page&limit=$limit";
       final response = await ApiService.get(url);
 
       if (response.statusCode == 200) {
@@ -74,7 +72,6 @@ class PendingRequestController extends GetxController {
         pendingRequests.value =
             data.map((e) => PendingRequest.fromJson(e)).toList();
 
-        // যদি এক page-এ data না থাকে
         if (page >= totalPage) hasNoMoreData.value = true;
       }
     } catch (e) {
@@ -110,6 +107,7 @@ class PendingRequestController extends GetxController {
       isLoadingMore.value = false;
     }
   }
+
 
   Future<void> updateRequestStatus(PendingRequest request, String status) async {
     try {

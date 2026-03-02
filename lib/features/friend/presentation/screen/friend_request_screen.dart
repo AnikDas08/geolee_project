@@ -4,13 +4,12 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:giolee78/component/button/common_button.dart';
 import 'package:giolee78/config/api/api_end_point.dart';
-import '../../../../utils/constants/app_images.dart';
 import '../controller/my_friend_controller.dart';
 
 class FriendRequestScreen extends StatelessWidget {
   FriendRequestScreen({super.key});
 
-  final controller = Get.put(MyFriendController());
+  final controller = Get.find<MyFriendController>();
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +20,6 @@ class FriendRequestScreen extends StatelessWidget {
           return const Center(child: CircularProgressIndicator());
         }
 
-        // ✅ Filter only pending requests
         final pendingRequests = controller.requests
             .where((r) => r.status == "pending")
             .toList();

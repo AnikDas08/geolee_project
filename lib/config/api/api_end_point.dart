@@ -69,15 +69,12 @@ class ApiEndPoint {
   static const String removeMember = "$baseUrl/chats/remove-member/";
   static const String nearbyChat = "$baseUrl/users/";
   static const String getSingleChatById = "$baseUrl/chats/single";
-
   static const String createAds = "$baseUrl/advertisements/create";
   static const String createJoinRequest = "$baseUrl/join-requests/create";
   static const String getAdvertisementMe = "$baseUrl/advertisements/me";
   static const String getAdvertisementById = "$baseUrl/advertisements/single/";
-  static const String updateAdvertisementById =
-      "$baseUrl/advertisements/update/";
-  static const String deleteAdvertisementById =
-      "$baseUrl/advertisements/delete/";
+  static const String updateAdvertisementById = "$baseUrl/advertisements/update/";
+  static const String deleteAdvertisementById = "$baseUrl/advertisements/delete/";
 
   // Plan===============================================
   static const String getPlans = "$baseUrl/plans";

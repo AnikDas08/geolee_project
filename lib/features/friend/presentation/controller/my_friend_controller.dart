@@ -6,8 +6,6 @@ import 'package:giolee78/features/friend/data/friend_request_model.dart';
 import 'package:giolee78/features/friend/data/suggested_friend_model.dart';
 import 'package:giolee78/services/api/api_service.dart';
 import 'package:giolee78/services/repo/get_my_all_friend_repo.dart';
-import 'package:giolee78/utils/constants/app_images.dart';
-
 import '../../../../config/route/app_routes.dart';
 import '../../../../services/api/api_response_model.dart';
 import '../../../../services/storage/storage_services.dart';
@@ -218,6 +216,7 @@ class MyFriendController extends GetxController {
 
       if (response.statusCode == 200) {
         requests.removeAt(index);
+        requests.refresh();
         Get.snackbar(
           "Success",
           "Friend request accepted",
@@ -247,6 +246,7 @@ class MyFriendController extends GetxController {
 
       if (response.statusCode == 200) {
         requests.removeAt(index);
+        requests.refresh();
         Get.snackbar("Rejected", "Friend request rejected");
       } else {
         debugPrint("rejectFriendRequest error => ${response.data}");
