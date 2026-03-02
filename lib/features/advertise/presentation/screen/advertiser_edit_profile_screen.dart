@@ -19,14 +19,9 @@ class AdvertiserEditProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
-    if (Get.isRegistered<AdvertiserEditProfileController>()) {
-      Get.delete<AdvertiserEditProfileController>();
-    }
-
     return GetBuilder<AdvertiserEditProfileController>(
-      init: AdvertiserEditProfileController(),
-      builder: (controller) {
+        init: AdvertiserEditProfileController(),
+        builder: (controller){
         return Scaffold(
           backgroundColor: AppColors.background,
           appBar: AppBar(
@@ -52,13 +47,12 @@ class AdvertiserEditProfileScreen extends StatelessWidget {
 
                       32.height,
 
+
                       Align(
                         alignment: Alignment.centerLeft,
-                        child: _buildLabel('Business Name'),
+                        child: _buildLabel('Business Name *'),
                       ),
-
                       6.height,
-
                       CommonTextField(
                         controller: controller.businessNameController,
                         validator: OtherHelper.validator,
@@ -73,12 +67,10 @@ class AdvertiserEditProfileScreen extends StatelessWidget {
                         alignment: Alignment.centerLeft,
                         child: _buildLabel('Bio'),
                       ),
-
                       6.height,
-
                       CommonTextField(
                         controller: controller.bioController,
-                        validator: OtherHelper.validator,
+                        validator: null,
                         maxLines: 4,
                         hintText:
                         'Skilled professionals offering reliable, on-demand services...',
@@ -88,13 +80,12 @@ class AdvertiserEditProfileScreen extends StatelessWidget {
 
                       10.height,
 
+
                       Align(
                         alignment: Alignment.centerLeft,
                         child: _buildLabel('Phone Number'),
                       ),
-
                       6.height,
-
                       IntlPhoneField(
                         key: controller.phoneFieldKey,
                         controller: controller.phoneNumberController,
@@ -116,15 +107,16 @@ class AdvertiserEditProfileScreen extends StatelessWidget {
                           FilteringTextInputFormatter.digitsOnly,
                           LengthLimitingTextInputFormatter(15),
                         ],
+
                         validator: (phone) {
                           if (phone == null || phone.number.trim().isEmpty) {
                             return "Phone number is required";
                           }
-                          final length = phone.number.length;
-                          if (length < 6) {
-                            return "Minimum 6 digits required";
+                          final completeLength = phone.completeNumber.length;
+                          if (completeLength < 10) {
+                            return "Please enter a valid phone number";
                           }
-                          if (length > 15) {
+                          if (phone.number.length > 15) {
                             return "Maximum 15 digits allowed";
                           }
                           return null;
@@ -148,12 +140,10 @@ class AdvertiserEditProfileScreen extends StatelessWidget {
                         alignment: Alignment.centerLeft,
                         child: _buildLabel('Business Licence Number'),
                       ),
-
                       6.height,
-
                       CommonTextField(
                         controller: controller.businessLicenceController,
-                        validator: OtherHelper.validator,
+                        validator: null,
                         hintText: 'Enter Your Business Licence Number EUN',
                         hintTextColor: AppColors.secondaryText,
                         textColor: AppColors.black,
@@ -161,16 +151,15 @@ class AdvertiserEditProfileScreen extends StatelessWidget {
 
                       10.height,
 
+
                       Align(
                         alignment: Alignment.centerLeft,
                         child: _buildLabel('Business Type'),
                       ),
-
                       6.height,
-
                       CommonTextField(
                         controller: controller.businessTypeController,
-                        validator: OtherHelper.validator,
+                        validator: null,
                         hintText: 'Restaurant',
                         hintTextColor: AppColors.secondaryText,
                         textColor: AppColors.black,
@@ -264,7 +253,7 @@ class AdvertiserEditProfileScreen extends StatelessWidget {
   }
 
   Widget _buildNetworkOrDefaultImage() {
-    if (LocalStorage.myImage.isNotEmpty) {
+    if (LocalStorage.businessLogo.isNotEmpty) {
       return CommonImage(
         imageSrc: ApiEndPoint.imageUrl + LocalStorage.businessLogo,
         width: 100.w,
@@ -273,7 +262,7 @@ class AdvertiserEditProfileScreen extends StatelessWidget {
       );
     }
     return CommonImage(
-      imageSrc: "assets/images/profile_image.png",
+      imageSrc: "assets/images/profilePlaceholder.jpg",
       width: 100.w,
       height: 100.h,
       fill: BoxFit.cover,

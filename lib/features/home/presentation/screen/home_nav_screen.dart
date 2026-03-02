@@ -29,7 +29,7 @@ class _HomeNavState extends State<HomeNav> {
 
   final List<Widget> userScreens = [
     const HomeScreen(),
-    AddPostScreen(),
+         AddPostScreen(),
     const ChatListScreen(),
   ];
 
@@ -59,7 +59,6 @@ class _HomeNavState extends State<HomeNav> {
 
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
 
-      // ✅ FAB with guest restriction
       floatingActionButton: Obx(() {
         if (!controller.showNavBar.value) return const SizedBox.shrink();
 
@@ -85,7 +84,6 @@ class _HomeNavState extends State<HomeNav> {
         );
       }),
 
-      // ✅ Bottom Nav with guest restriction
       bottomNavigationBar: Obx(() {
         if (!controller.showNavBar.value) return const SizedBox.shrink();
 
@@ -110,7 +108,7 @@ class _HomeNavState extends State<HomeNav> {
 
                 _buildNavItem(
                   index: 2,
-                  iconPath: AppIcons.chatIcon,
+                  iconPath: isUser? AppIcons.chatIcon:AppIcons.dashBoard,
                   label: isUser ? 'Message' : 'Dashboard',
                 ),
               ],

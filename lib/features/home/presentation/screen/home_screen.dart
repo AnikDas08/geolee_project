@@ -69,7 +69,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           ? Get.find<HomeController>().currentLongitude.value
           : LocalStorage.long,
     ),
-    zoom: 14.4746,
+    zoom: 10.4746,
   );
 
   @override

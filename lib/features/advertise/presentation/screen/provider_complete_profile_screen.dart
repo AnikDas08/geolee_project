@@ -215,7 +215,7 @@ class _ServiceProviderInfoScreenState extends State<ServiceProviderInfoScreen> {
                     const SizedBox(height: 20),
 
                     const Text(
-                      'Business License Number (UEN)',
+                      'Company Registration Number (UEN) ',
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,

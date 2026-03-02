@@ -14,8 +14,6 @@ import '../../../profile/presentation/screen/dashboard_profile.dart';
 class AdvertiserEditProfileController extends GetxController {
   // ================= VARIABLES =================
   List<String> languages = ["English", "French", "Arabic"];
-  late GlobalKey<FormState> formKey;
-
   String selectedLanguage = "English";
   File? selectedImage;
   bool isLoading = false;
@@ -40,10 +38,13 @@ class AdvertiserEditProfileController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    formKey = GlobalKey<FormState>(); // ✅ Fresh key every time controller is created
     _initializeControllers();
     fetchAdvertiserProfile();
   }
+
+  // ✅ formKey কে getter বানান যাতে প্রতিবার নতুন key না হয়
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  GlobalKey<FormState> get formKey => _formKey;
 
   // ================= INITIALIZE CONTROLLERS =================
   void _initializeControllers() {
@@ -238,7 +239,8 @@ class AdvertiserEditProfileController extends GetxController {
     phoneNumberController.text = phoneNumberOnly;
     phoneFieldKey = UniqueKey();
 
-    debugPrint("Parsed → countryCode: $countryCode | isoCode: $countryIsoCode | number: $phoneNumberOnly");
+    debugPrint(
+        "Parsed → countryCode: $countryCode | isoCode: $countryIsoCode | number: $phoneNumberOnly");
   }
 
   // ================= SAVE TO LOCAL STORAGE =================
@@ -247,19 +249,25 @@ class AdvertiserEditProfileController extends GetxController {
       LocalStorage.userId = advertiserData["_id"] ?? LocalStorage.userId;
       LocalStorage.businessName = advertiserData["businessName"] ?? '';
       LocalStorage.businessType = advertiserData["businessType"] ?? '';
-      LocalStorage.businessLicenceNumber = advertiserData["licenseNumber"] ?? '';
+      LocalStorage.businessLicenceNumber =
+          advertiserData["licenseNumber"] ?? '';
       LocalStorage.phone = advertiserData["phone"] ?? '';
       LocalStorage.advertiserBio = advertiserData["bio"] ?? '';
       LocalStorage.businessLogo = advertiserData["logo"] ?? '';
 
       await Future.wait([
         LocalStorage.setString(LocalStorageKeys.userId, LocalStorage.userId),
-        LocalStorage.setString(LocalStorageKeys.businessName, LocalStorage.businessName),
-        LocalStorage.setString(LocalStorageKeys.businessType, LocalStorage.businessType),
-        LocalStorage.setString(LocalStorageKeys.businessLicenceNumber, LocalStorage.businessLicenceNumber),
+        LocalStorage.setString(
+            LocalStorageKeys.businessName, LocalStorage.businessName),
+        LocalStorage.setString(
+            LocalStorageKeys.businessType, LocalStorage.businessType),
+        LocalStorage.setString(LocalStorageKeys.businessLicenceNumber,
+            LocalStorage.businessLicenceNumber),
         LocalStorage.setString(LocalStorageKeys.phone, LocalStorage.phone),
-        LocalStorage.setString(LocalStorageKeys.advertiserBio, LocalStorage.advertiserBio),
-        LocalStorage.setString(LocalStorageKeys.businessLogo, LocalStorage.businessLogo),
+        LocalStorage.setString(
+            LocalStorageKeys.advertiserBio, LocalStorage.advertiserBio),
+        LocalStorage.setString(
+            LocalStorageKeys.businessLogo, LocalStorage.businessLogo),
       ]);
 
       debugPrint("✅ Data saved to local storage");
@@ -348,7 +356,8 @@ class AdvertiserEditProfileController extends GetxController {
           duration: const Duration(seconds: 4),
           mainButton: TextButton(
             onPressed: () => openAppSettings(),
-            child: const Text('Open Settings', style: TextStyle(color: Colors.white)),
+            child: const Text('Open Settings',
+                style: TextStyle(color: Colors.white)),
           ),
         );
         return;
@@ -393,7 +402,9 @@ class AdvertiserEditProfileController extends GetxController {
 
   // ================= EDIT PROFILE API =================
   Future<void> editProfileRepo() async {
+    // ✅ businessName + phone validate
     if (!formKey.currentState!.validate()) return;
+
     if (!LocalStorage.isLogIn) return;
 
     isLoading = true;
@@ -408,10 +419,13 @@ class AdvertiserEditProfileController extends GetxController {
 
       final Map<String, String> body = {
         "businessName": businessNameController.text.trim(),
-        "businessType": businessTypeController.text.trim(),
-        "licenseNumber": businessLicenceController.text.trim(),
         "phone": phoneToSend,
-        "bio": bioController.text.trim().isEmpty ? "  " : bioController.text.trim(),
+        if (businessTypeController.text.trim().isNotEmpty)
+          "businessType": businessTypeController.text.trim(),
+        if (businessLicenceController.text.trim().isNotEmpty)
+          "licenseNumber": businessLicenceController.text.trim(),
+        if (bioController.text.trim().isNotEmpty)
+          "bio": bioController.text.trim(),
       };
 
       debugPrint("📦 Update Body: $body");
@@ -433,7 +447,8 @@ class AdvertiserEditProfileController extends GetxController {
 
         if (selectedImage?.path != null) {
           LocalStorage.myImage = selectedImage!.path;
-          await LocalStorage.setString(LocalStorageKeys.myImage, LocalStorage.myImage);
+          await LocalStorage.setString(
+              LocalStorageKeys.myImage, LocalStorage.myImage);
         }
 
         Utils.successSnackBar(
@@ -441,7 +456,7 @@ class AdvertiserEditProfileController extends GetxController {
           response.data['message'] ?? "Profile Updated Successfully",
         );
 
-        debugPrint(" Profile updated successfully");
+        debugPrint("✅ Profile updated successfully");
 
         Get.to(const DashBoardProfile());
       } else {

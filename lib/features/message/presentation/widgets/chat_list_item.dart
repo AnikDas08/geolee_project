@@ -10,7 +10,6 @@ import '../../../../../utils/constants/app_colors.dart';
 String _formatTime(DateTime dateTime) {
   final now = DateTime.now();
   final difference = now.difference(dateTime);
-
   if (difference.inDays > 7) {
     return '${dateTime.month}/${dateTime.day}/${dateTime.year}';
   } else if (difference.inDays >= 1) {
@@ -24,156 +23,133 @@ String _formatTime(DateTime dateTime) {
   }
 }
 
+String _formatDistance(double? km) {
+  if (km == null) return '';
+  if (km < 1) return '${(km * 1000).toStringAsFixed(0)} M';
+  return '${km.toStringAsFixed(1)} KM';
+}
+
 Widget chatListItem({
   required ChatModel item,
   bool isFriend = true,
-  VoidCallback? onJoinTap, // ✅
+  VoidCallback? onJoinTap,
 }) {
   final bool hasUnseenMessages = item.unreadCount > 0;
-  final Color backgroundColor = !isFriend ? Colors.white : hasUnseenMessages ? const Color(0xFFFFFFFF) : Colors.white;
-  final Color nameColor = !isFriend ? Colors.grey[500]! : Colors.black;
-  final Color messageColor = !isFriend
-      ? Colors.grey[400]!
-      : hasUnseenMessages
-      ? Colors.black87
-      : AppColors.secondaryText;
+  final String distanceText = _formatDistance(item.distanceInKm);
+  final bool showDistance = !item.isGroup && distanceText.isNotEmpty;
+
+  final Color bgColor = isFriend
+      ? item.isGroup?Colors.white: Color(0xFFFEF3E6)
+      : Colors.white;
 
   return Container(
-    padding: const EdgeInsets.all(8),
-    margin: const EdgeInsets.only(bottom: 12),
-    decoration: ShapeDecoration(
-      color: backgroundColor,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      shadows: const [
-        BoxShadow(color: Color(0x11000000), blurRadius: 2, offset: Offset(0, 2)),
-      ],
+    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+    margin: const EdgeInsets.only(bottom: 10),
+    decoration: BoxDecoration(
+      color: bgColor,
+      borderRadius: BorderRadius.circular(12),
+      border: Border.all(
+        color:item.isGroup?Colors.white:Color(0xFFFCD8B0)
+      ),
+
     ),
     child: Row(
       children: [
-        /// Avatar
-        Stack(
-          children: [
-            CircleAvatar(
-              radius: 35.sp,
-              child: ClipOval(
-                child: ColorFiltered(
-                  colorFilter: !isFriend
-                      ? const ColorFilter.matrix(<double>[
-                    0.2126, 0.7152, 0.0722, 0, 0,
-                    0.2126, 0.7152, 0.0722, 0, 0,
-                    0.2126, 0.7152, 0.0722, 0, 0,
-                    0, 0, 0, 1, 0,
-                  ])
-                      : const ColorFilter.mode(Colors.transparent, BlendMode.multiply),
-                  child: CommonImage(
-                    imageSrc: item.isGroup
-                        ? "${ApiEndPoint.imageUrl}${item.chatImage ?? ""}"
-                        : "${ApiEndPoint.imageUrl}${item.participant.image}",
-                    fill: BoxFit.fill,
-                    size: 70,
-                  ),
-                ),
-              ),
+        // ─── Avatar ─────────────────────────────────
+        CircleAvatar(
+          radius: 28.sp,
+          backgroundColor: Colors.grey[200],
+          child: ClipOval(
+            child: CommonImage(
+              imageSrc: item.isGroup
+                  ? "${ApiEndPoint.imageUrl}${item.chatImage ?? ""}"
+                  : "${ApiEndPoint.imageUrl}${item.participant.image}",
+              fill: BoxFit.cover,
+              size: 56,
             ),
-            if (item.isOnline && !item.isGroup && isFriend)
-              Positioned(
-                bottom: 6,
-                right: 2,
-                child: Container(
-                  width: 10,
-                  height: 10,
-                  decoration: const ShapeDecoration(
-                    color: Color(0xFF0FE16D),
-                    shape: OvalBorder(),
-                  ),
-                ),
-              ),
-          ],
+          ),
         ),
 
         12.width,
 
+        // ─── Name + Message ──────────────────────────
         Expanded(
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    CommonText(
-                      text: item.isGroup
-                          ? (item.chatName ?? "Unnamed Group")
-                          : item.participant.fullName,
-                      fontWeight: hasUnseenMessages && isFriend ? FontWeight.w700 : FontWeight.w600,
-                      fontSize: 18,
-                      color: nameColor,
-                    ),
-                    CommonText(
-                      text: item.latestMessage.text.isNotEmpty
-                          ? item.latestMessage.text
-                          : "Tap to view messages",
-                      fontWeight: hasUnseenMessages && isFriend ? FontWeight.w500 : FontWeight.w400,
-                      fontSize: 12,
-                      color: messageColor,
-                    ),
-                  ],
+              Text(
+                item.isGroup
+                    ? (item.chatName ?? "Unnamed Group")
+                    : item.participant.fullName,
+                style: TextStyle(
+                  fontSize: 15.sp,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black,
                 ),
               ),
-
-              12.width,
-
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  // ✅ Group + not participant → Join button
-                  if (item.isGroup && !item.amIAParticipant)
-                    GestureDetector(
-                      onTap: onJoinTap,
-                      child: Container(
-                        padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
-                        decoration: BoxDecoration(
-                          color: AppColors.primaryColor,
-                          borderRadius: BorderRadius.circular(6.r),
-                        ),
-                        child: Text(
-                          'Join',
-                          style: TextStyle(
-                            fontSize: 12.sp,
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    )
-                  else ...[
-                    if (!item.isGroup)
-                      CommonText(
-                        text: _formatTime(item.latestMessage.createdAt),
-                        fontSize: 12,
-                        color: hasUnseenMessages && isFriend
-                            ? const Color(0xFFE88D67)
-                            : AppColors.secondaryText,
-                      ),
-                    if (!isFriend)
-                      Container(
-                        margin: EdgeInsets.only(top: 4.h),
-                        padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
-                        decoration: BoxDecoration(
-                          color: Colors.grey[200],
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Text(
-                          "Not friend",
-                          style: TextStyle(fontSize: 10.sp, color: Colors.grey[500]),
-                        ),
-                      ),
-                  ],
-                ],
+              SizedBox(height: 3.h),
+              Text(
+                item.latestMessage.text.isNotEmpty
+                    ? item.latestMessage.text
+                    : "Tap to view messages",
+                style: TextStyle(
+                  fontSize: 12.sp,
+                  color: Colors.grey[600],
+                  fontWeight: FontWeight.w400,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
             ],
           ),
         ),
+
+        8.width,
+
+        if (item.isGroup && !item.amIAParticipant)
+          GestureDetector(
+            onTap: onJoinTap,
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
+              decoration: BoxDecoration(
+                color: AppColors.primaryColor,
+                borderRadius: BorderRadius.circular(6.r),
+              ),
+              child: Text(
+                'Join',
+                style: TextStyle(
+                  fontSize: 12.sp,
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          )
+        else
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+
+              if (showDistance && isFriend)
+                Text(
+                  'Distance: $distanceText',
+                  style: TextStyle(
+                    fontSize: 11.sp,
+                    color: const Color(0xFFF48201),
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              SizedBox(height: 3.h),
+
+              Text(
+                _formatTime(item.latestMessage.createdAt),
+                style: TextStyle(
+                  fontSize: 11.sp,
+                  color: Color(0xFF797C7B),
+                ),
+              ),
+            ],
+          ),
       ],
     ),
   );

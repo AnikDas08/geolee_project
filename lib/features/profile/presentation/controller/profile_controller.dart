@@ -187,23 +187,26 @@ class ProfileController extends GetxController {
     update();
 
     try {
-      final DateTime? dobDate = DateTime.tryParse(dateOfBirthController.text.trim());
-      if (dobDate == null) {
-        Utils.errorSnackBar("Error", "Invalid Date of Birth");
-        isLoading = false;
-        update();
-        return;
-      }
-
-      final String formattedDob = dobDate.toUtc().toIso8601String();
 
       final Map<String, String> body = {
         "name": nameController.text.trim(),
         "bio": aboutController.text.trim(),
-        "dob": formattedDob,
-        "gender": genderController.text.toLowerCase().trim(),
-
       };
+
+// gender optional
+      final gender = genderController.text.trim().toLowerCase();
+      if (gender.isNotEmpty) {
+        body["gender"] = gender;
+      }
+
+// dob optional
+      final dobText = dateOfBirthController.text.trim();
+      if (dobText.isNotEmpty) {
+        final DateTime? dobDate = DateTime.tryParse(dobText);
+        if (dobDate != null) {
+          body["dob"] = dobDate.toUtc().toIso8601String();
+        }
+      }
 
       final response = await ApiService.multipart(
         ApiEndPoint.updateProfile,

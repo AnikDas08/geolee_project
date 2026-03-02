@@ -1,8 +1,10 @@
+import 'package:flutter/material.dart';
 import 'package:giolee78/services/storage/storage_services.dart';
 import 'package:socket_io_client/socket_io_client.dart' as io;
 import '../../config/api/api_end_point.dart';
 import '../../features/notifications/data/model/notification_model.dart';
 import '../../features/notifications/presentation/controller/notifications_controller.dart';
+import '../../features/message/presentation/controller/message_controller.dart';
 import '../notification/notification_service.dart';
 import 'package:get/get.dart';
 
@@ -27,7 +29,7 @@ class SocketServices {
         : (namespace.startsWith("/") ? namespace : "/$namespace");
     final String fullUrl = "$baseUrl$namespacePath";
 
-    print(">>>>>>>>>>>> 🔌 Connecting to Namespace: '$namespace' via $fullUrl <<<<<<<<<<<<");
+    debugPrint(">>>>>>>>>>>> 🔌 Connecting to Namespace: '$namespace' via $fullUrl <<<<<<<<<<<<");
 
     _sockets[namespace]?.dispose();
 
@@ -44,52 +46,114 @@ class SocketServices {
     );
 
     socket.on('connect', (data) {
-      print(">>>>>>>>>>>> 🌐 Socket Connected [$namespace]: ID=${socket.id} <<<<<<<<<<<<");
+      debugPrint(">>>>>>>>>>>> 🌐 Socket Connected [$namespace]: ID=${socket.id} <<<<<<<<<<<<");
     });
 
     socket.on('connect_error', (data) {
-      print(">>>>>>>>>>>> ❌ Socket Connection Error [$namespace]: $data <<<<<<<<<<<<");
+      debugPrint(">>>>>>>>>>>>  Socket Connection Error [$namespace]: $data <<<<<<<<<<<<");
     });
 
     socket.on('error', (data) {
-      print(">>>>>>>>>>>> ⚠️ Socket Error [$namespace]: $data <<<<<<<<<<<<");
+      debugPrint(">>>>>>>>>>>> ⚠ Socket Error [$namespace]: $data <<<<<<<<<<<<");
     });
 
     socket.on('disconnect', (data) {
-      print(">>>>>>>>>>>> 🔌 Socket Disconnected [$namespace]: $data <<<<<<<<<<<<");
+      debugPrint(">>>>>>>>>>>> 🔌 Socket Disconnected [$namespace]: $data <<<<<<<<<<<<");
     });
 
-
     socket.on("notification:new", (data) {
-      print(">>>>>>>>>>>> 🔔 New Notification via socket [$namespace]: $data <<<<<<<<<<<<");
+      debugPrint(">>>>>>>>>>>> 🔔 New Notification via socket [$namespace]: $data <<<<<<<<<<<<");
       NotificationService.showNotification(data);
-      _handleNewNotification(data); // 👈 Added
+      _handleNewNotification(data);
     });
 
     socket.on("message:new", (data) {
-      print(">>>>>>>>>>>> 📩 New Message via socket [$namespace]: $data <<<<<<<<<<<<");
+      debugPrint(">>>>>>>>>>>> 📩 New Message via socket [$namespace]: $data <<<<<<<<<<<<");
+      print(">>>>>>>>>>>> 📩 RAW MESSAGE DATA: $data <<<<<<<<<<<<");
+      _handleNewMessageNotification(data);
     });
 
     socket.on("chat:update", (data) {
-      print(">>>>>>>>>>>> 🔄 Chat Update via socket [$namespace] <<<<<<<<<<<<");
+      debugPrint(">>>>>>>>>>>> 🔄 Chat Update via socket [$namespace] <<<<<<<<<<<<");
     });
 
     _sockets[namespace] = socket;
     socket.connect();
   }
 
-  // ✅ CORRECT PLACE — inside the class, outside connectToNamespace
+  //Notification handle
   static void _handleNewNotification(dynamic data) {
     try {
+      final NotificationsController controller =
+      Get.isRegistered<NotificationsController>()
+          ? Get.find<NotificationsController>()
+          : Get.put(NotificationsController());
+
+      final newNotification =
+      NotificationModel.fromJson(data as Map<String, dynamic>);
+      controller.notifications.insert(0, newNotification);
+      controller.unreadCount.value++;
+      controller.update();
+    } catch (e) {
+      debugPrint("Error handling notification: $e");
+    }
+  }
+
+
+  static void _handleNewMessageNotification(dynamic data) {
+    try {
+      final Map<String, dynamic> messageData = data as Map<String, dynamic>;
+
+
+      final String incomingChatId = messageData['chat'] is String
+          ? messageData['chat']
+          : messageData['chat']?['_id'] ?? '';
+
+
+      final String senderId = messageData['sender'] is Map
+          ? messageData['sender']['_id'] ?? ''
+          : messageData['sender']?.toString() ?? '';
+
+
+      if (senderId == LocalStorage.userId) return;
+
+
+      String currentOpenChatId = '';
+      if (Get.isRegistered<MessageController>()) {
+        currentOpenChatId = Get.find<MessageController>().chatId;
+      }
+
+
+      if (currentOpenChatId == incomingChatId) return;
+
+      final String senderName = messageData['sender'] is Map
+          ? messageData['sender']['name'] ?? 'Someone'
+          : 'Someone';
+
+      final String type = messageData['type'] ?? 'text';
+      final String body = type == 'text'
+          ? (messageData['text'] ?? messageData['content'] ?? 'Sent a message')
+          : type == 'image'
+          ? '📷 Sent an image'
+          : type == 'document'
+          ? '📄 Sent a document'
+          : '📎 Sent a file';
+
+      NotificationService.showNotification({
+        'title': senderName,
+        'message': body,
+      });
+
+      // ✅ unread count বাড়াও
       if (Get.isRegistered<NotificationsController>()) {
         final controller = Get.find<NotificationsController>();
-        final newNotification = NotificationModel.fromJson(data as Map<String, dynamic>);
-        controller.notifications.insert(0, newNotification);
         controller.unreadCount.value++;
         controller.update();
       }
+
+      debugPrint("✅ Message notification shown from: $senderName");
     } catch (e) {
-      print("Error handling new notification in controller: $e");
+      debugPrint("❌ Error handling message notification: $e");
     }
   }
 
@@ -102,7 +166,7 @@ class SocketServices {
   }
 
   static void joinRoom(String chatId) {
-    print(">>>>>>>>>>>> 🚪 Joining Room: $chatId <<<<<<<<<<<<");
+    debugPrint(">>>>>>>>>>>> 🚪 Joining Room: $chatId <<<<<<<<<<<<");
     getSocket("/").emit("room:join", chatId);
     if (_sockets["messaging"]?.connected ?? false) {
       _sockets["messaging"]?.emit("room:join", chatId);
@@ -110,16 +174,18 @@ class SocketServices {
   }
 
   static void leaveRoom(String chatId) {
-    print(">>>>>>>>>>>> 🚪 Leaving Room: $chatId <<<<<<<<<<<<");
+    debugPrint(">>>>>>>>>>>> 🚪 Leaving Room: $chatId <<<<<<<<<<<<");
     getSocket("/").emit("room:leave", chatId);
     if (_sockets["messaging"]?.connected ?? false) {
       _sockets["messaging"]?.emit("room:leave", chatId);
     }
   }
 
-  static void on(String event, Function(dynamic data) handler, {String namespace = "/"}) {
+  static void on(String event, Function(dynamic data) handler,
+      {String namespace = "/"}) {
     if (namespace != "/" && _sockets[namespace]?.connected != true) {
-      print(">>>>>>>>>>>> ⚠️ Namespace $namespace not connected, listening on root for $event <<<<<<<<<<<<");
+      debugPrint(
+          ">>>>>>>>>>>> ⚠️ Namespace $namespace not connected, listening on root for $event <<<<<<<<<<<<");
       getSocket("/").on(event, handler);
     } else {
       getSocket(namespace).on(event, handler);
@@ -134,7 +200,9 @@ class SocketServices {
     }
   }
 
-  static void emitWithAck(String event, dynamic data, Function(dynamic data) handler, {String namespace = "/"}) {
+  static void emitWithAck(
+      String event, dynamic data, Function(dynamic data) handler,
+      {String namespace = "/"}) {
     if (namespace != "/" && _sockets[namespace]?.connected != true) {
       getSocket("/").emitWithAck(event, data, ack: handler);
     } else {

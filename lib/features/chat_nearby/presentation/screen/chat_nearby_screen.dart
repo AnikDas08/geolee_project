@@ -159,7 +159,7 @@ class _ChatNearbyAppBar extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               IconButton(
-                icon: const Icon(Icons.arrow_back_ios_new_rounded),
+                icon: const Icon(Icons.arrow_back),
                 onPressed: () => Navigator.pop(context),
               ),
               Expanded(
@@ -323,21 +323,13 @@ class _NearbyUserCard extends StatelessWidget {
                   ],
                 ),
               ),
-              // if (isFriend)
-              //   Container(
-              //     padding:
-              //     EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
-              //     decoration: BoxDecoration(
-              //       color: AppColors.primaryColor,
-              //       borderRadius: BorderRadius.circular(12),
-              //     ),
-              //     child: CommonText(
-              //       text: "Friend",
-              //       fontSize: 10.sp,
-              //       color: Colors.white,
-              //       fontWeight: FontWeight.w600,
-              //     ),
-              //   ),
+              if (!isFriend)
+                CommonText(
+                  text: "Not Friend",
+                  fontSize: 10.sp,
+                  color: Colors.black,
+                  fontWeight: FontWeight.w600,
+                ),
             ],
           ),
         ),

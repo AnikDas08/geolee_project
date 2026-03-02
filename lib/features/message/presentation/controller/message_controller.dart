@@ -112,8 +112,8 @@ class MessageController extends GetxController {
     if (chatId.isNotEmpty) {
       SocketServices.leaveRoom(chatId);
     }
-    messageController.dispose();
-    scrollController.dispose();
+    // messageController.dispose();
+    // scrollController.dispose();
     super.onClose();
   }
 

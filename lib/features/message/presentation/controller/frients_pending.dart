@@ -19,16 +19,16 @@ class PendingRequest {
   });
 
   factory PendingRequest.fromJson(Map<String, dynamic> json) {
+    final user = json['user'] as Map<String, dynamic>? ?? {};
     return PendingRequest(
       id: json['_id'] ?? '',
-      userId: json['user'] ?? '',
+      userId: user['_id'] ?? '',
       status: json['status'] ?? '',
-      userName: json['userName'] ?? 'Unknown',
-      userImage: json['userImage'] ?? '',
+      userName: user['name'] ?? 'Unknown',
+      userImage: user['image'] ?? '',
     );
   }
 }
-
 
 class PendingRequestController extends GetxController {
   final String chatId = Get.arguments ?? '';
@@ -39,8 +39,8 @@ class PendingRequestController extends GetxController {
 
   final RxList<PendingRequest> pendingRequests = <PendingRequest>[].obs;
 
-  int page = 1; // প্রথম page
-  int limit = 10; // API অনুযায়ী
+  int page = 1;
+  int limit = 10;
 
   final ScrollController scrollController = ScrollController();
 
@@ -62,25 +62,52 @@ class PendingRequestController extends GetxController {
     if (isLoading.value) return;
     try {
       isLoading.value = true;
-      final url = "${ApiEndPoint.getPendingRequest}$chatId?page=$page&limit=$limit";
+      final url =
+          "${ApiEndPoint.getPendingRequest}$chatId?page=$page&limit=$limit";
       final response = await ApiService.get(url);
 
-      if (response.statusCode == 200) {
-        final List data = response.data['data']['data'];
-        final totalPage = response.data['data']['pagination']['totalPage'] ?? 1;
+      debugPrint("📦 Status: ${response.statusCode}");
+      debugPrint("📦 Full data: ${response.data}");
 
-        pendingRequests.value =
-            data.map((e) => PendingRequest.fromJson(e)).toList();
+      if (response.statusCode == 200) {
+        final dataWrapper = response.data['data'];
+        debugPrint("📦 dataWrapper type: ${dataWrapper.runtimeType}");
+
+        List rawList = [];
+        int totalPage = 1;
+
+        if (dataWrapper is Map) {
+          rawList = dataWrapper['data'] ?? [];
+          totalPage = dataWrapper['pagination']?['totalPage'] ?? 1;
+        } else if (dataWrapper is List) {
+          rawList = dataWrapper;
+        }
+
+        debugPrint("📦 rawList length: ${rawList.length}");
+
+        final parsed = <PendingRequest>[];
+        for (int i = 0; i < rawList.length; i++) {
+          try {
+            final item = PendingRequest.fromJson(rawList[i]);
+            parsed.add(item);
+            debugPrint("✅ [$i] name: ${item.userName} | id: ${item.userId}");
+          } catch (e) {
+            debugPrint("❌ Parse error [$i]: $e");
+          }
+        }
+
+        pendingRequests.value = parsed;
+        debugPrint("✅ Total in list: ${pendingRequests.length}");
 
         if (page >= totalPage) hasNoMoreData.value = true;
       }
     } catch (e) {
+      debugPrint("❌ fetchPendingRequests error: $e");
       Get.snackbar("Error", "Failed to load pending requests");
     } finally {
       isLoading.value = false;
     }
   }
-
 
   Future<void> fetchMorePendingRequests() async {
     if (isLoadingMore.value || hasNoMoreData.value) return;
@@ -92,24 +119,35 @@ class PendingRequestController extends GetxController {
       final response = await ApiService.get(url);
 
       if (response.statusCode == 200) {
-        final List data = response.data['data']['data'];
-        final totalPage = response.data['data']['pagination']['totalPage'] ?? 1;
+        final dataWrapper = response.data['data'];
+        List rawList = [];
+        int totalPage = 1;
 
-        if (data.isNotEmpty) {
-          pendingRequests.addAll(data.map((e) => PendingRequest.fromJson(e)));
+        if (dataWrapper is Map) {
+          rawList = dataWrapper['data'] ?? [];
+          totalPage = dataWrapper['pagination']?['totalPage'] ?? 1;
+        } else if (dataWrapper is List) {
+          rawList = dataWrapper;
+        }
+
+        if (rawList.isNotEmpty) {
+          pendingRequests.addAll(
+            rawList.map((e) => PendingRequest.fromJson(e)),
+          );
         }
 
         if (page >= totalPage) hasNoMoreData.value = true;
       }
     } catch (e) {
+      debugPrint("❌ fetchMorePendingRequests error: $e");
       Get.snackbar("Error", "Failed to load more pending requests");
     } finally {
       isLoadingMore.value = false;
     }
   }
 
-
-  Future<void> updateRequestStatus(PendingRequest request, String status) async {
+  Future<void> updateRequestStatus(
+      PendingRequest request, String status) async {
     try {
       isLoading.value = true;
 
@@ -128,6 +166,7 @@ class PendingRequestController extends GetxController {
         );
       }
     } catch (e) {
+      debugPrint("❌ updateRequestStatus error: $e");
       Get.snackbar("Error", "Update failed");
     } finally {
       isLoading.value = false;

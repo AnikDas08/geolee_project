@@ -11,14 +11,16 @@ import 'package:giolee78/utils/extensions/extension.dart';
 
 import '../controller/provider_profile_view_controller.dart';
 
-
 class ProviderProfileViewScreen extends StatelessWidget {
   const ProviderProfileViewScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return GetBuilder<ProviderProfileViewController>(
-      init: ProviderProfileViewController(),
+      // ✅ নতুন instance তৈরি না করে আগের টা খুঁজে নিন
+      init: Get.isRegistered<ProviderProfileViewController>()
+          ? Get.find<ProviderProfileViewController>()
+          : Get.put(ProviderProfileViewController()),
       builder: (controller) {
         return Scaffold(
           backgroundColor: AppColors.background,
@@ -62,7 +64,7 @@ class ProviderProfileViewScreen extends StatelessWidget {
 
                     /// Name
                     CommonText(
-                      text:controller.businessName,
+                      text: controller.businessName,
                       fontSize: 18.sp,
                       fontWeight: FontWeight.w600,
                     ),
@@ -110,7 +112,8 @@ class ProviderProfileViewScreen extends StatelessWidget {
         ],
       ),
       child: ClipOval(
-        child: controller.userImage.isNotEmpty
+        // ✅ businessLogo দিয়ে check করুন, userImage নয়
+        child: controller.businessLogo.isNotEmpty
             ? CommonImage(
           imageSrc: ApiEndPoint.imageUrl + controller.businessLogo,
           width: 120.w,
@@ -127,12 +130,11 @@ class ProviderProfileViewScreen extends StatelessWidget {
     );
   }
 
-  /// About Section Widget - Fixed to show label and content separately
+  /// About Section Widget
   Widget _buildAboutSection(ProviderProfileViewController controller) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Label
         CommonText(
           text: 'Bio',
           fontSize: 16.sp,
@@ -140,7 +142,6 @@ class ProviderProfileViewScreen extends StatelessWidget {
           textAlign: TextAlign.start,
         ),
         8.height,
-        // Content (bio)
         CommonText(
           text: controller.advertiserBion,
           fontSize: 14.sp,
@@ -158,14 +159,10 @@ class ProviderProfileViewScreen extends StatelessWidget {
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8),
-
-        color: Colors.white
+        color: Colors.white,
       ),
       child: Column(
         children: [
-          // Uncomment if mobile is available in the API
-          // _buildDetailRow('Mobile', controller.mobile),
-          // 16.height,
           _buildDetailRow('E-mail', controller.userEmail),
           16.height,
           _buildDetailRow('Phone Number', controller.phone),
@@ -174,8 +171,8 @@ class ProviderProfileViewScreen extends StatelessWidget {
           16.height,
           _buildDetailRow('Business Type', controller.businessType),
           16.height,
-          _buildDetailRow('Address', controller.address,)
-            ],
+          _buildDetailRow('Address', controller.address),
+        ],
       ),
     );
   }

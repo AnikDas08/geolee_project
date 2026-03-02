@@ -169,7 +169,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
                 padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
                 child: Column(
                   children: [
-                    /// Search bar
+                    //Search bar===================================================================
                     TextField(
                       controller: controller.searchController,
                       onChanged: (value) => controller.searchChats(value),
@@ -220,7 +220,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
 
                     SizedBox(height: 12.h),
 
-                    /// Tab Views
+                    // Tab Views============================================================
                     Expanded(
                       child: TabBarView(
                         children: [

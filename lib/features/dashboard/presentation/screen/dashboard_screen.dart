@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:giolee78/config/api/api_end_point.dart';
 import 'package:giolee78/features/ads/presentation/screen/view_ads_screen.dart';
+import 'package:giolee78/features/notifications/presentation/controller/notifications_controller.dart';
 
 import '../../../../component/image/common_image.dart';
 import '../../../../component/text/common_text.dart';
@@ -23,20 +24,23 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
-  final ProviderProfileViewController _providerProfileViewController =
-      ProviderProfileViewController();
+  late final ProviderProfileViewController _providerProfileViewController;
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
+    if (Get.isRegistered<ProviderProfileViewController>()) {
+      _providerProfileViewController = Get.find<ProviderProfileViewController>();
+    } else {
+      _providerProfileViewController = Get.put(ProviderProfileViewController());
+    }
     _providerProfileViewController.getAdvertiserData();
   }
 
   @override
   Widget build(BuildContext context) {
     return GetBuilder<DashBoardScreenController>(
-      init: DashBoardScreenController(), // ✅ Initialize once
+      init: DashBoardScreenController(),
       builder: (controller) {
         return Scaffold(
           backgroundColor: AppColors.background,
@@ -58,8 +62,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     color: AppColors.textColorFirst,
                   ),
                   SizedBox(height: 16.h),
-
-                  // ✅ Show loading or content
                   controller.isLoading.value
                       ? const Center(child: CircularProgressIndicator())
                       : controller.activeAds.isEmpty
@@ -101,87 +103,120 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _buildHeader() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        GestureDetector(
-          onTap: () {
-            _providerProfileViewController.getAdvertiserData();
-            print(
-              "My Role Is :===========================${LocalStorage.role.toString()}",
-            );
-            Get.to(() => const DashBoardProfile());
-          },
-          child: Row(
-            children: [
-              Container(
-                height: 40.w,
-                width: 40.w,
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: AppColors.white,
-                ),
-                child: Center(
-                  child: CommonImage(
-                    imageSrc: "${ApiEndPoint.imageUrl+_providerProfileViewController.businessLogo}",
-                    borderRadius: 12.r,
-                    fill: BoxFit.cover,
-                  ),
-                ),
-              ),
-              SizedBox(width: 12.w),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+    return GetBuilder<ProviderProfileViewController>(
+      builder: (ctrl) {
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            // ✅ Profile section
+            GestureDetector(
+              onTap: () {
+                ctrl.getAdvertiserData();
+                Get.to(() => const DashBoardProfile());
+              },
+              child: Row(
                 children: [
-
-
-                  CommonText(
-                    text: _providerProfileViewController.businessName,
-                    textAlign: TextAlign.left,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textColorFirst,
-                  ),
-                  SizedBox(height: 4.h),
-                  Row(
-                    children: [
-                      SvgPicture.asset(
-                        AppIcons.location,
-                        height: 14.w,
-                        width: 14.w,
+                  Container(
+                    height: 40.w,
+                    width: 40.w,
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: AppColors.white,
+                    ),
+                    child: ClipOval(
+                      child: CommonImage(
+                        imageSrc: "${ApiEndPoint.imageUrl}${ctrl.businessLogo}",
+                        fill: BoxFit.cover,
                       ),
-                      SizedBox(width: 4.w),
-                      const CommonText(
-                        text: 'Thomridge Cir. Shiloh, Hawaii',
+                    ),
+                  ),
+                  SizedBox(width: 12.w),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      CommonText(
+                        text: ctrl.businessName,
                         textAlign: TextAlign.left,
-                        fontSize: 12,
-                        color: AppColors.secondaryText,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textColorFirst,
+                      ),
+                      SizedBox(height: 4.h),
+                      Row(
+                        children: [
+                          SvgPicture.asset(
+                            AppIcons.location,
+                            height: 14.w,
+                            width: 14.w,
+                          ),
+                          SizedBox(width: 4.w),
+                          const CommonText(
+                            text: 'Thomridge Cir. Shiloh, Hawaii',
+                            textAlign: TextAlign.left,
+                            fontSize: 12,
+                            color: AppColors.secondaryText,
+                          ),
+                        ],
                       ),
                     ],
                   ),
                 ],
               ),
-            ],
-          ),
-        ),
-        Container(
-          height: 34.w,
-          width: 34.w,
-          decoration: BoxDecoration(
-            color: AppColors.white,
-            borderRadius: BorderRadius.circular(12.r),
-          ),
-          child: InkWell(
-            onTap: (){
-              Get.toNamed(AppRoutes.notifications);
-            },
-            child: Icon(
-              Icons.notifications_none,
-              size: 20.w,
-              color: AppColors.textColorFirst,
             ),
-          ),
-        ),
-      ],
+
+            // ✅ Notification bell with badge
+            GetBuilder<NotificationsController>(
+              init: Get.isRegistered<NotificationsController>()
+                  ? Get.find<NotificationsController>()
+                  : Get.put(NotificationsController()),
+              builder: (notifController) {
+                return Obx(() {
+                  return GestureDetector(
+                    onTap: () => Get.toNamed(AppRoutes.notifications),
+                    child: Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        Container(
+                          height: 34.w,
+                          width: 34.w,
+                          decoration: BoxDecoration(
+                            color: AppColors.white,
+                            borderRadius: BorderRadius.circular(12.r),
+                          ),
+                          child: Icon(
+                            Icons.notifications_none,
+                            size: 20.w,
+                            color: AppColors.textColorFirst,
+                          ),
+                        ),
+                        // ✅ Badge
+                        if (notifController.unreadCount.value > 0)
+                          Positioned(
+                            right: -4,
+                            top: -4,
+                            child: Container(
+                              padding: const EdgeInsets.all(4),
+                              decoration: const BoxDecoration(
+                                color: Colors.red,
+                                shape: BoxShape.circle,
+                              ),
+                              child: Text(
+                                "${notifController.unreadCount.value}",
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 10,
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  );
+                });
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -200,7 +235,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         _StatsCard(title: 'Ads Reach', value: data.totalReachCount.toString()),
         _StatsCard(
           title: 'Engagement',
-          value: '${(data.engagementRate * 100).toStringAsFixed(1)}%', // ✅ Format as percentage
+          value: '${(data.engagementRate * 100).toStringAsFixed(1)}%',
         ),
         _StatsCard(title: 'Ads Click', value: data.totalClickCount.toString()),
       ],
@@ -282,7 +317,7 @@ class _StatsCard extends StatelessWidget {
     return Container(
       clipBehavior: Clip.antiAlias,
       decoration: ShapeDecoration(
-        color: Colors.white /* White-BG */,
+        color: Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         shadows: const [
           BoxShadow(
@@ -295,12 +330,11 @@ class _StatsCard extends StatelessWidget {
       padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
-
         children: [
           CommonText(
             text: title,
             textAlign: TextAlign.left,
-            fontSize: 12.sp,
+            fontSize: 12,
             fontWeight: FontWeight.w500,
             color: AppColors.secondaryText,
           ),
@@ -308,7 +342,7 @@ class _StatsCard extends StatelessWidget {
           CommonText(
             text: value,
             textAlign: TextAlign.left,
-            fontSize: 36.sp,
+            fontSize: 36,
             fontWeight: FontWeight.w700,
             color: AppColors.textColorFirst,
           ),

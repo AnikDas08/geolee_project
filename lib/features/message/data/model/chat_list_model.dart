@@ -14,6 +14,7 @@ class ChatModel {
   final int memberCount;
   final bool isFriend;
   final bool amIAParticipant;
+  final double? distanceInKm; // ✅ নতুন field
 
   ChatModel({
     required this.id,
@@ -31,6 +32,7 @@ class ChatModel {
     this.memberCount = 0,
     this.isFriend = true,
     this.amIAParticipant = true,
+    this.distanceInKm, // ✅
   });
 
   ChatModel copyWith({
@@ -49,6 +51,7 @@ class ChatModel {
     int? memberCount,
     bool? isFriend,
     bool? amIAParticipant,
+    double? distanceInKm, // ✅
   }) {
     return ChatModel(
       id: id ?? this.id,
@@ -66,6 +69,7 @@ class ChatModel {
       memberCount: memberCount ?? this.memberCount,
       isFriend: isFriend ?? this.isFriend,
       amIAParticipant: amIAParticipant ?? this.amIAParticipant,
+      distanceInKm: distanceInKm ?? this.distanceInKm, // ✅
     );
   }
 
@@ -115,6 +119,12 @@ class ChatModel {
 
     final bool amIAParticipant = json['amIAParticipant'] ?? true;
 
+    // ✅ distanceInKm parse করুন
+    final dynamic rawDist = json['distanceInKm'];
+    final double? distanceInKm = rawDist != null
+        ? double.tryParse(rawDist.toString())
+        : null;
+
     return ChatModel(
       id: json['_id']?.toString() ?? '',
       isGroup: isGroup,
@@ -133,6 +143,7 @@ class ChatModel {
       memberCount: allParticipants.length,
       isFriend: isFriend,
       amIAParticipant: amIAParticipant,
+      distanceInKm: distanceInKm, // ✅
     );
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:giolee78/services/storage/storage_services.dart';
 import 'package:giolee78/utils/log/app_log.dart';
 import '../../../services/api/api_service.dart';
 import '../../../config/api/api_end_point.dart';
@@ -27,15 +28,23 @@ Future<ChatRepositoryResponse> chatRepository(
     ) async {
   appLog("Fetching for Search: $value");
 
-  // Construct URL with searchTerm
-  String url = "${ApiEndPoint.chats}/my-chats?page=$page&isGroupChat=${isGroup ? "true" : "false"}";
+  String url =
+      "${ApiEndPoint.chats}/my-chats?page=$page&isGroupChat=${isGroup ? "true" : "false"}";
 
-  // Re-enabled searchTerm
   if (value.trim().isNotEmpty) {
     url += "&searchTerm=${Uri.encodeComponent(value.trim())}";
   }
 
-  print(">>>>>>>>>>>> 🌐 Fetching Chats: $url <<<<<<<<<<<<");
+  if (!isGroup) {
+    final double lat = LocalStorage.lat;
+    final double lng = LocalStorage.long;
+    if (lat != 0.0 && lng != 0.0) {
+      url += "&lat=$lat&lng=$lng";
+    }
+  }
+
+  debugPrint(">>>>>>>>>>>> 🌐 Fetching Chats: $url <<<<<<<<<<<<");
+  debugPrint("LAT: ${LocalStorage.lat}, LNG: ${LocalStorage.long}");
 
   final response = await ApiService.get(url);
 
@@ -53,7 +62,7 @@ Future<ChatRepositoryResponse> chatRepository(
       try {
         list.add(ChatModel.fromJson(json));
       } catch (e) {
-        print("❌ Parsing Error: $e");
+        debugPrint("❌ Parsing Error: $e");
       }
     }
 
@@ -66,7 +75,11 @@ Future<ChatRepositoryResponse> chatRepository(
     );
   } else {
     return ChatRepositoryResponse(
-      data: [], totalPage: 1, total: 0, currentPage: page, limit: 10,
+      data: [],
+      totalPage: 1,
+      total: 0,
+      currentPage: page,
+      limit: 10,
     );
   }
 }

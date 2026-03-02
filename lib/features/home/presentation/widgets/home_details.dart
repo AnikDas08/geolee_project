@@ -174,7 +174,6 @@ class _HomeDetailsState extends State<HomeDetails> {
               ),
             ),
 
-            /// 👉 RIGHT SIDE
             LocalStorage.token.isNotEmpty
                 ? Obx(
                   () => Stack(

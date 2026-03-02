@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:giolee78/component/text/common_text.dart';
+import '../../../../config/api/api_end_point.dart';
 import '../controller/frients_pending.dart';
 
 class GroupUserPendingRequestScreen extends StatelessWidget {
@@ -41,7 +42,7 @@ class GroupUserPendingRequestScreen extends StatelessWidget {
                     CircleAvatar(
                       radius: 24.r,
                       backgroundImage: request.userImage.isNotEmpty
-                          ? NetworkImage(request.userImage)
+                          ? NetworkImage(ApiEndPoint.imageUrl + request.userImage)
                           : null,
                       child: request.userImage.isEmpty
                           ? Icon(Icons.person, size: 24.r, color: Colors.grey)

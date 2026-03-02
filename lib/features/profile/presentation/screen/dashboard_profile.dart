@@ -31,6 +31,11 @@ class DashBoardProfile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ✅ Same instance use করুন
+    final providerCtrl = Get.isRegistered<ProviderProfileViewController>()
+        ? Get.find<ProviderProfileViewController>()
+        : Get.put(ProviderProfileViewController());
+
     return Scaffold(
       appBar: AppBar(),
       body: GetBuilder<ProfileController>(
@@ -40,14 +45,9 @@ class DashBoardProfile extends StatelessWidget {
               imageSrc: AppIcons.profile,
               title: 'My Profile',
               onTap: () {
-
-              final  advEditProfileController=Get.put(AdvertiserEditProfileController());
-
-              advEditProfileController.fetchAdvertiserProfile();
-
-                print("===============================${LocalStorage.myRole}");
-                print("===============================${LocalStorage.businessLicenceNumber}");
-
+                final advEditProfileController =
+                Get.put(AdvertiserEditProfileController());
+                advEditProfileController.fetchAdvertiserProfile();
                 Get.to(() => const ProviderProfileViewScreen());
               },
             ),
@@ -115,50 +115,56 @@ class DashBoardProfile extends StatelessWidget {
                 padding: EdgeInsets.symmetric(horizontal: 20.w),
                 child: Column(
                   children: [
-
-                    /// User Profile Image here
-
-
-                    Center(
-                      child: GetBuilder<ProviderProfileViewController>(
-                        builder: (controller) {
-                          return ClipOval(
-                            child: controller.userImage.isNotEmpty
-                                ? CommonImage(
-                              imageSrc: ApiEndPoint.imageUrl + controller.businessLogo,
-                              width: 120.w,
-                              height: 120.h,
-                              fill: BoxFit.cover,
-                            )
-                                : CommonImage(
-                              imageSrc: AppImages.profile,
-                              width: 120.w,
-                              height: 120.h,
-                              fill: BoxFit.cover,
+                    // ✅ পুরো profile section GetBuilder এ wrap করা
+                    GetBuilder<ProviderProfileViewController>(
+                      init: providerCtrl,
+                      builder: (ctrl) {
+                        return Column(
+                          children: [
+                            // ✅ Profile Image
+                            Center(
+                              child: ClipOval(
+                                child: ctrl.businessLogo.isNotEmpty
+                                    ? CommonImage(
+                                  imageSrc: ApiEndPoint.imageUrl +
+                                      ctrl.businessLogo,
+                                  width: 120.w,
+                                  height: 120.h,
+                                  fill: BoxFit.cover,
+                                )
+                                    : CommonImage(
+                                  imageSrc: AppImages.profile,
+                                  width: 120.w,
+                                  height: 120.h,
+                                  fill: BoxFit.cover,
+                                ),
+                              ),
                             ),
-                          );
-                        }
-                      ),
+
+                            // ✅ Business Name
+                            CommonText(
+                              text: ctrl.businessName,
+                              fontWeight: FontWeight.w600,
+                              top: 16,
+                              bottom: 8.h,
+                            ),
+
+                            // ✅ Bio
+                            CommonText(
+                              text: ctrl.advertiserBion,
+                              fontSize: 12,
+                              bottom: 20,
+                              maxLines: 2,
+                              left: 25,
+                              right: 25,
+                              color: AppColors.secondaryText,
+                            ),
+                          ],
+                        );
+                      },
                     ),
 
-                    /// User Name here
-                    CommonText(
-                      text: LocalStorage.businessName,
-                      fontWeight: FontWeight.w600,
-                      top: 16,
-                      bottom: 8.h,
-                    ),
-                    CommonText(
-                      text:
-                      LocalStorage.advertiserBio,
-                      fontSize: 12,
-                      bottom: 20,
-                      maxLines: 2,
-                      left: 25,
-                      right: 25,
-                      color: AppColors.secondaryText,
-                    ),
-                    if(LocalStorage.myRole==UserType.user.name)
+                    if (LocalStorage.myRole == UserType.user.name)
                       CommonButton(
                         titleText: 'Public',
                         buttonWidth: 80.w,
@@ -171,7 +177,7 @@ class DashBoardProfile extends StatelessWidget {
 
                     16.height,
 
-                    /// Edit Profile item here
+                    // ✅ Profile Menu Items
                     ListView.builder(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
@@ -185,50 +191,18 @@ class DashBoardProfile extends StatelessWidget {
                         );
                       },
                     ),
-                    SizedBox(height: 20.h,),
 
-                    /*if (LocalStorage.myRole != "advertiser")
-                      CommonButton(
-                        titleText: "Advertise with Us",
-                        onTap: (){
-
-
-                          if(controller.advToken.isEmpty){
-                            Get.toNamed(
-                                AppRoutes.serviceProviderInfo
-                            );
-                            print("My Role Is :===========================${LocalStorage.myRole.toString()}");
-                          }else{
-                            Get.toNamed(
-                                AppRoutes.homeNav
-                            );
-
-                          }
-
-
-                        },
-                      ),*/
+                    SizedBox(height: 20.h),
 
                     if (LocalStorage.role != "user")
                       CommonButton(
                         titleText: "Become a User",
                         onTap: () {
-                          print("My Role Is :===========================${LocalStorage.role.toString()}");
-
                           successPopUps(
-                            message:
-                            'Your Role now User.',
-                            onTap: () async{
-                              await LocalStorage.setString(LocalStorageKeys.role, "user");
-                              // LocalStorage.setString(
-                              //LocalStorageKeys.myRole, LocalStorage.myRole=UserType.user.name,
-                              //
-                              // );
-
-                              //LocalStorage.setRoles(LocalStorageKeys.myRole, LocalStorage.myRole='user');
-                              print("My Role Is :===========================${LocalStorage.role.toString()}");
-                              //appLog(LocalStorage.myRole.toString());
-
+                            message: 'Your Role now User.',
+                            onTap: () async {
+                              await LocalStorage.setString(
+                                  LocalStorageKeys.role, "user");
                               Get.offAllNamed(AppRoutes.homeNav);
                             },
                             buttonTitle: 'Go to HomeScreen',
