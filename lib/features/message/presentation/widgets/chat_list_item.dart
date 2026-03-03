@@ -130,7 +130,7 @@ Widget chatListItem({
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
 
-              if (showDistance && isFriend)
+              if (showDistance && !isFriend)
                 Text(
                   'Distance: $distanceText',
                   style: TextStyle(

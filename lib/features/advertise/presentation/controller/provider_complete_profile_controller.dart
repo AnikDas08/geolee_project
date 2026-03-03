@@ -10,8 +10,6 @@ import 'package:giolee78/services/storage/storage_services.dart';
 import '../../../../config/api/api_end_point.dart';
 import '../../../../services/storage/storage_keys.dart';
 import '../../../../utils/enum/enum.dart';
-import '../../../home/presentation/screen/home_nav_screen.dart';
-import '../screen/admin_approval_screen.dart';
 import '../screen/verify_user.dart';
 
 class ServiceProviderController extends GetxController {
@@ -22,11 +20,11 @@ class ServiceProviderController extends GetxController {
   var skills = <String>[].obs;
   var profileImagePath = ''.obs;
 
-  final formKey=GlobalKey<FormState>();
+  final formKey = GlobalKey<FormState>();
 
   // Timer & OTP
-  var start = 180.obs;
-  var time = "03:00".obs;
+  var start = 320.obs;
+  var time = "05:00".obs;
   var isResendEnabled = false.obs;
   Timer? _timer;
 
@@ -37,7 +35,6 @@ class ServiceProviderController extends GetxController {
   var isLoading = false.obs;
 
   // for number country code
-
 
   // Text controllers
   var businessNameController = TextEditingController();
@@ -57,6 +54,7 @@ class ServiceProviderController extends GetxController {
     experience.value = '5 Years';
     skills.value = ['Electrician', 'House', 'Wiring'];
   }
+
   //
   // @override
   // void onClose() {
@@ -85,8 +83,11 @@ class ServiceProviderController extends GetxController {
       skills.add(skillController.text.trim());
       skillController.clear();
     } else {
-      Get.snackbar('Duplicate Skill', 'This skill is already added',
-          snackPosition: SnackPosition.BOTTOM);
+      Get.snackbar(
+        'Duplicate Skill',
+        'This skill is already added',
+        snackPosition: SnackPosition.BOTTOM,
+      );
     }
   }
 
@@ -95,8 +96,6 @@ class ServiceProviderController extends GetxController {
   // ================= Advertiser Info =================
   Future<void> completeAdvertiserInfo() async {
     try {
-
-
       if (profileImagePath.value.isEmpty) {
         Get.snackbar('Validation Error', 'Please Select an Image');
         return;
@@ -121,7 +120,9 @@ class ServiceProviderController extends GetxController {
       }
       if (businessLicenseNumberController.text.isEmpty) {
         Get.snackbar(
-            'Validation Error', 'Please Enter your Business License Number');
+          'Validation Error',
+          'Please Enter your Business License Number',
+        );
         return;
       }
       if (businessTypeController.text.isEmpty) {
@@ -129,17 +130,15 @@ class ServiceProviderController extends GetxController {
         return;
       }
 
-
-      isLoading.value=true;
+      isLoading.value = true;
 
       final body = {
         "businessName": businessNameController.text.trim(),
         "bio": bioController.text.trim(),
-        "phone": phoneNumberController.text.trim(),
+        "phone": "$countryCode${phoneNumberController.text.trim()}",
         "licenseNumber": businessLicenseNumberController.text.trim(),
         "businessType": businessTypeController.text.trim(),
       };
-
 
       // API Call
       final response = await ApiService.multipart(
@@ -149,23 +148,21 @@ class ServiceProviderController extends GetxController {
       );
 
       if (response.statusCode == 200) {
-        isLoading.value = false ;
-
-
+        isLoading.value = false;
 
         await LocalStorage.setString(LocalStorageKeys.token, "");
 
-        await LocalStorage.setString(LocalStorageKeys.role,"advertise");
+        await LocalStorage.setString(LocalStorageKeys.role, "advertise");
         Get.offAll(ProviderVerifyUser());
 
         startTimer();
       } else {
-        isLoading.value=false;
+        isLoading.value = false;
         Get.snackbar("Error", response.message);
         debugPrint("Error: ${response.message}");
       }
     } catch (e) {
-      isLoading.value=false;
+      isLoading.value = false;
       debugPrint("Exception: ${e.toString()}");
     }
   }
@@ -198,7 +195,6 @@ class ServiceProviderController extends GetxController {
       final body = {"email": LocalStorage.myEmail.toString().trim()};
 
       final ApiResponseModel response = await ApiService.post(
-
         ApiEndPoint.resendOtp,
         body: body,
       );
@@ -219,13 +215,11 @@ class ServiceProviderController extends GetxController {
     try {
       final body = {
         "email": LocalStorage.myEmail.toString().trim(),
-        "oneTimeCode": int.parse(otpController.text.trim())
+        "oneTimeCode": int.parse(otpController.text.trim()),
       };
 
       final ApiResponseModel response = await ApiService.post(
-        header: {
-          'Content-Type': 'application/json',
-        },
+        header: {'Content-Type': 'application/json'},
         ApiEndPoint.advertiserVerify,
         body: body,
       );
@@ -233,21 +227,31 @@ class ServiceProviderController extends GetxController {
       if (response.statusCode == 200 || response.statusCode == 201) {
         Get.snackbar('Verify', "OTP Verify SuccessFull");
 
-        final data=response.data;
+        final data = response.data;
         await LocalStorage.setString(LocalStorageKeys.role, "advertise");
 
         LocalStorage.role = UserType.advertiser.name;
         LocalStorage.setString(LocalStorageKeys.role, LocalStorage.role);
 
-        await LocalStorage.setString(LocalStorage.token, data["data"]["accessToken"]);
-        LocalStorage.token=data["data"]["accessToken"];
+        await LocalStorage.setString(LocalStorageKeys.role, "advertise");
 
-        successPopUps(message: 'Verify Success', onTap: (){
-          Get.toNamed(AppRoutes.homeNav);
+        await LocalStorage.setString(
+          LocalStorage.token,
+          data["data"]["accessToken"],
+        );
+        LocalStorage.token = data["data"]["accessToken"];
 
-        }, buttonTitle: "Go To Dashboard");
 
 
+
+
+        successPopUps(
+          message: 'Verify Success',
+          onTap: () {
+            Get.toNamed(AppRoutes.homeNav);
+          },
+          buttonTitle: "Go To Dashboard",
+        );
       } else {
         Get.snackbar('Error', "OTP verification failed");
         debugPrint("Error: ${response.message}");

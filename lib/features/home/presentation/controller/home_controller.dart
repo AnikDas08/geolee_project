@@ -86,10 +86,14 @@ class HomeController extends GetxController {
         fetchPosts();
         myProfileController.getUserData();
       } else {
+
+        clickerCount.value = "All";
         allPosts = [];
         filteredPosts = [];
         isLoading = false;
+        await fetchPosts();
         update();
+
       }
     } catch (e) {
       debugPrint('Error in onInit: $e');
@@ -97,18 +101,12 @@ class HomeController extends GetxController {
     }
   }
 
-  // ─── Debounced map refresh ───
-
   void _scheduleMapRefresh() {
     _refreshDebounce?.cancel();
     _refreshDebounce = Timer(const Duration(milliseconds: 300), () {
       mapRefreshTrigger.value++;
     });
   }
-
-  // ─────────────────────────────────────────
-  //  Heatmap Gradient & Marker Color
-  // ─────────────────────────────────────────
 
   HeatmapGradient _getHeatmapGradient() {
     final clicker = clickerCount.value;
@@ -150,6 +148,7 @@ class HomeController extends GetxController {
     }
   }
 
+
   Color _getMarkerColor() {
     final clicker = clickerCount.value;
     if (clicker == "Great Vibes") return Colors.green;
@@ -158,10 +157,6 @@ class HomeController extends GetxController {
     if (clicker == "Lovely Lady") return Colors.pink;
     return Colors.red;
   }
-
-  //  Marker Icon — cached + disposed
-
-
   void clearMarkerCache() => _markerIconCache.clear();
 
   Future<BitmapDescriptor> _createCountMarkerIcon(
@@ -206,7 +201,7 @@ class HomeController extends GetxController {
       final ui.Image img =
       await recorder.endRecording().toImage(size.toInt(), size.toInt());
       final data = await img.toByteData(format: ui.ImageByteFormat.png);
-      img.dispose(); // ✅ memory free
+      img.dispose();
 
       final icon = BitmapDescriptor.fromBytes(data!.buffer.asUint8List());
       _markerIconCache[cacheKey] = icon;
@@ -216,10 +211,6 @@ class HomeController extends GetxController {
       return BitmapDescriptor.defaultMarker;
     }
   }
-
-  // ─────────────────────────────────────────
-  //  Heatmap Generator
-  // ─────────────────────────────────────────
 
   void _generateHeatmapFromPosts(List<Post> posts) {
     try {

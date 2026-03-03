@@ -80,7 +80,7 @@ class LocalStorage {
     final localStorage = await _getStorage();
     await localStorage.setString(key, value);
 
-    // Update memory variables immediately
+
     if (key == LocalStorageKeys.role) role = value;
     if (key == LocalStorageKeys.myRole) myRole = value;
     if (key == LocalStorageKeys.activeRole) activeRole = value;

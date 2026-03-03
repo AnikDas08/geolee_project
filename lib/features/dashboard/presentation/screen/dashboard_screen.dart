@@ -235,7 +235,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         _StatsCard(title: 'Ads Reach', value: data.totalReachCount.toString()),
         _StatsCard(
           title: 'Engagement',
-          value: '${(data.engagementRate * 100).toStringAsFixed(1)}%',
+          value: '${data.engagementRate.toStringAsFixed(2)}%',
         ),
         _StatsCard(title: 'Ads Click', value: data.totalClickCount.toString()),
       ],

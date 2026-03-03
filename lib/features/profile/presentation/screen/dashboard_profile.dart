@@ -31,7 +31,6 @@ class DashBoardProfile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // ✅ Same instance use করুন
     final providerCtrl = Get.isRegistered<ProviderProfileViewController>()
         ? Get.find<ProviderProfileViewController>()
         : Get.put(ProviderProfileViewController());
@@ -266,7 +265,6 @@ void _showLogoutDialog() {
   );
 }
 
-// Profile Item Model
 class ProfileItemData {
   final String imageSrc;
   final String title;

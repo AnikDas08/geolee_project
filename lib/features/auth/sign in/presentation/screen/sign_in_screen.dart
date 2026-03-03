@@ -1,7 +1,6 @@
-
-
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:giolee78/component/image/common_image.dart';
 import 'package:giolee78/utils/constants/app_images.dart';
 import '../../../../../../../config/route/app_routes.dart';
@@ -11,6 +10,7 @@ import 'package:get/get.dart';
 import '../../../../../component/button/common_button.dart';
 import '../../../../../component/text/common_text.dart';
 import '../../../../../component/text_field/common_text_field.dart';
+import '../../../../../services/storage/storage_services.dart';
 import '../controller/sign_in_controller.dart';
 
 import '../../../../../../../utils/constants/app_colors.dart';
@@ -27,10 +27,9 @@ class SignInScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         actions: [
-
           GestureDetector(
             onTap: () {
-              Get.offNamed(AppRoutes.homeNav);
+              onTapSkipButton();
             },
             child: Padding(
               padding: EdgeInsets.only(right: 20.w),
@@ -98,9 +97,7 @@ class SignInScreen extends StatelessWidget {
                   CommonButton(
                     titleText: AppString.login,
                     isLoading: controller.isLoading,
-                    onTap: () => {
-                      controller.signInUser(formKey)
-                    },
+                    onTap: () => {controller.signInUser(formKey)},
                   ),
                   30.height,
 
@@ -125,7 +122,7 @@ class SignInScreen extends StatelessWidget {
                             border: Border.all(color: Colors.grey, width: 2),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.grey.withOpacity(0.1),
+                                color: Colors.grey.withValues(alpha: 0.1),
                                 blurRadius: 8,
                                 spreadRadius: 2,
                                 offset: const Offset(0, 2),
@@ -167,7 +164,7 @@ class SignInScreen extends StatelessWidget {
                             border: Border.all(color: Colors.grey, width: 2),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.grey.withOpacity(0.1),
+                                color: Colors.grey.withValues(alpha: 0.1),
                                 blurRadius: 8,
                                 spreadRadius: 2,
                                 offset: const Offset(0, 2),
@@ -213,5 +210,131 @@ class SignInScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Future<void> onTapSkipButton() async {
+    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+
+    if (!serviceEnabled) {
+      _showLocationWarningDialog();
+      return;
+    }
+
+    LocationPermission permission = await Geolocator.checkPermission();
+
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+    }
+
+    if (permission == LocationPermission.deniedForever ||
+        permission == LocationPermission.denied) {
+      _showLocationWarningDialog();
+      return;
+    }
+
+    try {
+      Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+
+      // Save to LocalStorage
+      LocalStorage.lat = position.latitude;
+      LocalStorage.long = position.longitude;
+
+      // Navigate to next screen
+      _navigateToHome();
+    } catch (e) {
+      _showLocationWarningDialog();
+    }
+  }
+
+  void _showLocationWarningDialog() {
+    Get.dialog(
+      Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              /// Icon
+              Container(
+                padding: const EdgeInsets.all(15),
+                decoration: BoxDecoration(
+                  color: Colors.orange.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.location_on,
+                  color: Colors.orange,
+                  size: 40,
+                ),
+              ),
+
+              const SizedBox(height: 20),
+
+              /// Title
+              const Text(
+                "Location Permission Required",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center,
+              ),
+
+              const SizedBox(height: 10),
+
+              /// Message
+              const Text(
+                "You are logging in as Guest Mode. Without enabling Location Permission, the map may not function properly.",
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 14, color: Colors.black54),
+              ),
+
+              const SizedBox(height: 25),
+
+              /// Buttons
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () {
+                        Get.back();
+                        _navigateToHome();
+                      },
+                      style: OutlinedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: const Text("Skip"),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Get.back();
+                        Geolocator.openLocationSettings();
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primaryColor2,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: const Text("Allow",
+                        style: TextStyle(color: Colors.white),),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _navigateToHome() {
+    Get.offNamed(AppRoutes.homeNav);
   }
 }

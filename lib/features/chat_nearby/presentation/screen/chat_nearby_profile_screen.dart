@@ -254,10 +254,10 @@ class _ProfileHeader extends StatelessWidget {
             child: imageUrl.isNotEmpty
                 ? CommonImage(
               imageSrc: ApiEndPoint.imageUrl + imageUrl,
-              defaultImage: AppImages.profileImage,
+              defaultImage: AppImages.placeHolderImage,
             )
                 : Image.asset(
-              AppImages.profileImage,
+              AppImages.placeHolderImage,
               fit: BoxFit.cover,
             ),
           ),

@@ -225,7 +225,7 @@ class _ServiceProviderInfoScreenState extends State<ServiceProviderInfoScreen> {
                     const SizedBox(height: 8),
                     CommonTextField(
                       controller: controller.businessLicenseNumberController,
-                      hintText: 'Business License Number',
+                      hintText: 'Company Registration Number (UEN)',
                       validator: OtherHelper.validator,
                     ),
                     const SizedBox(height: 20),

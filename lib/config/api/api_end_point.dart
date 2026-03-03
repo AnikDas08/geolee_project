@@ -83,8 +83,7 @@ class ApiEndPoint {
   static const String advertiserCompleteProfile = "$baseUrl/advertisers/create";
   static const String advertiserVerify = "$baseUrl/advertisers/verify";
   static const String resendOtp = "$baseUrl/auth/request-otp";
-  static const String advertisementsOverviewMe =
-      "$baseUrl/advertisements/overview/me";
+  static const String advertisementsOverviewMe ="$baseUrl/advertisements/overview/me";
   static const String getsMyAdsByStatus = "$baseUrl/advertisements/me";
   static const String advertiserUpdate = "$baseUrl/advertisers/update/me";
 

@@ -12,6 +12,7 @@ import 'package:giolee78/utils/constants/app_colors.dart';
 import 'package:giolee78/utils/constants/app_icons.dart';
 import '../../../../config/api/api_end_point.dart';
 import '../../../../config/route/app_routes.dart';
+import '../../../../utils/helpers/other_helper.dart';
 
 class EditAdsScreen extends StatelessWidget {
   EditAdsScreen({super.key});
@@ -99,8 +100,9 @@ class EditAdsScreen extends StatelessWidget {
 
                     _label('Website Link'),
                     CommonTextField(
+                      validator: OtherHelper.urlValidator,
                       controller: controller.websiteLinkController,
-                      hintText: 'www.website.com',
+                      hintText: ' e.g https//:www.website.com',
                     ),
                     SizedBox(height: 20.h),
 

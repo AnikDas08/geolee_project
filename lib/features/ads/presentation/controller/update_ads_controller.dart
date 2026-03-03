@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:giolee78/services/storage/storage_services.dart';
 import 'package:image_picker/image_picker.dart';
 
 import 'package:giolee78/config/api/api_end_point.dart';
@@ -83,45 +84,45 @@ class UpdateAdsController extends GetxController {
           }
         }
 
-        print("📅 Date String: $dateString");
+        debugPrint("📅 Date String: $dateString");
 
         final parsedDate = _safeParseDate(dateString)?.toLocal();
-        print("📅 Parsed Date: $parsedDate");
+        debugPrint("📅 Parsed Date: $parsedDate");
 
         if (parsedDate != null) {
           adStartDateController.text =
           "${parsedDate.day.toString().padLeft(2, '0')} "
               "${_month(parsedDate.month)} "
               "${parsedDate.year}";
-          print("📅 Formatted Date: ${adStartDateController.text}");
+          debugPrint("📅 Formatted Date: ${adStartDateController.text}");
         } else {
-          print("❌ Date parsing failed!");
+          debugPrint("❌ Date parsing failed!");
         }
 
         // Handle image
-        print("🖼️ Raw image: ${ad?.image}");
+        debugPrint("🖼️ Raw image: ${ad?.image}");
 
         if (ad?.image != null && ad!.image.isNotEmpty) {
           // Store only the image path/filename, not the full URL
           coverImagePath.value = ad!.image;
-          print("🖼️ Image Path: ${coverImagePath.value}");
+          debugPrint("🖼️ Image Path: ${coverImagePath.value}");
         } else {
-          print("❌ No image found!");
+          debugPrint("❌ No image found!");
         }
 
         // Handle plan
-        print("💰 Raw plan: ${ad?.plan}");
+        debugPrint("💰 Raw plan: ${ad?.plan}");
         if (ad?.plan != null && ad!.plan.isNotEmpty) {
           selectedPricingPlan.value = ad!.plan.toLowerCase().trim();
-          print("💰 Selected Plan: ${selectedPricingPlan.value}");
+          debugPrint("💰 Selected Plan: ${selectedPricingPlan.value}");
         }
       } else {
-        print("❌ Invalid response");
+        debugPrint("❌ Invalid response");
         Get.snackbar("Error", "Failed to load ad data");
       }
     } catch (e, stackTrace) {
-      print("❌ Fetch Ad Error: $e");
-      print("❌ Stack Trace: $stackTrace");
+      debugPrint("❌ Fetch Ad Error: $e");
+      debugPrint("❌ Stack Trace: $stackTrace");
       Get.snackbar("Error", "Failed to load ad data: $e");
     }
 
@@ -314,8 +315,8 @@ class UpdateAdsController extends GetxController {
     try {
       isLoading.value = true;
 
-      print("📤 Updating ad: $adsId");
-      print("🖼️ Image path: ${coverImagePath.value}");
+      debugPrint("📤 Updating ad: $adsId");
+      debugPrint("🖼️ Image path: ${coverImagePath.value}");
 
       // যদি image path local file path না হয়, শুধু text body পাঠাও
       final bool isLocalImage = File(coverImagePath.value).existsSync();
@@ -326,15 +327,15 @@ class UpdateAdsController extends GetxController {
           "title": titleController.text.trim(),
           "description": descriptionController.text.trim(),
           "focusArea": focusAreaController.text.trim(),
-          "latitude": "23.810332",
-          "longitude": "90.4125181",
+          "latitude": LocalStorage.lat.toString(),
+          "longitude": LocalStorage.long.toString(),
           "websiteUrl": websiteLinkController.text.trim(),
         },
         imagePath: isLocalImage ? coverImagePath.value : null,
       );
 
-      print("📦 Update Response: ${response.statusCode}");
-      print("📦 Response Data: ${response.data}");
+      debugPrint("📦 Update Response: ${response.statusCode}");
+      debugPrint("📦 Response Data: ${response.data}");
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         _showSuccessPopup();

@@ -24,12 +24,14 @@ class ClickerController extends GetxController {
 
   /// ================= Carousel
   final _currentPosition = 0.obs;
+
   int get currentPosition => _currentPosition.value;
 
   /// ================= Banners & Filters
   var adList = <AdBannerModel>[].obs;
   var isBannerLoading = false.obs;
   final _selectedFilter = 'All'.obs;
+
   String get selectedFilter => _selectedFilter.value;
   var userAddress = "Fetching location...".obs;
   var isLocationLoading = false.obs;
@@ -63,13 +65,11 @@ class ClickerController extends GetxController {
 
   Future<void> updateProfileAndLocationVisible() async {
     try {
-
       final latitude = LocalStorage.lat.toDouble();
-      final longitude=LocalStorage.long.toDouble();
+      final longitude = LocalStorage.long.toDouble();
 
       // API call
       final response = await ApiService.patch(
-
         ApiEndPoint.updateProfile,
 
         body: {
@@ -87,7 +87,6 @@ class ClickerController extends GetxController {
       debugPrint('Error updating profile: $e');
     }
   }
-
 
   @override
   void onInit() {
@@ -141,6 +140,7 @@ class ClickerController extends GetxController {
       isLoading.value = false;
     }
   }
+
   // ================= Fetch Dynamic Banners
   Future<void> getBanners() async {
     try {
@@ -152,7 +152,8 @@ class ClickerController extends GetxController {
 
       final String deviceId = await _getUniqueDeviceId();
 
-      final String url = "advertisements/nearby-active"
+      final String url =
+          "/advertisements/nearby-active"
           "?lng=${position.longitude}"
           "&lat=${position.latitude}"
           "&deviceId=$deviceId";
@@ -171,7 +172,10 @@ class ClickerController extends GetxController {
   }
 
   // ================= Get All Posts (with Pagination)
-  Future<void> getAllPosts({String? clickerType, bool isLoadMore = false}) async {
+  Future<void> getAllPosts({
+    String? clickerType,
+    bool isLoadMore = false,
+  }) async {
     try {
       if (isLoadMore) {
         if (currentPage.value >= totalPages.value) return;
@@ -242,12 +246,16 @@ class ClickerController extends GetxController {
           response.data as Map<String, dynamic>,
         );
 
-        debugPrint("✅ [getPostsByUserId] Parsed ${responseData.data.length} posts");
+        debugPrint(
+          "✅ [getPostsByUserId] Parsed ${responseData.data.length} posts",
+        );
 
         usersPosts.assignAll(responseData.data);
         usersPosts.refresh(); // 🔥 Force refresh
 
-        debugPrint("✅ [getPostsByUserId] usersPosts updated: ${usersPosts.length} posts");
+        debugPrint(
+          "✅ [getPostsByUserId] usersPosts updated: ${usersPosts.length} posts",
+        );
       } else {
         debugPrint("❌ [getPostsByUserId] Error status: ${response.statusCode}");
       }
@@ -322,8 +330,6 @@ class ClickerController extends GetxController {
     }
   }
 
-
-
   // ================= Device ID
   Future<String> _getUniqueDeviceId() async {
     final DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
@@ -340,7 +346,7 @@ class ClickerController extends GetxController {
   // ================= Banner Click Tracking
   Future<void> clickBanner(String bannerId) async {
     try {
-      final String url = "advertisements/track-click/$bannerId";
+      final String url = "/advertisements/track-click/$bannerId";
       final response = await ApiService.post(url);
       if (response.statusCode == 200) {
         debugPrint("Banner click tracked: $bannerId");
@@ -375,10 +381,10 @@ class ClickerController extends GetxController {
       filtered = filtered
           .where(
             (post) =>
-        post.user.name.toLowerCase().contains(query) ||
-            post.description.toLowerCase().contains(query) ||
-            post.address.toLowerCase().contains(query),
-      )
+                post.user.name.toLowerCase().contains(query) ||
+                post.description.toLowerCase().contains(query) ||
+                post.address.toLowerCase().contains(query),
+          )
           .toList();
     }
 

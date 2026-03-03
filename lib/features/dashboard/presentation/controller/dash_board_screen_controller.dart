@@ -14,7 +14,7 @@ class DashBoardScreenController extends GetxController {
     totalActiveAds: 0,
     totalReachCount: 0,
     totalClickCount: 0,
-    engagementRate: 0.0, // ✅ Changed to 0.0 for double
+    engagementRate: 0.0,
   ).obs;
 
   List<MyActiveAdvertisement> activeAds = [];

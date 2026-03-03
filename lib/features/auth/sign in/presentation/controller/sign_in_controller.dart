@@ -20,7 +20,9 @@ class SignInController extends GetxController {
     text: kDebugMode ? 'password123' : "",
   );
 
-  // Sign in Api call here
+void onTapSkipButton(){
+
+}
 
   Future<void> signInUser(GlobalKey<FormState> formKey) async {
     if (!formKey.currentState!.validate()) return;

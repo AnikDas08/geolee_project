@@ -59,7 +59,7 @@ class ForgetPasswordController extends GetxController {
 
   void startTimer() {
     _timer?.cancel(); // Cancel any existing timer
-    start = 180; // Reset the start value
+    start = 360; // Reset the start value
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (start > 0) {
         start--;

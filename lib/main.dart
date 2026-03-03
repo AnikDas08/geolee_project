@@ -16,13 +16,11 @@ Future<void> main() async {
 }
 
 Future<void> init() async {
-  // Load storage first so token is available for DI and Sockets
   await LocalStorage.getAllPrefData();
   
   final DependencyInjection dI = DependencyInjection();
   dI.dependencies();
-  
-  // Connect socket if token exists
+
   if (LocalStorage.token.isNotEmpty) {
     SocketServices.connectToSocket();
   }

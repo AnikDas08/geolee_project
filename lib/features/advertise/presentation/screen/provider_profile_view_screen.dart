@@ -17,7 +17,6 @@ class ProviderProfileViewScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetBuilder<ProviderProfileViewController>(
-      // ✅ নতুন instance তৈরি না করে আগের টা খুঁজে নিন
       init: Get.isRegistered<ProviderProfileViewController>()
           ? Get.find<ProviderProfileViewController>()
           : Get.put(ProviderProfileViewController()),
@@ -171,7 +170,6 @@ class ProviderProfileViewScreen extends StatelessWidget {
           16.height,
           _buildDetailRow('Business Type', controller.businessType),
           16.height,
-          _buildDetailRow('Address', controller.address),
         ],
       ),
     );
