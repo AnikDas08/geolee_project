@@ -213,7 +213,7 @@ class SignInScreen extends StatelessWidget {
   }
 
   Future<void> onTapSkipButton() async {
-    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    final bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
 
     if (!serviceEnabled) {
       _showLocationWarningDialog();
@@ -233,7 +233,7 @@ class SignInScreen extends StatelessWidget {
     }
 
     try {
-      Position position = await Geolocator.getCurrentPosition(
+      final Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
       );
 

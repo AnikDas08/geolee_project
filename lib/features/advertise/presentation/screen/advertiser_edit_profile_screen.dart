@@ -70,7 +70,6 @@ class AdvertiserEditProfileScreen extends StatelessWidget {
                       6.height,
                       CommonTextField(
                         controller: controller.bioController,
-                        validator: null,
                         maxLines: 4,
                         hintText:
                         'Skilled professionals offering reliable, on-demand services...',
@@ -102,7 +101,6 @@ class AdvertiserEditProfileScreen extends StatelessWidget {
                             vertical: 14,
                           ),
                         ),
-                        keyboardType: TextInputType.phone,
                         inputFormatters: [
                           FilteringTextInputFormatter.digitsOnly,
                           LengthLimitingTextInputFormatter(15),
@@ -143,7 +141,6 @@ class AdvertiserEditProfileScreen extends StatelessWidget {
                       6.height,
                       CommonTextField(
                         controller: controller.businessLicenceController,
-                        validator: null,
                         hintText: 'Enter Your Business Licence Number EUN',
                         hintTextColor: AppColors.secondaryText,
                         textColor: AppColors.black,
@@ -159,7 +156,6 @@ class AdvertiserEditProfileScreen extends StatelessWidget {
                       6.height,
                       CommonTextField(
                         controller: controller.businessTypeController,
-                        validator: null,
                         hintText: 'Restaurant',
                         hintTextColor: AppColors.secondaryText,
                         textColor: AppColors.black,

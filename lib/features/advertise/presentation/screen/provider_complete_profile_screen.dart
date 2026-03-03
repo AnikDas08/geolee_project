@@ -163,8 +163,6 @@ class _ServiceProviderInfoScreenState extends State<ServiceProviderInfoScreen> {
                         ),
                       ),
 
-                      keyboardType: TextInputType.phone,
-
                       inputFormatters: [
                         FilteringTextInputFormatter.digitsOnly,
                         LengthLimitingTextInputFormatter(15),
@@ -201,7 +199,7 @@ class _ServiceProviderInfoScreenState extends State<ServiceProviderInfoScreen> {
                         controller.countryCode = '+${country.dialCode}';
                       },
                     ),
-                    SizedBox(height: 4),
+                    const SizedBox(height: 4),
 
                     const Text(
                       '• Minimum 10 digits, Maximum 15 digits \n• Optional + sign at the beginning',

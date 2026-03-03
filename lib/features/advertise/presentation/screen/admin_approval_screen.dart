@@ -11,14 +11,14 @@ class AdminApprovalScreen extends StatelessWidget {
     return  Scaffold(
       
       appBar: AppBar(
-        title: Text("Admin Approval"),
+        title: const Text("Admin Approval"),
         leading: InkWell(
           onTap: (){
             Get.offAllNamed(AppRoutes.homeNav);
           },
-            child: Icon(Icons.arrow_back)),
+            child: const Icon(Icons.arrow_back)),
       ),
-      body: Center(
+      body: const Center(
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: 24),
           child: Column(

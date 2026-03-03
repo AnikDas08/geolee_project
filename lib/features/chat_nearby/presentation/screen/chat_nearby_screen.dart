@@ -327,7 +327,6 @@ class _NearbyUserCard extends StatelessWidget {
                 CommonText(
                   text: "Not Friend",
                   fontSize: 10.sp,
-                  color: Colors.black,
                   fontWeight: FontWeight.w600,
                 ),
             ],

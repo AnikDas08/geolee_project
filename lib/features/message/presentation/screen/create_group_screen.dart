@@ -92,14 +92,12 @@ class CreateGroupScreen extends StatelessWidget {
                   ),
                   child: Obx(() {
                     return DropdownButtonFormField<String>(
-                      initialValue: controller.privacyOptions[controller.selectedPrivacyType.value],
+                      initialValue: controller
+                          .privacyOptions[controller.selectedPrivacyType.value],
                       items: controller.privacyTypes.map((String type) {
                         return DropdownMenuItem<String>(
                           value: type,
-                          child: Text(
-                            type,
-                            style: TextStyle(fontSize: 14.sp),
-                          ),
+                          child: Text(type, style: TextStyle(fontSize: 14.sp)),
                         );
                       }).toList(),
                       onChanged: controller.changePrivacyType,
@@ -200,19 +198,21 @@ class CreateGroupScreen extends StatelessWidget {
                 SizedBox(height: 12.h),
 
                 /// Selected Members Count
-                Obx(() => CommonText(
-                  text: "Selected Member (${controller.selectedMembers.length})",
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.grey,
-                  bottom: 12.h,
-                )),
+                Obx(
+                  () => CommonText(
+                    text:
+                        "Selected Member (${controller.selectedMembers.length})",
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.grey,
+                    bottom: 12.h,
+                  ),
+                ),
 
-                /// Selected Members Chips
                 Obx(() {
                   if (controller.selectedMembers.isEmpty) {
                     return CommonText(
-                      text: "No members selected",
+                      text: "No Members Selected",
                       fontSize: 13.sp,
                       color: Colors.grey,
                     );
@@ -238,17 +238,19 @@ class CreateGroupScreen extends StatelessWidget {
                 SizedBox(height: 40.h),
 
                 /// Create Group Button
-                Obx(() => CommonButton(
-                  titleText: controller.isCreating.value
-                      ? 'Creating...'
-                      : 'Create Group',
-                  buttonHeight: 50.h,
-                  buttonRadius: 8.r,
-                  titleSize: 16.sp,
-                  onTap: () {
-                    controller.createGroup();
-                  },
-                )),
+                Obx(
+                  () => CommonButton(
+                    titleText: controller.isCreating.value
+                        ? 'Creating...'
+                        : 'Create Group',
+                    buttonHeight: 50.h,
+                    buttonRadius: 8.r,
+                    titleSize: 16.sp,
+                    onTap: () {
+                      controller.createGroup();
+                    },
+                  ),
+                ),
 
                 SizedBox(height: 20.h),
               ],
@@ -260,9 +262,9 @@ class CreateGroupScreen extends StatelessWidget {
   }
 
   void _showAddMemberDialog(
-      BuildContext context,
-      CreateGroupController controller,
-      ) {
+    BuildContext context,
+    CreateGroupController controller,
+  ) {
     controller.fetchMyChats();
     showModalBottomSheet(
       context: context,
@@ -280,7 +282,7 @@ class CreateGroupScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  /// Header
+                  // Header=======================================
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -301,7 +303,7 @@ class CreateGroupScreen extends StatelessWidget {
 
                   SizedBox(height: 16.h),
 
-                  /// Search
+                  //Search======================================
                   TextField(
                     controller: controller.searchController,
                     onChanged: controller.searchMembers,
@@ -310,9 +312,9 @@ class CreateGroupScreen extends StatelessWidget {
                       prefixIcon: const Icon(Icons.search),
                       suffixIcon: controller.searchQuery.value.isNotEmpty
                           ? IconButton(
-                        icon: const Icon(Icons.clear),
-                        onPressed: controller.clearSearch,
-                      )
+                              icon: const Icon(Icons.clear),
+                              onPressed: controller.clearSearch,
+                            )
                           : null,
                       filled: true,
                       fillColor: Colors.grey.shade100,
@@ -325,75 +327,72 @@ class CreateGroupScreen extends StatelessWidget {
 
                   SizedBox(height: 16.h),
 
-
                   Expanded(
                     child: controller.isMemberLoading.value
-                        ? const Center(
-                      child: CircularProgressIndicator(),
-                    )
+                        ? const Center(child: CircularProgressIndicator())
                         : controller.availableMembers.isEmpty
                         ? Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.people_outline,
-                            size: 48,
-                            color: Colors.grey[300],
-                          ),
-                          SizedBox(height: 16.h),
-                          Text(
-                            "No members found",
-                            style: TextStyle(
-                              fontSize: 14.sp,
-                              color: Colors.grey[600],
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.people_outline,
+                                  size: 48,
+                                  color: Colors.grey[300],
+                                ),
+                                SizedBox(height: 16.h),
+                                Text(
+                                  "No Members found",
+                                  style: TextStyle(
+                                    fontSize: 14.sp,
+                                    color: Colors.grey[600],
+                                  ),
+                                ),
+                              ],
                             ),
-                          ),
-                        ],
-                      ),
-                    )
-                        : ListView.builder(
-                      itemCount: controller.availableMembers.length,
-                      itemBuilder: (context, index) {
-                        final member =
-                        controller.availableMembers[index];
-                        final isSelected = controller.selectedMembers.any((m) => m.id == member.id);
-
-                        return ListTile(
-                          leading: CircleAvatar(
-                            backgroundColor:
-                            AppColors.primaryColor,
-                            backgroundImage: member.image != null
-                                ? NetworkImage(
-                                ApiEndPoint.imageUrl +
-                                    member.image!)
-                                : null,
-                            child: member.image == null
-                                ? Text(
-                              member.name[0].toUpperCase(),
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            )
-                                : null,
-                          ),
-                          title: Text(member.name),
-                          trailing: isSelected
-                              ? const Icon(
-                            Icons.check_circle,
-                            color: Colors.green,
                           )
-                              : const Icon(
-                            Icons.add_circle_outline,
-                            color: Colors.grey,
+                        : ListView.builder(
+                            itemCount: controller.availableMembers.length,
+                            itemBuilder: (context, index) {
+                              final member = controller.availableMembers[index];
+                              final isSelected = controller.selectedMembers.any(
+                                (m) => m.id == member.id,
+                              );
+
+                              return ListTile(
+                                leading: CircleAvatar(
+                                  backgroundColor: AppColors.primaryColor,
+                                  backgroundImage: member.image != null
+                                      ? NetworkImage(
+                                          ApiEndPoint.imageUrl + member.image!,
+                                        )
+                                      : null,
+                                  child: member.image == null
+                                      ? Text(
+                                          member.name[0].toUpperCase(),
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        )
+                                      : null,
+                                ),
+                                title: Text(member.name),
+                                trailing: isSelected
+                                    ? const Icon(
+                                        Icons.check_circle,
+                                        color: Colors.green,
+                                      )
+                                    : const Icon(
+                                        Icons.add_circle_outline,
+                                        color: Colors.grey,
+                                      ),
+                                onTap: () {
+                                  controller.toggleMember(member);
+                                },
+                              );
+                            },
                           ),
-                          onTap: () {
-                            controller.toggleMember(member);
-                          },
-                        );
-                      },
-                    ),
                   ),
 
                   SizedBox(height: 20.h),

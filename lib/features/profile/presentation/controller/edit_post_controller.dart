@@ -610,6 +610,7 @@ class EditPostController extends GetxController {
           debugPrint("MyPostController not found: $e");
         }
 
+        Get.back();
         // Navigate back with result
         Get.back(result: true);
       } else {

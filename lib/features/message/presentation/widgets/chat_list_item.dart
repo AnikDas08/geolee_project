@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../component/image/common_image.dart';
-import '../../../../component/text/common_text.dart';
 import '../../../../config/api/api_end_point.dart';
 import '../../data/model/chat_list_model.dart';
 import '../../../../../utils/extensions/extension.dart';
@@ -39,7 +38,7 @@ Widget chatListItem({
   final bool showDistance = !item.isGroup && distanceText.isNotEmpty;
 
   final Color bgColor = isFriend
-      ? item.isGroup?Colors.white: Color(0xFFFEF3E6)
+      ? item.isGroup?Colors.white: const Color(0xFFFEF3E6)
       : Colors.white;
 
   return Container(
@@ -49,7 +48,7 @@ Widget chatListItem({
       color: bgColor,
       borderRadius: BorderRadius.circular(12),
       border: Border.all(
-        color:item.isGroup?Colors.white:Color(0xFFFCD8B0)
+        color:item.isGroup?Colors.white:const Color(0xFFFCD8B0)
       ),
 
     ),
@@ -145,7 +144,7 @@ Widget chatListItem({
                 _formatTime(item.latestMessage.createdAt),
                 style: TextStyle(
                   fontSize: 11.sp,
-                  color: Color(0xFF797C7B),
+                  color: const Color(0xFF797C7B),
                 ),
               ),
             ],

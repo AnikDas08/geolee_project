@@ -46,7 +46,7 @@ class MyFriendScreen extends StatelessWidget {
             physics: const BouncingScrollPhysics(),
             padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
             children: [
-               _SearchField(),
+               const _SearchField(),
 
               SizedBox(height: 16.h),
 
@@ -134,7 +134,7 @@ class MyFriendScreen extends StatelessWidget {
 }
 
 class _SearchField extends StatelessWidget {
-  const _SearchField({super.key});
+  const _SearchField();
 
   @override
   Widget build(BuildContext context) {
@@ -206,7 +206,7 @@ class _SuggestedFriendCard extends StatelessWidget {
                     fontWeight: FontWeight.w600,
                   ),
                   SizedBox(height: 2.h),
-                  CommonText(
+                  const CommonText(
                     text: 'People you may know',
                     fontSize: 11,
                     color: AppColors.secondaryText,
@@ -383,7 +383,7 @@ class _FriendListItem extends StatelessWidget {
                     fontWeight: FontWeight.w600,
                   ),
                   SizedBox(height: 2.h),
-                  CommonText(
+                  const CommonText(
                     text: 'Tap to view profile',
                     fontSize: 11,
                     color: AppColors.secondaryText,
@@ -439,9 +439,8 @@ class _FriendListItem extends StatelessWidget {
                               color: Colors.redAccent,
                             ),
                             SizedBox(height: 12.h),
-                            CommonText(
+                            const CommonText(
                               text: 'Remove Friend?',
-                              fontSize: 16,
                               fontWeight: FontWeight.w600,
                             ),
                             SizedBox(height: 6.h),

@@ -44,7 +44,7 @@ class ApiEndPoint {
   static const String getAllPost = "$baseUrl/posts";
   static const String deletePost = "$baseUrl/posts/delete/";
 
-  // Friend =========================================
+  // Friend ===========================================
 
   static const String createFriendRequest = "$baseUrl/friend-requests/create/";
   static const String friendStatusUpdate = "$baseUrl/friend-requests/update/";
@@ -58,8 +58,8 @@ class ApiEndPoint {
 
   // Chat ===========================================
   // static const String createOneToOneChat = "$baseUrl/chats/create-1-to-1";
-  static const String createChatGroup = "$baseUrl/chats/create-group";
 
+  static const String createChatGroup = "$baseUrl/chats/create-group";
   static String deleteChatById(String id) => "$baseUrl/chats/$id";
 
   static String leaveChat(String id) => "$baseUrl/chats/leave/$id";
@@ -99,8 +99,7 @@ class ApiEndPoint {
   static const String notifications = "$baseUrl/notification/all";
   static const String category = "$baseUrl/category/service";
   static const String privacyPolicies = "$baseUrl/disclaimer/privacy-policy";
-  static const String termsOfServices =
-      "$baseUrl/disclaimer/terms-and-conditions";
+  static const String termsOfServices = "$baseUrl/disclaimer/terms-and-conditions";
   static const String helpSupport = "$baseUrl/help/support";
   static const String chats = "$baseUrl/chats";
   static const String chatRoom = "$baseUrl/chats/my-chats";
@@ -111,7 +110,5 @@ class ApiEndPoint {
   static const String updateRequest = "$baseUrl/pay/my-service-history/";
   static const String readAllNotification = "$baseUrl/notifications/read-all";
   static const String readNotificationById = "$baseUrl/notifications/read/";
-
-  static String updateChatById(String chatId) =>
-      '$baseUrl/chats/update/$chatId';
+  static String updateChatById(String chatId) => '$baseUrl/chats/update/$chatId';
 }

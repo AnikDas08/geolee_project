@@ -1,7 +1,6 @@
 import 'dart:async'; // Added for Timer
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:giolee78/utils/log/app_log.dart';
 import '../../data/model/chat_list_model.dart';
 import '../../repository/chat_repository.dart';
 import '../../../../services/socket/socket_service.dart';
@@ -42,7 +41,7 @@ class ChatController extends GetxController {
   void clearSearch() {
     searchController.clear();
     // Refresh data from server without search term
-    getChatRepos(isGroup: false);
+    getChatRepos();
     getChatRepos(isGroup: true);
     update();
   }
@@ -59,8 +58,8 @@ class ChatController extends GetxController {
     // Small delay to wait for user to stop typing
     _searchDebounce = Timer(const Duration(milliseconds: 500), () {
       // Re-fetch data from server using the search query
-      getChatRepos(isGroup: false, showLoading: true);
-      getChatRepos(isGroup: true, showLoading: true);
+      getChatRepos();
+      getChatRepos(isGroup: true);
     });
 
     update();
@@ -246,7 +245,11 @@ class ChatController extends GetxController {
       for (var item in data) {
         try {
           final chat = ChatModel.fromJson(item);
-          if (chat.isGroup) chats.add(chat); else singleChats.add(chat);
+          if (chat.isGroup) {
+            chats.add(chat);
+          } else {
+            singleChats.add(chat);
+          }
         } catch (e) {}
       }
       _sortChats();

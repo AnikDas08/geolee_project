@@ -43,7 +43,7 @@ class ProviderVerifyUser extends StatelessWidget {
                 color: AppColors.primaryColor,
                 bottom: 8,
               ),
-              Center(
+              const Center(
                 child: CommonText(
                   text: "Code Has been send to your reqistration Email",
                   fontSize: 14,

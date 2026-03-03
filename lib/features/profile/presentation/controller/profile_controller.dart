@@ -13,7 +13,6 @@ import '../../../../config/api/api_end_point.dart';
 import '../../../../config/route/app_routes.dart';
 import '../../../../services/api/api_service.dart';
 import '../../../../utils/app_utils.dart';
-import '../../../../utils/constants/app_colors.dart';
 import '../../../../utils/log/app_log.dart';
 import '../../../home/presentation/controller/home_nav_controller.dart';
 

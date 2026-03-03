@@ -43,6 +43,7 @@ class _HomeNavState extends State<HomeNav> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+       resizeToAvoidBottomInset: false,
       body: Obx(() {
         if (controller.currentIndex.value == 2) {
      WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -119,7 +120,6 @@ class _HomeNavState extends State<HomeNav> {
     );
   }
 
-  // ✅ Nav item with disable logic
   Widget _buildNavItem({
     required int index,
     required String iconPath,
