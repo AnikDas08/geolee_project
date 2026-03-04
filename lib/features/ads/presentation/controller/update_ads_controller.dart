@@ -318,7 +318,6 @@ class UpdateAdsController extends GetxController {
       debugPrint("📤 Updating ad: $adsId");
       debugPrint("🖼️ Image path: ${coverImagePath.value}");
 
-      // যদি image path local file path না হয়, শুধু text body পাঠাও
       final bool isLocalImage = File(coverImagePath.value).existsSync();
 
       final ApiResponseModel response = await ApiService.multipartUpdate(

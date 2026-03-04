@@ -122,7 +122,7 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
               borderRadius: BorderRadius.circular(4.r),
               child: Container(
                 padding: const EdgeInsets.symmetric(
-                  horizontal: 109,
+                  horizontal: 120,
                   vertical: 17,
                 ),
                 decoration: ShapeDecoration(

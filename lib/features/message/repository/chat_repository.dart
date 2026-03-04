@@ -58,6 +58,7 @@ Future<ChatRepositoryResponse> chatRepository(
     final chatList = response.data['data'] ?? [];
     final List<ChatModel> list = [];
 
+
     for (var json in chatList) {
       try {
         list.add(ChatModel.fromJson(json));

@@ -22,6 +22,24 @@ String _formatTime(DateTime dateTime) {
   }
 }
 
+
+String formatTimeAgo(DateTime dateTime) {
+  final now = DateTime.now();
+  final difference = now.difference(dateTime);
+
+  if (difference.inSeconds < 60) {
+    return "Just Now";
+  } else if (difference.inMinutes < 60) {
+    return "${difference.inMinutes} Min Ago";
+  } else if (difference.inHours < 24) {
+    return "${difference.inHours} Hour Ago";
+  } else if (difference.inDays < 7) {
+    return "${difference.inDays} Day Ago";
+  } else {
+    return "${dateTime.day}/${dateTime.month}/${dateTime.year}";
+  }
+}
+
 String _formatDistance(double? km) {
   if (km == null) return '';
   if (km < 1) return '${(km * 1000).toStringAsFixed(0)} M';
@@ -115,7 +133,9 @@ Widget chatListItem({
                 borderRadius: BorderRadius.circular(6.r),
               ),
               child: Text(
-                'Join',
+                item.joinRequestStatus?.toLowerCase() == "pending"
+                    ? "Cancel Request"
+                    : "Join",
                 style: TextStyle(
                   fontSize: 12.sp,
                   color: Colors.white,
@@ -141,7 +161,8 @@ Widget chatListItem({
               SizedBox(height: 3.h),
 
               Text(
-                _formatTime(item.latestMessage.createdAt),
+                 formatTimeAgo(item.updatedAt),
+                // _formatTime(item.latestMessage.createdAt),
                 style: TextStyle(
                   fontSize: 11.sp,
                   color: const Color(0xFF797C7B),

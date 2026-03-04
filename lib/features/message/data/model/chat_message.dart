@@ -94,10 +94,10 @@ class ChatMessage {
       isDeleted: json['isDeleted'] ?? false,
       createdAt: DateTime.parse(
         json['createdAt'] ?? DateTime.now().toIso8601String(),
-      ),
+      ).toLocal(),
       updatedAt: DateTime.parse(
         json['updatedAt'] ?? DateTime.now().toIso8601String(),
-      ),
+      ).toLocal(),
       isCurrentUser: json['isMyMessage'] ?? false,
       isSeen: json['isSeen'] ?? false,
       // Image

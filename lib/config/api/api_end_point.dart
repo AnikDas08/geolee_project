@@ -71,6 +71,7 @@ class ApiEndPoint {
   static const String getSingleChatById = "$baseUrl/chats/single";
   static const String createAds = "$baseUrl/advertisements/create";
   static const String createJoinRequest = "$baseUrl/join-requests/create";
+  static const String cancelJoinRequest = "$baseUrl/join-requests/update/";
   static const String getAdvertisementMe = "$baseUrl/advertisements/me";
   static const String getAdvertisementById = "$baseUrl/advertisements/single/";
   static const String updateAdvertisementById = "$baseUrl/advertisements/update/";

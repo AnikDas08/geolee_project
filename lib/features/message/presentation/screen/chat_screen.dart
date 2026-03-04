@@ -1,3 +1,5 @@
+import 'dart:ffi' hide Size;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -37,9 +39,10 @@ class _ChatListScreenState extends State<ChatListScreen> {
       );
       if (response.statusCode == 200 || response.statusCode == 201) {
         Get.snackbar(
+          colorText: Colors.white,
+          backgroundColor: Colors.red,
           "Request Sent",
           "Your join request has been sent",
-          colorText: Colors.black,
         );
       } else {
         Get.snackbar("Error", response.message ?? "Failed to send request");
@@ -48,6 +51,34 @@ class _ChatListScreenState extends State<ChatListScreen> {
       Get.snackbar("Error", e.toString());
     }
   }
+
+  Future<void>_cancelJoinRequest(String chatId)async{
+
+    try{
+      final response = await ApiService.patch(
+          "${ApiEndPoint.cancelJoinRequest}${chatId}",
+          body: {
+            "status":"cancelled"
+          }
+      );
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        Get.snackbar(
+          colorText: Colors.white,
+          backgroundColor: Colors.red,
+          "Request Cancel",
+          "Your join request has been Cancel",
+        );
+      } else {
+        Get.snackbar("Error", response.message ?? "Failed to send request");
+      }
+
+    }catch(e){
+      debugPrint("cancel Request error is :$e");
+    }
+
+  }
+
+
 
   @override
   void initState() {
@@ -371,7 +402,19 @@ class _ChatListScreenState extends State<ChatListScreen> {
                                     },
                                     child: chatListItem(
                                       item: item,
-                                      onJoinTap: () => _sendJoinRequest(item.id),
+                                      onJoinTap: () {
+                                        final status = item.joinRequestStatus?.toLowerCase();
+                                        if (status == "pending") {
+                                          // Cancel request==========================
+
+                                          _cancelJoinRequest(item.joinRequestId ?? item.id);
+                                        } else {
+
+                                          // Send join request=======================
+
+                                          _sendJoinRequest(item.id);
+                                        }
+                                      },
                                     ),
                                   );
                                 },

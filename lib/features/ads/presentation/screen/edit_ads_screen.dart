@@ -25,7 +25,7 @@ class EditAdsScreen extends StatelessWidget {
       canPop: false,
       onPopInvoked: (didPop) {
         if (didPop) return;
-        Get.offAllNamed(AppRoutes.homeNav);
+        Get.back();
       },
       child: Scaffold(
         backgroundColor: AppColors.background,
@@ -33,7 +33,7 @@ class EditAdsScreen extends StatelessWidget {
           elevation: 0,
           centerTitle: true,
           leading: GestureDetector(
-            onTap: () => Get.offAllNamed(AppRoutes.homeNav),
+            onTap: () => Get.back(),
             child: const Icon(Icons.arrow_back_ios),
           ),
           title: const CommonText(

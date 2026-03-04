@@ -1,7 +1,9 @@
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:giolee78/features/message/presentation/controller/chat_controller.dart';
 import 'package:giolee78/features/message/presentation/controller/group_message_controller.dart';
+import 'package:giolee78/services/storage/storage_services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:giolee78/services/api/api_service.dart';
 import 'package:giolee78/config/api/api_end_point.dart';
@@ -22,6 +24,13 @@ class GroupSettingsController extends GetxController {
   final RxBool isLoading = false.obs;
   final RxBool isSaving = false.obs;
   String chatId = '';
+  final RxString authorId = ''.obs;
+
+  /// LocalStorage থেকে current user ID নিয়ে author কিনা check করে
+  bool get isAuthor {
+    final myId = LocalStorage.userId;
+    return myId.isNotEmpty && myId == authorId.value;
+  }
 
   final ImagePicker _picker = ImagePicker();
 
@@ -67,6 +76,9 @@ class GroupSettingsController extends GetxController {
         accessType.value = data['accessType'] ?? 'open';
         memberCount.value = (data['participants'] as List?)?.length ?? 0;
 
+        // ✅ Author ID সেট করুন
+        authorId.value = data['author'] ?? '';
+
         if (data['avatarUrl'] != null && data['avatarUrl'].isNotEmpty) {
           final timestamp = DateTime.now().millisecondsSinceEpoch;
           avatarFilePath.value = "${data['avatarUrl']}?t=$timestamp";
@@ -80,7 +92,6 @@ class GroupSettingsController extends GetxController {
     }
   }
 
-  // ✅ Admin Approval Toggle
   Future<void> toggleAdminApproval(bool value) async {
     try {
       final newAccessType = value ? 'restricted' : 'open';
@@ -188,8 +199,6 @@ class GroupSettingsController extends GetxController {
   void onPendingRequest() {
     Get.toNamed(AppRoutes.friendPendingScreenHere, arguments: chatId);
   }
-
-
 
   void onPrivacySettings() {
     Get.bottomSheet(

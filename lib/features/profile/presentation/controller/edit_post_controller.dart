@@ -581,15 +581,15 @@ class EditPostController extends GetxController {
       }
 
       // ✅ Handle response properly
-      if (response.statusCode == 200||response.statusCode==201) {
+      if (response.statusCode == 200) {
         // Show success message
-        Get.snackbar(
-          "Success",
-          "Post updated successfully!",
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.green,
-          colorText: Colors.white,
-        );
+        // Get.snackbar(
+        //   "Success",
+        //   "Post updated successfully!",
+        //   snackPosition: SnackPosition.BOTTOM,
+        //   backgroundColor: Colors.green,
+        //   colorText: Colors.white,
+        // );
 
         // Refresh posts in both controllers (if they exist)
         try {
@@ -610,9 +610,15 @@ class EditPostController extends GetxController {
           debugPrint("MyPostController not found: $e");
         }
 
-        Get.back();
-        // Navigate back with result
         Get.back(result: true);
+        Get.snackbar(
+          "Success",
+          "Post updated successfully!",
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+        );
+
       } else {
         // Handle error
         final errorMessage = _getErrorMessage(response);

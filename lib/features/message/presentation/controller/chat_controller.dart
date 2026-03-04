@@ -161,7 +161,7 @@ class ChatController extends GetxController {
 
       final response = await chatRepository(
         isGroup ? page : singlePage,
-        searchController.text.trim(), // Use actual search controller text
+        searchController.text.trim(),
         isGroup,
       );
 

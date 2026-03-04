@@ -14,7 +14,9 @@ class ChatModel {
   final int memberCount;
   final bool isFriend;
   final bool amIAParticipant;
-  final double? distanceInKm; // ✅ নতুন field
+  final double? distanceInKm;
+  final String? joinRequestStatus;
+  final String? joinRequestId;
 
   ChatModel({
     required this.id,
@@ -32,7 +34,9 @@ class ChatModel {
     this.memberCount = 0,
     this.isFriend = true,
     this.amIAParticipant = true,
-    this.distanceInKm, // ✅
+    this.distanceInKm,
+    this.joinRequestStatus,
+    this.joinRequestId,
   });
 
   ChatModel copyWith({
@@ -51,7 +55,9 @@ class ChatModel {
     int? memberCount,
     bool? isFriend,
     bool? amIAParticipant,
-    double? distanceInKm, // ✅
+    double? distanceInKm,
+    String? joinRequestStatus,
+    String? joinRequestId,
   }) {
     return ChatModel(
       id: id ?? this.id,
@@ -69,7 +75,9 @@ class ChatModel {
       memberCount: memberCount ?? this.memberCount,
       isFriend: isFriend ?? this.isFriend,
       amIAParticipant: amIAParticipant ?? this.amIAParticipant,
-      distanceInKm: distanceInKm ?? this.distanceInKm, // ✅
+      distanceInKm: distanceInKm ?? this.distanceInKm,
+      joinRequestStatus: joinRequestStatus ?? this.joinRequestStatus,
+      joinRequestId: joinRequestId ?? this.joinRequestId,
     );
   }
 
@@ -119,11 +127,17 @@ class ChatModel {
 
     final bool amIAParticipant = json['amIAParticipant'] ?? true;
 
-    // ✅ distanceInKm parse করুন
     final dynamic rawDist = json['distanceInKm'];
     final double? distanceInKm = rawDist != null
         ? double.tryParse(rawDist.toString())
         : null;
+
+    String? joinRequestStatus;
+    String? joinRequestId;
+    if (json['joinRequest'] != null && json['joinRequest'] is Map) {
+      joinRequestStatus = json['joinRequest']['status']?.toString();
+      joinRequestId = json['joinRequest']['_id']?.toString();
+    }
 
     return ChatModel(
       id: json['_id']?.toString() ?? '',
@@ -137,13 +151,15 @@ class ChatModel {
       isDeleted: json['isDeleted'] ?? false,
       isOnline: json['isOnline'] ?? false,
       createdAt: DateTime.tryParse(json['createdAt']?.toString() ?? '') ??
-          DateTime.now(),
+          DateTime.now().toLocal(),
       updatedAt: DateTime.tryParse(json['updatedAt']?.toString() ?? '') ??
-          DateTime.now(),
+          DateTime.now().toLocal(),
       memberCount: allParticipants.length,
       isFriend: isFriend,
       amIAParticipant: amIAParticipant,
-      distanceInKm: distanceInKm, // ✅
+      distanceInKm: distanceInKm,
+      joinRequestStatus: joinRequestStatus,
+      joinRequestId: joinRequestId,
     );
   }
 }
@@ -204,10 +220,10 @@ class LatestMessage {
 
     return LatestMessage(
       id: json['_id']?.toString() ?? '',
-      sender: json['sender']?.toString() ?? '',
+      sender: json['sender']?['_id']?.toString() ?? '',
       text: displayText,
       createdAt: DateTime.tryParse(json['createdAt']?.toString() ?? '') ??
-          DateTime.now(),
+          DateTime.now().toLocal(),
     );
   }
 }

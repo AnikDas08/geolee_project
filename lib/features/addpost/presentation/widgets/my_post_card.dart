@@ -17,8 +17,8 @@ class MyPostCard extends StatefulWidget {
     required this.userAvatar,
     required this.timeAgo,
     required this.location,
-    this.images,        // ✅ nullable
-    this.description,  // ✅ nullable
+    this.images,
+    this.description,
     this.isMyPost = false,
     required this.clickerType,
     required this.privacyImage,
@@ -32,8 +32,8 @@ class MyPostCard extends StatefulWidget {
   final String userAvatar;
   final String timeAgo;
   final String location;
-  final List<String>? images;  // ✅ nullable
-  final String? description;   // ✅ nullable
+  final List<String>? images;
+  final String? description;
   final bool isMyPost;
   final String clickerType;
   final String privacyImage;
@@ -142,12 +142,10 @@ class _MyPostCardState extends State<MyPostCard> {
                                         fontSize: 11,
                                         color: AppColors.secondaryText,
                                       ),
-                                      SizedBox(width: 30.w),
-                                      Expanded(
-                                        child: CommonImage(
-                                          size: 12,
-                                          imageSrc: widget.privacyImage,
-                                        ),
+                                      SizedBox(width: 15.w),
+                                      CommonImage(
+                                        size: 12,
+                                        imageSrc: widget.privacyImage,
                                       ),
                                     ],
                                   ),
@@ -165,7 +163,7 @@ class _MyPostCardState extends State<MyPostCard> {
             ),
           ),
 
-          /// ✅ Image slider only if images exist
+          //=============================Image slider only if images exist
           if (widget.images != null && widget.images!.isNotEmpty)
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 12.w),
@@ -184,7 +182,7 @@ class _MyPostCardState extends State<MyPostCard> {
             child: CommonText(text: widget.clickerType, fontSize: 12),
           ),
 
-          /// ✅ Description only if not null or empty
+          //================================ Description only if not null or empty
           if (widget.description != null && widget.description!.isNotEmpty)
             Padding(
               padding: EdgeInsets.fromLTRB(12.w, 6.h, 12.w, 12.h),

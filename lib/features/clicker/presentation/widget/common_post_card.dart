@@ -117,12 +117,10 @@ class CommonPostCards extends StatelessWidget {
                                   fontSize: 11,
                                   color: AppColors.secondaryText,
                                 ),
-                                SizedBox(width: 30.w),
-                                Expanded(
-                                  child: CommonImage(
-                                    size: 12,
-                                    imageSrc: privacyImage,
-                                  ),
+                                SizedBox(width: 15.w),
+                                CommonImage(
+                                  size: 12,
+                                  imageSrc: privacyImage,
                                 ),
                               ],
                             ),

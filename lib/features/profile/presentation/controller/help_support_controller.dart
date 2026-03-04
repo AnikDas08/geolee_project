@@ -8,6 +8,7 @@ import 'package:giolee78/features/profile/data/model/html_model.dart';
 import '../../../../config/api/api_end_point.dart';
 import '../../../../services/api/api_service.dart';
 import '../../../../utils/app_utils.dart';
+import '../../../../utils/constants/app_colors.dart';
 import '../../../../utils/enum/enum.dart';
 
 class HelpSupportController extends GetxController {
@@ -45,10 +46,10 @@ class HelpSupportController extends GetxController {
       return;
     }
 
-    if (image == null) {
-      Utils.errorSnackBar(400, "Please attach a file");
-      return;
-    }
+    // if (image == null) {
+    //   Utils.errorSnackBar(400, "Please attach a file");
+    //   return;
+    // }
 
     status = Status.loading;
     update();
@@ -137,7 +138,7 @@ class HelpSupportController extends GetxController {
                     Get.back();
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF1E88E5),
+                    backgroundColor: AppColors.primaryColor,
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),

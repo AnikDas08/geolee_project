@@ -113,41 +113,47 @@ class _ClickerScreenState extends State<ClickerScreen> {
 
                 // ── Banner Slider=============================
                 if (controller.adList.isNotEmpty) ...[
-                  CarouselSlider(
-                    items: controller.adList.map((ad) {
-                      return GestureDetector(
-                        onTap: () {
-                          controller.clickBanner(ad.id);
-                          if (ad.websiteUrl != null &&
-                              ad.websiteUrl!.isNotEmpty) {
-                            Get.to(
-                              () => CommonWebViewScreen(
-                                url: ad.websiteUrl!,
-                                title: ad.title,
-                              ),
-                            );
-                          }
-                        },
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(12.r),
-                          child: CommonImage(
-                            imageSrc: "${ApiEndPoint.imageUrl}${ad.image}",
-                            height: 150.h,
-                            width: double.infinity,
-                            fill: BoxFit.cover,
+                  Obx(
+                    () => CarouselSlider(
+                      items: controller.adList.map((ad) {
+                        debugPrint(
+                          "=======================${controller.adList.length.toString()}",
+                        );
+                        return GestureDetector(
+                          onTap: () {
+                            controller.clickBanner(ad.id);
+                            if (ad.websiteUrl != null &&
+                                ad.websiteUrl!.isNotEmpty) {
+                              Get.to(
+                                () => CommonWebViewScreen(
+                                  url: ad.websiteUrl!,
+                                  title: ad.title,
+                                ),
+                              );
+                            }
+                          },
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(12.r),
+                            child: CommonImage(
+                              imageSrc: "${ApiEndPoint.imageUrl}${ad.image}",
+                              height: 150.h,
+                              width: double.infinity,
+                              fill: BoxFit.cover,
+                            ),
                           ),
-                        ),
-                      );
-                    }).toList(),
-                    options: CarouselOptions(
-                      height: 150.h,
-                      viewportFraction: 0.85,
-                      autoPlay: true,
-                      enlargeCenterPage: true,
-                      onPageChanged: (index, _) =>
-                          controller.changePosition(index),
+                        );
+                      }).toList(),
+                      options: CarouselOptions(
+                        height: 150.h,
+                        viewportFraction: 0.85,
+                        autoPlay: true,
+                        enlargeCenterPage: true,
+                        onPageChanged: (index, _) =>
+                            controller.changePosition(index),
+                      ),
                     ),
                   ),
+
                   SizedBox(height: 8.h),
                   Center(
                     child: DotsIndicator(
@@ -211,7 +217,8 @@ class _ClickerScreenState extends State<ClickerScreen> {
                             onTapProfile: () {
                               //condition for guest mood====================
                               if (LocalStorage.token.isNotEmpty) {
-                                Get.to(() => ViewFriendScreen(
+                                Get.to(
+                                  () => ViewFriendScreen(
                                     userId: data.user.id,
                                     isFriend: false,
                                   ),
@@ -220,7 +227,8 @@ class _ClickerScreenState extends State<ClickerScreen> {
                             },
                             clickerType: data.clickerType,
                             userName: data.user.name,
-                            userAvatar: "${ApiEndPoint.imageUrl}${data.user.image}",
+                            userAvatar:
+                                "${ApiEndPoint.imageUrl}${data.user.image}",
                             timeAgo: _formatPostTime(data.createdAt),
                             location: data.address.isNotEmpty
                                 ? data.address.split(',')[0]
