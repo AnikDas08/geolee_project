@@ -30,7 +30,6 @@ class _EditPostState extends State<EditPost> {
     super.initState();
     debugPrint("📌 Post ID from widget: ${widget.postId}");
 
-    // ✅ Initialize controller with postId after widget is ready
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (widget.postId != null && widget.postId!.isNotEmpty) {
@@ -54,7 +53,6 @@ class _EditPostState extends State<EditPost> {
         return Scaffold(
           backgroundColor: AppColors.background,
           body: Obx(() {
-            // Show loading while fetching post data
             if (controller.isLoading.value &&
                 controller.mySinglePost.value == null) {
               return const Center(child: CircularProgressIndicator());

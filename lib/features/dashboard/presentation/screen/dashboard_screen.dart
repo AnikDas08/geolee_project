@@ -5,7 +5,6 @@ import 'package:get/get.dart';
 import 'package:giolee78/config/api/api_end_point.dart';
 import 'package:giolee78/features/ads/presentation/screen/view_ads_screen.dart';
 import 'package:giolee78/features/notifications/presentation/controller/notifications_controller.dart';
-
 import '../../../../component/image/common_image.dart';
 import '../../../../component/text/common_text.dart';
 import '../../../../config/route/app_routes.dart';
@@ -162,7 +161,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
             ),
 
-            // ✅ Notification bell with badge
+            //Notification bell with badge==================================
+
             GetBuilder<NotificationsController>(
               init: Get.isRegistered<NotificationsController>()
                   ? Get.find<NotificationsController>()
@@ -255,7 +255,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           borderRadius: BorderRadius.circular(16.r),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.04),
+              color: Colors.black.withValues(alpha:0.04),
               blurRadius: 12,
               offset: const Offset(0, 4),
             ),

@@ -62,7 +62,6 @@ class AddPostScreen extends StatelessWidget {
                   ),
                   SizedBox(height: 16.h),
 
-                  // ✅ FIXED: Pricing / Fee Options with proper layout
                   CommonText(
                     text: "Select Clicker",
                     fontSize: 14.sp,
@@ -71,7 +70,7 @@ class AddPostScreen extends StatelessWidget {
                   Obx(
                         () => Column(
                       children: [
-                        // First Row
+
                         Row(
                           children: [
                             Expanded(
@@ -432,8 +431,6 @@ class AddPostScreen extends StatelessWidget {
     );
   }
 
-  // ✅ DROPDOWN WITH DIFFERENT ICONS FOR EACH PRIVACY LEVEL
-// ✅ DROPDOWN WITH IMAGE ASSET FOR EACH PRIVACY LEVEL
   Widget _buildDropdownWithIcons({
     required String? value,
     required String hint,

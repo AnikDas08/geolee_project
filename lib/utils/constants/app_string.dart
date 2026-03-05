@@ -3,7 +3,8 @@ class AppString {
   static const String noInternet = "No Internet";
   static const String checkInternet = "Check Internet";
   static const String back = "Back";
-  static const String enterValidUrl= "Url Must be Start with http:// or https://";
+  static const String enterValidUrl =
+      "Url Must be Start with http:// or https://";
   static const String youSureWantToLogout = "You sure want to logout";
   static const String no = "No";
   static const String yes = "Yes";
@@ -16,7 +17,8 @@ class AppString {
   static const String delete = "Delete";
   static const String payment_successful = "payment_successful";
   static const String payment_cancel = "payment_cancel";
-  static const String deleteDetails = "Type 'Delete Account' to confirm your action";
+  static const String deleteDetails =
+      "Type 'Delete Account' to confirm your action";
 
   static const String someThingWrong = "Some Thing Wrong";
   static const String tryAgain = "Try Again";
@@ -73,7 +75,8 @@ class AppString {
   static const String requestTimeOut = "Request Time Out";
   static const String thisFieldIsRequired = "This field is required";
   static const String enterValidEmail = "Enter valid email";
-  static const String passwordMustBeeEightCharacters ="Password must be 8 characters & contain both alphabets and numerics";
+  static const String passwordMustBeeEightCharacters =
+      "Password must be 8 characters & contain both alphabets and numerics";
   static const String thePasswordDoesNotMatch = "The password does not match";
   static const String startServer = "Please, start the Server";
   static const String unknownError = "Unknown Error";
@@ -81,7 +84,9 @@ class AppString {
   // Onboarding
   static const String onboardingHeadingText = "Onboarding Heading Text";
   static const String onboardingSubText =
-      "Designed for outdoor enthusiasts, this app allows users to share their Unique Locations and Moments whether they are hiking, walking or on the move. ";
+      "Designed for outdoor enthusiasts, this app allows users to share their "
+      "Unique Locations and Moments whether they are hiking, walking or on the "
+      "move. ";
 
   // Sign Up
   static const String name = "Name";
@@ -99,5 +104,6 @@ class AppString {
   static const String update = "Update";
 
   static const String onboardingTitle =
-      "Find the Best Vibes / Charms/ Attractions or its opposite for quiet moments";
+      "Find the Best Vibes / Charms/ Attractions or its opposite for quiet "
+      "moments";
 }

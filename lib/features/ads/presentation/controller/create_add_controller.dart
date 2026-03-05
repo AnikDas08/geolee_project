@@ -1,11 +1,13 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 
 import 'package:giolee78/config/api/api_end_point.dart';
 import 'package:giolee78/services/api/api_response_model.dart';
 import 'package:giolee78/services/api/api_service.dart';
-import 'package:url_launcher/url_launcher.dart';
+
 
 import '../../../../component/pop_up/common_pop_menu.dart';
 import '../../../../config/route/app_routes.dart';
@@ -13,6 +15,9 @@ import '../../../notifications/presentation/screen/stripe_web_view_screen.dart';
 import '../../data/plan_model.dart';
 
 class CreateAdsController extends GetxController {
+  /// ---------------- GOOGLE API KEY ----------------
+  static const String _googleApiKey = 'AIzaSyAp3rwzXU0fAqaPCTRfx81ixNMu5flXnPo';
+
   /// ---------------- OBSERVABLES ----------------
   var coverImagePath = ''.obs;
   var selectedPricingPlan = ''.obs;
@@ -20,6 +25,15 @@ class CreateAdsController extends GetxController {
 
   var plans = <PlanModel>[].obs;
   var isPlansLoading = false.obs;
+
+  // --- Places Autocomplete ---
+  var placeSuggestions = <Map<String, dynamic>>[].obs;
+  var isLoadingSuggestions = false.obs;
+
+  // --- Selected Location Coordinates ---
+  var selectedLatitude = ''.obs;
+  var selectedLongitude = ''.obs;
+  var selectedLocationName = ''.obs;
 
   /// ---------------- TEXT CONTROLLERS ----------------
   final titleController = TextEditingController();
@@ -29,6 +43,9 @@ class CreateAdsController extends GetxController {
   final adStartDateController = TextEditingController();
 
   final ImagePicker _picker = ImagePicker();
+
+  // Debounce timer
+  DateTime? _lastSearchTime;
 
   /// ---------------- PLAN HELPERS ----------------
   String get planId {
@@ -61,6 +78,113 @@ class CreateAdsController extends GetxController {
     }
   }
 
+  /// ---------------- PLACES AUTOCOMPLETE ----------------
+
+  Future<void> searchPlaces(String query) async {
+    if (query.trim().length < 2) {
+      placeSuggestions.clear();
+      return;
+    }
+
+    final now = DateTime.now();
+    _lastSearchTime = now;
+    await Future.delayed(const Duration(milliseconds: 500));
+    if (_lastSearchTime != now) return;
+
+    try {
+      isLoadingSuggestions.value = true;
+
+      final url = Uri.parse(
+        'https://maps.googleapis.com/maps/api/place/autocomplete/json'
+            '?input=${Uri.encodeComponent(query)}'
+            '&key=$_googleApiKey',
+      );
+
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+
+        if (data['status'] == 'OK') {
+          final predictions = data['predictions'] as List;
+          placeSuggestions.value = predictions
+              .map((p) => {
+            'place_id': p['place_id'],
+            'description': p['description'],
+            'main_text': p['structured_formatting']?['main_text'] ?? p['description'],
+          })
+              .toList();
+        } else {
+          placeSuggestions.clear();
+          debugPrint("Places API status: ${data['status']}");
+        }
+      }
+    } catch (e) {
+      debugPrint("Places search error: $e");
+      placeSuggestions.clear();
+    } finally {
+      isLoadingSuggestions.value = false;
+    }
+  }
+
+
+  Future<void> selectPlace(Map<String, dynamic> place) async {
+    try {
+      final placeId = place['place_id'];
+      final description = place['description'];
+
+      focusAreaController.text = description;
+      selectedLocationName.value = description;
+
+      // Suggestions hide করো
+      placeSuggestions.clear();
+
+      await _fetchPlaceCoordinates(placeId);
+    } catch (e) {
+      debugPrint("Select place error: $e");
+    }
+  }
+
+
+  Future<void> _fetchPlaceCoordinates(String placeId) async {
+    try {
+      final url = Uri.parse(
+        'https://maps.googleapis.com/maps/api/place/details/json'
+            '?place_id=$placeId'
+            '&fields=geometry,name'
+            '&key=$_googleApiKey',
+      );
+
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+
+        if (data['status'] == 'OK') {
+          final location = data['result']['geometry']['location'];
+          selectedLatitude.value = location['lat'].toString();
+          selectedLongitude.value = location['lng'].toString();
+
+          debugPrint("Coordinates: ${selectedLatitude.value}, ${selectedLongitude.value}");
+        } else {
+          debugPrint("Place Details API status: ${data['status']}");
+          // Fallback coordinates
+          selectedLatitude.value = '0.0';
+          selectedLongitude.value = '0.0';
+        }
+      }
+    } catch (e) {
+      debugPrint("Fetch coordinates error: $e");
+      selectedLatitude.value = '0.0';
+      selectedLongitude.value = '0.0';
+    }
+  }
+
+  /// Suggestions dismiss করা (outside tap এ)
+  void clearSuggestions() {
+    placeSuggestions.clear();
+  }
+
   /// ---------------- VALIDATION ----------------
   bool _validate() {
     if (coverImagePath.value.isEmpty) {
@@ -77,6 +201,11 @@ class CreateAdsController extends GetxController {
     }
     if (focusAreaController.text.trim().isEmpty) {
       Get.snackbar("Error", "Please enter focus area");
+      return false;
+    }
+
+    if (selectedLatitude.value.isEmpty || selectedLatitude.value == '0.0') {
+      Get.snackbar("Error", "Please select a valid location from suggestions");
       return false;
     }
     if (websiteLinkController.text.trim().isEmpty) {
@@ -152,14 +281,12 @@ class CreateAdsController extends GetxController {
         plans.value =
             (res['data'] as List).map((e) => PlanModel.fromJson(e)).toList();
 
-        debugPrint("✅ Plans loaded: ${plans.length} items");
-        debugPrint("📋 Plans: ${plans.map((p) => p.name).toList()}");
+        debugPrint(" Plans loaded: ${plans.length} items");
 
         if (plans.isNotEmpty) {
           selectedPricingPlan.value = plans.first.name;
         }
       } else {
-        debugPrint("❌ Failed - Status: ${response.statusCode}, Message: ${response.message}");
         Get.snackbar("Error", response.message ?? "Failed to load plans");
       }
     } catch (e) {
@@ -185,8 +312,8 @@ class CreateAdsController extends GetxController {
           "title": titleController.text.trim(),
           "description": descriptionController.text.trim(),
           "focusArea": focusAreaController.text.trim(),
-          "latitude": "23.810332",
-          "longitude": "90.4125181",
+          "latitude": selectedLatitude.value,
+          "longitude": selectedLongitude.value,
           "websiteUrl": websiteLinkController.text.trim(),
           "startAt": getIsoStartDate(),
           "plan": planId,
@@ -195,80 +322,43 @@ class CreateAdsController extends GetxController {
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-
-        isLoading.value=false;
+        isLoading.value = false;
         final res = response.data;
 
         if (res['data'] != null && res['data']['url'] != null) {
-
           final paymentUrl = res['data']['url'];
-
-
           Get.to(() => StripeWebViewPage(checkoutUrl: paymentUrl));
-
         } else {
-
           _showSuccessPopup();
         }
       } else {
-        isLoading.value=false;
-        // Get.snackbar("Error", response.message ?? "Something went wrong");
+        isLoading.value = false;
         debugPrint("Create ads error: ${response.message}");
       }
     } catch (e) {
-      isLoading.value=false;
-      // Get.snackbar("Error", "Failed to create ad: ${e.toString()}");
-
+      isLoading.value = false;
       debugPrint("Create ads error: $e");
     } finally {
       isLoading.value = false;
     }
   }
 
-  /// ---------------- PAYMENT LAUNCH (UPDATED) ----------------
+/*  /// ---------------- PAYMENT LAUNCH ----------------
   Future<void> _launchPayment(String url) async {
     try {
-      debugPrint("🔗 Launching payment URL: $url");
-
       final uri = Uri.parse(url);
-
-      // ✅ Method 1: launchUrl (Recommended)
       final bool launched = await launchUrl(
         uri,
-        mode: LaunchMode.externalApplication, // External browser এ open হবে
+        mode: LaunchMode.externalApplication,
       );
 
-      if (launched) {
-        debugPrint("✅ Payment URL launched successfully");
-
-        // ✅ Optional: User কে inform করুন
-        Get.snackbar(
-          "Payment",
-          "Opening payment page...",
-          snackPosition: SnackPosition.BOTTOM,
-          duration: const Duration(seconds: 2),
-        );
-      } else {
-        debugPrint("❌ Could not launch payment URL");
+      if (!launched) {
         Get.snackbar("Error", "Could not open payment page");
       }
     } catch (e) {
       debugPrint("❌ Launch error: $e");
-
-      // ✅ Fallback: Manual copy option
-      Get.defaultDialog(
-        title: "Payment Link",
-        middleText: "Please copy and open this link in your browser",
-        textConfirm: "Copy Link",
-        textCancel: "Cancel",
-        onConfirm: () {
-          // Copy to clipboard logic
-          Get.back();
-          Get.snackbar("Copied", "Payment link copied to clipboard");
-        },
-      );
     }
-  }
+  }*/
 
   /// ---------------- DATE PICKER ----------------
   Future<void> selectDate(
@@ -298,11 +388,6 @@ class CreateAdsController extends GetxController {
   /// ---------------- DISPOSE ----------------
   @override
   void onClose() {
-    // titleController.dispose();
-    // descriptionController.dispose();
-    // focusAreaController.dispose();
-    // websiteLinkController.dispose();
-    // adStartDateController.dispose();
     super.onClose();
   }
 }

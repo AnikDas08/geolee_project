@@ -70,12 +70,12 @@ class NotificationItem extends StatelessWidget {
                 margin: EdgeInsets.only(right: 12.w),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: AppColors.secondaryText.withOpacity(0.2),
+                  color: AppColors.secondaryText.withValues(alpha: 0.2),
                 ),
                 child: const Icon(Icons.person, size: 20),
               ),
 
-            /// Content
+            //================================================== Content
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

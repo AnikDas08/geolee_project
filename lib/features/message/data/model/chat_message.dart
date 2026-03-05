@@ -1,4 +1,5 @@
 import 'package:giolee78/config/api/api_end_point.dart';
+import 'package:giolee78/services/storage/storage_services.dart';
 
 class ChatMessage {
   final String id;
@@ -47,23 +48,26 @@ class ChatMessage {
     this.isFile = false,
   });
 
+  // ─────────────────────────────────────────────
+  // Helpers
+  // ─────────────────────────────────────────────
+
   /// Builds a full URL from a relative path returned by the server
   static String _buildUrl(String? path) {
     if (path == null || path.isEmpty) return '';
     if (path.startsWith('http')) return path;
-    // Remove leading slash to avoid double-slash
     final clean = path.startsWith('/') ? path.substring(1) : path;
     return '${ApiEndPoint.imageUrl}/$clean';
   }
 
-  /// Extracts the file name from a URL/path (e.g. "/uploads/doc_abc.pdf" → "doc_abc.pdf")
+  /// Extracts the file name from a URL/path
   static String? _extractFileName(String? path, String? explicit) {
     if (explicit != null && explicit.isNotEmpty) return explicit;
     if (path == null || path.isEmpty) return null;
     return path.split('/').last;
   }
 
-  /// Extracts the extension from a URL/path (e.g. "doc.pdf" → "pdf")
+  /// Extracts the extension from a URL/path
   static String? _extractExtension(String? path, String? explicit) {
     if (explicit != null && explicit.isNotEmpty) return explicit;
     if (path == null || path.isEmpty) return null;
@@ -73,6 +77,9 @@ class ChatMessage {
     return name.substring(dotIndex + 1).toLowerCase();
   }
 
+  // ─────────────────────────────────────────────
+  // fromJson
+  // ─────────────────────────────────────────────
   factory ChatMessage.fromJson(Map<dynamic, dynamic> json) {
     final String type = json['type'] ?? 'text';
     final String? content = json['content'];
@@ -80,12 +87,20 @@ class ChatMessage {
     final bool isFileType =
         type == 'document' || type == 'file' || type == 'media';
 
+    // ✅ sender ID বের করুন
+    final String senderId =
+        json['sender']?['_id']?.toString() ?? '';
+
+    // ✅ LocalStorage.userId দিয়ে compare — সবসময় সঠিক result দেবে
+    final bool isCurrentUser =
+        senderId.isNotEmpty && senderId == LocalStorage.userId;
+
     return ChatMessage(
       id: json['_id'] ?? '',
       chatId: json['chat'] is String
           ? json['chat']
           : json['chat']?['_id'] ?? '',
-      senderId: json['sender']?['_id'] ?? '',
+      senderId: senderId,
       senderName: json['sender']?['name'] ?? '',
       senderImage: json['sender']?['image'] ?? '',
       type: type,
@@ -98,12 +113,10 @@ class ChatMessage {
       updatedAt: DateTime.parse(
         json['updatedAt'] ?? DateTime.now().toIso8601String(),
       ).toLocal(),
-      isCurrentUser: json['isMyMessage'] ?? false,
+      isCurrentUser: isCurrentUser, // ✅ Fixed
       isSeen: json['isSeen'] ?? false,
-      // Image
       imageUrl: isImageType ? _buildUrl(content) : null,
       isImage: isImageType,
-      // File / document / media
       fileUrl: isFileType ? _buildUrl(content) : null,
       fileName: _extractFileName(isFileType ? content : null, json['fileName']),
       fileExtension: _extractExtension(
@@ -113,4 +126,29 @@ class ChatMessage {
       isFile: isFileType,
     );
   }
+}
+
+// ─────────────────────────────────────────────
+// ChatMessageModel (UI helper)
+// ─────────────────────────────────────────────
+class ChatMessageModel {
+  final DateTime time;
+  final String text;
+  final String image;
+  final String? messageImage;
+  final bool isMe;
+  final String? clientStatus;
+  final bool isNotice;
+  final bool isUploading;
+
+  ChatMessageModel({
+    required this.time,
+    required this.text,
+    required this.image,
+    this.messageImage,
+    this.isMe = false,
+    this.clientStatus = "",
+    this.isNotice = false,
+    this.isUploading = false,
+  });
 }

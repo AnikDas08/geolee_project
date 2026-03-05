@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:giolee78/component/text/common_text.dart';
 import '../../../../component/image/common_image.dart';
 import '../../../../config/api/api_end_point.dart';
 import '../../data/model/chat_list_model.dart';
@@ -21,7 +22,6 @@ String _formatTime(DateTime dateTime) {
     return '$hour:$minute $period';
   }
 }
-
 
 String formatTimeAgo(DateTime dateTime) {
   final now = DateTime.now();
@@ -56,7 +56,9 @@ Widget chatListItem({
   final bool showDistance = !item.isGroup && distanceText.isNotEmpty;
 
   final Color bgColor = isFriend
-      ? item.isGroup?Colors.white: const Color(0xFFFEF3E6)
+      ? item.isGroup
+            ? Colors.white
+            : const Color(0xFFFEF3E6)
       : Colors.white;
 
   return Container(
@@ -66,9 +68,8 @@ Widget chatListItem({
       color: bgColor,
       borderRadius: BorderRadius.circular(12),
       border: Border.all(
-        color:item.isGroup?Colors.white:const Color(0xFFFCD8B0)
+        color: item.isGroup ? Colors.white : const Color(0xFFFCD8B0),
       ),
-
     ),
     child: Row(
       children: [
@@ -148,7 +149,6 @@ Widget chatListItem({
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-
               if (showDistance && !isFriend)
                 Text(
                   'Distance: $distanceText',
@@ -160,13 +160,20 @@ Widget chatListItem({
                 ),
               SizedBox(height: 3.h),
 
-              Text(
-                 formatTimeAgo(item.updatedAt),
-                // _formatTime(item.latestMessage.createdAt),
-                style: TextStyle(
-                  fontSize: 11.sp,
-                  color: const Color(0xFF797C7B),
-                ),
+              Column(
+                children: [
+                  Text(
+                    formatTimeAgo(item.updatedAt),
+                    style: TextStyle(
+                      fontSize: 11.sp,
+                      color: const Color(0xFF797C7B),
+                    ),
+                  ),
+                  CommonText(
+                    fontSize: 10.sp,
+                    text: item.unreadCount.toString(),
+                  ),
+                ],
               ),
             ],
           ),

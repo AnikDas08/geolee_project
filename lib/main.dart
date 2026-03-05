@@ -7,7 +7,6 @@ import 'app.dart';
 import 'config/dependency/dependency_injection.dart';
 import 'services/notification/notification_service.dart';
 import 'services/storage/storage_services.dart';
-
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await GetStorage.init();

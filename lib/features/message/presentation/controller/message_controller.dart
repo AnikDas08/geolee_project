@@ -10,9 +10,12 @@ import 'package:giolee78/services/api/api_service.dart';
 import 'package:giolee78/services/socket/socket_service.dart';
 import 'package:giolee78/utils/log/app_log.dart';
 
+import '../../../../services/storage/storage_services.dart';
 import '../../../../utils/app_utils.dart';
 
 class MessageController extends GetxController {
+  RxBool isActive = false.obs;
+
   // ================================================
   // FRIEND STATUS
   // ================================================
@@ -20,8 +23,6 @@ class MessageController extends GetxController {
   RxBool hasPendingRequest = false.obs;
   RxString otherUserId = ''.obs;
   RxString friendStatusValue = ''.obs;
-
-  /// Whether friendship status has been loaded (to avoid showing sheet before we know)
   RxBool friendStatusLoaded = false.obs;
 
   // ================================================
@@ -34,9 +35,6 @@ class MessageController extends GetxController {
   // ================================================
   final ImagePicker _imagePicker = ImagePicker();
 
-  // ------------------------------------------------
-  // PICKED FILES VARIABLES
-  // ------------------------------------------------
   XFile? pickedImage;
   PlatformFile? pickedFile;
   String? pickedImagePath;
@@ -44,9 +42,6 @@ class MessageController extends GetxController {
   String? pickedFileName;
   String? pickedFileType;
 
-  // ------------------------------------------------
-  // UI STATE VARIABLES
-  // ------------------------------------------------
   bool isPickingImage = false;
   bool isPickingFile = false;
   bool hasPickedImage = false;
@@ -72,7 +67,6 @@ class MessageController extends GetxController {
   String chatRoomId = '';
   String name = '';
   String image = '';
-  bool isActive = true;
   String userId = '';
 
   // ------------------------------------------------
@@ -103,8 +97,7 @@ class MessageController extends GetxController {
   void onInit() {
     super.onInit();
     listenMessage();
-    // NOTE: checkFriendshipStatus is called from MessageScreen.initState()
-    // after chatId and userId have been set from route parameters.
+    listenOnlineStatus(); // ✅ Socket online/offline listen
   }
 
   @override
@@ -112,8 +105,6 @@ class MessageController extends GetxController {
     if (chatId.isNotEmpty) {
       SocketServices.leaveRoom(chatId);
     }
-    // messageController.dispose();
-    // scrollController.dispose();
     super.onClose();
   }
 
@@ -151,6 +142,29 @@ class MessageController extends GetxController {
   }
 
   // ================================================
+  // ONLINE STATUS — Socket real-time  ✅
+  // ================================================
+  void listenOnlineStatus() {
+    SocketServices.on("user:online", (data) {
+      final String onlineUserId =
+          data['userId']?.toString() ?? data['_id']?.toString() ?? '';
+      appLog("🟢 user:online → $onlineUserId | my userId: $userId");
+      if (onlineUserId.isNotEmpty && onlineUserId == userId) {
+        isActive.value = true;
+      }
+    });
+
+    SocketServices.on("user:offline", (data) {
+      final String offlineUserId =
+          data['userId']?.toString() ?? data['_id']?.toString() ?? '';
+      appLog("🔴 user:offline → $offlineUserId | my userId: $userId");
+      if (offlineUserId.isNotEmpty && offlineUserId == userId) {
+        isActive.value = false;
+      }
+    });
+  }
+
+  // ================================================
   // 1. PICK IMAGE FROM GALLERY
   // ================================================
   Future<void> pickImageFromGallery() async {
@@ -171,7 +185,6 @@ class MessageController extends GetxController {
         hasPickedImage = true;
         hasPickedFile = false;
         pickedFileType = 'image';
-
         appLog("✅ Image picked from gallery: ${image.path}");
         update();
       }
@@ -205,7 +218,6 @@ class MessageController extends GetxController {
         hasPickedImage = true;
         hasPickedFile = false;
         pickedFileType = 'image';
-
         appLog("✅ Image captured from camera: ${image.path}");
         update();
       }
@@ -237,7 +249,6 @@ class MessageController extends GetxController {
 
       if (result != null && result.files.isNotEmpty) {
         final file = result.files.first;
-
         pickedFile = file;
         pickedFilePath = file.path;
         pickedFileName = file.name;
@@ -245,14 +256,8 @@ class MessageController extends GetxController {
         pickedImagePath = null;
         hasPickedFile = true;
         hasPickedImage = false;
-
         _detectFileType(file.name);
-
         appLog("✅ File picked: ${file.name}");
-        appLog("   Path: ${file.path}");
-        appLog("   Size: ${file.size} bytes");
-        appLog("   Type: $pickedFileType");
-
         update();
       }
     } catch (e) {
@@ -269,7 +274,6 @@ class MessageController extends GetxController {
   // ================================================
   void _detectFileType(String fileName) {
     final ext = fileName.toLowerCase().split('.').last;
-
     if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'heic'].contains(ext)) {
       pickedFileType = 'image';
     } else if (['mp3', 'mp4', 'avi', 'mov', 'mkv', 'flv', 'wav'].contains(ext)) {
@@ -390,11 +394,9 @@ class MessageController extends GetxController {
       _showErrorSnackBar('Nothing to send');
       return;
     }
-
     if (messageController.text.trim().isNotEmpty) {
       await _sendTextMessage();
     }
-
     if (isImagePicked() || isFilePicked()) {
       await sendPickedFile();
     }
@@ -468,14 +470,12 @@ class MessageController extends GetxController {
   Future<void> _sendImageMessage(String imagePath) async {
     isUploadingImage = true;
     update();
-
     try {
       final response = await ApiService.multipart(
         ApiEndPoint.createMessage,
         imagePath: imagePath,
         body: {"chat": chatId, "type": "image"},
       );
-
       if (response.statusCode == 200) {
         appLog("✅ Image sent successfully");
         _showSuccessSnackBar('Image sent');
@@ -495,7 +495,6 @@ class MessageController extends GetxController {
   Future<void> _sendMediaMessage(String mediaPath) async {
     isUploadingMedia = true;
     update();
-
     try {
       final response = await ApiService.multipart(
         ApiEndPoint.createMessage,
@@ -503,7 +502,6 @@ class MessageController extends GetxController {
         imageName: "media",
         body: {"chat": chatId, "type": "media"},
       );
-
       if (response.statusCode == 200) {
         appLog("✅ Media sent successfully");
         _showSuccessSnackBar('Media sent');
@@ -523,7 +521,6 @@ class MessageController extends GetxController {
   Future<void> _sendDocumentMessage(String docPath) async {
     isUploadingDocument = true;
     update();
-
     try {
       final response = await ApiService.multipart(
         ApiEndPoint.createMessage,
@@ -531,7 +528,6 @@ class MessageController extends GetxController {
         imageName: "doc",
         body: {"chat": chatId, "type": "document"},
       );
-
       if (response.statusCode == 200) {
         appLog("Document sent successfully");
         _showSuccessSnackBar('Document sent');
@@ -550,8 +546,7 @@ class MessageController extends GetxController {
 
   void _showSuccessSnackBar(String message) {
     Get.snackbar(
-      'Success',
-      message,
+      'Success', message,
       snackPosition: SnackPosition.BOTTOM,
       backgroundColor: Colors.green,
       colorText: Colors.white,
@@ -561,8 +556,7 @@ class MessageController extends GetxController {
 
   void _showErrorSnackBar(String message) {
     Get.snackbar(
-      'Error',
-      message,
+      'Error', message,
       snackPosition: SnackPosition.BOTTOM,
       backgroundColor: Colors.red,
       colorText: Colors.white,
@@ -583,56 +577,94 @@ class MessageController extends GetxController {
 
   // ================================================
   // 9. FRIENDSHIP METHODS
-  // ================================================
-
-  /// Call this after setting userId from route params
   Future<void> checkFriendshipStatus(String targetUserId) async {
     if (targetUserId.isEmpty) {
+      isFriend.value = true;
       friendStatusLoaded.value = true;
       return;
     }
 
+    friendStatusLoaded.value = false;
+
     try {
-      debugPrint("🔍 Checking friendship with: $targetUserId");
       otherUserId.value = targetUserId;
 
       final response = await ApiService.get(
         "${ApiEndPoint.checkFriendStatus}$targetUserId",
       );
 
-      debugPrint("📦 Friendship check response: ${response.statusCode}");
+      debugPrint("📦 Full API response: ${response.data}");
 
       if (response.statusCode == 200) {
         final data = response.data['data'];
 
         if (data['isAlreadyFriend'] == true) {
-          debugPrint("✅ Already Friends");
+          // ✅ Friend — দুজনেই normal input
           isFriend.value = true;
           hasPendingRequest.value = false;
           friendStatusValue.value = 'friends';
+
         } else if (data['pendingFriendRequest'] != null) {
-          debugPrint("⏳ Pending Friend Request");
-          isFriend.value = false;
-          hasPendingRequest.value = true;
-          friendStatusValue.value = 'pending';
+          final pendingRequest = data['pendingFriendRequest'];
+          final String requestSenderId =
+              pendingRequest['sender']?['_id']?.toString() ??
+                  pendingRequest['sender']?.toString() ?? '';
+
+          debugPrint("📨 Request sender: $requestSenderId");
+          debugPrint("👤 My userId: ${LocalStorage.userId}");
+
+          if (requestSenderId == LocalStorage.userId) {
+            // ✅ আমি sender — normal input দেখব
+            isFriend.value = true;
+            hasPendingRequest.value = true;
+            friendStatusValue.value = 'pending';
+          } else {
+            // ✅ আমি receiver — non-friend panel দেখব
+            isFriend.value = false;
+            hasPendingRequest.value = false;
+            friendStatusValue.value = 'received';
+          }
+
         } else {
-          debugPrint("❌ Not Friends");
-          isFriend.value = false;
-          hasPendingRequest.value = false;
-          friendStatusValue.value = 'none';
+          // ✅ No relation — message history দেখে determine করুন
+          // messages load হওয়ার পর check করব
+          _determineRoleFromMessages();
         }
       } else {
-        debugPrint("❌ Error checking friendship: ${response.message}");
-        // Default to not friends on error so sheet shows
-        isFriend.value = false;
+        isFriend.value = true;
         friendStatusValue.value = 'none';
       }
     } catch (e) {
       debugPrint("❌ Friendship check error: $e");
-      isFriend.value = false;
+      isFriend.value = true;
       friendStatusValue.value = 'none';
     } finally {
       friendStatusLoaded.value = true;
+    }
+  }
+
+// ✅ First message এর sender দেখে determine করুন
+  void _determineRoleFromMessages() {
+    if (messages.isEmpty) {
+      // কোনো message নেই — আমি প্রথমবার chat open করছি = sender
+      isFriend.value = true;
+      friendStatusValue.value = 'none';
+      return;
+    }
+
+    // First message কে পাঠিয়েছে?
+    final firstMessage = messages.first;
+    debugPrint("📨 First message senderId: ${firstMessage.senderId}");
+    debugPrint("👤 My userId: ${LocalStorage.userId}");
+
+    if (firstMessage.senderId == LocalStorage.userId) {
+      // ✅ আমি first message পাঠিয়েছি = আমি sender = normal input
+      isFriend.value = true;
+      friendStatusValue.value = 'none';
+    } else {
+      // ✅ অন্যজন first message পাঠিয়েছে = আমি receiver = non-friend panel
+      isFriend.value = false;
+      friendStatusValue.value = 'received';
     }
   }
 
@@ -653,7 +685,6 @@ class MessageController extends GetxController {
         friendStatusValue.value = 'pending';
         Utils.successSnackBar("Sent", "Friend request sent successfully");
 
-        // 🔄 Refresh friend requests in MyFriendController so badge updates on home screen
         if (Get.isRegistered<MyFriendController>()) {
           Get.find<MyFriendController>().fetchFriendRequests();
         }

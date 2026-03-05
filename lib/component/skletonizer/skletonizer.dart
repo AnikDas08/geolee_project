@@ -17,7 +17,7 @@ class PostCardSkeleton extends StatelessWidget {
           borderRadius: BorderRadius.circular(14.r),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.06),
+              color: Colors.black.withValues(alpha: 0.06),
               blurRadius: 10.r,
               offset: const Offset(0, 4),
             ),
@@ -26,7 +26,7 @@ class PostCardSkeleton extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            /// ── Header ──────────────────────────────────
+            //Header================================================
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
               child: Row(
@@ -46,7 +46,7 @@ class PostCardSkeleton extends StatelessWidget {
               ),
             ),
 
-            /// ── Image Area ───────────────────────────────
+            //Image Area=====================================
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 12.w),
               child: _SkeletonBox(
@@ -56,13 +56,14 @@ class PostCardSkeleton extends StatelessWidget {
               ),
             ),
 
-            /// ── Clicker Type ─────────────────────────────
+            //Clicker Type =================================
+
             Padding(
               padding: EdgeInsets.fromLTRB(12.w, 12.h, 12.w, 4.h),
               child: _SkeletonBox(width: 80.w, height: 10.h),
             ),
 
-            /// ── Description Lines ────────────────────────
+            //Description Lines ===============================
             Padding(
               padding: EdgeInsets.fromLTRB(12.w, 6.h, 12.w, 4.h),
               child: _SkeletonBox(width: double.infinity, height: 10.h),
@@ -82,7 +83,7 @@ class PostCardSkeleton extends StatelessWidget {
   }
 }
 
-/// ─── Reusable skeleton box ───────────────────────────────
+//Reusable skeleton box=================================
 class _SkeletonBox extends StatelessWidget {
   final double width;
   final double height;

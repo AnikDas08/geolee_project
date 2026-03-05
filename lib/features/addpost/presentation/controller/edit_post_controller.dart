@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:giolee78/features/profile/presentation/controller/post_controller.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../../config/api/api_end_point.dart';
@@ -17,7 +18,7 @@ class EditPostControllers extends GetxController {
   // Image handling
   final selectedImages = <File>[].obs;
   final existingImageUrls = <String>[].obs;
-  final removedImages = <String>[].obs; // ✅ Track removed images to send to API
+  final removedImages = <String>[].obs;
 
   final descriptionController = TextEditingController();
   final selectedPricingOption = ''.obs;
@@ -26,9 +27,9 @@ class EditPostControllers extends GetxController {
   final serviceTimeController = TextEditingController();
   final selectedGender = ''.obs;
 
-  final List<String> priorityLevels = ['friend', 'public', 'only me'];
-  final ImagePicker _picker = ImagePicker();
+  final List<String> priorityLevels = ['Friend', 'Public', 'Only Me'];
 
+  final ImagePicker _picker = ImagePicker();
   Rxn<SinglePostData> mySinglePost = Rxn<SinglePostData>();
 
   void initialize(String id) {
@@ -52,10 +53,7 @@ class EditPostControllers extends GetxController {
       isLoading.value = true;
       final url = "${ApiEndPoint.getSinglePost}$postId";
 
-      final ApiResponseModel response = await ApiService.get(
-        url,
-
-      );
+      final ApiResponseModel response = await ApiService.get(url);
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final myPostModel = SinglePostModel.fromJson(
@@ -77,17 +75,33 @@ class EditPostControllers extends GetxController {
       final post = mySinglePost.value!;
       descriptionController.text = post.description ?? '';
       selectedPricingOption.value = post.clickerType ?? '';
-      selectedPriorityLevel.value = post.privacy ?? '';
+
+      final privacy = post.privacy ?? '';
+      selectedPriorityLevel.value = _capitalizePrivacy(privacy);
 
       if (post.photos.isNotEmpty) {
         existingImageUrls.assignAll(post.photos);
       }
 
       postId = post.id.toString();
-          update();
+      update();
     }
   }
 
+  String _capitalizePrivacy(String value) {
+    switch (value.toLowerCase()) {
+      case 'friend':
+        return 'Friend';
+      case 'public':
+        return 'Public';
+      case 'only me':
+        return 'Only Me';
+      default:
+        return value.isEmpty
+            ? ''
+            : value[0].toUpperCase() + value.substring(1);
+    }
+  }
 
   Future<void> editPost() async {
     isLoading.value = true;
@@ -102,7 +116,6 @@ class EditPostControllers extends GetxController {
         'removedImages': jsonEncode(removedImages),
       };
 
-
       final List<Map<String, dynamic>> files = [];
       for (var file in selectedImages) {
         files.add({
@@ -111,27 +124,22 @@ class EditPostControllers extends GetxController {
         });
       }
 
-
       final response = await ApiService.multipartImage(
         url,
         method: "PATCH",
         body: body,
         files: files,
-
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        Utils.successSnackBar("Post Updated", "Successfully saved changes");
-        Get.back();
-
-        try {
-          // Get.find<PostController>().fetchMyPosts();
-        } catch (_) {}
-
+        // Utils.successSnackBar("Post Updated", "Successfully saved changes");
         removedImages.clear();
-        //selectedImages.clear();
-        Get.back();
-      } else {
+
+        MyPostController myPostController=Get.find();
+        myPostController.fetchMyPosts();
+        Get.back(result: true);
+
+      }else {
         Utils.errorSnackBar("Update Failed", response.message ?? "Error");
       }
     } catch (e) {
@@ -151,7 +159,6 @@ class EditPostControllers extends GetxController {
 
   void removeExistingImageAtIndex(int index) {
     if (index >= 0 && index < existingImageUrls.length) {
-      // ✅ Add the URL to the removed list before removing from UI
       removedImages.add(existingImageUrls[index]);
       existingImageUrls.removeAt(index);
       update();
@@ -183,8 +190,11 @@ class EditPostControllers extends GetxController {
     }
   }
 
-  Future<void> pickImageFromGallery() async => await _pickImage(ImageSource.gallery);
-  Future<void> pickImageFromCamera() async => await _pickImage(ImageSource.camera);
+  Future<void> pickImageFromGallery() async =>
+      await _pickImage(ImageSource.gallery);
+
+  Future<void> pickImageFromCamera() async =>
+      await _pickImage(ImageSource.camera);
 
   @override
   void onClose() {

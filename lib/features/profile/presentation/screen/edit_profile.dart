@@ -128,7 +128,7 @@ class EditProfile extends StatelessWidget {
         height: 100.h,
         fit: BoxFit.cover,
         errorBuilder: (context, error, stackTrace) {
-          print('Error loading selected image: $error');
+          debugPrint('Error loading selected image: $error');
           return _buildNetworkOrDefaultImage();
         },
       );

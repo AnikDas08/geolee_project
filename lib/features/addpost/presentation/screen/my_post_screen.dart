@@ -29,6 +29,11 @@ class _MyPostScreenState extends State<MyPostScreen> with WidgetsBindingObserver
   }
 
   @override
+  void didPopNext() {
+    controller.fetchMyPosts();
+  }
+
+  @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();

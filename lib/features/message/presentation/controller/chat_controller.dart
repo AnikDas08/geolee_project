@@ -40,9 +40,9 @@ class ChatController extends GetxController {
 
   void clearSearch() {
     searchController.clear();
-    // Refresh data from server without search term
-    getChatRepos();
-    getChatRepos(isGroup: true);
+    _searchDebounce?.cancel();
+    filteredSingleChats = List.from(singleChats);
+    filteredChats = List.from(chats);
     update();
   }
 

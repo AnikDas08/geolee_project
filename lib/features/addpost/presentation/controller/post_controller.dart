@@ -34,14 +34,12 @@ class PostController extends GetxController {
 
   final List<String> priorityLevels = ['Friends', 'Public', 'Only me'];
 
-  /// ✅ Image mapping for privacy level
   final Map<String, String> privacyImages = {
-    'Friends': 'assets/images/friend.png',
-    'Public': 'assets/images/public.png',
-    'Only me': 'assets/images/only_me.png',
+    'Friends': 'assets/images/fri.png',
+    'Public': 'assets/images/pub.png',
+    'Only me': 'assets/images/only.png',
   };
 
-  /// ✅ Get image path for privacy
   String getPrivacyImage(String privacyLevel) {
     return privacyImages[privacyLevel] ?? 'assets/icons/only_me.png';
   }

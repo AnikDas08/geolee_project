@@ -1,3 +1,5 @@
+import 'package:get/get_rx/src/rx_types/rx_types.dart';
+
 class NearbyChatResponseModel {
   final bool success;
   final String message;
@@ -21,10 +23,7 @@ class NearbyChatResponseModel {
           .toList(),
     );
   }
-
-  void operator [](int other) {}
 }
-
 
 class PaginationModel {
   final int total;
@@ -49,7 +48,6 @@ class PaginationModel {
   }
 }
 
-
 class NearbyChatUserModel {
   final String id;
   final String name;
@@ -72,6 +70,14 @@ class NearbyChatUserModel {
   final AdvertiserModel? advertiser;
   final double? distance;
 
+  final RxBool _isFriend;
+
+  RxBool get isFriendRx => _isFriend;
+
+  bool get isFriend => _isFriend.value;
+
+  void setFriend(bool value) => _isFriend.value = value;
+
   NearbyChatUserModel({
     required this.id,
     required this.name,
@@ -92,8 +98,9 @@ class NearbyChatUserModel {
     required this.createdAt,
     required this.updatedAt,
     this.advertiser,
-    this.distance, // ✅ add this
-  });
+    this.distance,
+    bool isFriend = false,
+  }) : _isFriend = isFriend.obs;
 
   factory NearbyChatUserModel.fromJson(Map<String, dynamic> json) {
     return NearbyChatUserModel(
@@ -118,12 +125,11 @@ class NearbyChatUserModel {
       advertiser: json['advertiser'] != null
           ? AdvertiserModel.fromJson(json['advertiser'])
           : null,
-      distance: (json['distance'] as num?)?.toDouble(), // ✅ parse
+      distance: (json['distance'] as num?)?.toDouble(),
+      isFriend: json['isFriend'] ?? false,
     );
   }
 }
-
-
 
 class AdvertiserModel {
   final String id;
@@ -169,15 +175,11 @@ class AdvertiserModel {
   }
 }
 
-
 class LocationModel {
   final String type;
   final List<double> coordinates;
 
-  LocationModel({
-    required this.type,
-    required this.coordinates,
-  });
+  LocationModel({required this.type, required this.coordinates});
 
   factory LocationModel.fromJson(Map<String, dynamic> json) {
     return LocationModel(

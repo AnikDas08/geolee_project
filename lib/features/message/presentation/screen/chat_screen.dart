@@ -1,4 +1,3 @@
-import 'dart:ffi' hide Size;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -202,6 +201,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
                   children: [
                     //Search bar===================================================================
                     TextField(
+                      autofocus: false,
                       controller: controller.searchController,
                       onChanged: (value) => controller.searchChats(value),
                       decoration: InputDecoration(
@@ -223,7 +223,10 @@ class _ChatListScreenState extends State<ChatListScreen> {
                                   color: Colors.grey[600],
                                   size: 20.sp,
                                 ),
-                                onPressed: () => controller.clearSearch(),
+                                onPressed: () {
+                                  FocusScope.of(context).unfocus();
+                                  controller.clearSearch();}
+
                               )
                             : null,
                         filled: true,
@@ -252,6 +255,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
                     SizedBox(height: 12.h),
 
                     // Tab Views============================================================
+
                     Expanded(
                       child: TabBarView(
                         children: [
@@ -298,12 +302,14 @@ class _ChatListScreenState extends State<ChatListScreen> {
                               }
                               final ChatModel item = controller.filteredSingleChats[index];
                               return GestureDetector(
+
                                 onTap: () {
                                   Get.toNamed(
                                     AppRoutes.message,
                                     parameters: {
                                       "userId": item.participant.sId,
                                       "chatId": item.id,
+                                      'isOnline': item.participant.isOnline.toString(),
                                       "name": item.isGroup
                                           ? (item.chatName ?? "Unnamed Group")
                                           : item.participant.fullName,
@@ -313,6 +319,22 @@ class _ChatListScreenState extends State<ChatListScreen> {
                                     },
                                   );
                                 },
+                               /* onTap: () {
+                                  Get.toNamed(
+                                    AppRoutes.message,
+                                    parameters: {
+                                      "userId": item.participant.sId,
+                                      "chatId": item.id,
+                                      'isOnline': item.isOnline.toString(),
+                                      "name": item.isGroup
+                                          ? (item.chatName ?? "Unnamed Group")
+                                          : item.participant.fullName,
+                                      "image": item.isGroup
+                                          ? (item.chatImage ?? "")
+                                          : item.participant.image,
+                                    },
+                                  );
+                                },*/
                                 child: chatListItem(item: item, isFriend: item.isFriend),
                               );
                             },

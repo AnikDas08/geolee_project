@@ -121,6 +121,7 @@ class ChatNearbyScreen extends StatelessWidget {
   }
 }
 
+
 class _ChatNearbyAppBar extends StatelessWidget {
   Future<void> updateProfileAndLocationVisible() async {
     try {
@@ -204,6 +205,7 @@ class _ChatNearbyAppBar extends StatelessWidget {
   }
 }
 
+
 class _NearbyUserCard extends StatelessWidget {
   const _NearbyUserCard({
     required this.nearbyChatUser,
@@ -227,9 +229,13 @@ class _NearbyUserCard extends StatelessWidget {
       final tempController = ChatNearbyProfileController();
       await tempController.checkFriendship(nearbyChatUser.id.toString());
 
+      final isNowFriend =
+          tempController.friendStatus.value == FriendStatus.friends;
+      nearbyChatUser.setFriend(isNowFriend);
+
       Get.back();
 
-      if (tempController.friendStatus.value == FriendStatus.friends) {
+      if (isNowFriend) {
         await clickerController.createOrGetChatAndGo(
           receiverId: nearbyChatUser.id.toString(),
           name: nearbyChatUser.name,
@@ -248,14 +254,13 @@ class _NearbyUserCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      final isFriend =
-          controller.friendStatusMap[nearbyChatUser.id] ?? false;
+
+      final isFriend = nearbyChatUser.isFriendRx.value;
 
       return GestureDetector(
         onTap: () => _handleUserTap(context),
         child: Container(
           decoration: ShapeDecoration(
-            //=======================if user is friend show This UI
             color: isFriend
                 ? AppColors.primaryColor2.withOpacity(0.08)
                 : Colors.white,
@@ -281,7 +286,7 @@ class _NearbyUserCard extends StatelessWidget {
             children: [
               CircleAvatar(
                 radius: 20.r,
-                backgroundColor: AppColors.primaryColor2.withOpacity(0.1),
+                backgroundColor: AppColors.primaryColor2.withValues(alpha: 0.1),
                 child: nearbyChatUser.privacy == "public"
                     ? ClipOval(
                   child: nearbyChatUser.image != null &&
@@ -293,7 +298,8 @@ class _NearbyUserCard extends StatelessWidget {
                     fill: BoxFit.cover,
                   )
                       : CommonImage(
-                    imageSrc: "assets/images/profilePlaceholder.jpg",
+                    imageSrc:
+                    "assets/images/profilePlaceholder.jpg",
                     size: 40.r,
                     fill: BoxFit.cover,
                   ),
@@ -326,7 +332,7 @@ class _NearbyUserCard extends StatelessWidget {
               if (!isFriend)
                 CommonText(
                   text: "Not Friend",
-                  fontSize: 10.sp,
+                  fontSize: 12.sp,
                   fontWeight: FontWeight.w600,
                 ),
             ],

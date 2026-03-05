@@ -63,9 +63,12 @@ class SearchFriendScreen extends StatelessWidget {
                       children: [
                         ClipOval(
                           child: CommonImage(
-                            fill: BoxFit.fill,
-                            imageSrc: "${ApiEndPoint.imageUrl}${user.image}",
-                            height: 50.r, width: 50.r,
+                            fill: BoxFit.cover,
+                            imageSrc: user.image!.isNotEmpty
+                                ? "${ApiEndPoint.imageUrl}${user.image}"
+                                : "assets/images/profilePlaceholder.jpg",
+                            height: 50.r,
+                            width: 50.r,
                           ),
                         ),
                         SizedBox(width: 15.w),

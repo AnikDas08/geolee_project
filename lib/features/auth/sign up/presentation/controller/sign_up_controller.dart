@@ -105,7 +105,7 @@ class SignUpController extends GetxController {
     update();
   }
 
-  ///============================================Sign Up
+  //============================================Sign Up
 
   Future<void> signUpUser(GlobalKey<FormState> signUpFormKey) async {
     if (!signUpFormKey.currentState!.validate()) return;
@@ -289,12 +289,6 @@ class SignUpController extends GetxController {
 
   ///========================================== Update Profile and Complete Profile
   Future<void> updateProfile() async {
-    isLoading = true;
-    update();
-
-    String formattedDob = "";
-
-
     if (image == null || image!.isEmpty) {
       Get.snackbar('Validation Error', 'Please select a profile image');
       return;
@@ -306,7 +300,7 @@ class SignUpController extends GetxController {
     }
 
     if (ageController.text.trim().isEmpty) {
-      Get.snackbar('Validation Error', 'Please select your age');
+      Get.snackbar('Validation Error', 'Please enter your age');
       return;
     }
 
@@ -315,6 +309,10 @@ class SignUpController extends GetxController {
       return;
     }
 
+    isLoading = true;
+    update();
+
+    String formattedDob = "";
 
     if (dateController.text.isNotEmpty) {
       try {
@@ -328,7 +326,6 @@ class SignUpController extends GetxController {
       }
     }
 
-
     final Map<String, String> body = {
       "gender": selectedGender!.toLowerCase(),
       "dob": formattedDob.isNotEmpty
@@ -338,6 +335,7 @@ class SignUpController extends GetxController {
           ? addressController.text
           : "Dhaka",
       "bio": bioController.text.toString(),
+      "age": ageController.text.trim(), // ✅ age add করুন
     };
 
     try {
@@ -352,7 +350,7 @@ class SignUpController extends GetxController {
           method: "PATCH",
         );
       } else {
-        debugPrint(" No image selected, updating profile without image");
+        debugPrint("No image selected, updating profile without image");
         response = await ApiService.patch(
           ApiEndPoint.updateProfile,
           body: body,
@@ -364,16 +362,13 @@ class SignUpController extends GetxController {
           Get.context!,
           title: "Your Registration Successfully Complete.",
         );
-
         Get.offAllNamed(AppRoutes.signIn);
       } else {
         Utils.errorSnackBar("Error ${response.statusCode}", response.message);
-        debugPrint(
-          "error is =>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>${response.message}",
-        );
+        debugPrint("error is ====${response.message}");
       }
     } catch (e) {
-      debugPrint("error is =>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>${e.toString()}");
+      debugPrint("error is ====${e.toString()}");
       Utils.errorSnackBar("Error", e.toString());
     } finally {
       isLoading = false;

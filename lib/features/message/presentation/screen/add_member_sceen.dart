@@ -23,7 +23,11 @@ class AddMemberScreen extends StatelessWidget {
           icon: Icon(Icons.arrow_back_ios_new, size: 18.sp, color: AppColors.black),
         ),
         centerTitle: true,
-        title: const CommonText(text: 'Add Member', fontSize: 20, fontWeight: FontWeight.w600),
+        title: const CommonText(
+          text: 'Add Member',
+          fontSize: 20,
+          fontWeight: FontWeight.w600,
+        ),
       ),
       body: Obx(() {
         if (controller.isLoading.value) {
@@ -33,32 +37,51 @@ class AddMemberScreen extends StatelessWidget {
         return CustomScrollView(
           physics: const BouncingScrollPhysics(),
           slivers: [
-            // --- Search Bar Section ---
+            // ── Search Bar ──
             SliverToBoxAdapter(
               child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 15.h),
+                padding: EdgeInsets.fromLTRB(20.w, 16.h, 20.w, 8.h),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     CommonText(
-                      text: 'Add Friends',
-                      fontSize: 14.sp,
+                      text: 'Add Friends to Group',
+                      fontSize: 13.sp,
                       fontWeight: FontWeight.w500,
                       color: AppColors.secondaryText,
                     ),
                     SizedBox(height: 10.h),
-                    TextField(
-                      onChanged: controller.onSearchChanged,
-                      decoration: InputDecoration(
-                        hintText: 'Search friends...',
-                        prefixIcon: Icon(Icons.search, size: 22.sp),
-                        contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12.r),
-                          borderSide: BorderSide.none,
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(14.r),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.05),
+                            blurRadius: 10,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: TextField(
+                        onChanged: controller.onSearchChanged,
+                        decoration: InputDecoration(
+                          hintText: 'Search friends...',
+                          hintStyle: TextStyle(
+                            fontSize: 14.sp,
+                            color: Colors.grey[400],
+                          ),
+                          prefixIcon: Icon(
+                            Icons.search_rounded,
+                            size: 22.sp,
+                            color: AppColors.primaryColor,
+                          ),
+                          contentPadding: EdgeInsets.symmetric(
+                            horizontal: 16.w,
+                            vertical: 14.h,
+                          ),
+                          border: InputBorder.none,
                         ),
-                        filled: true,
-                        fillColor: AppColors.white,
                       ),
                     ),
                   ],
@@ -66,19 +89,31 @@ class AddMemberScreen extends StatelessWidget {
               ),
             ),
 
-            // --- Friends List (Search Results) ---
+            // ── Search Results ──
             if (controller.searchResults.isEmpty)
-              const SliverToBoxAdapter(
-                child: Center(
-                  child: Padding(
-                    padding: EdgeInsets.only(top: 20),
-                    child: CommonText(text: 'No friends to add', fontSize: 14, color: Colors.grey),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: EdgeInsets.only(top: 30.h),
+                  child: Column(
+                    children: [
+                      Icon(
+                        Icons.person_search_rounded,
+                        size: 52.sp,
+                        color: Colors.grey[300],
+                      ),
+                      SizedBox(height: 12.h),
+                      CommonText(
+                        text: 'No friends to add',
+                        fontSize: 14,
+                        color: Colors.grey,
+                      ),
+                    ],
                   ),
                 ),
               )
             else
               SliverPadding(
-                padding: EdgeInsets.symmetric(horizontal: 20.w),
+                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
                 sliver: SliverList(
                   delegate: SliverChildBuilderDelegate(
                         (context, index) {
@@ -87,35 +122,12 @@ class AddMemberScreen extends StatelessWidget {
                           ? friend.image
                           : "${ApiEndPoint.imageUrl}${friend.image}";
 
-                      return _buildPersonItem(
+                      return _buildPersonCard(
                         imageUrl: imageUrl,
                         name: friend.name,
-                        trailing: ElevatedButton(
-                          onPressed: () => controller.onAddMember(friend),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primaryColor,
-                            minimumSize: Size(70.w, 34.h),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8.r),
-                            ),
-                            elevation: 0,
-                            shadowColor: Colors.transparent,
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(Icons.person_add_alt_1_rounded, size: 14.sp, color: Colors.white),
-                              SizedBox(width: 4.w),
-                              Text(
-                                'Add',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 12.sp,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
+                        subtitle: 'Friend',
+                        trailing: _buildAddButton(
+                          onTap: () => controller.onAddMember(friend),
                         ),
                       );
                     },
@@ -124,29 +136,54 @@ class AddMemberScreen extends StatelessWidget {
                 ),
               ),
 
-            // --- Divider & Header for Current Members ---
+            // ── Current Members Header ──
             if (controller.currentMembers.isNotEmpty)
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: EdgeInsets.fromLTRB(20.w, 30.h, 20.w, 10.h),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  padding: EdgeInsets.fromLTRB(20.w, 24.h, 20.w, 12.h),
+                  child: Row(
                     children: [
-                      Divider(height: 1.h, color: Colors.grey.shade200),
-                      SizedBox(height: 20.h),
+                      Container(
+                        width: 4.w,
+                        height: 18.h,
+                        decoration: BoxDecoration(
+                          color: AppColors.primaryColor,
+                          borderRadius: BorderRadius.circular(4.r),
+                        ),
+                      ),
+                      SizedBox(width: 8.w),
                       CommonText(
-                        text: 'Group Members (${controller.currentMembers.length})',
-                        fontSize: 16.sp,
+                        text: 'Group Members',
+                        fontSize: 15.sp,
                         fontWeight: FontWeight.w600,
+                      ),
+                      SizedBox(width: 8.w),
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 8.w,
+                          vertical: 2.h,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.primaryColor.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(20.r),
+                        ),
+                        child: Text(
+                          '${controller.currentMembers.length}',
+                          style: TextStyle(
+                            fontSize: 12.sp,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.primaryColor,
+                          ),
+                        ),
                       ),
                     ],
                   ),
                 ),
               ),
 
-            // --- Current Members List ---
+            // ── Current Members List ──
             SliverPadding(
-              padding: EdgeInsets.symmetric(horizontal: 20.w),
+              padding: EdgeInsets.symmetric(horizontal: 16.w),
               sliver: SliverList(
                 delegate: SliverChildBuilderDelegate(
                       (context, index) {
@@ -155,24 +192,13 @@ class AddMemberScreen extends StatelessWidget {
                         ? member.image
                         : "${ApiEndPoint.imageUrl}${member.image}";
 
-                    return _buildPersonItem(
+                    return _buildPersonCard(
                       imageUrl: imageUrl,
                       name: member.name,
-                      trailing: GestureDetector(
-                        onTap: () => controller.showRemoveMemberDialog(member),
-                        child: Container(
-                          padding: EdgeInsets.all(7.r),
-                          decoration: BoxDecoration(
-                            color: Colors.red.withOpacity(0.08),
-                            borderRadius: BorderRadius.circular(8.r),
-                            border: Border.all(color: Colors.red.withOpacity(0.2)),
-                          ),
-                          child: Icon(
-                            Icons.person_remove_outlined,
-                            color: Colors.redAccent,
-                            size: 18.sp,
-                          ),
-                        ),
+                      subtitle: 'Member',
+                      trailing: _buildRemoveButton(
+                        onTap: () =>
+                            controller.showRemoveMemberDialog(member),
                       ),
                     );
                   },
@@ -181,36 +207,164 @@ class AddMemberScreen extends StatelessWidget {
               ),
             ),
 
-            // Bottom Padding for smooth scrolling
-            SliverToBoxAdapter(child: SizedBox(height: 30.h)),
+            SliverToBoxAdapter(child: SizedBox(height: 40.h)),
           ],
         );
       }),
     );
   }
 
-  // Common Widget for List Items to keep code clean
-  Widget _buildPersonItem({required String imageUrl, required String name, required Widget trailing}) {
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: 10.h),
+
+  Widget _buildPersonCard({
+    required String imageUrl,
+    required String name,
+    required String subtitle,
+    required Widget trailing,
+  }) {
+    return Container(
+      margin: EdgeInsets.only(bottom: 10.h),
+      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14.r),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
       child: Row(
         children: [
-          CircleAvatar(
-            radius: 24.r,
-            backgroundColor: Colors.grey.shade200,
-            backgroundImage: NetworkImage(imageUrl),
-            onBackgroundImageError: (_, __) => const Icon(Icons.person),
+          // Avatar
+          Stack(
+            children: [
+              CircleAvatar(
+                radius: 24.r,
+                backgroundColor: Colors.grey.shade100,
+                backgroundImage: NetworkImage(imageUrl),
+                onBackgroundImageError: (_, __) {},
+                child: Icon(Icons.person, size: 24.sp, color: Colors.grey),
+              ),
+              // Online dot (optional)
+              // Positioned(
+              //   bottom: 0,
+              //   right: 0,
+              //   child: Container(
+              //     width: 10.w,
+              //     height: 10.w,
+              //     decoration: BoxDecoration(
+              //       color: const Color(0xFF0FE16D),
+              //       shape: BoxShape.circle,
+              //       border: Border.all(color: Colors.white, width: 1.5),
+              //     ),
+              //   ),
+              // ),
+            ],
           ),
-          SizedBox(width: 15.w),
+
+          SizedBox(width: 12.w),
+
+          // Name & subtitle
           Expanded(
-            child: CommonText(
-              text: name,
-              fontSize: 15.sp,
-              fontWeight: FontWeight.w500,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  name,
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black87,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                SizedBox(height: 2.h),
+                Text(
+                  subtitle,
+                  style: TextStyle(
+                    fontSize: 11.sp,
+                    color: Colors.grey[500],
+                  ),
+                ),
+              ],
             ),
           ),
+
           trailing,
         ],
+      ),
+    );
+  }
+
+  // ─────────────────────────────────────────────
+  // ✅ Add Button
+  // ─────────────────────────────────────────────
+  Widget _buildAddButton({required VoidCallback onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
+        decoration: BoxDecoration(
+          color: AppColors.primaryColor,
+          borderRadius: BorderRadius.circular(10.r),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.person_add_alt_1_rounded,
+              size: 14.sp,
+              color: Colors.white,
+            ),
+            SizedBox(width: 5.w),
+            Text(
+              'Add',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 12.sp,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRemoveButton({required VoidCallback onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
+        decoration: BoxDecoration(
+          color: Colors.red.withValues(alpha: 0.08),
+          borderRadius: BorderRadius.circular(10.r),
+          border: Border.all(
+            color: Colors.red.withValues(alpha: 0.25),
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.person_remove_outlined,
+              size: 14.sp,
+              color: Colors.redAccent,
+            ),
+            SizedBox(width: 5.w),
+            Text(
+              'Remove',
+              style: TextStyle(
+                color: Colors.redAccent,
+                fontSize: 12.sp,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

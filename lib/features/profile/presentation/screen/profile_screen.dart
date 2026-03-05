@@ -44,7 +44,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     super.initState();
     controller.getUserDataForRole();
 
-    print("===========================${LocalStorage.myRole}");
+    debugPrint("===========================${LocalStorage.myRole}");
   }
   @override
   Widget build(BuildContext context) {
@@ -197,16 +197,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       CommonButton(
                         titleText: "Advertise with Us",
                         onTap: () async{
-                          print(
+                          debugPrint(
                             "My Role Is :=========================== ${LocalStorage.myRole.toString()}",
                           );
 
                           if((controller.advToken.isEmpty||controller.advToken=="")){
 
-                            print("Token is Empty I Have no token");
+                            debugPrint("Token is Empty I Have no token");
                             await Get.to(()=>const ServiceProviderInfoScreen());
                           }else{
-                            // Update LocalStorage properly
                            await LocalStorage.setString(LocalStorageKeys.role,"advertise");
 
                             // Navigate to HomeNav after updating role
@@ -222,8 +221,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
 
 
-                        },
-                      ),
+                      },
+                    ),
                   ],
                 ),
               ),

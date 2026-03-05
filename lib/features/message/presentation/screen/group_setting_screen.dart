@@ -28,7 +28,7 @@ class GroupSettingsScreen extends StatelessWidget {
           borderRadius: BorderRadius.circular(10.r),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withValues(alpha: 0.05),
               blurRadius: 5.r,
               offset: const Offset(0, 2),
             ),
@@ -47,7 +47,7 @@ class GroupSettingsScreen extends StatelessWidget {
             Icon(
               Icons.arrow_forward_ios,
               size: 16.sp,
-              color: AppColors.secondaryText.withOpacity(0.6),
+              color: AppColors.secondaryText.withValues(alpha: 0.6),
             ),
           ],
         ),
@@ -277,7 +277,7 @@ class GroupSettingsScreen extends StatelessWidget {
                             return CircleAvatar(
                               radius: 50.r,
                               backgroundColor: AppColors.primaryColor
-                                  .withOpacity(0.8),
+                                  .withValues(alpha: 0.8),
                               child: CommonText(
                                 text: controller.groupName.value.isNotEmpty
                                     ? controller.groupName.value
@@ -377,7 +377,7 @@ class GroupSettingsScreen extends StatelessWidget {
                           borderRadius: BorderRadius.circular(10.r),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.05),
+                              color: Colors.black.withValues(alpha:0.05),
                               blurRadius: 5.r,
                               offset: const Offset(0, 2),
                             ),

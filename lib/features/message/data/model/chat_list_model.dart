@@ -92,9 +92,11 @@ class ChatModel {
   }
 
   factory ChatModel.fromJson(Map<String, dynamic> json) {
-    final bool isGroupFromFlag = json['isGroup'] ?? json['isGroupChat'] ?? false;
+    final bool isGroupFromFlag =
+        json['isGroup'] ?? json['isGroupChat'] ?? false;
     final String? cName = _parseStringOrFirstInList(json['chatName']);
-    final bool isGroup = isGroupFromFlag || (cName != null && cName.isNotEmpty);
+    final bool isGroup =
+        isGroupFromFlag || (cName != null && cName.isNotEmpty);
 
     var participantJson = json['anotherParticipant'];
     if (participantJson == null &&
@@ -123,14 +125,15 @@ class ChatModel {
         json['isFriend'] ?? json['isAlreadyFriend'] ?? json['is_friend'];
     final bool isFriend = isGroup
         ? true
-        : (friendRaw != null ? (friendRaw == true || friendRaw == 1) : true);
+        : (friendRaw != null
+        ? (friendRaw == true || friendRaw == 1)
+        : true);
 
     final bool amIAParticipant = json['amIAParticipant'] ?? true;
 
     final dynamic rawDist = json['distanceInKm'];
-    final double? distanceInKm = rawDist != null
-        ? double.tryParse(rawDist.toString())
-        : null;
+    final double? distanceInKm =
+    rawDist != null ? double.tryParse(rawDist.toString()) : null;
 
     String? joinRequestStatus;
     String? joinRequestId;
@@ -138,6 +141,9 @@ class ChatModel {
       joinRequestStatus = json['joinRequest']['status']?.toString();
       joinRequestId = json['joinRequest']['_id']?.toString();
     }
+
+    final bool participantIsOnline =
+        participantJson?['isOnline'] ?? false;
 
     return ChatModel(
       id: json['_id']?.toString() ?? '',
@@ -149,7 +155,7 @@ class ChatModel {
       latestMessage: LatestMessage.fromJson(json['latestMessage'] ?? {}),
       unreadCount: finalUnreadCount,
       isDeleted: json['isDeleted'] ?? false,
-      isOnline: json['isOnline'] ?? false,
+      isOnline: participantIsOnline,
       createdAt: DateTime.tryParse(json['createdAt']?.toString() ?? '') ??
           DateTime.now().toLocal(),
       updatedAt: DateTime.tryParse(json['updatedAt']?.toString() ?? '') ??
@@ -164,17 +170,23 @@ class ChatModel {
   }
 }
 
+// ─────────────────────────────────────────────
+// Participant
+// ─────────────────────────────────────────────
+
 class Participant {
   final String sId;
   final String fullName;
   final String image;
   final String email;
+  final bool isOnline;
 
   Participant({
     required this.sId,
     required this.fullName,
     required this.image,
     this.email = '',
+    this.isOnline = false,
   });
 
   factory Participant.fromJson(Map<String, dynamic> json) {
@@ -183,9 +195,14 @@ class Participant {
       fullName: json['name']?.toString() ?? '',
       image: ChatModel._parseStringOrFirstInList(json['image']) ?? '',
       email: json['email']?.toString() ?? '',
+      isOnline: json['isOnline'] ?? false,
     );
   }
 }
+
+// ─────────────────────────────────────────────
+// LatestMessage
+// ─────────────────────────────────────────────
 
 class LatestMessage {
   final String id;

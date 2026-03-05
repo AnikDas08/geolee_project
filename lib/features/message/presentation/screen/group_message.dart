@@ -196,7 +196,7 @@ class _GroupMessageScreenState extends State<GroupMessageScreen> {
                   backgroundImage: message.senderImage.isNotEmpty
                       ? NetworkImage(getImageUrl(message.senderImage)) // আপডেট করা হয়েছে
                       : null,
-                  backgroundColor: AppColors.primaryColor.withOpacity(0.2),
+                  backgroundColor: AppColors.primaryColor.withValues(alpha: 0.2),
                   child: message.senderImage.isEmpty
                       ? Text(
                     message.senderName.isNotEmpty
@@ -261,7 +261,7 @@ class _GroupMessageScreenState extends State<GroupMessageScreen> {
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 5,
             offset: const Offset(0, 2),
           ),
@@ -306,7 +306,7 @@ class _GroupMessageScreenState extends State<GroupMessageScreen> {
           Container(
             padding: EdgeInsets.all(8.w),
             decoration: BoxDecoration(
-              color: info.color.withOpacity(0.12),
+              color: info.color.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(8.r),
             ),
             child: Icon(info.icon, color: info.color, size: 28.sp),
@@ -391,7 +391,7 @@ class _GroupMessageScreenState extends State<GroupMessageScreen> {
               Container(
                 padding: EdgeInsets.all(8.w),
                 decoration: BoxDecoration(
-                  color: fileInfo.color.withOpacity(0.12),
+                  color: fileInfo.color.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(8.r),
                 ),
                 child: Icon(fileInfo.icon, color: fileInfo.color, size: 32.sp),
@@ -480,7 +480,7 @@ class _GroupMessageScreenState extends State<GroupMessageScreen> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Container(width: 60.w, height: 60.w, decoration: BoxDecoration(color: color.withOpacity(0.12), borderRadius: BorderRadius.circular(16.r)), child: Icon(icon, color: color, size: 28.sp)),
+          Container(width: 60.w, height: 60.w, decoration: BoxDecoration(color: color.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(16.r)), child: Icon(icon, color: color, size: 28.sp)),
           SizedBox(height: 8.h),
           Text(label, style: TextStyle(fontSize: 12.sp, color: Colors.grey[700])),
         ],

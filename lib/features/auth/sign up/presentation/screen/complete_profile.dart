@@ -175,7 +175,7 @@ class _CompleteProfileState extends State<CompleteProfile> {
                   ],
                 ),
                 child: DropdownButtonFormField<String>(
-                  initialValue: controller.selectedGender,
+                  value: controller.selectedGender,
                   decoration: InputDecoration(
                     contentPadding: EdgeInsets.symmetric(
                       horizontal: 16.w,
@@ -209,8 +209,7 @@ class _CompleteProfileState extends State<CompleteProfile> {
                   items: controller.genderOptions.map((String gender) {
                     return DropdownMenuItem<String>(
                       value: gender,
-                      // Display with title case (First letter capital)
-                      child: Text(toTitleCase(gender)),
+                      child: Text(gender),
                     );
                   }).toList(),
                   onChanged: (String? newValue) {

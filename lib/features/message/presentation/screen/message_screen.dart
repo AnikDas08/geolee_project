@@ -30,43 +30,36 @@ class _MessageScreenState extends State<MessageScreen> {
       messageController.name = params['name'] ?? '';
       messageController.image = params['image'] ?? '';
       messageController.userId = params['userId'] ?? '';
+      messageController.isActive.value = params['isOnline'] == 'true';
     }
 
+    debugPrint("user Online status: ${messageController.isActive.value}");
     _initScreen();
   }
 
   String _getImageUrl(String? path) {
     if (path == null || path.isEmpty) return "";
     if (path.startsWith('http')) return path;
-
     String baseUrl = ApiEndPoint.imageUrl;
     if (!baseUrl.endsWith('/')) baseUrl = '$baseUrl/';
     final String cleanPath = path.startsWith('/') ? path.substring(1) : path;
     return "$baseUrl$cleanPath";
   }
 
-  ({IconData icon, Color color}) _getFileIconInfo(String? ext) {
-    switch (ext?.toLowerCase()) {
-      case 'pdf':
-        return (icon: Icons.picture_as_pdf_rounded, color: Colors.red);
-      case 'doc':
-      case 'docx':
-        return (icon: Icons.description_rounded, color: Colors.blue);
-      case 'xls':
-      case 'xlsx':
-        return (icon: Icons.table_chart_rounded, color: Colors.green);
-      case 'ppt':
-      case 'pptx':
-        return (icon: Icons.slideshow_rounded, color: Colors.orange);
-      default:
-        return (icon: Icons.insert_drive_file_rounded, color: Colors.grey);
-    }
+  // ✅ Full screen image viewer
+  void _openImageFullScreen(BuildContext context, String imageUrl) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => _FullScreenImageViewer(imageUrl: imageUrl),
+      ),
+    );
   }
 
   void _showAttachmentPicker(
-    BuildContext context,
-    MessageController controller,
-  ) {
+      BuildContext context,
+      MessageController controller,
+      ) {
     showModalBottomSheet(
       context: context,
       shape: RoundedRectangleBorder(
@@ -145,6 +138,8 @@ class _MessageScreenState extends State<MessageScreen> {
           },
           child: Scaffold(
             backgroundColor: Colors.grey[100],
+
+            // ✅ AppBar with Obx for reactive isActive
             appBar: AppBar(
               backgroundColor: Colors.white,
               elevation: 0,
@@ -155,7 +150,7 @@ class _MessageScreenState extends State<MessageScreen> {
                   Get.back();
                 },
               ),
-              title: Row(
+              title: Obx(() => Row(
                 children: [
                   Stack(
                     children: [
@@ -166,14 +161,10 @@ class _MessageScreenState extends State<MessageScreen> {
                             ? NetworkImage(_getImageUrl(controller.image))
                             : null,
                         child: controller.image.isEmpty
-                            ? Icon(
-                                Icons.person,
-                                size: 20.sp,
-                                color: Colors.grey,
-                              )
+                            ? Icon(Icons.person, size: 20.sp, color: Colors.grey)
                             : null,
                       ),
-                      if (controller.isActive)
+                      if (controller.isActive.value)
                         Positioned(
                           bottom: 0,
                           right: 0,
@@ -195,7 +186,9 @@ class _MessageScreenState extends State<MessageScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          controller.name.isNotEmpty ? controller.name : 'Chat',
+                          controller.name.isNotEmpty
+                              ? controller.name
+                              : 'Chat',
                           style: TextStyle(
                             fontWeight: FontWeight.w600,
                             fontSize: 16.sp,
@@ -204,7 +197,7 @@ class _MessageScreenState extends State<MessageScreen> {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        if (controller.isActive)
+                        if (controller.isActive.value)
                           Text(
                             "Active now",
                             style: TextStyle(
@@ -216,52 +209,72 @@ class _MessageScreenState extends State<MessageScreen> {
                     ),
                   ),
                 ],
-              ),
+              )),
             ),
 
             body: controller.isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : Column(
-                    children: [
-                      Expanded(
-                        child: ListView.builder(
-                          controller: controller.scrollController,
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 16.w,
-                            vertical: 16.h,
-                          ),
-                          itemCount: controller.messages.length,
-                          itemBuilder: (context, index) =>
-                              _buildMessageBubble(controller.messages[index]),
-                        ),
-                      ),
-
-                      _buildPickedFilePreview(controller),
-
-                      if (controller.isUploadingImage ||
-                          controller.isUploadingMedia)
-                        _buildUploadProgress(),
-
-                      Obx(() {
-                        final loaded = controller.friendStatusLoaded.value;
-                        final isFriend = controller.isFriend.value;
-                        if (!loaded || isFriend) {
-                          return _buildInputArea(context, controller);
-                        }
-                        return _buildNonFriendPanel(context, controller);
-                      }),
-                    ],
+              children: [
+                Expanded(
+                  child: ListView.builder(
+                    controller: controller.scrollController,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 16.w,
+                      vertical: 16.h,
+                    ),
+                    itemCount: controller.messages.length,
+                    itemBuilder: (context, index) =>
+                        _buildMessageBubble(
+                            context, controller.messages[index]),
                   ),
+                ),
+
+                // ✅ Picked image/file preview
+                _buildPickedFilePreview(controller),
+
+                if (controller.isUploadingImage ||
+                    controller.isUploadingMedia)
+                  _buildUploadProgress(),
+
+                Obx(() {
+                  final loaded = controller.friendStatusLoaded.value;
+                  final isFriend = controller.isFriend.value;
+
+                  // ⏳ Loading
+                  if (!loaded) {
+                    return Container(
+                      color: Colors.white,
+                      padding: EdgeInsets.symmetric(vertical: 20.h),
+                      child: const Center(
+                        child: CircularProgressIndicator(color: AppColors.primaryColor),
+                      ),
+                    );
+                  }
+
+                  // ✅ Sender বা Friend — normal input
+                  if (isFriend) {
+                    return _buildInputArea(context, controller);
+                  }
+
+                  // ❌ Receiver — non-friend panel
+                  return _buildNonFriendPanel(context, controller);
+                }),
+              ],
+            ),
           ),
         );
       },
     );
   }
 
+  // ─────────────────────────────────────────────
+  // Non-Friend Panel
+  // ─────────────────────────────────────────────
   Widget _buildNonFriendPanel(
-    BuildContext context,
-    MessageController controller,
-  ) {
+      BuildContext context,
+      MessageController controller,
+      ) {
     return Obx(() {
       final status = controller.friendStatusValue.value;
       return SafeArea(
@@ -311,10 +324,10 @@ class _MessageScreenState extends State<MessageScreen> {
                         onTap: status == 'pending'
                             ? null
                             : () async {
-                                await controller.sendFriendRequest(
-                                  controller.otherUserId.value,
-                                );
-                              },
+                          await controller.sendFriendRequest(
+                            controller.otherUserId.value,
+                          );
+                        },
                         iconPath: 'assets/images/add_friend.png',
                       ),
                       Divider(height: 1, color: Colors.grey[200]),
@@ -404,6 +417,9 @@ class _MessageScreenState extends State<MessageScreen> {
     );
   }
 
+  // ─────────────────────────────────────────────
+  // Upload Progress
+  // ─────────────────────────────────────────────
   Widget _buildUploadProgress() {
     return Container(
       color: Colors.white,
@@ -425,10 +441,99 @@ class _MessageScreenState extends State<MessageScreen> {
     );
   }
 
+  // ─────────────────────────────────────────────
+  // ✅ Picked File Preview
+  // ─────────────────────────────────────────────
   Widget _buildPickedFilePreview(MessageController controller) {
-    return const SizedBox.shrink();
+    if (!controller.hasPickedImage && !controller.hasPickedFile) {
+      return const SizedBox.shrink();
+    }
+
+    return Container(
+      color: Colors.white,
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+      child: Row(
+        children: [
+          // ✅ Image preview
+          if (controller.hasPickedImage && controller.pickedImagePath != null)
+            Stack(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8.r),
+                  child: Image.network(
+                    controller.pickedImagePath!.startsWith('http')
+                        ? controller.pickedImagePath!
+                        : controller.pickedImagePath!,
+                    width: 60.w,
+                    height: 60.w,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => Container(
+                      width: 60.w,
+                      height: 60.w,
+                      color: Colors.grey[200],
+                      child: const Icon(Icons.image),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  top: 0,
+                  right: 0,
+                  child: GestureDetector(
+                    onTap: controller.clearPickedImage,
+                    child: Container(
+                      decoration: const BoxDecoration(
+                        color: Colors.red,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(Icons.close, size: 16.sp, color: Colors.white),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+
+          // ✅ File preview
+          if (controller.hasPickedFile && controller.pickedFileName != null)
+            Expanded(
+              child: Row(
+                children: [
+                  Icon(Icons.insert_drive_file,
+                      color: AppColors.primaryColor, size: 32.sp),
+                  SizedBox(width: 8.w),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          controller.pickedFileName ?? '',
+                          style: TextStyle(
+                              fontSize: 12.sp, fontWeight: FontWeight.w500),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        Text(
+                          controller.getPickedFileSize(),
+                          style: TextStyle(
+                              fontSize: 10.sp, color: Colors.grey[500]),
+                        ),
+                      ],
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: controller.clearPickedFile,
+                    child: Icon(Icons.close, size: 20.sp, color: Colors.red),
+                  ),
+                ],
+              ),
+            ),
+        ],
+      ),
+    );
   }
 
+  // ─────────────────────────────────────────────
+  // Input Area
+  // ─────────────────────────────────────────────
   Widget _buildInputArea(BuildContext context, MessageController controller) {
     return Container(
       color: Colors.white,
@@ -485,7 +590,10 @@ class _MessageScreenState extends State<MessageScreen> {
     );
   }
 
-  Widget _buildMessageBubble(ChatMessage message) {
+  // ─────────────────────────────────────────────
+  // ✅ Message Bubble — context pass করুন
+  // ─────────────────────────────────────────────
+  Widget _buildMessageBubble(BuildContext context, ChatMessage message) {
     return Padding(
       padding: EdgeInsets.only(bottom: 16.h),
       child: Row(
@@ -521,14 +629,14 @@ class _MessageScreenState extends State<MessageScreen> {
                     borderRadius: BorderRadius.circular(16.r),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
+                        color: Colors.black.withValues(alpha: 0.05),
                         blurRadius: 5,
                         offset: const Offset(0, 2),
                       ),
                     ],
                   ),
                   padding: EdgeInsets.all(12.w),
-                  child: _buildBubbleContent(message),
+                  child: _buildBubbleContent(context, message), // ✅ context pass
                 ),
                 Text(
                   DateFormat('hh:mm a').format(message.createdAt),
@@ -542,31 +650,109 @@ class _MessageScreenState extends State<MessageScreen> {
     );
   }
 
-  Widget _buildBubbleContent(ChatMessage message) {
+  // ─────────────────────────────────────────────
+  // ✅ Bubble Content — image tap করলে full screen
+  // ─────────────────────────────────────────────
+  Widget _buildBubbleContent(BuildContext context, ChatMessage message) {
     if (message.isImage) {
-      final url = message.imageUrl ?? '';
-      return ClipRRect(
-        borderRadius: BorderRadius.circular(8.r),
-        child: Image.network(
-          _getImageUrl(url),
-          width: 200.w,
-          fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) => const Icon(Icons.broken_image),
+      final url = _getImageUrl(message.imageUrl ?? '');
+      return GestureDetector(
+        onTap: () => _openImageFullScreen(context, url), // ✅ Tap to view
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(8.r),
+          child: Image.network(
+            url,
+            width: 200.w,
+            fit: BoxFit.cover,
+            loadingBuilder: (_, child, loadingProgress) {
+              if (loadingProgress == null) return child;
+              return SizedBox(
+                width: 200.w,
+                height: 150.h,
+                child: Center(
+                  child: CircularProgressIndicator(
+                    value: loadingProgress.expectedTotalBytes != null
+                        ? loadingProgress.cumulativeBytesLoaded /
+                        loadingProgress.expectedTotalBytes!
+                        : null,
+                    color: AppColors.primaryColor,
+                    strokeWidth: 2,
+                  ),
+                ),
+              );
+            },
+            errorBuilder: (_, __, ___) => Container(
+              width: 200.w,
+              height: 100.h,
+              color: Colors.grey[200],
+              child: const Icon(Icons.broken_image, color: Colors.grey),
+            ),
+          ),
         ),
       );
     }
+
     return Text(
       message.message,
       style: TextStyle(fontSize: 14.sp, height: 1.4),
     );
   }
 
+
   Future<void> _initScreen() async {
+
     await messageController.loadMessages();
+
     if (messageController.userId.isNotEmpty) {
+
       await messageController.checkFriendshipStatus(messageController.userId);
     } else {
+      messageController.isFriend.value = true;
       messageController.friendStatusLoaded.value = true;
     }
+  }
+}
+
+
+
+// ==================================Full Image View
+
+class _FullScreenImageViewer extends StatelessWidget {
+  final String imageUrl;
+
+  const _FullScreenImageViewer({required this.imageUrl});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      appBar: AppBar(
+        backgroundColor: Colors.black,
+        iconTheme: const IconThemeData(color: Colors.white),
+        elevation: 0,
+      ),
+      body: Center(
+        child: InteractiveViewer(
+          panEnabled: true,
+          minScale: 0.5,
+          maxScale: 4.0,
+          child: Image.network(
+            imageUrl,
+            fit: BoxFit.contain,
+            loadingBuilder: (_, child, loadingProgress) {
+              if (loadingProgress == null) return child;
+              return const Center(
+                child: CircularProgressIndicator(color: Colors.white),
+              );
+            },
+            errorBuilder: (_, __, ___) => const Icon(
+              Icons.broken_image,
+              color: Colors.white,
+              size: 64,
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }

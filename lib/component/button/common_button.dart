@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:giolee78/utils/constants/app_colors.dart';
-
 import '../other_widgets/common_loader.dart';
 import '../text/common_text.dart';
 
@@ -64,7 +63,6 @@ class _CommonButtonState extends State<CommonButton>
     );
   }
 
-  // Function to build the button with common settings
   Widget _buildElevatedButton() {
     return GestureDetector(
       onTapDown: _onTapDown,

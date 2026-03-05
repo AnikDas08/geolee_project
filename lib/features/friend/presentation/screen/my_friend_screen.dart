@@ -176,7 +176,7 @@ class _SuggestedFriendCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(16.r),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withValues(alpha: 0.05),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -187,7 +187,7 @@ class _SuggestedFriendCard extends StatelessWidget {
             // ── Avatar ──
             CircleAvatar(
               radius: 26.r,
-              backgroundColor: AppColors.primaryColor.withOpacity(0.1),
+              backgroundColor: AppColors.primaryColor.withValues(alpha: 0.1),
               backgroundImage: (avatar != null && avatar!.isNotEmpty)
                   ? NetworkImage(avatar!)
                   : const AssetImage(AppImages.profileImage) as ImageProvider,
@@ -281,9 +281,9 @@ class _StatusButton extends StatelessWidget {
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 7.h),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
+          color: color.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(8.r),
-          border: Border.all(color: color.withOpacity(0.4)),
+          border: Border.all(color: color.withValues(alpha: 0.4)),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -336,7 +336,7 @@ class _FriendListItem extends StatelessWidget {
           borderRadius: BorderRadius.circular(16.r),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withValues(alpha: 0.05),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -349,30 +349,30 @@ class _FriendListItem extends StatelessWidget {
               children: [
                 CircleAvatar(
                   radius: 26.r,
-                  backgroundColor: AppColors.primaryColor.withOpacity(0.1),
+                  backgroundColor: AppColors.primaryColor.withValues(alpha: 0.1),
                   backgroundImage: (avatar != null && avatar!.startsWith('http'))
                       ? NetworkImage(avatar!)
                       : const AssetImage(AppImages.profileImage) as ImageProvider,
                 ),
-                Positioned(
-                  bottom: 0,
-                  right: 0,
-                  child: Container(
-                    width: 12.w,
-                    height: 12.h,
-                    decoration: BoxDecoration(
-                      color: Colors.green,
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white, width: 2),
-                    ),
-                  ),
-                ),
+                // Positioned(
+                //   bottom: 0,
+                //   right: 0,
+                //   child: Container(
+                //     width: 12.w,
+                //     height: 12.h,
+                //     decoration: BoxDecoration(
+                //       color: Colors.green,
+                //       shape: BoxShape.circle,
+                //       border: Border.all(color: Colors.white, width: 2),
+                //     ),
+                //   ),
+                // ),
               ],
             ),
 
             SizedBox(width: 12.w),
 
-            // ── Name ──
+            // ================
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -521,7 +521,7 @@ class _ActionButton extends StatelessWidget {
       child: Container(
         padding: EdgeInsets.all(8.r),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
+          color: color.withValues(alpha:0.1),
           borderRadius: BorderRadius.circular(8.r),
         ),
         child: Icon(icon, size: 18.sp, color: color),
