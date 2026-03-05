@@ -17,7 +17,7 @@ class EditProfileAllFiled extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildLabel('Full Name'),
+        _buildLabel('Name'),
         8.height,
         CommonTextField(
           controller: controller.nameController,
@@ -34,7 +34,7 @@ class EditProfileAllFiled extends StatelessWidget {
         8.height,
         CommonTextField(
           controller: controller.aboutController,
-          hintText: 'Skilled professionals offering reliable, on-demand services..',
+          hintText: 'Enter a few words about yourself',
           keyboardType: TextInputType.multiline,
           maxLines: 3,
           hintTextColor: AppColors.secondaryText,

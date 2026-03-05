@@ -146,6 +146,7 @@ class _HomeDetailsState extends State<HomeDetails> {
                           color: AppColors.textColorFirst,
                           fontWeight: FontWeight.w600,
                         ),
+                        if (LocalStorage.token.isNotEmpty)
                         Row(
                           children: [
                             const CommonImage(
@@ -153,6 +154,7 @@ class _HomeDetailsState extends State<HomeDetails> {
                               size: 14,
                             ),
                             8.width,
+
                             Expanded(
                               child: Text(
                                 displayLocation,

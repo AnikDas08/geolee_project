@@ -75,6 +75,13 @@ class HomeController extends GetxController {
     super.onInit();
     try {
       clickerCount.value = "All";
+
+      final DateTime now = DateTime.now();
+      selectedPeriod.value = '24h';
+      startDate.value = now.subtract(const Duration(hours: 24));
+      endDate.value = now;
+      isDateFilterActive.value = true;
+
       if (LocalStorage.token.isNotEmpty) {
         argument = Get.arguments;
         Get.find<HomeNavController>().refresh();
@@ -83,17 +90,15 @@ class HomeController extends GetxController {
         await getUserData();
 
         getCurrentLocationAndUpdateProfile();
-        fetchPosts();
+        fetchPostsWithFilter();
         myProfileController.getUserData();
       } else {
-
         clickerCount.value = "All";
         allPosts = [];
         filteredPosts = [];
         isLoading = false;
-        await fetchPosts();
+        await fetchPostsWithFilter();
         update();
-
       }
     } catch (e) {
       debugPrint('Error in onInit: $e');

@@ -75,6 +75,62 @@ class ChatController extends GetxController {
     });
   }
 
+  Future<void> sendFriendRequest(String userId, String chatId) async {
+    try {
+      final response = await ApiService.post(
+        ApiEndPoint.createFriendRequest,
+        body: {"receiver": userId},
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final requestId = response.data['data']?['_id'] ?? '';
+        // ✅ UI update
+        _updateFriendRequestStatus(chatId, 'pending', requestId);
+      }
+    } catch (e) {
+      debugPrint("sendFriendRequest error: $e");
+    }
+  }
+
+  Future<void> cancelFriendRequest(String userId, String chatId) async {
+    try {
+      final index = singleChats.indexWhere((c) => c.id == chatId);
+      final requestId = index != -1
+          ? singleChats[index].friendRequestId ?? userId
+          : userId;
+
+      final response = await ApiService.patch(
+        "${ApiEndPoint.cancelFriendRequest}$requestId",
+        body: {"status": "cancelled"},
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        // ✅ UI update
+        _updateFriendRequestStatus(chatId, 'none', '');
+      }
+    } catch (e) {
+      debugPrint("cancelFriendRequest error: $e");
+    }
+  }
+
+  void _updateFriendRequestStatus(String chatId, String status, String requestId) {
+    final index = singleChats.indexWhere((c) => c.id == chatId);
+    if (index != -1) {
+      singleChats[index] = singleChats[index].copyWith(
+        friendRequestStatus: status,
+        friendRequestId: requestId,
+      );
+      final fIndex = filteredSingleChats.indexWhere((c) => c.id == chatId);
+      if (fIndex != -1) {
+        filteredSingleChats[fIndex] = filteredSingleChats[fIndex].copyWith(
+          friendRequestStatus: status,
+          friendRequestId: requestId,
+        );
+      }
+      update();
+    }
+  }
+
   void setupSinglePagination() {
     singleScrollController.addListener(() async {
       if (singleScrollController.position.pixels >=
@@ -276,6 +332,9 @@ class ChatController extends GetxController {
       update();
     }
   }
+
+
+
 
   @override
   void onInit() {

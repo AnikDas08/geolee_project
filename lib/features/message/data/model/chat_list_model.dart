@@ -17,6 +17,8 @@ class ChatModel {
   final double? distanceInKm;
   final String? joinRequestStatus;
   final String? joinRequestId;
+  final String? friendRequestStatus; // ✅ new — 'none' | 'pending'
+  final String? friendRequestId;     // ✅ new — cancel করার জন্য
 
   ChatModel({
     required this.id,
@@ -37,6 +39,8 @@ class ChatModel {
     this.distanceInKm,
     this.joinRequestStatus,
     this.joinRequestId,
+    this.friendRequestStatus, // ✅
+    this.friendRequestId,     // ✅
   });
 
   ChatModel copyWith({
@@ -58,6 +62,8 @@ class ChatModel {
     double? distanceInKm,
     String? joinRequestStatus,
     String? joinRequestId,
+    String? friendRequestStatus, // ✅
+    String? friendRequestId,     // ✅
   }) {
     return ChatModel(
       id: id ?? this.id,
@@ -78,6 +84,8 @@ class ChatModel {
       distanceInKm: distanceInKm ?? this.distanceInKm,
       joinRequestStatus: joinRequestStatus ?? this.joinRequestStatus,
       joinRequestId: joinRequestId ?? this.joinRequestId,
+      friendRequestStatus: friendRequestStatus ?? this.friendRequestStatus, // ✅
+      friendRequestId: friendRequestId ?? this.friendRequestId,             // ✅
     );
   }
 
@@ -142,8 +150,7 @@ class ChatModel {
       joinRequestId = json['joinRequest']['_id']?.toString();
     }
 
-    final bool participantIsOnline =
-        participantJson?['isOnline'] ?? false;
+    final bool participantIsOnline = participantJson?['isOnline'] ?? false;
 
     return ChatModel(
       id: json['_id']?.toString() ?? '',
@@ -166,6 +173,8 @@ class ChatModel {
       distanceInKm: distanceInKm,
       joinRequestStatus: joinRequestStatus,
       joinRequestId: joinRequestId,
+      friendRequestStatus: null, // ✅ API থেকে আসে না — controller set করবে
+      friendRequestId: null,     // ✅ API থেকে আসে না — controller set করবে
     );
   }
 }

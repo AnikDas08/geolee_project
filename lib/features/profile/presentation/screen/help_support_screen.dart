@@ -99,7 +99,7 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
         CommonTextField(
           controller: HelpSupportController.instance.messageController,
           hintText:
-              'If you are having trouble to sign in with Account then you can Email us in Account Issues or Choosing Other Issue Regarding',
+              'What do you need help with?”',
           textInputAction: TextInputAction.newline,
           maxLines: 6,
           keyboardType: TextInputType.multiline,

@@ -127,21 +127,14 @@ Widget chatListItem({
         if (item.isGroup && !item.amIAParticipant)
           GestureDetector(
             onTap: onJoinTap,
-            child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
-              decoration: BoxDecoration(
+            child: Text(
+              item.joinRequestStatus?.toLowerCase() == "pending"
+                  ? "Cancel Request"
+                  : "Join",
+              style: TextStyle(
+                fontSize: 18.sp,
                 color: AppColors.primaryColor,
-                borderRadius: BorderRadius.circular(6.r),
-              ),
-              child: Text(
-                item.joinRequestStatus?.toLowerCase() == "pending"
-                    ? "Cancel Request"
-                    : "Join",
-                style: TextStyle(
-                  fontSize: 12.sp,
-                  color: Colors.white,
-                  fontWeight: FontWeight.w600,
-                ),
+                fontWeight: FontWeight.w700,
               ),
             ),
           )
@@ -169,10 +162,10 @@ Widget chatListItem({
                       color: const Color(0xFF797C7B),
                     ),
                   ),
-                  CommonText(
-                    fontSize: 10.sp,
-                    text: item.unreadCount.toString(),
-                  ),
+                  // CommonText(
+                  //   fontSize: 10.sp,
+                  //   text: item.unreadCount.toString(),
+                  // ),
                 ],
               ),
             ],

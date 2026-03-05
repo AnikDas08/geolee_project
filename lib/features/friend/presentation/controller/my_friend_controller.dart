@@ -175,25 +175,19 @@ class MyFriendController extends GetxController {
     try {
       isLoading.value = true;
       final url = ApiEndPoint.getMyFriendRequest;
-      debugPrint("🔄 Fetching friend requests from: $url");
 
       final response = await ApiService.get(url);
-
-      debugPrint("📦 Friend Requests API Status: ${response.statusCode}");
-      debugPrint("📦 Friend Requests API Response: ${response.data}");
 
       if (response.statusCode == 200) {
         final model = FriendModel.fromJson(
           response.data as Map<String, dynamic>,
         );
 
-        debugPrint("✅ Parsed ${model.data.length} friend requests");
-        model.data.forEach((req) {
-          debugPrint("  - Request ID: ${req.id}, Status: ${req.status}, Sender: ${req.sender.name}");
-        });
 
-        requests.value = model.data;
-        debugPrint("📝 Requests list updated. Now has ${requests.length} items");
+        final sorted = model.data
+          ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
+        requests.value = sorted;
       } else {
         debugPrint("❌ fetchFriendRequests error =====> ${response.data}");
       }

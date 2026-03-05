@@ -201,34 +201,32 @@ class GroupSettingsScreen extends StatelessWidget {
             backgroundColor: AppColors.background,
             leading: IconButton(
               onPressed: () => Navigator.pop(context),
-              icon: Icon(
-                Icons.arrow_back_ios_new,
-                size: 18.sp,
-                color: AppColors.black,
-              ),
+              icon: Icon(Icons.arrow_back_ios_new, size: 18.sp, color: AppColors.black),
             ),
             centerTitle: true,
-            title: const CommonText(
-              text: 'Settings',
-              fontSize: 20,
-              fontWeight: FontWeight.w600,
-            ),
+            title: const CommonText(text: 'Settings', fontSize: 20, fontWeight: FontWeight.w600),
           ),
           body: Obx(() {
             if (controller.isLoading.value) {
               return const Center(child: CircularProgressIndicator());
             }
 
-            // ✅ Author check — reactive হওয়ার জন্য authorId observe করা হচ্ছে
             final bool isAuthor = controller.isAuthor;
+            final String access = controller.accessType.value; // 'open', 'restricted', 'private'
+
+            // ✅ Add Member permission
+            // public(open) = anyone, private = owner only, restricted = anyone (owner approves)
+            final bool canAddMember = isAuthor ||
+                access == 'open' ||
+                access == 'restricted';
 
             return SingleChildScrollView(
               padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
               child: Column(
                 children: [
-                  // --- Group Avatar ---
+                  // ─── Group Avatar — only owner can change ───
                   GestureDetector(
-                    onTap: controller.pickGroupImage,
+                    onTap: isAuthor ? controller.pickGroupImage : null, // ✅ only owner
                     child: Stack(
                       alignment: Alignment.bottomRight,
                       children: [
@@ -243,9 +241,8 @@ class GroupSettingsScreen extends StatelessWidget {
                           }
 
                           if (avatarPath.isNotEmpty) {
-                            final isNetworkImage =
-                                avatarPath.startsWith('http') ||
-                                    !avatarPath.contains('/data/user/');
+                            final isNetworkImage = avatarPath.startsWith('http') ||
+                                !avatarPath.contains('/data/user/');
 
                             return CircleAvatar(
                               radius: 50.r,
@@ -255,34 +252,23 @@ class GroupSettingsScreen extends StatelessWidget {
                                 avatarPath.startsWith('http')
                                     ? avatarPath
                                     : () {
-                                  String baseUrl =
-                                      ApiEndPoint.imageUrl;
-                                  if (!baseUrl.endsWith('/')) {
-                                    baseUrl = '$baseUrl/';
-                                  }
-                                  final String cleanPath =
-                                  avatarPath.startsWith('/')
+                                  String baseUrl = ApiEndPoint.imageUrl;
+                                  if (!baseUrl.endsWith('/')) baseUrl = '$baseUrl/';
+                                  final String cleanPath = avatarPath.startsWith('/')
                                       ? avatarPath.substring(1)
                                       : avatarPath;
                                   return "$baseUrl$cleanPath";
                                 }(),
                               )
-                                  : FileImage(File(avatarPath))
-                              as ImageProvider,
-                              onBackgroundImageError: (exception, stackTrace) {
-                                appLog("❌ Image Load Error: $exception");
-                              },
+                                  : FileImage(File(avatarPath)) as ImageProvider,
                             );
                           } else {
                             return CircleAvatar(
                               radius: 50.r,
-                              backgroundColor: AppColors.primaryColor
-                                  .withValues(alpha: 0.8),
+                              backgroundColor: AppColors.primaryColor.withValues(alpha: 0.8),
                               child: CommonText(
                                 text: controller.groupName.value.isNotEmpty
-                                    ? controller.groupName.value
-                                    .substring(0, 1)
-                                    .toUpperCase()
+                                    ? controller.groupName.value.substring(0, 1).toUpperCase()
                                     : '?',
                                 fontSize: 32.sp,
                                 fontWeight: FontWeight.bold,
@@ -291,119 +277,115 @@ class GroupSettingsScreen extends StatelessWidget {
                             );
                           }
                         }),
-                        Positioned(
-                          bottom: 0,
-                          right: 0,
-                          child: CircleAvatar(
-                            radius: 12.r,
-                            backgroundColor: AppColors.primaryColor,
-                            child: Icon(
-                              Icons.edit,
-                              size: 14.sp,
-                              color: AppColors.white,
+
+                        // ✅ Edit icon — only owner দেখবে
+                        if (isAuthor)
+                          Positioned(
+                            bottom: 0,
+                            right: 0,
+                            child: CircleAvatar(
+                              radius: 12.r,
+                              backgroundColor: AppColors.primaryColor,
+                              child: Icon(Icons.edit, size: 14.sp, color: AppColors.white),
                             ),
                           ),
-                        ),
                       ],
                     ),
                   ),
                   SizedBox(height: 12.h),
 
-                  // --- Group Name & Edit ---
+                  // ─── Group Name — only owner can edit ───
                   GestureDetector(
-                    onTap: () => showEditGroupNameDialog(controller),
+                    onTap: isAuthor // ✅ only owner
+                        ? () => showEditGroupNameDialog(controller)
+                        : null,
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Obx(
-                              () => CommonText(
-                            text: controller.groupName.value,
-                            fontSize: 18.sp,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
+                        Obx(() => CommonText(
+                          text: controller.groupName.value,
+                          fontSize: 18.sp,
+                          fontWeight: FontWeight.w600,
+                        )),
                         SizedBox(width: 4.w),
-                        Icon(
-                          Icons.edit,
-                          size: 16.sp,
-                          color: Colors.grey.shade600,
-                        ),
+                        // ✅ Edit icon — only owner দেখবে
+                        if (isAuthor)
+                          Icon(Icons.edit, size: 16.sp, color: Colors.grey.shade600),
                       ],
                     ),
                   ),
                   SizedBox(height: 4.h),
 
-                  // --- Member Count ---
-                  Obx(
-                        () => CommonText(
-                      text:
-                      '${controller.memberCount.value} Member${controller.memberCount.value != 1 ? 's' : ''}',
-                      fontSize: 14.sp,
-                      color: AppColors.secondaryText,
-                    ),
-                  ),
+                  // ─── Member Count ───
+                  Obx(() => CommonText(
+                    text: '${controller.memberCount.value} Member${controller.memberCount.value != 1 ? 's' : ''}',
+                    fontSize: 14.sp,
+                    color: AppColors.secondaryText,
+                  )),
                   SizedBox(height: 30.h),
 
-                  // --- Settings List ---
-                  _SettingsTile(
-                    title: 'Add Member',
-                    onTap: () {
-                      Get.toNamed(
-                        AppRoutes.addMemberScreen,
-                        arguments: {'chatId': controller.chatId},
-                      );
-                    },
-                  ),
+                  // ─── Add Member ───
+                  // Public/Restricted: anyone | Private: owner only
+                  if (canAddMember)
+                    _SettingsTile(
+                      title: 'Add Member',
+                      onTap: () {
+                        Get.toNamed(
+                          AppRoutes.addMemberScreen,
+                          arguments: {'chatId': controller.chatId},
+                        );
+                      },
+                    ),
 
-
+                  // ─── Owner only options ───
                   if (isAuthor) ...[
+                    // Pending Request — only owner
                     _SettingsTile(
                       title: 'Pending Request',
                       onTap: controller.onPendingRequest,
                     ),
+
+                    // Privacy Settings — only owner
                     _SettingsTile(
                       title: 'Privacy Settings',
                       onTap: controller.onPrivacySettings,
                     ),
 
-
-                    Obx(
-                          () => Container(
-                        height: 56.h,
-                        margin: EdgeInsets.only(bottom: 12.h),
-                        decoration: BoxDecoration(
-                          color: AppColors.white,
-                          borderRadius: BorderRadius.circular(10.r),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha:0.05),
-                              blurRadius: 5.r,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        padding: EdgeInsets.symmetric(horizontal: 16.w),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            CommonText(
-                              text: 'Admin Approval',
-                              fontSize: 16.sp,
-                              fontWeight: FontWeight.w500,
-                            ),
-                            CupertinoSwitch(
-                              value: controller.accessType.value == 'restricted',
-                              activeTrackColor: AppColors.primaryColor,
-                              onChanged: (value) =>
-                                  controller.toggleAdminApproval(value),
-                            ),
-                          ],
-                        ),
+                    // Admin Approval toggle — only owner
+                    Obx(() => Container(
+                      height: 56.h,
+                      margin: EdgeInsets.only(bottom: 12.h),
+                      decoration: BoxDecoration(
+                        color: AppColors.white,
+                        borderRadius: BorderRadius.circular(10.r),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.05),
+                            blurRadius: 5.r,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
                       ),
-                    ),
+                      padding: EdgeInsets.symmetric(horizontal: 16.w),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          CommonText(
+                            text: 'Admin Approval',
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.w500,
+                          ),
+                          CupertinoSwitch(
+                            value: controller.accessType.value == 'restricted',
+                            activeTrackColor: AppColors.primaryColor,
+                            onChanged: (value) => controller.toggleAdminApproval(value),
+                          ),
+                        ],
+                      ),
+                    )),
 
-
+                    // Delete Group — only owner
                     _SettingsTile(
                       title: 'Delete Group',
                       onTap: controller.onDeleteGroup,
@@ -411,6 +393,7 @@ class GroupSettingsScreen extends StatelessWidget {
                     ),
                   ],
 
+                  // ─── Leave Group — anyone except owner ───
                   if (!isAuthor)
                     _SettingsTile(
                       title: 'Leave Group',

@@ -46,7 +46,6 @@ class ChatNearbyProfileController extends GetxController {
         return;
       }
 
-      // ✅ Validate user ID exists (handle both 'id' and '_id' formats)
       final userId = userProfile.value?['id'] ?? userProfile.value?['_id'];
       if (userId == null || userId.toString().isEmpty) {
         debugPrint("User profile: ${userProfile.value}");
@@ -67,8 +66,8 @@ class ChatNearbyProfileController extends GetxController {
 
       if (response.statusCode == 200) {
         debugPrint("=========================${response.message}");
-        Utils.successSnackBar("Success", "Greeting sent successfully");
-        controller.clear();
+         controller.clear();
+        Get.back();
       } else {
         Utils.errorSnackBar("Error", response.message ?? "Failed to send greeting");
       }
