@@ -6,6 +6,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:giolee78/config/api/api_end_point.dart';
 import 'package:giolee78/features/friend/presentation/controller/my_friend_controller.dart';
 import 'package:giolee78/features/message/data/model/chat_message.dart';
+import 'package:giolee78/features/message/presentation/controller/chat_controller.dart';
 import 'package:giolee78/services/api/api_service.dart';
 import 'package:giolee78/services/socket/socket_service.dart';
 import 'package:giolee78/utils/log/app_log.dart';
@@ -13,8 +14,15 @@ import 'package:giolee78/utils/log/app_log.dart';
 import '../../../../services/storage/storage_services.dart';
 import '../../../../utils/app_utils.dart';
 
+enum FriendStatus { none, requested, friends }
+
 class MessageController extends GetxController {
   RxBool isActive = false.obs;
+  RxString distance = ''.obs;
+
+  var error = ''.obs;
+  var friendStatus = FriendStatus.none.obs;
+  var pendingRequestId = ''.obs;
 
   // ================================================
   // FRIEND STATUS
@@ -97,7 +105,7 @@ class MessageController extends GetxController {
   void onInit() {
     super.onInit();
     listenMessage();
-    listenOnlineStatus(); // ✅ Socket online/offline listen
+    listenOnlineStatus();
   }
 
   @override
@@ -113,8 +121,7 @@ class MessageController extends GetxController {
   // ================================================
   void listenMessage() {
     SocketServices.on("message:new", (data) {
-      appLog(">>>>>>>>>>>> 📩 New Message received via socket: $data <<<<<<<<<<<<");
-
+      appLog("📩 New Message received via socket: $data");
       try {
         final String incomingChatId = data['chat'] is String
             ? data['chat']
@@ -126,6 +133,9 @@ class MessageController extends GetxController {
             messages.add(newMessage);
             update();
             _scrollToBottom();
+            if (Get.isRegistered<ChatController>()) {
+              Get.find<ChatController>().markChatAsSeen(chatId);
+            }
           }
         }
       } catch (e) {
@@ -135,20 +145,18 @@ class MessageController extends GetxController {
 
     SocketServices.on("chat:update", (data) {
       if (chatId.isNotEmpty) {
-        appLog(">>>>>>>>>>>> 🔄 chat:update received — reloading messages <<<<<<<<<<<<");
         loadMessages(showLoading: false);
       }
     });
   }
 
   // ================================================
-  // ONLINE STATUS — Socket real-time  ✅
+  // ONLINE STATUS
   // ================================================
   void listenOnlineStatus() {
     SocketServices.on("user:online", (data) {
       final String onlineUserId =
           data['userId']?.toString() ?? data['_id']?.toString() ?? '';
-      appLog("🟢 user:online → $onlineUserId | my userId: $userId");
       if (onlineUserId.isNotEmpty && onlineUserId == userId) {
         isActive.value = true;
       }
@@ -157,7 +165,6 @@ class MessageController extends GetxController {
     SocketServices.on("user:offline", (data) {
       final String offlineUserId =
           data['userId']?.toString() ?? data['_id']?.toString() ?? '';
-      appLog("🔴 user:offline → $offlineUserId | my userId: $userId");
       if (offlineUserId.isNotEmpty && offlineUserId == userId) {
         isActive.value = false;
       }
@@ -165,18 +172,16 @@ class MessageController extends GetxController {
   }
 
   // ================================================
-  // 1. PICK IMAGE FROM GALLERY
+  // PICKER METHODS
   // ================================================
   Future<void> pickImageFromGallery() async {
     try {
       isPickingImage = true;
       update();
-
       final XFile? image = await _imagePicker.pickImage(
         source: ImageSource.gallery,
         imageQuality: 80,
       );
-
       if (image != null) {
         pickedImage = image;
         pickedImagePath = image.path;
@@ -185,31 +190,24 @@ class MessageController extends GetxController {
         hasPickedImage = true;
         hasPickedFile = false;
         pickedFileType = 'image';
-        appLog("✅ Image picked from gallery: ${image.path}");
         update();
       }
     } catch (e) {
       _showErrorSnackBar('Failed to pick image: $e');
-      appLog("❌ Pick image error: $e");
     } finally {
       isPickingImage = false;
       update();
     }
   }
 
-  // ================================================
-  // 2. PICK IMAGE FROM CAMERA
-  // ================================================
   Future<void> pickImageFromCamera() async {
     try {
       isPickingImage = true;
       update();
-
       final XFile? image = await _imagePicker.pickImage(
         source: ImageSource.camera,
         imageQuality: 80,
       );
-
       if (image != null) {
         pickedImage = image;
         pickedImagePath = image.path;
@@ -218,35 +216,48 @@ class MessageController extends GetxController {
         hasPickedImage = true;
         hasPickedFile = false;
         pickedFileType = 'image';
-        appLog("✅ Image captured from camera: ${image.path}");
         update();
       }
     } catch (e) {
       _showErrorSnackBar('Failed to capture photo: $e');
-      appLog("❌ Camera error: $e");
     } finally {
       isPickingImage = false;
       update();
     }
   }
 
-  // ================================================
-  // 3. PICK FILE
-  // ================================================
   Future<void> pickFile() async {
     try {
       isPickingFile = true;
       update();
-
       final FilePickerResult? result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
         allowedExtensions: [
-          'pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx',
-          'txt', 'csv', 'jpg', 'jpeg', 'png', 'gif', 'webp',
-          'bmp', 'heic', 'mp3', 'mp4', 'avi', 'mov', 'mkv', 'flv', 'wav',
+          'pdf',
+          'doc',
+          'docx',
+          'xls',
+          'xlsx',
+          'ppt',
+          'pptx',
+          'txt',
+          'csv',
+          'jpg',
+          'jpeg',
+          'png',
+          'gif',
+          'webp',
+          'bmp',
+          'heic',
+          'mp3',
+          'mp4',
+          'avi',
+          'mov',
+          'mkv',
+          'flv',
+          'wav',
         ],
       );
-
       if (result != null && result.files.isNotEmpty) {
         final file = result.files.first;
         pickedFile = file;
@@ -257,35 +268,35 @@ class MessageController extends GetxController {
         hasPickedFile = true;
         hasPickedImage = false;
         _detectFileType(file.name);
-        appLog("✅ File picked: ${file.name}");
         update();
       }
     } catch (e) {
       _showErrorSnackBar('Failed to pick file: $e');
-      appLog("❌ File picker error: $e");
     } finally {
       isPickingFile = false;
       update();
     }
   }
 
-  // ================================================
-  // 4. DETECT FILE TYPE
-  // ================================================
   void _detectFileType(String fileName) {
     final ext = fileName.toLowerCase().split('.').last;
     if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'heic'].contains(ext)) {
       pickedFileType = 'image';
-    } else if (['mp3', 'mp4', 'avi', 'mov', 'mkv', 'flv', 'wav'].contains(ext)) {
+    } else if ([
+      'mp3',
+      'mp4',
+      'avi',
+      'mov',
+      'mkv',
+      'flv',
+      'wav',
+    ].contains(ext)) {
       pickedFileType = 'media';
     } else {
       pickedFileType = 'document';
     }
   }
 
-  // ================================================
-  // 5. CLEAR PICKED FILES
-  // ================================================
   void clearPickedImage() {
     pickedImage = null;
     pickedImagePath = null;
@@ -315,17 +326,6 @@ class MessageController extends GetxController {
     update();
   }
 
-  // ================================================
-  // 6. GETTER METHODS
-  // ================================================
-  String getPickedFileName() {
-    if (hasPickedImage && pickedImage != null) return pickedImage!.name;
-    if (hasPickedFile && pickedFile != null) return pickedFile!.name;
-    return '';
-  }
-
-  String getPickedFileType() => pickedFileType ?? 'unknown';
-
   String getPickedFileSize() {
     if (hasPickedFile && pickedFile != null) {
       final sizeMB = (pickedFile!.size / (1024 * 1024)).toStringAsFixed(2);
@@ -333,9 +333,6 @@ class MessageController extends GetxController {
     }
     return '';
   }
-
-  bool isImagePicked() => hasPickedImage && pickedImage != null;
-  bool isFilePicked() => hasPickedFile && pickedFile != null;
 
   String? getPickedFilePath() {
     if (hasPickedImage && pickedImagePath != null) return pickedImagePath;
@@ -355,20 +352,48 @@ class MessageController extends GetxController {
     try {
       if (chatId.isNotEmpty) {
         SocketServices.joinRoom(chatId);
+        if (Get.isRegistered<ChatController>()) {
+          Get.find<ChatController>().markChatAsSeen(chatId);
+        }
       }
 
-      final String url = "${ApiEndPoint.messages}/$chatId";
-      final response = await ApiService.get(url);
+      final response = await ApiService.get("${ApiEndPoint.messages}/$chatId");
 
       if (response.statusCode == 200) {
         final data = response.data['data'] as List?;
         if (data != null) {
-          messages.clear();
-          for (var json in data) {
-            final message = ChatMessage.fromJson(json);
-            messages.add(message);
+          messages =
+              data
+                  .map((json) {
+                    try {
+                      return ChatMessage.fromJson(json);
+                    } catch (_) {
+                      return null;
+                    }
+                  })
+                  .whereType<ChatMessage>()
+                  .toList()
+                ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
+        }
+
+        // ✅ Panel Visibility Logic: If not friends, check who sent the last message
+        if (friendStatus.value != FriendStatus.friends) {
+          if (messages.isEmpty) {
+            // No messages yet, person opening the chat is the sender
+            isFriend.value = true;
+          } else {
+            final lastMsg = messages.last;
+            if (lastMsg.isCurrentUser) {
+              // I sent the last message, I should see the input
+              isFriend.value = true;
+            } else {
+              // Other person sent the last message and we aren't friends, show panel
+              // But only if I haven't clicked "Continue with Chat" already
+              if (friendStatusValue.value != 'none_continued') {
+                isFriend.value = false;
+              }
+            }
           }
-          messages.sort((a, b) => a.createdAt.compareTo(b.createdAt));
         }
       }
     } catch (e) {
@@ -383,29 +408,21 @@ class MessageController extends GetxController {
   // ================================================
   // 8. SEND METHODS
   // ================================================
-  Future<void> sendMessage() async {
-    await sendTextAndFile();
-  }
+  Future<void> sendMessage() async => await sendTextAndFile();
 
   Future<void> sendTextAndFile() async {
     if (messageController.text.trim().isEmpty &&
-        !isImagePicked() &&
-        !isFilePicked()) {
-      _showErrorSnackBar('Nothing to send');
+        !hasPickedImage &&
+        !hasPickedFile) {
       return;
     }
-    if (messageController.text.trim().isNotEmpty) {
-      await _sendTextMessage();
-    }
-    if (isImagePicked() || isFilePicked()) {
-      await sendPickedFile();
-    }
+    if (messageController.text.trim().isNotEmpty) await _sendTextMessage();
+    if (hasPickedImage || hasPickedFile) await _sendPickedFile();
   }
 
   Future<void> _sendTextMessage() async {
     isSendingText = true;
     update();
-
     try {
       final response = await ApiService.post(
         ApiEndPoint.createMessage,
@@ -415,9 +432,7 @@ class MessageController extends GetxController {
           "text": messageController.text.trim(),
         },
       );
-
       if (response.statusCode == 200) {
-        appLog("✅ Text sent successfully");
         messageController.clear();
         await loadMessages(showLoading: false);
       } else {
@@ -425,274 +440,166 @@ class MessageController extends GetxController {
       }
     } catch (e) {
       _showErrorSnackBar('Error: $e');
-      appLog("❌ Send text error: $e");
     } finally {
       isSendingText = false;
       update();
     }
   }
 
-  Future<void> sendPickedFile() async {
+  Future<void> _sendPickedFile() async {
     final filePath = getPickedFilePath();
-    final fileType = pickedFileType;
-
-    if (filePath == null || filePath.isEmpty) {
-      _showErrorSnackBar('No file picked');
-      return;
-    }
-
-    if (!File(filePath).existsSync()) {
-      _showErrorSnackBar('File not found or deleted');
-      clearAllPicks();
-      return;
-    }
+    if (filePath == null || !File(filePath).existsSync()) return;
 
     try {
-      switch (fileType) {
+      if (pickedFileType == 'image') {
+        isUploadingImage = true;
+      } else {
+        isUploadingMedia = true;
+      }
+      update();
+
+      // ✅ type অনুযায়ী আলাদা imageName পাঠাচ্ছি
+      String imageName;
+      String messageType;
+
+      switch (pickedFileType) {
         case 'image':
-          await _sendImageMessage(filePath);
+          imageName = "image";
+          messageType = "image";
           break;
         case 'media':
-          await _sendMediaMessage(filePath);
+          imageName = "media";
+          messageType = "media";
           break;
         case 'document':
         default:
-          await _sendDocumentMessage(filePath);
+          imageName = "doc"; // ✅ server এ "doc" field expect করে
+          messageType = "document";
+          break;
       }
-    } catch (e) {
-      _showErrorSnackBar('Failed to send file: $e');
-    } finally {
-      clearAllPicks();
-      update();
-    }
-  }
 
-  Future<void> _sendImageMessage(String imagePath) async {
-    isUploadingImage = true;
-    update();
-    try {
       final response = await ApiService.multipart(
         ApiEndPoint.createMessage,
-        imagePath: imagePath,
-        body: {"chat": chatId, "type": "image"},
+        imagePath: filePath,
+        imageName: imageName,
+        body: {"chat": chatId, "type": messageType},
       );
+
       if (response.statusCode == 200) {
-        appLog("✅ Image sent successfully");
-        _showSuccessSnackBar('Image sent');
+        clearAllPicks();
         await loadMessages();
       } else {
-        _showErrorSnackBar('Failed to send image');
+        _showErrorSnackBar('Failed to send file');
       }
     } catch (e) {
-      _showErrorSnackBar('Error sending image: $e');
-      appLog("❌ Send image error: $e");
+      appLog("❌ Send file error: $e");
+      _showErrorSnackBar('Failed to send file');
     } finally {
       isUploadingImage = false;
-      update();
-    }
-  }
-
-  Future<void> _sendMediaMessage(String mediaPath) async {
-    isUploadingMedia = true;
-    update();
-    try {
-      final response = await ApiService.multipart(
-        ApiEndPoint.createMessage,
-        imagePath: mediaPath,
-        imageName: "media",
-        body: {"chat": chatId, "type": "media"},
-      );
-      if (response.statusCode == 200) {
-        appLog("✅ Media sent successfully");
-        _showSuccessSnackBar('Media sent');
-        await loadMessages();
-      } else {
-        _showErrorSnackBar('Failed to send media');
-      }
-    } catch (e) {
-      _showErrorSnackBar('Error sending media: $e');
-      appLog("❌ Send media error: $e");
-    } finally {
       isUploadingMedia = false;
       update();
     }
   }
 
-  Future<void> _sendDocumentMessage(String docPath) async {
-    isUploadingDocument = true;
-    update();
-    try {
-      final response = await ApiService.multipart(
-        ApiEndPoint.createMessage,
-        imagePath: docPath,
-        imageName: "doc",
-        body: {"chat": chatId, "type": "document"},
-      );
-      if (response.statusCode == 200) {
-        appLog("Document sent successfully");
-        _showSuccessSnackBar('Document sent');
-        await loadMessages();
-      } else {
-        _showErrorSnackBar('Failed to send document');
-      }
-    } catch (e) {
-      _showErrorSnackBar('Error sending document: $e');
-      appLog("❌ Send document error: $e");
-    } finally {
-      isUploadingDocument = false;
-      update();
-    }
-  }
-
-  void _showSuccessSnackBar(String message) {
-    Get.snackbar(
-      'Success', message,
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: Colors.green,
-      colorText: Colors.white,
-      duration: const Duration(seconds: 2),
-    );
-  }
-
-  void _showErrorSnackBar(String message) {
-    Get.snackbar(
-      'Error', message,
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: Colors.red,
-      colorText: Colors.white,
-    );
-  }
-
-  void _scrollToBottom() {
-    Future.delayed(const Duration(milliseconds: 100), () {
-      if (scrollController.hasClients) {
-        scrollController.animateTo(
-          scrollController.position.maxScrollExtent,
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeOut,
-        );
-      }
-    });
-  }
-
   // ================================================
   // 9. FRIENDSHIP METHODS
+  // ================================================
   Future<void> checkFriendshipStatus(String targetUserId) async {
     if (targetUserId.isEmpty) {
       isFriend.value = true;
+      friendStatus.value = FriendStatus.friends;
       friendStatusLoaded.value = true;
       return;
     }
 
     friendStatusLoaded.value = false;
+    otherUserId.value = targetUserId;
 
     try {
-      otherUserId.value = targetUserId;
-
       final response = await ApiService.get(
         "${ApiEndPoint.checkFriendStatus}$targetUserId",
       );
-
-      debugPrint("📦 Full API response: ${response.data}");
 
       if (response.statusCode == 200) {
         final data = response.data['data'];
 
         if (data['isAlreadyFriend'] == true) {
-          // ✅ Friend — দুজনেই normal input
+          // ✅ বন্ধু — normal input দেখাবে
           isFriend.value = true;
           hasPendingRequest.value = false;
           friendStatusValue.value = 'friends';
-
+          friendStatus.value = FriendStatus.friends;
+          pendingRequestId.value = '';
         } else if (data['pendingFriendRequest'] != null) {
           final pendingRequest = data['pendingFriendRequest'];
           final String requestSenderId =
               pendingRequest['sender']?['_id']?.toString() ??
-                  pendingRequest['sender']?.toString() ?? '';
+              pendingRequest['sender']?.toString() ??
+              '';
 
-          debugPrint("📨 Request sender: $requestSenderId");
-          debugPrint("👤 My userId: ${LocalStorage.userId}");
+          // ✅ AppBar এর জন্য
+          friendStatus.value = FriendStatus.requested;
+          pendingRequestId.value = pendingRequest['_id']?.toString() ?? '';
 
           if (requestSenderId == LocalStorage.userId) {
-            // ✅ আমি sender — normal input দেখব
+            // আমি পাঠিয়েছি — normal input দেখাবে
             isFriend.value = true;
             hasPendingRequest.value = true;
             friendStatusValue.value = 'pending';
           } else {
-            // ✅ আমি receiver — non-friend panel দেখব
+            // অন্যজন পাঠিয়েছে — non-friend panel দেখাবে
             isFriend.value = false;
             hasPendingRequest.value = false;
             friendStatusValue.value = 'received';
           }
-
         } else {
-          // ✅ No relation — message history দেখে determine করুন
-          // messages load হওয়ার পর check করব
-          _determineRoleFromMessages();
+          // ✅ কোনো relation নেই
+          // Default এ isFriend = true থাকবে কারণ আমি message পাঠাতে এসেছি
+          // loadMessages এ চেক হবে যদি অন্যজন লাস্ট মেসেজ দেয় তবে প্যানেল আসবে
+          isFriend.value = true;
+          hasPendingRequest.value = false;
+          friendStatusValue.value = 'none';
+          friendStatus.value = FriendStatus.none;
+          pendingRequestId.value = '';
         }
       } else {
-        isFriend.value = true;
+        isFriend.value = false;
+        friendStatus.value = FriendStatus.none;
         friendStatusValue.value = 'none';
       }
     } catch (e) {
       debugPrint("❌ Friendship check error: $e");
-      isFriend.value = true;
+      isFriend.value = false;
+      friendStatus.value = FriendStatus.none;
       friendStatusValue.value = 'none';
     } finally {
       friendStatusLoaded.value = true;
     }
   }
 
-// ✅ First message এর sender দেখে determine করুন
-  void _determineRoleFromMessages() {
-    if (messages.isEmpty) {
-      // কোনো message নেই — আমি প্রথমবার chat open করছি = sender
-      isFriend.value = true;
-      friendStatusValue.value = 'none';
-      return;
-    }
-
-    // First message কে পাঠিয়েছে?
-    final firstMessage = messages.first;
-    debugPrint("📨 First message senderId: ${firstMessage.senderId}");
-    debugPrint("👤 My userId: ${LocalStorage.userId}");
-
-    if (firstMessage.senderId == LocalStorage.userId) {
-      // ✅ আমি first message পাঠিয়েছি = আমি sender = normal input
-      isFriend.value = true;
-      friendStatusValue.value = 'none';
-    } else {
-      // ✅ অন্যজন first message পাঠিয়েছে = আমি receiver = non-friend panel
-      isFriend.value = false;
-      friendStatusValue.value = 'received';
-    }
-  }
-
   Future<void> sendFriendRequest(String targetUserId) async {
     try {
-      debugPrint("📤 Sending friend request to: $targetUserId");
-
       final response = await ApiService.post(
         ApiEndPoint.createFriendRequest,
         body: {"receiver": targetUserId},
       );
 
-      debugPrint("📦 Friend request response: ${response.statusCode}");
-
-      if (response.statusCode == 200) {
-        debugPrint("✅ Friend request sent");
-        hasPendingRequest.value = true;
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final reqData = response.data['data'];
+        pendingRequestId.value = (reqData?['_id'] ?? '').toString();
         friendStatusValue.value = 'pending';
+        friendStatus.value = FriendStatus.requested;
+        isFriend.value = true;
+        hasPendingRequest.value = true;
         Utils.successSnackBar("Sent", "Friend request sent successfully");
-
         if (Get.isRegistered<MyFriendController>()) {
           Get.find<MyFriendController>().fetchFriendRequests();
         }
+        update();
       } else {
-        debugPrint("❌ Error sending friend request: ${response.message}");
         Utils.errorSnackBar(
           "Error",
-          response.message ?? "Failed to send friend request",
+          response.message ?? "Failed to send request",
         );
       }
     } catch (e) {
@@ -703,21 +610,50 @@ class MessageController extends GetxController {
 
   Future<void> cancelFriendRequest(String targetUserId) async {
     try {
-      debugPrint("❌ Canceling friend request for: $targetUserId");
+      final idToUse = pendingRequestId.value.isNotEmpty
+          ? pendingRequestId.value
+          : targetUserId;
 
       final response = await ApiService.patch(
-        "${ApiEndPoint.cancelFriendRequest}$targetUserId",
+        "${ApiEndPoint.cancelFriendRequest}$idToUse",
         body: {"status": "cancelled"},
       );
 
       if (response.statusCode == 200) {
-        debugPrint("✅ Friend request cancelled");
+        // ✅ Cancel হলে non-friend panel দেখাবে
+        isFriend.value = false;
         hasPendingRequest.value = false;
         friendStatusValue.value = 'none';
+        friendStatus.value = FriendStatus.none;
+        pendingRequestId.value = '';
         Utils.successSnackBar("Cancelled", "Friend request cancelled");
+        update();
+      } else {
+        Utils.errorSnackBar(
+          "Error",
+          response.message ?? "Failed to cancel request",
+        );
       }
     } catch (e) {
       debugPrint("❌ Cancel error: $e");
     }
+  }
+
+  void _showErrorSnackBar(String message) {
+    Get.snackbar(
+      'Error',
+      message,
+      snackPosition: SnackPosition.BOTTOM,
+      backgroundColor: Colors.red,
+      colorText: Colors.white,
+    );
+  }
+
+  void _scrollToBottom() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (scrollController.hasClients) {
+        scrollController.jumpTo(scrollController.position.maxScrollExtent);
+      }
+    });
   }
 }

@@ -14,9 +14,6 @@ import '../../../../utils/enum/enum.dart';
 import '../../data/my_friends_model.dart';
 
 class MyFriendController extends GetxController {
-
-
-
   final RxMap<String, bool> friendRequestSent = <String, bool>{}.obs;
 
   // ================= Friend Requests
@@ -63,6 +60,20 @@ class MyFriendController extends GetxController {
     }).toList();
   }
 
+  // ================= Suggested Friends Filtering
+  List<SuggestedFriendUserModel> get filteredSuggestedFriends {
+    // Get all friend IDs
+    final friendIds = myFriendsList
+        .map((data) => data.friend?.id)
+        .whereType<String>()
+        .toSet();
+
+    // Filter suggested list to exclude those already in myFriendsList
+    return suggestedFriendList.where((user) {
+      return !friendIds.contains(user.id);
+    }).toList();
+  }
+
   // ================= Lifecycle
   @override
   Future<void> onInit() async {
@@ -78,6 +89,10 @@ class MyFriendController extends GetxController {
     await getSuggestedFriend();
     await _initLocationThenFetch();
     debugPrint("📍 Lat: ${LocalStorage.lat} | Long: ${LocalStorage.long}");
+
+    debounce(searchQuery, (query) {
+      getMyAllFriends(searchTerm: query);
+    }, time: const Duration(milliseconds: 500));
   }
 
   // ================= Per-User Helpers
@@ -98,10 +113,12 @@ class MyFriendController extends GetxController {
   }
 
   // ================= Get My All Friends
-  Future<void> getMyAllFriends() async {
+  Future<void> getMyAllFriends({String? searchTerm}) async {
     try {
       isLoading.value = true;
-      myFriendsList.value = await GetMyAllFriendsRepo().getFriendList();
+      myFriendsList.value = await GetMyAllFriendsRepo().getFriendList(
+        searchTerm: searchTerm,
+      );
     } catch (e) {
       debugPrint("Exception in getMyAllFriends: $e");
     } finally {
@@ -146,9 +163,7 @@ class MyFriendController extends GetxController {
 
   Future<void> removeFriend(String friendshipId) async {
     try {
-      final index = myFriendsList.indexWhere(
-            (data) => data.id == friendshipId,
-      );
+      final index = myFriendsList.indexWhere((data) => data.id == friendshipId);
 
       if (index == -1) return;
       final removedFriend = myFriendsList.removeAt(index);
@@ -182,7 +197,6 @@ class MyFriendController extends GetxController {
         final model = FriendModel.fromJson(
           response.data as Map<String, dynamic>,
         );
-
 
         final sorted = model.data
           ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
@@ -281,7 +295,7 @@ class MyFriendController extends GetxController {
 
       if (permission == LocationPermission.deniedForever) {
         nearbyChatError.value =
-        "Location permission permanently denied.\nPlease enable from settings.";
+            "Location permission permanently denied.\nPlease enable from settings.";
         debugPrint("❌ Permission denied forever");
         return;
       }
@@ -293,18 +307,18 @@ class MyFriendController extends GetxController {
       }
 
       debugPrint("📡 Getting position...");
-      final Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-      ).timeout(
-        const Duration(seconds: 15),
-        onTimeout: () {
-          debugPrint("⏱️ Location timeout! Trying last known...");
-          throw Exception("Location timeout");
-        },
-      );
+      final Position position =
+          await Geolocator.getCurrentPosition(
+            desiredAccuracy: LocationAccuracy.high,
+          ).timeout(
+            const Duration(seconds: 15),
+            onTimeout: () {
+              debugPrint("⏱️ Location timeout! Trying last known...");
+              throw Exception("Location timeout");
+            },
+          );
 
-      debugPrint(
-          "✅ Got position: ${position.latitude}, ${position.longitude}");
+      debugPrint("✅ Got position: ${position.latitude}, ${position.longitude}");
 
       LocalStorage.lat = position.latitude;
       LocalStorage.long = position.longitude;
@@ -317,7 +331,8 @@ class MyFriendController extends GetxController {
         final Position? lastKnown = await Geolocator.getLastKnownPosition();
         if (lastKnown != null) {
           debugPrint(
-              "📍 Using last known: ${lastKnown.latitude}, ${lastKnown.longitude}");
+            "📍 Using last known: ${lastKnown.latitude}, ${lastKnown.longitude}",
+          );
           LocalStorage.lat = lastKnown.latitude;
           LocalStorage.long = lastKnown.longitude;
           await getSuggestedFriend();
@@ -339,20 +354,19 @@ class MyFriendController extends GetxController {
         suggestedFriendList.clear();
       }
 
-      final double lat = LocalStorage.lat ?? 0.0;
-      final double lng = LocalStorage.long ?? 0.0;
+      final double lat = LocalStorage.lat;
+      final double lng = LocalStorage.long;
 
       if (lat == 0.0 || lng == 0.0) {
         nearbyChatError.value =
-        "Location not available. Please enable location.";
+            "Location not available. Please enable location.";
         debugPrint("❌ Invalid coordinates - Lat: $lat, Lng: $lng");
         return;
       }
 
       final url =
           "${ApiEndPoint.nearbyChat}?lat=$lat&lng=$lng&page=$_currentPage&limit=20";
-      debugPrint(
-          "🌐 Fetching Nearby - URL: $url | Page: $_currentPage");
+      debugPrint("🌐 Fetching Nearby - URL: $url | Page: $_currentPage");
 
       if (isRefresh) {
         isNearbyChatLoading.value = true;
@@ -381,7 +395,7 @@ class MyFriendController extends GetxController {
           return;
         }
 
-        final List data = rawList as List;
+        final List<dynamic> data = rawList as List<dynamic>;
         debugPrint("📋 Raw list count: ${data.length}");
 
         final List<SuggestedFriendUserModel> parsedList = [];
@@ -431,6 +445,59 @@ class MyFriendController extends GetxController {
     await getSuggestedFriend(isRefresh: false);
   }
 
+  // ================= Global Search (Search by name/email)
+  Future<void> searchGlobalUsers(String query) async {
+    try {
+      if (query.isEmpty) {
+        await getSuggestedFriend();
+        return;
+      }
+
+      isNearbyChatLoading.value = true;
+      nearbyChatError.value = '';
+
+      final url =
+          "${ApiEndPoint.nearByUsers}?searchTerm=${Uri.encodeComponent(query)}&limit=50";
+      debugPrint("🌐 Global Search URL: $url");
+
+      final ApiResponseModel response = await ApiService.get(url);
+
+      if (response.isSuccess) {
+        final rawList = response.data['data'];
+        if (rawList != null) {
+          final List data = rawList as List;
+          final List<SuggestedFriendUserModel> parsedList = [];
+
+          for (var item in data) {
+            try {
+              final user = SuggestedFriendUserModel.fromJson(item);
+              // Don't show ourselves in search results
+              if (user.id != LocalStorage.userId) {
+                parsedList.add(user);
+              }
+            } catch (e) {
+              debugPrint("❌ Failed to parse user in search: $e");
+            }
+          }
+
+          suggestedFriendList.value = parsedList;
+
+          // Check friendship status for search results
+          for (final user in parsedList) {
+            checkFriendship(user.id);
+          }
+        }
+      } else {
+        nearbyChatError.value = response.message ?? "Search failed";
+      }
+    } catch (e) {
+      nearbyChatError.value = e.toString();
+      debugPrint("❌ Global Search Error: $e");
+    } finally {
+      isNearbyChatLoading.value = false;
+    }
+  }
+
   // ================= Check Friendship Status (per user)
   Future<void> checkFriendship(String userId) async {
     try {
@@ -441,10 +508,8 @@ class MyFriendController extends GetxController {
         final data = response.data['data'];
 
         if (data['isAlreadyFriend'] == true) {
-          suggestedFriendList.removeWhere((user) => user.id == userId);
-          friendStatusMap.remove(userId);
+          friendStatusMap[userId] = FriendStatus.friends;
           friendStatusMap.refresh();
-          debugPrint("🚫 Removed friend from suggested list: $userId");
         } else if (data['pendingFriendRequest'] != null) {
           friendStatusMap[userId] = FriendStatus.requested;
           pendingRequestIdMap[userId] =
@@ -518,7 +583,6 @@ class MyFriendController extends GetxController {
 
         pendingRequestIdMap.remove(userId);
         pendingRequestIdMap.refresh();
-
       }
     } catch (e) {
       Utils.errorSnackBar("Error", e.toString());

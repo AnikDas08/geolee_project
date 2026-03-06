@@ -30,6 +30,8 @@ class HomeController extends GetxController {
   var clickerCount = RxnString();
   var filterOption = RxnString();
 
+  RxBool isNearbyActive = false.obs;
+
 
   var selectedPeriod = ''.obs;
   Rxn<DateTime> startDate = Rxn<DateTime>();
@@ -86,12 +88,15 @@ class HomeController extends GetxController {
         argument = Get.arguments;
         Get.find<HomeNavController>().refresh();
         Get.find<MyProfileController>().refresh();
-        await myProfileController.getUserData();
-        await getUserData();
 
-        getCurrentLocationAndUpdateProfile();
-        fetchPostsWithFilter();
-        myProfileController.getUserData();
+
+        await getCurrentLocationAndUpdateProfile();
+
+        await Future.wait([
+          myProfileController.getUserData(),
+          getUserData(),
+          fetchPostsWithFilter(),
+        ]);
       } else {
         clickerCount.value = "All";
         allPosts = [];

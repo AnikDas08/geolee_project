@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:giolee78/component/text/common_text.dart';
 import 'package:giolee78/utils/constants/app_colors.dart';
 import 'package:giolee78/config/api/api_end_point.dart';
+import 'package:giolee78/services/storage/storage_services.dart';
 import '../controller/add_member_controller.dart';
 
 class AddMemberScreen extends StatelessWidget {
@@ -20,7 +21,11 @@ class AddMemberScreen extends StatelessWidget {
         backgroundColor: AppColors.background,
         leading: IconButton(
           onPressed: () => Get.back(),
-          icon: Icon(Icons.arrow_back_ios_new, size: 18.sp, color: AppColors.black),
+          icon: Icon(
+            Icons.arrow_back_ios_new,
+            size: 18.sp,
+            color: AppColors.black,
+          ),
         ),
         centerTitle: true,
         title: const CommonText(
@@ -115,24 +120,21 @@ class AddMemberScreen extends StatelessWidget {
               SliverPadding(
                 padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
                 sliver: SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                        (context, index) {
-                      final friend = controller.searchResults[index];
-                      final imageUrl = friend.image.startsWith('http')
-                          ? friend.image
-                          : "${ApiEndPoint.imageUrl}${friend.image}";
+                  delegate: SliverChildBuilderDelegate((context, index) {
+                    final friend = controller.searchResults[index];
+                    final imageUrl = friend.image.startsWith('http')
+                        ? friend.image
+                        : "${ApiEndPoint.imageUrl}${friend.image}";
 
-                      return _buildPersonCard(
-                        imageUrl: imageUrl,
-                        name: friend.name,
-                        subtitle: 'Friend',
-                        trailing: _buildAddButton(
-                          onTap: () => controller.onAddMember(friend),
-                        ),
-                      );
-                    },
-                    childCount: controller.searchResults.length,
-                  ),
+                    return _buildPersonCard(
+                      imageUrl: imageUrl,
+                      name: friend.name,
+                      subtitle: 'Friend',
+                      trailing: _buildAddButton(
+                        onTap: () => controller.onAddMember(friend),
+                      ),
+                    );
+                  }, childCount: controller.searchResults.length),
                 ),
               ),
 
@@ -185,25 +187,26 @@ class AddMemberScreen extends StatelessWidget {
             SliverPadding(
               padding: EdgeInsets.symmetric(horizontal: 16.w),
               sliver: SliverList(
-                delegate: SliverChildBuilderDelegate(
-                      (context, index) {
-                    final member = controller.currentMembers[index];
-                    final imageUrl = member.image.startsWith('http')
-                        ? member.image
-                        : "${ApiEndPoint.imageUrl}${member.image}";
+                delegate: SliverChildBuilderDelegate((context, index) {
+                  final member = controller.currentMembers[index];
+                  final imageUrl = member.image.startsWith('http')
+                      ? member.image
+                      : "${ApiEndPoint.imageUrl}${member.image}";
 
-                    return _buildPersonCard(
-                      imageUrl: imageUrl,
-                      name: member.name,
-                      subtitle: 'Member',
-                      trailing: _buildRemoveButton(
-                        onTap: () =>
-                            controller.showRemoveMemberDialog(member),
-                      ),
-                    );
-                  },
-                  childCount: controller.currentMembers.length,
-                ),
+                  return _buildPersonCard(
+                    imageUrl: imageUrl,
+                    name: member.name,
+                    subtitle: 'Member',
+                    trailing:
+                        (controller.isAuthor &&
+                            member.id != LocalStorage.userId)
+                        ? _buildRemoveButton(
+                            onTap: () =>
+                                controller.showRemoveMemberDialog(member),
+                          )
+                        : const SizedBox.shrink(),
+                  );
+                }, childCount: controller.currentMembers.length),
               ),
             ),
 
@@ -213,7 +216,6 @@ class AddMemberScreen extends StatelessWidget {
       }),
     );
   }
-
 
   Widget _buildPersonCard({
     required String imageUrl,
@@ -284,10 +286,7 @@ class AddMemberScreen extends StatelessWidget {
                 SizedBox(height: 2.h),
                 Text(
                   subtitle,
-                  style: TextStyle(
-                    fontSize: 11.sp,
-                    color: Colors.grey[500],
-                  ),
+                  style: TextStyle(fontSize: 11.sp, color: Colors.grey[500]),
                 ),
               ],
             ),
@@ -342,9 +341,7 @@ class AddMemberScreen extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.red.withValues(alpha: 0.08),
           borderRadius: BorderRadius.circular(10.r),
-          border: Border.all(
-            color: Colors.red.withValues(alpha: 0.25),
-          ),
+          border: Border.all(color: Colors.red.withValues(alpha: 0.25)),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,

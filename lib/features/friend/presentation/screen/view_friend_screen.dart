@@ -117,38 +117,41 @@ class _ViewFriendScreenState extends State<ViewFriendScreen> {
 
                     final List<String> postImages = data.photos.isNotEmpty
                         ? data.photos
-                        .map((photo) => ApiEndPoint.imageUrl + photo)
-                        .toList()
+                              .map((photo) => ApiEndPoint.imageUrl + photo)
+                              .toList()
                         : [];
 
                     return CommonPostCards(
                       onTapPhoto: () {
                         if (postImages.isNotEmpty) {
-                          Get.to(() => FullScreenImageView(
-                            images: postImages,
-                          ));
+                          Get.to(() => FullScreenImageView(images: postImages));
                         }
                       },
 
-                      onTapProfile: () => Get.to(() => ViewFriendScreen(
-                        userId: data.user.id,
-                        isFriend: false,
-                      )),
+                      onTapProfile: () => Get.to(
+                        () => ViewFriendScreen(
+                          userId: data.user.id,
+                          isFriend: false,
+                        ),
+                      ),
                       clickerType: data.clickerType,
                       userName: data.user.name,
                       userAvatar: "${ApiEndPoint.imageUrl}${data.user.image}",
-                      timeAgo: _formatPostTime(DateTime.parse(data.createdAt.toString())),
+                      timeAgo: _formatPostTime(
+                        DateTime.parse(data.createdAt.toString()),
+                      ),
                       location: data.address.isNotEmpty
                           ? data.address.split(',')[0]
                           : "",
                       images: data.photos.isNotEmpty
                           ? data.photos
-                          .map((photo) => ApiEndPoint.imageUrl + photo)
-                          .toList()
+                                .map((photo) => ApiEndPoint.imageUrl + photo)
+                                .toList()
                           : [],
                       description: data.description,
-                      isFriend: false,
-                      privacyImage: data.privacy == "public" ? AppIcons.public : AppIcons.onlyMe,
+                      isFriend:
+                          controller.friendStatus.value == FriendStatus.friends,
+                      privacyImage: _getPrivacyIcon(data.privacy),
                     );
                   },
                   separatorBuilder: (_, __) => SizedBox(height: 12.h),
@@ -229,70 +232,65 @@ class _ViewFriendScreenState extends State<ViewFriendScreen> {
             ],
           ),
 
-
           SizedBox(height: 16.h),
 
-          if(widget.userId!=LocalStorage.userId)
-
-          Obx(() {
-            switch (controller.friendStatus.value) {
-              /// ✅ ALREADY FRIEND
-              case FriendStatus.friends:
-                return _buildButton(
-                  title: 'Message',
-                  image: AppIcons.chat2,
-                  color: AppColors.primaryColor,
+          if (widget.userId != LocalStorage.userId)
+            Obx(() {
+              switch (controller.friendStatus.value) {
+                /// ✅ ALREADY FRIEND
+                case FriendStatus.friends:
+                  return _buildButton(
+                    title: 'Message',
+                    image: AppIcons.chat2,
+                    color: AppColors.primaryColor,
                     onTap: () {
                       controller.createOrGetChatAndGo(
                         receiverId: widget.userId,
                         name: user?.name ?? "",
                         image: user?.image ?? "",
                       );
-                    }
-                );
+                    },
+                  );
 
+                // Get.toNamed(AppRoutes.message, parameters: {
+                // "chatId": item.id,
+                // "name": item.isGroup ? (item.chatName ?? "Unnamed Group")
+                //     : item.participant.fullName,
+                // "image": item.isGroup
+                // ? (item.chatImage ?? "")
+                //     : item.participant.image,
+                // },
 
+                /// 📤 REQUEST SENT
+                case FriendStatus.requested:
+                  return _buildButton(
+                    title: controller.isLoading.value
+                        ? 'Cancelling...'
+                        : 'Cancel Request',
+                    image: AppIcons.friendRequest,
+                    color: Colors.grey,
+                    onTap: controller.isLoading.value
+                        ? () {}
+                        : () {
+                            controller.cancelFriendRequest(widget.userId);
+                          },
+                  );
 
-
-            // Get.toNamed(AppRoutes.message, parameters: {
-            // "chatId": item.id,
-            // "name": item.isGroup ? (item.chatName ?? "Unnamed Group")
-            //     : item.participant.fullName,
-            // "image": item.isGroup
-            // ? (item.chatImage ?? "")
-            //     : item.participant.image,
-            // },
-
-              /// 📤 REQUEST SENT
-              case FriendStatus.requested:
-                return _buildButton(
-                  title: controller.isLoading.value
-                      ? 'Cancelling...'
-                      : 'Cancel Request',
-                  image: AppIcons.friendRequest,
-                  color: Colors.grey,
-                  onTap: controller.isLoading.value
-                      ? () {}
-                      : () {
-                          controller.cancelFriendRequest(widget.userId);
-                        },
-                );
-
-              /// ➕ NOT FRIEND
-              case FriendStatus.none:
-              default:
-                return _buildButton(
-                  title: controller.isLoading.value
-                      ? 'Sending...'
-                      : 'Add Friend',
-                  image: AppIcons.friendRequest,
-                  color: AppColors.primaryColor2,
-                  onTap: controller.isLoading.value
-                      ? () {}
-                      : () => controller.onTapAddFriendButton(widget.userId),
-                );
-            }
-          }),
+                /// ➕ NOT FRIEND
+                case FriendStatus.none:
+                default:
+                  return _buildButton(
+                    title: controller.isLoading.value
+                        ? 'Sending...'
+                        : 'Add Friend',
+                    image: AppIcons.friendRequest,
+                    color: AppColors.primaryColor2,
+                    onTap: controller.isLoading.value
+                        ? () {}
+                        : () => controller.onTapAddFriendButton(widget.userId),
+                  );
+              }
+            }),
         ],
       );
     });
@@ -367,5 +365,12 @@ class _ViewFriendScreenState extends State<ViewFriendScreen> {
         ),
       ],
     );
+  }
+
+  String _getPrivacyIcon(String privacy) {
+    final p = privacy.toLowerCase().trim();
+    if (p == 'public') return AppIcons.public;
+    if (p == 'friend' || p == 'friends') return AppIcons.friends;
+    return AppIcons.onlyMe;
   }
 }

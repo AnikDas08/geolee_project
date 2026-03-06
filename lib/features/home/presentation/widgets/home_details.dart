@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'package:giolee78/config/route/app_routes.dart';
 import 'package:giolee78/services/storage/storage_services.dart';
@@ -93,11 +94,9 @@ class _HomeDetailsState extends State<HomeDetails> {
         return Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-
             Expanded(
               child: Row(
                 children: [
-
                   if (LocalStorage.token.isEmpty)
                     IconButton(
                       icon: const Icon(Icons.arrow_back),
@@ -122,8 +121,9 @@ class _HomeDetailsState extends State<HomeDetails> {
                       child: ClipOval(
                         child: CommonImage(
                           fill: BoxFit.cover,
-                          imageSrc: controller.userImage.isNotEmpty &&
-                              LocalStorage.token.isNotEmpty
+                          imageSrc:
+                              controller.userImage.isNotEmpty &&
+                                  LocalStorage.token.isNotEmpty
                               ? ApiEndPoint.imageUrl + controller.userImage
                               : "assets/images/profile.png",
                           size: 40,
@@ -139,36 +139,38 @@ class _HomeDetailsState extends State<HomeDetails> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         CommonText(
-                          text: controller.userName.isNotEmpty &&
-                              LocalStorage.token.isNotEmpty
+                          text:
+                              controller.userName.isNotEmpty &&
+                                  LocalStorage.token.isNotEmpty
                               ? controller.userName
                               : "Guest User",
                           color: AppColors.textColorFirst,
                           fontWeight: FontWeight.w600,
                         ),
                         if (LocalStorage.token.isNotEmpty)
-                        Row(
-                          children: [
-                            const CommonImage(
-                              imageSrc: AppIcons.location,
-                              size: 14,
-                            ),
-                            8.width,
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.location_on_rounded,
+                                size: 14.sp,
+                                color: AppColors.primaryColor,
+                              ),
+                              4.width,
 
-                            Expanded(
-                              child: Text(
-                                displayLocation,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w400,
-                                  color: AppColors.secondaryText,
+                              Expanded(
+                                child: Text(
+                                  displayLocation,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w400,
+                                    color: AppColors.secondaryText,
+                                  ),
                                 ),
                               ),
-                            ),
-                          ],
-                        ),
+                            ],
+                          ),
                       ],
                     ),
                   ),
@@ -178,41 +180,41 @@ class _HomeDetailsState extends State<HomeDetails> {
 
             LocalStorage.token.isNotEmpty
                 ? Obx(
-                  () => Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(right: 10),
-                    child: GestureDetector(
-                      onTap: () => Get.toNamed(AppRoutes.notifications),
-                      child: const CommonImage(
-                        imageSrc: AppIcons.notification,
-                        size: 28,
-                      ),
-                    ),
-                  ),
-                  if (widget.notificationCount.value > 0)
-                    Positioned(
-                      right: 4,
-                      top: -4,
-                      child: Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: const BoxDecoration(
-                          color: Colors.red,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Text(
-                          "${widget.notificationCount.value}",
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 10,
+                    () => Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(right: 10),
+                          child: GestureDetector(
+                            onTap: () => Get.toNamed(AppRoutes.notifications),
+                            child: const CommonImage(
+                              imageSrc: AppIcons.notification,
+                              size: 28,
+                            ),
                           ),
                         ),
-                      ),
+                        if (widget.notificationCount.value > 0)
+                          Positioned(
+                            right: 4,
+                            top: -4,
+                            child: Container(
+                              padding: const EdgeInsets.all(4),
+                              decoration: const BoxDecoration(
+                                color: Colors.red,
+                                shape: BoxShape.circle,
+                              ),
+                              child: Text(
+                                "${widget.notificationCount.value}",
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 10,
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
                     ),
-                ],
-              ),
-            )
+                  )
                 : const SizedBox(),
           ],
         );
@@ -220,3 +222,4 @@ class _HomeDetailsState extends State<HomeDetails> {
     );
   }
 }
+

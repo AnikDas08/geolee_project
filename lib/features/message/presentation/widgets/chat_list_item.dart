@@ -40,7 +40,7 @@ String formatTimeAgo(DateTime dateTime) {
   }
 }
 
-String _formatDistance(double? km) {
+String formatDistance(double? km) {
   if (km == null) return '';
   if (km < 1) return '${(km * 1000).toStringAsFixed(0)} M';
   return '${km.toStringAsFixed(1)} KM';
@@ -49,10 +49,11 @@ String _formatDistance(double? km) {
 Widget chatListItem({
   required ChatModel item,
   bool isFriend = true,
+  bool isSearching = false,
   VoidCallback? onJoinTap,
 }) {
   final bool hasUnseenMessages = item.unreadCount > 0;
-  final String distanceText = _formatDistance(item.distanceInKm);
+  final String distanceText = formatDistance(item.distanceInKm);
   final bool showDistance = !item.isGroup && distanceText.isNotEmpty;
 
   final Color bgColor = isFriend
@@ -107,9 +108,14 @@ Widget chatListItem({
               ),
               SizedBox(height: 3.h),
               Text(
-                item.latestMessage.text.isNotEmpty
-                    ? item.latestMessage.text
-                    : "Tap to view messages",
+                (isSearching &&
+                        item.isGroup &&
+                        item.description != null &&
+                        item.description!.isNotEmpty)
+                    ? item.description!
+                    : (item.latestMessage.text.isNotEmpty
+                          ? item.latestMessage.text
+                          : "Tap to view messages"),
                 style: TextStyle(
                   fontSize: 12.sp,
                   color: Colors.grey[600],

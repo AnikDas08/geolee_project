@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -18,7 +17,8 @@ class Item extends StatelessWidget {
     this.vertical = 8,
     this.horizontal = 4,
     this.disableIcon = false,
-    this.badgeText, // ✅ new
+    this.badgeText,
+    this.trailing, // ✅ new — custom trailing widget
   });
 
   final IconData? icon;
@@ -30,7 +30,8 @@ class Item extends StatelessWidget {
   final Color color;
   final double vertical;
   final double horizontal;
-  final String? badgeText; // ✅ optional badge
+  final String? badgeText;
+  final Widget? trailing; // ✅ optional trailing widget
 
   @override
   Widget build(BuildContext context) {
@@ -65,7 +66,7 @@ class Item extends StatelessWidget {
                     ? Icon(icon, color: color)
                     : CommonImage(imageSrc: imageSrc),
 
-                /// ✅ Badge (optional)
+                /// Badge (optional)
                 if (badgeText != null && badgeText!.isNotEmpty)
                   Positioned(
                     top: -6,
@@ -102,7 +103,12 @@ class Item extends StatelessWidget {
 
             const Spacer(),
 
-            /// Arrow Icon
+
+            if (trailing != null) ...[
+              trailing!,
+              SizedBox(width: 8.w),
+            ],
+
             disableIcon
                 ? const SizedBox()
                 : Icon(

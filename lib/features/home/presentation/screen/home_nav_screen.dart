@@ -29,10 +29,9 @@ class _HomeNavState extends State<HomeNav> {
 
   final List<Widget> userScreens = [
     const HomeScreen(),
-         AddPostScreen(),
+    AddPostScreen(),
     const ChatListScreen(),
   ];
-
 
   final List<Widget> advertiseScreens = [
     const HomeScreen(),
@@ -43,10 +42,10 @@ class _HomeNavState extends State<HomeNav> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-       resizeToAvoidBottomInset: false,
+      resizeToAvoidBottomInset: true,
       body: Obx(() {
         if (controller.currentIndex.value == 2) {
-     WidgetsBinding.instance.addPostFrameCallback((_) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
             ChatController.instance.getChatRepos();
           });
         }
@@ -61,7 +60,10 @@ class _HomeNavState extends State<HomeNav> {
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
 
       floatingActionButton: Obx(() {
-        if (!controller.showNavBar.value) return const SizedBox.shrink();
+        final bool isKeyboardVisible =
+            MediaQuery.of(context).viewInsets.bottom > 0;
+        if (!controller.showNavBar.value || isKeyboardVisible)
+          return const SizedBox.shrink();
 
         return SizedBox(
           height: 70.w,
@@ -86,7 +88,10 @@ class _HomeNavState extends State<HomeNav> {
       }),
 
       bottomNavigationBar: Obx(() {
-        if (!controller.showNavBar.value) return const SizedBox.shrink();
+        final bool isKeyboardVisible =
+            MediaQuery.of(context).viewInsets.bottom > 0;
+        if (!controller.showNavBar.value || isKeyboardVisible)
+          return const SizedBox.shrink();
 
         final bool isUser = LocalStorage.role == "user";
 
@@ -109,7 +114,7 @@ class _HomeNavState extends State<HomeNav> {
 
                 _buildNavItem(
                   index: 2,
-                  iconPath: isUser? AppIcons.chatIcon:AppIcons.dashBoard,
+                  iconPath: isUser ? AppIcons.chatIcon : AppIcons.dashBoard,
                   label: isUser ? 'Message' : 'Dashboard',
                 ),
               ],
@@ -127,13 +132,14 @@ class _HomeNavState extends State<HomeNav> {
   }) {
     return Obx(() {
       final bool isSelected = controller.currentIndex.value == index;
+      final chatController = Get.find<ChatController>();
 
       return GestureDetector(
         onTap: () {
           if (isGuest && index != 0) {
             Get.snackbar(
               "Login required",
-              "Please login to access this feature",
+              "Please sign up to use this feature.",
             );
             return;
           }
@@ -144,14 +150,51 @@ class _HomeNavState extends State<HomeNav> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              SvgPicture.asset(
-                iconPath,
-                height: 24.w,
-                width: 24.w,
-                colorFilter: ColorFilter.mode(
-                  isSelected ? AppColors.primaryColor : Colors.black,
-                  BlendMode.srcIn,
-                ),
+              Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  SvgPicture.asset(
+                    iconPath,
+                    height: 24.w,
+                    width: 24.w,
+                    colorFilter: ColorFilter.mode(
+                      isSelected ? AppColors.primaryColor : Colors.black,
+                      BlendMode.srcIn,
+                    ),
+                  ),
+                  if (index == 2 && LocalStorage.role == "user")
+                    GetBuilder<ChatController>(
+                      builder: (chatCtrl) {
+                        final count = chatCtrl.unreadCountUser;
+                        if (count <= 0) return const SizedBox.shrink();
+                        return Positioned(
+                          right: -8.w,
+                          top: -8.w,
+                          child: Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: const BoxDecoration(
+                              color: Colors.red,
+                              shape: BoxShape.circle,
+                            ),
+                            constraints: BoxConstraints(
+                              minWidth: 16.w,
+                              minHeight: 16.w,
+                            ),
+                            child: Center(
+                              child: Text(
+                                count > 9 ? '9+' : '$count',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 10.sp,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                ],
               ),
               SizedBox(height: 4.h),
               Text(

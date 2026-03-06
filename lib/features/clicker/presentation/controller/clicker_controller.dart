@@ -57,6 +57,7 @@ class ClickerController extends GetxController {
   /// ================= User Profile & Specific Posts
   Rxn<SingleUserByIdData> userData = Rxn<SingleUserByIdData>();
   var usersPosts = <PostById>[].obs;
+  List<PostById> _allUserPostsRaw = []; // Store raw posts for re-filtering
   var isUserLoading = false.obs;
 
   /// ================= Friend Status
@@ -250,11 +251,11 @@ class ClickerController extends GetxController {
           "✅ [getPostsByUserId] Parsed ${responseData.data.length} posts",
         );
 
-        usersPosts.assignAll(responseData.data);
-        usersPosts.refresh(); // 🔥 Force refresh
+        _allUserPostsRaw = responseData.data;
+        _filterUserPosts();
 
         debugPrint(
-          "✅ [getPostsByUserId] usersPosts updated: ${usersPosts.length} posts",
+          "✅ [getPostsByUserId] usersPosts updated: ${usersPosts.length} posts (Filtered from ${_allUserPostsRaw.length})",
         );
       } else {
         debugPrint("❌ [getPostsByUserId] Error status: ${response.statusCode}");
@@ -414,6 +415,7 @@ class ClickerController extends GetxController {
         } else {
           friendStatus.value = FriendStatus.none;
         }
+        _filterUserPosts(); // Re-filter posts based on newly fetched status
       }
     } catch (e) {
       debugPrint("Friendship Error: $e");
@@ -463,5 +465,35 @@ class ClickerController extends GetxController {
     } finally {
       isLoading.value = false;
     }
+  }
+
+  // ================= Private Helper: Filter User Posts
+  void _filterUserPosts() {
+    if (_allUserPostsRaw.isEmpty) {
+      usersPosts.clear();
+      return;
+    }
+
+    final String currentUserId = LocalStorage.userId;
+    final List<PostById> filtered = _allUserPostsRaw.where((post) {
+      // 1. Owner sees everything
+      if (post.user.id == currentUserId) return true;
+
+      final privacy = post.privacy.toLowerCase().trim();
+
+      // 2. Hide "Only me" from everyone else
+      if (privacy == 'only me' || privacy == 'onlyme') return false;
+
+      // 3. "Friend" posts only visible to friends
+      if (privacy == 'friend' || privacy == 'friends') {
+        return friendStatus.value == FriendStatus.friends;
+      }
+
+      // 4. "Public" posts visible to everyone
+      return true;
+    }).toList();
+
+    usersPosts.assignAll(filtered);
+    usersPosts.refresh();
   }
 }

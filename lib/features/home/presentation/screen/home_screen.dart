@@ -21,7 +21,6 @@ import '../widgets/clicker_main.dart';
 import '../widgets/filter_main.dart';
 import '../widgets/home_details.dart';
 
-
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -30,7 +29,8 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
-  final Completer<GoogleMapController> _mapController = Completer<GoogleMapController>();
+  final Completer<GoogleMapController> _mapController =
+  Completer<GoogleMapController>();
   late final MyFriendController myFriendController;
 
   @override
@@ -39,10 +39,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
     if (Get.isRegistered<MyFriendController>()) {
       myFriendController = Get.find<MyFriendController>();
-      debugPrint("Using existing MyFriendController");
     } else {
       myFriendController = Get.put(MyFriendController());
-      debugPrint("Created new MyFriendController");
     }
   }
 
@@ -55,21 +53,16 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      debugPrint("HomeScreen resumed - refreshing friend requests");
       myFriendController.fetchFriendRequests();
     }
   }
 
   CameraPosition get _initialPosition => CameraPosition(
     target: LatLng(
-      Get.find<HomeController>().currentLatitude.value != 0.0
-          ? Get.find<HomeController>().currentLatitude.value
-          : LocalStorage.lat,
-      Get.find<HomeController>().currentLongitude.value != 0.0
-          ? Get.find<HomeController>().currentLongitude.value
-          : LocalStorage.long,
+      LocalStorage.lat != 0.0 ? LocalStorage.lat : 1.3521,
+      LocalStorage.long != 0.0 ? LocalStorage.long : 103.8198,
     ),
-    zoom: 14.4746,
+    zoom: 14.0,
   );
 
   @override
@@ -128,6 +121,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     );
   }
 
+  // ─────────────────────────────────────────────
+  // Top Details
+  // ─────────────────────────────────────────────
   Widget _buildTopDetails() {
     try {
       return GetBuilder<NotificationsController>(
@@ -142,6 +138,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     }
   }
 
+  // ─────────────────────────────────────────────
+  // Loading Map placeholder
+  // ─────────────────────────────────────────────
   Widget _buildLoadingMap() {
     return Container(
       height: 350.h,
@@ -166,6 +165,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     );
   }
 
+  // ─────────────────────────────────────────────
+  // Map Section
+  // ─────────────────────────────────────────────
   Widget _buildMapSection(HomeController controller) {
     return Container(
       height: 350.h,
@@ -175,9 +177,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         borderRadius: BorderRadius.circular(10.r),
         child: Stack(
           children: [
-
             Obx(
-              () => GoogleMap(
+                  () => GoogleMap(
                 mapType: MapType.satellite,
                 initialCameraPosition: _initialPosition,
                 myLocationEnabled: true,
@@ -187,20 +188,33 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   try {
                     if (!_mapController.isCompleted) {
                       _mapController.complete(mapController);
-                      if (controller.currentLatitude.value != 0.0 &&
-                          controller.currentLongitude.value != 0.0) {
-                        await mapController.animateCamera(
-                          CameraUpdate.newCameraPosition(
-                            CameraPosition(
-                              target: LatLng(
-                                controller.currentLatitude.value,
-                                controller.currentLongitude.value,
-                              ),
-                              zoom: 14.4746,
-                            ),
-                          ),
-                        );
+
+                      // ✅ HomeController এও save করো
+                      if (!controller.mapController.isCompleted) {
+                        controller.mapController.complete(mapController);
                       }
+
+                      final double lat =
+                      controller.currentLatitude.value != 0.0
+                          ? controller.currentLatitude.value
+                          : LocalStorage.lat != 0.0
+                          ? LocalStorage.lat
+                          : 1.3521;
+                      final double lng =
+                      controller.currentLongitude.value != 0.0
+                          ? controller.currentLongitude.value
+                          : LocalStorage.long != 0.0
+                          ? LocalStorage.long
+                          : 103.8198;
+
+                      await mapController.animateCamera(
+                        CameraUpdate.newCameraPosition(
+                          CameraPosition(
+                            target: LatLng(lat, lng),
+                            zoom: 14.0,
+                          ),
+                        ),
+                      );
                     }
                   } catch (e) {
                     debugPrint('Error on map created: $e');
@@ -214,18 +228,21 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               ),
             ),
 
+            // ── Overlay buttons (clicker + filter)
             Positioned(
               top: 16.h,
               right: 16.w,
               child: _buildOverlayButtons(controller),
             ),
 
-            // Heatmap badge
+            // ── Heatmap info badge
             if (controller.heatmaps.isNotEmpty)
               Positioned(
                 bottom: 16.h,
                 left: 16.w,
-                child: IgnorePointer(child: _buildHeatmapInfoBadge(controller)),
+                child: IgnorePointer(
+                  child: _buildHeatmapInfoBadge(controller),
+                ),
               ),
           ],
         ),
@@ -233,6 +250,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     );
   }
 
+  // ─────────────────────────────────────────────
+  // Overlay Buttons
+  // ─────────────────────────────────────────────
   Widget _buildOverlayButtons(HomeController controller) {
     try {
       return Row(
@@ -254,7 +274,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             child: Row(
               children: [
                 Obx(
-                  () => Text(
+                      () => Text(
                     controller.clickerCount.value ?? 'Select Clicker',
                     style: TextStyle(fontSize: 12.sp, color: Colors.black87),
                   ),
@@ -268,9 +288,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             onTap: () {
               Get.dialog(FilterDialog(onApply: controller.applyFilter));
             },
-
             child: Obx(
-              () => Row(
+                  () => Row(
                 children: [
                   if (controller.isDateFilterActive.value)
                     Container(
@@ -300,13 +319,39 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     }
   }
 
+  Widget _buildOverlayButton({
+    required VoidCallback onTap,
+    required Widget child,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.9),
+          borderRadius: BorderRadius.circular(8.r),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: child,
+      ),
+    );
+  }
+
+  // ─────────────────────────────────────────────
+  // Heatmap Info Badge
+  // ─────────────────────────────────────────────
   Widget _buildHeatmapInfoBadge(HomeController controller) {
     try {
       int totalPoints = 0;
       for (var heatmap in controller.heatmaps) {
         totalPoints += heatmap.data.length;
       }
-
       return Container(
         padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
         decoration: BoxDecoration(
@@ -330,36 +375,16 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     }
   }
 
-  Widget _buildOverlayButton({
-    required VoidCallback onTap,
-    required Widget child,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.9),
-          borderRadius: BorderRadius.circular(8.r),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.1),
-              blurRadius: 4,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: child,
-      ),
-    );
-  }
-
+  // ─────────────────────────────────────────────
+  // Action List
+  // ─────────────────────────────────────────────
   Widget _buildActionList(HomeController controller) {
     try {
       final bool isLoggedIn = LocalStorage.token.isNotEmpty;
 
       return Column(
         children: [
+          // ── Clicker
           Item(
             imageSrc: AppIcons.clicker,
             title: 'Clicker',
@@ -371,12 +396,35 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               }
             },
           ),
+
           if (isLoggedIn) ...[
-            Item(
-              imageSrc: AppIcons.bubbleChat,
-              title: 'Chat Nearby',
-              onTap: _handleLocationAndNavigate,
+            // ── Chat Nearby ✅ with active indicator
+            Obx(
+                  () => Item(
+                imageSrc: AppIcons.bubbleChat,
+                title: 'Chat Nearby',
+                trailing: controller.isNearbyActive.value
+                    ? Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const _NearbyActiveDot(),
+                    SizedBox(width: 5.w),
+                    Text(
+                      'ON',
+                      style: TextStyle(
+                        fontSize: 11.sp,
+                        fontWeight: FontWeight.w700,
+                        color: const Color(0xFF22C55E),
+                      ),
+                    ),
+                  ],
+                )
+                    : null,
+                onTap: _handleLocationAndNavigate,
+              ),
             ),
+
+            // ── My Post
             Item(
               imageSrc: AppIcons.myPost,
               title: 'My Post',
@@ -388,6 +436,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 }
               },
             ),
+
+            // ── My Friend
             Item(
               imageSrc: AppIcons.myFriend,
               title: 'My Friend',
@@ -399,17 +449,13 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 }
               },
             ),
-            Obx(
-              () {
-                // 🔄 Calculate pending requests dynamically
-                debugPrint("Total requests: ${myFriendController.requests.length}");
-                debugPrint("All requests: ${myFriendController.requests.map((r) => "status=${r.status}").toList()}");
 
+            // ── Friend Request with badge
+            Obx(
+                  () {
                 final pendingRequests = myFriendController.requests
                     .where((r) => r.status == "pending")
                     .toList();
-
-                debugPrint("⏳ Pending requests: ${pendingRequests.length}");
 
                 return Item(
                   imageSrc: AppIcons.friend,
@@ -436,6 +482,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     }
   }
 
+  // ─────────────────────────────────────────────
+  // Location & Navigation
+  // ─────────────────────────────────────────────
   Future<void> _handleLocationAndNavigate() async {
     try {
       _showConfirmationDialog();
@@ -457,7 +506,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             children: [
               const Text(
                 'By Enabling Location, Your Nearby Activity May Be Visible To Others, '
-                'And Your Location Data Will Be Stored Temporarily.',
+                    'And Your Location Data Will Be Stored Temporarily.',
                 textAlign: TextAlign.start,
                 style: TextStyle(
                   fontSize: 14,
@@ -499,26 +548,34 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
                           if (status.isGranted) {
                             final bool serviceEnabled =
-                                await Geolocator.isLocationServiceEnabled();
+                            await Geolocator.isLocationServiceEnabled();
                             if (!serviceEnabled) {
                               Get.back();
                               Get.snackbar(
                                 'GPS Disabled',
                                 'Please enable GPS/Location services',
                                 snackPosition: SnackPosition.BOTTOM,
-                                backgroundColor: Colors.orange.withValues(alpha: 0.7),
+                                backgroundColor:
+                                Colors.orange.withOpacity(0.7),
                                 colorText: Colors.white,
                               );
                               return;
                             }
 
                             final Position position =
-                                await Geolocator.getCurrentPosition(
-                                  desiredAccuracy: LocationAccuracy.high,
-                                );
+                            await Geolocator.getCurrentPosition(
+                              desiredAccuracy: LocationAccuracy.high,
+                            );
+
                             Get.back();
+
                             LocalStorage.lat = position.latitude;
                             LocalStorage.long = position.longitude;
+
+                            // ✅ Nearby active indicator চালু করো
+                            Get.find<HomeController>().isNearbyActive.value =
+                            true;
+
                             Get.to(() => const ChatNearbyScreen());
                           } else {
                             Get.back();
@@ -537,7 +594,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                             'Error',
                             'Failed to request location permission',
                             snackPosition: SnackPosition.BOTTOM,
-                            backgroundColor: Colors.red.withValues(alpha: 0.7),
+                            backgroundColor: Colors.red.withOpacity(0.7),
                             colorText: Colors.white,
                           );
                         }
@@ -561,6 +618,63 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       debugPrint('Error showing confirmation dialog: $e');
     }
   }
+}
 
+// ══════════════════════════════════════════════
+// ✅ Pulsing green dot — Nearby Active indicator
+// ══════════════════════════════════════════════
+class _NearbyActiveDot extends StatefulWidget {
+  const _NearbyActiveDot();
 
+  @override
+  State<_NearbyActiveDot> createState() => _NearbyActiveDotState();
+}
+
+class _NearbyActiveDotState extends State<_NearbyActiveDot>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _ctrl;
+  late Animation<double> _anim;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 900),
+    )..repeat(reverse: true);
+    _anim = CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut);
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _anim,
+      builder: (_, __) => Container(
+        width: 9,
+        height: 9,
+        decoration: BoxDecoration(
+          color: Color.lerp(
+            const Color(0xFF22C55E),
+            const Color(0xFF86EFAC),
+            _anim.value,
+          ),
+          shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF22C55E)
+                  .withOpacity(0.4 + (_anim.value * 0.3)),
+              blurRadius: 4 + (_anim.value * 4),
+              spreadRadius: _anim.value * 2,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }

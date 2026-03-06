@@ -18,7 +18,8 @@ class ChatModel {
   final String? joinRequestStatus;
   final String? joinRequestId;
   final String? friendRequestStatus; // ✅ new — 'none' | 'pending'
-  final String? friendRequestId;     // ✅ new — cancel করার জন্য
+  final String? friendRequestId; // ✅ new — cancel করার জন্য
+  final String? description; // ✅ group description
 
   ChatModel({
     required this.id,
@@ -40,7 +41,8 @@ class ChatModel {
     this.joinRequestStatus,
     this.joinRequestId,
     this.friendRequestStatus, // ✅
-    this.friendRequestId,     // ✅
+    this.friendRequestId, // ✅
+    this.description,
   });
 
   ChatModel copyWith({
@@ -63,7 +65,8 @@ class ChatModel {
     String? joinRequestStatus,
     String? joinRequestId,
     String? friendRequestStatus, // ✅
-    String? friendRequestId,     // ✅
+    String? friendRequestId, // ✅
+    String? description,
   }) {
     return ChatModel(
       id: id ?? this.id,
@@ -85,7 +88,8 @@ class ChatModel {
       joinRequestStatus: joinRequestStatus ?? this.joinRequestStatus,
       joinRequestId: joinRequestId ?? this.joinRequestId,
       friendRequestStatus: friendRequestStatus ?? this.friendRequestStatus, // ✅
-      friendRequestId: friendRequestId ?? this.friendRequestId,             // ✅
+      friendRequestId: friendRequestId ?? this.friendRequestId, // ✅
+      description: description ?? this.description,
     );
   }
 
@@ -103,8 +107,7 @@ class ChatModel {
     final bool isGroupFromFlag =
         json['isGroup'] ?? json['isGroupChat'] ?? false;
     final String? cName = _parseStringOrFirstInList(json['chatName']);
-    final bool isGroup =
-        isGroupFromFlag || (cName != null && cName.isNotEmpty);
+    final bool isGroup = isGroupFromFlag || (cName != null && cName.isNotEmpty);
 
     var participantJson = json['anotherParticipant'];
     if (participantJson == null &&
@@ -117,31 +120,35 @@ class ChatModel {
     List<Participant> allParticipants = [];
     if (json['participants'] != null && json['participants'] is List) {
       allParticipants = (json['participants'] as List)
-          .map((p) => Participant.fromJson(
-          p is Map<String, dynamic> ? p : {"_id": p.toString()}))
+          .map(
+            (p) => Participant.fromJson(
+              p is Map<String, dynamic> ? p : {"_id": p.toString()},
+            ),
+          )
           .toList();
     }
 
-    final dynamic rawUnseen = json['unseenCount'] ??
+    final dynamic rawUnseen =
+        json['unseenCount'] ??
         json['unSeenCount'] ??
         json['unseen_count'] ??
         json['unreadCount'];
-    final int finalUnreadCount =
-    rawUnseen != null ? int.tryParse(rawUnseen.toString()) ?? 0 : 0;
+    final int finalUnreadCount = rawUnseen != null
+        ? int.tryParse(rawUnseen.toString()) ?? 0
+        : 0;
 
     final dynamic friendRaw =
         json['isFriend'] ?? json['isAlreadyFriend'] ?? json['is_friend'];
     final bool isFriend = isGroup
         ? true
-        : (friendRaw != null
-        ? (friendRaw == true || friendRaw == 1)
-        : true);
+        : (friendRaw != null ? (friendRaw == true || friendRaw == 1) : true);
 
     final bool amIAParticipant = json['amIAParticipant'] ?? true;
 
     final dynamic rawDist = json['distanceInKm'];
-    final double? distanceInKm =
-    rawDist != null ? double.tryParse(rawDist.toString()) : null;
+    final double? distanceInKm = rawDist != null
+        ? double.tryParse(rawDist.toString())
+        : null;
 
     String? joinRequestStatus;
     String? joinRequestId;
@@ -163,9 +170,11 @@ class ChatModel {
       unreadCount: finalUnreadCount,
       isDeleted: json['isDeleted'] ?? false,
       isOnline: participantIsOnline,
-      createdAt: DateTime.tryParse(json['createdAt']?.toString() ?? '') ??
+      createdAt:
+          DateTime.tryParse(json['createdAt']?.toString() ?? '') ??
           DateTime.now().toLocal(),
-      updatedAt: DateTime.tryParse(json['updatedAt']?.toString() ?? '') ??
+      updatedAt:
+          DateTime.tryParse(json['updatedAt']?.toString() ?? '') ??
           DateTime.now().toLocal(),
       memberCount: allParticipants.length,
       isFriend: isFriend,
@@ -174,7 +183,8 @@ class ChatModel {
       joinRequestStatus: joinRequestStatus,
       joinRequestId: joinRequestId,
       friendRequestStatus: null, // ✅ API থেকে আসে না — controller set করবে
-      friendRequestId: null,     // ✅ API থেকে আসে না — controller set করবে
+      friendRequestId: null, // ✅ API থেকে আসে না — controller set করবে
+      description: json['description']?.toString(),
     );
   }
 }
@@ -227,7 +237,8 @@ class LatestMessage {
   });
 
   factory LatestMessage.fromJson(Map<String, dynamic> json) {
-    final String rawText = json['text']?.toString() ??
+    final String rawText =
+        json['text']?.toString() ??
         json['content']?.toString() ??
         json['message']?.toString() ??
         '';
@@ -248,7 +259,8 @@ class LatestMessage {
       id: json['_id']?.toString() ?? '',
       sender: json['sender']?['_id']?.toString() ?? '',
       text: displayText,
-      createdAt: DateTime.tryParse(json['createdAt']?.toString() ?? '') ??
+      createdAt:
+          DateTime.tryParse(json['createdAt']?.toString() ?? '') ??
           DateTime.now().toLocal(),
     );
   }

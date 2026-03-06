@@ -58,7 +58,6 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   Future<void> _initializeLocation() async {
     await _checkLocationStatus();
 
-    // যদি location enabled থাকে, তাহলে save করো
     if (isLocationEnabled) {
       await _saveCurrentLocation();
     }
@@ -292,7 +291,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       await openAppSettings();
       // Wait for user to return from settings
       await Future.delayed(const Duration(milliseconds: 500));
-      await _initializeLocation(); // Re-check and save if enabled
+      await _initializeLocation();
     }
   }
 
@@ -334,7 +333,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
 
                   debugPrint("🚀 Navigation - Location -> Lat: $lat, Long: $log");
 
-                  Get.toNamed(AppRoutes.signUp);
+                  Get.toNamed(AppRoutes.signIn);
                 },
               ),
             ],

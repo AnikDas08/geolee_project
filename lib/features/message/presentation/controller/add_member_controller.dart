@@ -4,15 +4,15 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:giolee78/config/api/api_end_point.dart';
 import 'package:giolee78/services/api/api_service.dart';
+import 'package:giolee78/services/storage/storage_services.dart';
 import 'package:giolee78/utils/log/app_log.dart';
 import 'package:giolee78/utils/app_utils.dart';
 import '../../data/model/add_friend_model.dart';
 import '../../data/model/friend_response_model.dart';
 
-
-
 class AddMemberController extends GetxController {
   final RxBool isLoading = false.obs;
+  final RxString authorId = ''.obs;
   final RxString searchKeyword = ''.obs;
   String chatId = '';
   Timer? _debounce;
@@ -21,6 +21,8 @@ class AddMemberController extends GetxController {
   final RxList<Participant> currentMembers = <Participant>[].obs;
 
   List<Participant> allFriendsList = [];
+
+  bool get isAuthor => authorId.value == LocalStorage.userId;
 
   @override
   void onInit() {
@@ -63,13 +65,18 @@ class AddMemberController extends GetxController {
   Future<void> fetchCurrentMembers() async {
     try {
       appLog("📥 Fetching current members...");
-      final response = await ApiService.get("${ApiEndPoint.getSingleChatById}/$chatId");
+      final response = await ApiService.get(
+        "${ApiEndPoint.getSingleChatById}/$chatId",
+      );
 
       appLog("📊 Members Response Status: ${response.statusCode}");
 
       if (response.statusCode == 200) {
-        final groupData = TotalMemberResponseModelById.fromJson(response.data as Map<String, dynamic>);
+        final groupData = TotalMemberResponseModelById.fromJson(
+          response.data as Map<String, dynamic>,
+        );
         currentMembers.assignAll(groupData.data.participants);
+        authorId.value = groupData.data.author;
 
         appLog("✅ Current members count: ${currentMembers.length}");
         for (var member in currentMembers) {
@@ -91,7 +98,9 @@ class AddMemberController extends GetxController {
 
       if (response.statusCode == 200) {
         // Parse response using model
-        final friendsResponse = FriendsResponse.fromJson(response.data as Map<String, dynamic>);
+        final friendsResponse = FriendsResponse.fromJson(
+          response.data as Map<String, dynamic>,
+        );
 
         appLog("📊 Total friends from API: ${friendsResponse.data.length}");
 
@@ -99,12 +108,16 @@ class AddMemberController extends GetxController {
         final List<Participant> friends = [];
         for (var i = 0; i < friendsResponse.data.length; i++) {
           final friendData = friendsResponse.data[i];
-          friends.add(Participant(
-            id: friendData.friend.id,
-            name: friendData.friend.name,
-            image: friendData.friend.image,
-          ));
-          appLog("   👤 Friend $i: ${friendData.friend.name} (${friendData.friend.id})");
+          friends.add(
+            Participant(
+              id: friendData.friend.id,
+              name: friendData.friend.name,
+              image: friendData.friend.image,
+            ),
+          );
+          appLog(
+            "   👤 Friend $i: ${friendData.friend.name} (${friendData.friend.id})",
+          );
         }
 
         appLog("📊 Current members in list: ${currentMembers.length}");
@@ -116,7 +129,9 @@ class AddMemberController extends GetxController {
         appLog("🔍 Filtering...");
         final List<Participant> filtered = [];
         for (var friend in friends) {
-          final bool isAlreadyMember = currentMembers.any((member) => member.id == friend.id);
+          final bool isAlreadyMember = currentMembers.any(
+            (member) => member.id == friend.id,
+          );
           if (isAlreadyMember) {
             appLog("   🚫 Filtered out: ${friend.name} (already member)");
           } else {
@@ -126,7 +141,9 @@ class AddMemberController extends GetxController {
         }
 
         allFriendsList = filtered;
-        appLog("✅ Available friends (after filtering): ${allFriendsList.length}");
+        appLog(
+          "✅ Available friends (after filtering): ${allFriendsList.length}",
+        );
 
         // Show all friends initially
         searchResults.assignAll(allFriendsList);
@@ -148,10 +165,15 @@ class AddMemberController extends GetxController {
         searchResults.assignAll(allFriendsList);
       } else {
         final filtered = allFriendsList
-            .where((friend) => friend.name.toLowerCase()
-            .contains(searchKeyword.value.toLowerCase()))
+            .where(
+              (friend) => friend.name.toLowerCase().contains(
+                searchKeyword.value.toLowerCase(),
+              ),
+            )
             .toList();
-        appLog("🔎 Search for '${searchKeyword.value}': found ${filtered.length}");
+        appLog(
+          "🔎 Search for '${searchKeyword.value}': found ${filtered.length}",
+        );
         searchResults.assignAll(filtered);
       }
     });
@@ -168,7 +190,6 @@ class AddMemberController extends GetxController {
 
       appLog("➕ Adding: ${friend.name} to Chat: $chatId");
 
-
       final url = "${ApiEndPoint.addMember}$chatId";
 
       appLog("📤 Sending payload: {members: [${friend.id}]}");
@@ -176,7 +197,7 @@ class AddMemberController extends GetxController {
       final response = await ApiService.patch(
         url,
         body: {
-          "members": [friend.id] // Friend ID array hishebe body-te jabe
+          "members": [friend.id], // Friend ID array hishebe body-te jabe
         },
       );
 
@@ -201,88 +222,107 @@ class AddMemberController extends GetxController {
     final RxBool isRemoving = false.obs;
 
     Get.dialog(
-      Obx(() => Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        insetPadding: EdgeInsets.symmetric(horizontal: 24.w),
-        child: Container(
-          padding: EdgeInsets.all(20.w),
-          decoration: BoxDecoration(
-            color: Colors.white,
+      Obx(
+        () => Dialog(
+          shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.person_remove, size: 50.sp, color: Colors.red.shade700),
-              SizedBox(height: 12.h),
-              Text(
-                "Remove Member",
-                style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
-              ),
-              SizedBox(height: 8.h),
-              Text(
-                "Remove ${member.name} from the group?",
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 14.sp, color: Colors.grey.shade700),
-              ),
-              SizedBox(height: 20.h),
-              Row(
-                children: [
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () => Get.back(),
-                      child: Container(
-                        padding: EdgeInsets.symmetric(vertical: 12.h),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(8.r),
-                          border: Border.all(color: Colors.grey.shade400),
-                          color: Colors.grey.shade100,
-                        ),
-                        alignment: Alignment.center,
-                        child: Text(
-                          "Cancel",
-                          style: TextStyle(fontSize: 14.sp, color: Colors.grey.shade800),
-                        ),
-                      ),
-                    ),
+          insetPadding: EdgeInsets.symmetric(horizontal: 24.w),
+          child: Container(
+            padding: EdgeInsets.all(20.w),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.person_remove,
+                  size: 50.sp,
+                  color: Colors.red.shade700,
+                ),
+                SizedBox(height: 12.h),
+                Text(
+                  "Remove Member",
+                  style: TextStyle(
+                    fontSize: 20.sp,
+                    fontWeight: FontWeight.bold,
                   ),
-                  SizedBox(width: 12.w),
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: isRemoving.value ? null : () => _removeMember(member, isRemoving),
-                      child: Container(
-                        padding: EdgeInsets.symmetric(vertical: 12.h),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(8.r),
-                          color: Colors.red.shade700,
-                        ),
-                        alignment: Alignment.center,
-                        child: isRemoving.value
-                            ? SizedBox(
-                          height: 18.h,
-                          width: 18.h,
-                          child: const CircularProgressIndicator(
-                            color: Colors.white,
-                            strokeWidth: 2,
+                ),
+                SizedBox(height: 8.h),
+                Text(
+                  "Remove ${member.name} from the group?",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    color: Colors.grey.shade700,
+                  ),
+                ),
+                SizedBox(height: 20.h),
+                Row(
+                  children: [
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () => Get.back(),
+                        child: Container(
+                          padding: EdgeInsets.symmetric(vertical: 12.h),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8.r),
+                            border: Border.all(color: Colors.grey.shade400),
+                            color: Colors.grey.shade100,
                           ),
-                        )
-                            : Text(
-                          "Remove",
-                          style: TextStyle(
-                            fontSize: 14.sp,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white,
+                          alignment: Alignment.center,
+                          child: Text(
+                            "Cancel",
+                            style: TextStyle(
+                              fontSize: 14.sp,
+                              color: Colors.grey.shade800,
+                            ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-            ],
+                    SizedBox(width: 12.w),
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: isRemoving.value
+                            ? null
+                            : () => _removeMember(member, isRemoving),
+                        child: Container(
+                          padding: EdgeInsets.symmetric(vertical: 12.h),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8.r),
+                            color: Colors.red.shade700,
+                          ),
+                          alignment: Alignment.center,
+                          child: isRemoving.value
+                              ? SizedBox(
+                                  height: 18.h,
+                                  width: 18.h,
+                                  child: const CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : Text(
+                                  "Remove",
+                                  style: TextStyle(
+                                    fontSize: 14.sp,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
-      )),
+      ),
     );
   }
 

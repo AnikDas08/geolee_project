@@ -250,7 +250,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
                           // ─── Chat Tab ───────────────────────────────
                           controller.isSingleLoading
                               ? const CommonLoader()
-                              : controller.singleChats.isEmpty
+                              : controller.filteredSingleChats.isEmpty
                               ? SizedBox(
                                   height: Get.height,
                                   width: Get.width,
@@ -259,17 +259,42 @@ class _ChatListScreenState extends State<ChatListScreen> {
                                       mainAxisAlignment:
                                           MainAxisAlignment.center,
                                       children: [
-                                        CommonImage(
-                                          imageSrc: "assets/images/noData.png",
-                                          height: 100.h,
-                                          width: 100.w,
-                                        ),
-                                        SizedBox(height: 20.h),
-                                        CommonText(
-                                          text: "No Chat List Found",
-                                          fontSize: 24.sp,
-                                          fontWeight: FontWeight.w600,
-                                        ),
+                                        if (controller.searchController.text
+                                            .trim()
+                                            .isEmpty) ...[
+                                          CommonImage(
+                                            imageSrc:
+                                                "assets/images/noData.png",
+                                            height: 100.h,
+                                            width: 100.w,
+                                          ),
+                                          SizedBox(height: 20.h),
+                                          CommonText(
+                                            text: "No Chat List Found",
+                                            fontSize: 24.sp,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ] else ...[
+                                          Icon(
+                                            Icons.search_off,
+                                            size: 60.sp,
+                                            color: Colors.grey[400],
+                                          ),
+                                          SizedBox(height: 16.h),
+                                          CommonText(
+                                            text: "No results found",
+                                            fontSize: 18.sp,
+                                            fontWeight: FontWeight.w500,
+                                            color: Colors.grey,
+                                          ),
+                                          SizedBox(height: 8.h),
+                                          CommonText(
+                                            text:
+                                                "Try searching with different keywords",
+                                            fontSize: 14.sp,
+                                            color: Colors.grey,
+                                          ),
+                                        ],
                                       ],
                                     ),
                                   ),
@@ -312,6 +337,9 @@ class _ChatListScreenState extends State<ChatListScreen> {
                                             "image": item.isGroup
                                                 ? (item.chatImage ?? "")
                                                 : item.participant.image,
+                                            "distance": formatDistance(
+                                              item.distanceInKm,
+                                            ),
                                           },
                                         );
                                       },
@@ -334,6 +362,11 @@ class _ChatListScreenState extends State<ChatListScreen> {
                                       child: chatListItem(
                                         item: item,
                                         isFriend: item.isFriend,
+                                        isSearching: controller
+                                            .searchController
+                                            .text
+                                            .trim()
+                                            .isNotEmpty,
                                       ),
                                     );
                                   },
@@ -430,6 +463,11 @@ class _ChatListScreenState extends State<ChatListScreen> {
                                           },
                                           child: chatListItem(
                                             item: item,
+                                            isSearching: controller
+                                                .searchController
+                                                .text
+                                                .trim()
+                                                .isNotEmpty,
                                             onJoinTap: () {
                                               final status = item
                                                   .joinRequestStatus

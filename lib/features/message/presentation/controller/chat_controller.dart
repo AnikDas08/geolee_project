@@ -38,11 +38,27 @@ class ChatController extends GetxController {
 
   static ChatController get instance => Get.put(ChatController());
 
+  // Getter for the number of chats (users/groups) with unread messages
+  int get unreadCountUser {
+    int count = 0;
+    // Use a Set to avoid counting the same chatId twice if it exists in multiple lists (unlikely but safe)
+    Set<String> unreadChatIds = {};
+
+    for (var chat in singleChats) {
+      if (chat.unreadCount > 0) unreadChatIds.add(chat.id);
+    }
+    for (var chat in chats) {
+      if (chat.unreadCount > 0) unreadChatIds.add(chat.id);
+    }
+
+    return unreadChatIds.length;
+  }
+
   void clearSearch() {
     searchController.clear();
     _searchDebounce?.cancel();
-    filteredSingleChats = List.from(singleChats);
-    filteredChats = List.from(chats);
+    getChatRepos();
+    getChatRepos(isGroup: true);
     update();
   }
 
@@ -113,7 +129,11 @@ class ChatController extends GetxController {
     }
   }
 
-  void _updateFriendRequestStatus(String chatId, String status, String requestId) {
+  void _updateFriendRequestStatus(
+    String chatId,
+    String status,
+    String requestId,
+  ) {
     final index = singleChats.indexWhere((c) => c.id == chatId);
     if (index != -1) {
       singleChats[index] = singleChats[index].copyWith(
@@ -231,7 +251,9 @@ class ChatController extends GetxController {
       } else {
         singleChats.clear();
         _singleTotalPages = response.totalPage;
-        singleChats.addAll(response.data.where((item) => !item.isGroup).toList());
+        singleChats.addAll(
+          response.data.where((item) => !item.isGroup).toList(),
+        );
         _sortChats();
         filteredSingleChats = List.from(singleChats);
         await _markFriendStatus();
@@ -271,7 +293,9 @@ class ChatController extends GetxController {
           singleChats[index] = singleChats[index].copyWith(isFriend: isFriend);
           final fIndex = filteredSingleChats.indexWhere((c) => c.id == chat.id);
           if (fIndex != -1) {
-            filteredSingleChats[fIndex] = filteredSingleChats[fIndex].copyWith(isFriend: isFriend);
+            filteredSingleChats[fIndex] = filteredSingleChats[fIndex].copyWith(
+              isFriend: isFriend,
+            );
           }
         }
       } catch (_) {}
@@ -317,24 +341,39 @@ class ChatController extends GetxController {
   }
 
   void markChatAsSeen(String chatId) {
+    bool found = false;
+
+    // Update single chats
     int index = singleChats.indexWhere((chat) => chat.id == chatId);
     if (index != -1) {
       singleChats[index] = singleChats[index].copyWith(unreadCount: 0);
-      final fIndex = filteredSingleChats.indexWhere((c) => c.id == chatId);
-      if (fIndex != -1) filteredSingleChats[fIndex] = filteredSingleChats[fIndex].copyWith(unreadCount: 0);
-      update();
-      return;
+      int fIndex = filteredSingleChats.indexWhere((c) => c.id == chatId);
+      if (fIndex != -1)
+        filteredSingleChats[fIndex] = filteredSingleChats[fIndex].copyWith(
+          unreadCount: 0,
+        );
+      found = true;
     }
-    index = chats.indexWhere((chat) => chat.id == chatId);
-    if (index != -1) {
-      chats[index] = chats[index].copyWith(unreadCount: 0);
-      filteredChats = List.from(chats);
+
+    // Update group chats
+    int gIndex = chats.indexWhere((chat) => chat.id == chatId);
+    if (gIndex != -1) {
+      chats[gIndex] = chats[gIndex].copyWith(unreadCount: 0);
+      int fgIndex = filteredChats.indexWhere((c) => c.id == chatId);
+      if (fgIndex != -1)
+        filteredChats[fgIndex] = filteredChats[fgIndex].copyWith(
+          unreadCount: 0,
+        );
+      found = true;
+    }
+
+    if (found) {
       update();
+      debugPrint(
+        "✅ Chat $chatId marked as seen. Current unread user count: $unreadCountUser",
+      );
     }
   }
-
-
-
 
   @override
   void onInit() {
@@ -354,9 +393,6 @@ class ChatController extends GetxController {
   }
 
   Future<void> fetchInitialData() async {
-    await Future.wait([
-      getChatRepos(),
-      getChatRepos(isGroup: true),
-    ]);
+    await Future.wait([getChatRepos(), getChatRepos(isGroup: true)]);
   }
 }
