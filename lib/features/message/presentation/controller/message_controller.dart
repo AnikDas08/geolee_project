@@ -114,6 +114,14 @@ class MessageController extends GetxController {
     if (chatId.isNotEmpty) {
       SocketServices.leaveRoom(chatId);
     }
+    // Remove individual listeners to prevent memory leaks and duplicate triggers
+    SocketServices.off("message:new");
+    SocketServices.off("chat:update");
+    SocketServices.off("user:online");
+    SocketServices.off("user:offline");
+
+    messageController.dispose();
+    scrollController.dispose();
     super.onClose();
   }
 

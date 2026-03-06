@@ -8,7 +8,6 @@ import 'package:giolee78/config/api/api_end_point.dart';
 import 'package:giolee78/services/api/api_response_model.dart';
 import 'package:giolee78/services/api/api_service.dart';
 
-
 import '../../../../component/pop_up/common_pop_menu.dart';
 import '../../../../config/route/app_routes.dart';
 import '../../../notifications/presentation/screen/stripe_web_view_screen.dart';
@@ -51,7 +50,7 @@ class CreateAdsController extends GetxController {
   String get planId {
     if (selectedPricingPlan.value.isEmpty || plans.isEmpty) return '';
     final plan = plans.firstWhere(
-          (p) => p.name.toLowerCase() == selectedPricingPlan.value.toLowerCase(),
+      (p) => p.name.toLowerCase() == selectedPricingPlan.value.toLowerCase(),
       orElse: () => plans.first,
     );
     return plan.id;
@@ -60,7 +59,7 @@ class CreateAdsController extends GetxController {
   double get selectedPrice {
     if (plans.isEmpty) return 0;
     final plan = plans.firstWhere(
-          (p) => p.name.toLowerCase() == selectedPricingPlan.value.toLowerCase(),
+      (p) => p.name.toLowerCase() == selectedPricingPlan.value.toLowerCase(),
       orElse: () => plans.first,
     );
     return plan.price;
@@ -96,8 +95,8 @@ class CreateAdsController extends GetxController {
 
       final url = Uri.parse(
         'https://maps.googleapis.com/maps/api/place/autocomplete/json'
-            '?input=${Uri.encodeComponent(query)}'
-            '&key=$_googleApiKey',
+        '?input=${Uri.encodeComponent(query)}'
+        '&key=$_googleApiKey',
       );
 
       final response = await http.get(url);
@@ -108,11 +107,15 @@ class CreateAdsController extends GetxController {
         if (data['status'] == 'OK') {
           final predictions = data['predictions'] as List;
           placeSuggestions.value = predictions
-              .map((p) => {
-            'place_id': p['place_id'],
-            'description': p['description'],
-            'main_text': p['structured_formatting']?['main_text'] ?? p['description'],
-          })
+              .map(
+                (p) => {
+                  'place_id': p['place_id'],
+                  'description': p['description'],
+                  'main_text':
+                      p['structured_formatting']?['main_text'] ??
+                      p['description'],
+                },
+              )
               .toList();
         } else {
           placeSuggestions.clear();
@@ -126,7 +129,6 @@ class CreateAdsController extends GetxController {
       isLoadingSuggestions.value = false;
     }
   }
-
 
   Future<void> selectPlace(Map<String, dynamic> place) async {
     try {
@@ -145,14 +147,13 @@ class CreateAdsController extends GetxController {
     }
   }
 
-
   Future<void> _fetchPlaceCoordinates(String placeId) async {
     try {
       final url = Uri.parse(
         'https://maps.googleapis.com/maps/api/place/details/json'
-            '?place_id=$placeId'
-            '&fields=geometry,name'
-            '&key=$_googleApiKey',
+        '?place_id=$placeId'
+        '&fields=geometry,name'
+        '&key=$_googleApiKey',
       );
 
       final response = await http.get(url);
@@ -165,7 +166,9 @@ class CreateAdsController extends GetxController {
           selectedLatitude.value = location['lat'].toString();
           selectedLongitude.value = location['lng'].toString();
 
-          debugPrint("Coordinates: ${selectedLatitude.value}, ${selectedLongitude.value}");
+          debugPrint(
+            "Coordinates: ${selectedLatitude.value}, ${selectedLongitude.value}",
+          );
         } else {
           debugPrint("Place Details API status: ${data['status']}");
           // Fallback coordinates
@@ -238,29 +241,43 @@ class CreateAdsController extends GetxController {
   String getIsoStartDate() {
     final d = _parseUiDate();
     final now = DateTime.now();
-    return _formatIso(DateTime(
-      d.year,
-      d.month,
-      d.day,
-      now.hour,
-      now.minute,
-      now.second,
-    ));
+    return _formatIso(
+      DateTime(d.year, d.month, d.day, now.hour, now.minute, now.second),
+    );
   }
 
   int _monthToNumber(String month) {
     const map = {
-      'Jan': 1, 'Feb': 2, 'Mar': 3, 'Apr': 4,
-      'May': 5, 'Jun': 6, 'Jul': 7, 'Aug': 8,
-      'Sep': 9, 'Oct': 10, 'Nov': 11, 'Dec': 12,
+      'Jan': 1,
+      'Feb': 2,
+      'Mar': 3,
+      'Apr': 4,
+      'May': 5,
+      'Jun': 6,
+      'Jul': 7,
+      'Aug': 8,
+      'Sep': 9,
+      'Oct': 10,
+      'Nov': 11,
+      'Dec': 12,
     };
     return map[month]!;
   }
 
   String _month(int m) {
     const months = [
-      'Jan','Feb','Mar','Apr','May','Jun',
-      'Jul','Aug','Sep','Oct','Nov','Dec'
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
     ];
     return months[m - 1];
   }
@@ -271,15 +288,18 @@ class CreateAdsController extends GetxController {
       isPlansLoading.value = true;
       debugPrint("🔍 Fetching plans from: ${ApiEndPoint.getPlans}");
 
-      final ApiResponseModel response = await ApiService.get(ApiEndPoint.getPlans);
+      final ApiResponseModel response = await ApiService.get(
+        ApiEndPoint.getPlans,
+      );
 
       debugPrint("📊 Response Status: ${response.statusCode}");
       debugPrint("📦 Response Data: ${response.data}");
 
       if (response.statusCode == 200) {
         final res = response.data as Map<String, dynamic>;
-        plans.value =
-            (res['data'] as List).map((e) => PlanModel.fromJson(e)).toList();
+        plans.value = (res['data'] as List)
+            .map((e) => PlanModel.fromJson(e))
+            .toList();
 
         debugPrint(" Plans loaded: ${plans.length} items");
 
@@ -343,7 +363,7 @@ class CreateAdsController extends GetxController {
     }
   }
 
-/*  /// ---------------- PAYMENT LAUNCH ----------------
+  /*  /// ---------------- PAYMENT LAUNCH ----------------
   Future<void> _launchPayment(String url) async {
     try {
       final uri = Uri.parse(url);
@@ -362,7 +382,9 @@ class CreateAdsController extends GetxController {
 
   /// ---------------- DATE PICKER ----------------
   Future<void> selectDate(
-      BuildContext context, TextEditingController controller) async {
+    BuildContext context,
+    TextEditingController controller,
+  ) async {
     final picked = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
@@ -371,7 +393,7 @@ class CreateAdsController extends GetxController {
     );
     if (picked != null) {
       controller.text =
-      "${picked.day.toString().padLeft(2, '0')} ${_month(picked.month)} ${picked.year}";
+          "${picked.day.toString().padLeft(2, '0')} ${_month(picked.month)} ${picked.year}";
     }
   }
 
@@ -379,7 +401,7 @@ class CreateAdsController extends GetxController {
   void _showSuccessPopup() {
     successPopUps(
       message:
-      'Your Ad submitted successfully. Please wait for admin approval.',
+          'Your Ad submitted successfully. Please wait for admin approval.',
       buttonTitle: 'Done',
       onTap: () => Get.offAllNamed(AppRoutes.homeNav),
     );
@@ -388,6 +410,11 @@ class CreateAdsController extends GetxController {
   /// ---------------- DISPOSE ----------------
   @override
   void onClose() {
+    titleController.dispose();
+    descriptionController.dispose();
+    focusAreaController.dispose();
+    websiteLinkController.dispose();
+    adStartDateController.dispose();
     super.onClose();
   }
 }

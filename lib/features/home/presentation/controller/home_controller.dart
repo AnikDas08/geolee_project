@@ -67,9 +67,8 @@ class HomeController extends GetxController {
     "Lovely Lady",
   ];
 
-  final MyProfileController myProfileController = Get.put(
-    MyProfileController(),
-  );
+  final MyProfileController myProfileController =
+      Get.find<MyProfileController>();
 
   @override
   Future<void> onInit() async {
@@ -94,7 +93,10 @@ class HomeController extends GetxController {
           myProfileController.getUserData(),
           getUserData(),
           fetchPostsWithFilter(),
-        ]);
+        ]).catchError((e) {
+          debugPrint('Error fetching initial data: $e');
+          return <dynamic>[];
+        });
       } else {
         clickerCount.value = "All";
         allPosts = [];

@@ -20,9 +20,7 @@ class SignInController extends GetxController {
     text: kDebugMode ? 'password123' : "",
   );
 
-void onTapSkipButton(){
-
-}
+  void onTapSkipButton() {}
 
   Future<void> signInUser(GlobalKey<FormState> formKey) async {
     if (!formKey.currentState!.validate()) return;
@@ -45,16 +43,18 @@ void onTapSkipButton(){
         final data = response.data;
         final token = data["data"]?['accessToken'] ?? '';
         LocalStorage.token = token;
-        await LocalStorage.setString(LocalStorageKeys.token, token);
-
+        await Future.wait([
+          LocalStorage.setString(LocalStorageKeys.token, token),
+          LocalStorage.setBool(LocalStorageKeys.isLogIn, true),
+          LocalStorage.setString(LocalStorageKeys.role, "user"),
+        ]);
         LocalStorage.isLogIn = true;
-
-        await LocalStorage.setBool(LocalStorageKeys.isLogIn, LocalStorage.isLogIn,);
-        await LocalStorage.setString(LocalStorageKeys.role, "user");
         LocalStorage.getAllPrefData();
         SocketServices.connectToSocket();
 
-        debugPrint("My Token Is :===============💕💕💕 ${LocalStorage.token.toString()}",);
+        debugPrint(
+          "My Token Is :===============💕💕💕 ${LocalStorage.token.toString()}",
+        );
 
         await getUserData();
         Get.snackbar(barBlur: 0.5, "Welcome Back", "Logged In Successfully");
@@ -111,5 +111,12 @@ void onTapSkipButton(){
       isLoading = false;
       update();
     }
+  }
+
+  @override
+  void onClose() {
+    emailController.dispose();
+    passwordController.dispose();
+    super.onClose();
   }
 }

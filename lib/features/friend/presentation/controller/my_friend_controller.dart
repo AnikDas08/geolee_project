@@ -421,9 +421,11 @@ class MyFriendController extends GetxController {
 
         debugPrint("📋 Total in list: ${suggestedFriendList.length}");
 
-        for (final user in parsedList) {
-          checkFriendship(user.id);
-        }
+        // Parallelize friendship status checks for better performance
+        final List<Future<void>> checks = parsedList
+            .map((user) => checkFriendship(user.id))
+            .toList();
+        await Future.wait(checks);
       } else {
         nearbyChatError.value = response.message ?? "Something went wrong";
         debugPrint("❌ API Error: ${response.message}");
@@ -482,13 +484,14 @@ class MyFriendController extends GetxController {
 
           suggestedFriendList.value = parsedList;
 
-          // Check friendship status for search results
-          for (final user in parsedList) {
-            checkFriendship(user.id);
-          }
+          // Parallelize friendship status checks for better performance
+          final List<Future<void>> checks = parsedList
+              .map((user) => checkFriendship(user.id))
+              .toList();
+          await Future.wait(checks);
         }
       } else {
-        nearbyChatError.value = response.message ?? "Search failed";
+        nearbyChatError.value = response.message;
       }
     } catch (e) {
       nearbyChatError.value = e.toString();

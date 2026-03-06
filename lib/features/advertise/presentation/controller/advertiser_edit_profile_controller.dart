@@ -240,7 +240,8 @@ class AdvertiserEditProfileController extends GetxController {
     phoneFieldKey = UniqueKey();
 
     debugPrint(
-        "Parsed → countryCode: $countryCode | isoCode: $countryIsoCode | number: $phoneNumberOnly");
+      "Parsed → countryCode: $countryCode | isoCode: $countryIsoCode | number: $phoneNumberOnly",
+    );
   }
 
   // ================= SAVE TO LOCAL STORAGE =================
@@ -258,16 +259,26 @@ class AdvertiserEditProfileController extends GetxController {
       await Future.wait([
         LocalStorage.setString(LocalStorageKeys.userId, LocalStorage.userId),
         LocalStorage.setString(
-            LocalStorageKeys.businessName, LocalStorage.businessName),
+          LocalStorageKeys.businessName,
+          LocalStorage.businessName,
+        ),
         LocalStorage.setString(
-            LocalStorageKeys.businessType, LocalStorage.businessType),
-        LocalStorage.setString(LocalStorageKeys.businessLicenceNumber,
-            LocalStorage.businessLicenceNumber),
+          LocalStorageKeys.businessType,
+          LocalStorage.businessType,
+        ),
+        LocalStorage.setString(
+          LocalStorageKeys.businessLicenceNumber,
+          LocalStorage.businessLicenceNumber,
+        ),
         LocalStorage.setString(LocalStorageKeys.phone, LocalStorage.phone),
         LocalStorage.setString(
-            LocalStorageKeys.advertiserBio, LocalStorage.advertiserBio),
+          LocalStorageKeys.advertiserBio,
+          LocalStorage.advertiserBio,
+        ),
         LocalStorage.setString(
-            LocalStorageKeys.businessLogo, LocalStorage.businessLogo),
+          LocalStorageKeys.businessLogo,
+          LocalStorage.businessLogo,
+        ),
       ]);
 
       debugPrint("✅ Data saved to local storage");
@@ -356,8 +367,10 @@ class AdvertiserEditProfileController extends GetxController {
           duration: const Duration(seconds: 4),
           mainButton: TextButton(
             onPressed: () => openAppSettings(),
-            child: const Text('Open Settings',
-                style: TextStyle(color: Colors.white)),
+            child: const Text(
+              'Open Settings',
+              style: TextStyle(color: Colors.white),
+            ),
           ),
         );
         return;
@@ -448,7 +461,9 @@ class AdvertiserEditProfileController extends GetxController {
         if (selectedImage?.path != null) {
           LocalStorage.myImage = selectedImage!.path;
           await LocalStorage.setString(
-              LocalStorageKeys.myImage, LocalStorage.myImage);
+            LocalStorageKeys.myImage,
+            LocalStorage.myImage,
+          );
         }
 
         Utils.successSnackBar(

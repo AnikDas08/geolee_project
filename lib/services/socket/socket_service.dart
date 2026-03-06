@@ -29,7 +29,9 @@ class SocketServices {
         : (namespace.startsWith("/") ? namespace : "/$namespace");
     final String fullUrl = "$baseUrl$namespacePath";
 
-    debugPrint(">>>>>>>>>>>> 🔌 Connecting to Namespace: '$namespace' via $fullUrl <<<<<<<<<<<<");
+    debugPrint(
+      ">>>>>>>>>>>> 🔌 Connecting to Namespace: '$namespace' via $fullUrl <<<<<<<<<<<<",
+    );
 
     _sockets[namespace]?.dispose();
 
@@ -46,35 +48,49 @@ class SocketServices {
     );
 
     socket.on('connect', (data) {
-      debugPrint(">>>>>>>>>>>> 🌐 Socket Connected [$namespace]: ID=${socket.id} <<<<<<<<<<<<");
+      debugPrint(
+        ">>>>>>>>>>>> 🌐 Socket Connected [$namespace]: ID=${socket.id} <<<<<<<<<<<<",
+      );
     });
 
     socket.on('connect_error', (data) {
-      debugPrint(">>>>>>>>>>>>  Socket Connection Error [$namespace]: $data <<<<<<<<<<<<");
+      debugPrint(
+        ">>>>>>>>>>>>  Socket Connection Error [$namespace]: $data <<<<<<<<<<<<",
+      );
     });
 
     socket.on('error', (data) {
-      debugPrint(">>>>>>>>>>>> ⚠ Socket Error [$namespace]: $data <<<<<<<<<<<<");
+      debugPrint(
+        ">>>>>>>>>>>> ⚠ Socket Error [$namespace]: $data <<<<<<<<<<<<",
+      );
     });
 
     socket.on('disconnect', (data) {
-      debugPrint(">>>>>>>>>>>> 🔌 Socket Disconnected [$namespace]: $data <<<<<<<<<<<<");
+      debugPrint(
+        ">>>>>>>>>>>> 🔌 Socket Disconnected [$namespace]: $data <<<<<<<<<<<<",
+      );
     });
 
     socket.on("notification:new", (data) {
-      debugPrint(">>>>>>>>>>>> 🔔 New Notification via socket [$namespace]: $data <<<<<<<<<<<<");
+      debugPrint(
+        ">>>>>>>>>>>> 🔔 New Notification via socket [$namespace]: $data <<<<<<<<<<<<",
+      );
       NotificationService.showNotification(data);
       _handleNewNotification(data);
     });
 
     socket.on("message:new", (data) {
-      debugPrint(">>>>>>>>>>>> 📩 New Message via socket [$namespace]: $data <<<<<<<<<<<<");
+      debugPrint(
+        ">>>>>>>>>>>> 📩 New Message via socket [$namespace]: $data <<<<<<<<<<<<",
+      );
       print(">>>>>>>>>>>> 📩 RAW MESSAGE DATA: $data <<<<<<<<<<<<");
       _handleNewMessageNotification(data);
     });
 
     socket.on("chat:update", (data) {
-      debugPrint(">>>>>>>>>>>> 🔄 Chat Update via socket [$namespace] <<<<<<<<<<<<");
+      debugPrint(
+        ">>>>>>>>>>>> 🔄 Chat Update via socket [$namespace] <<<<<<<<<<<<",
+      );
     });
 
     _sockets[namespace] = socket;
@@ -85,12 +101,13 @@ class SocketServices {
   static void _handleNewNotification(dynamic data) {
     try {
       final NotificationsController controller =
-      Get.isRegistered<NotificationsController>()
+          Get.isRegistered<NotificationsController>()
           ? Get.find<NotificationsController>()
           : Get.put(NotificationsController());
 
-      final newNotification =
-      NotificationModel.fromJson(data as Map<String, dynamic>);
+      final newNotification = NotificationModel.fromJson(
+        data as Map<String, dynamic>,
+      );
       controller.notifications.insert(0, newNotification);
       controller.unreadCount.value++;
       controller.update();
@@ -99,30 +116,24 @@ class SocketServices {
     }
   }
 
-
   static void _handleNewMessageNotification(dynamic data) {
     try {
       final Map<String, dynamic> messageData = data as Map<String, dynamic>;
-
 
       final String incomingChatId = messageData['chat'] is String
           ? messageData['chat']
           : messageData['chat']?['_id'] ?? '';
 
-
       final String senderId = messageData['sender'] is Map
           ? messageData['sender']['_id'] ?? ''
           : messageData['sender']?.toString() ?? '';
 
-
       if (senderId == LocalStorage.userId) return;
-
 
       String currentOpenChatId = '';
       if (Get.isRegistered<MessageController>()) {
         currentOpenChatId = Get.find<MessageController>().chatId;
       }
-
 
       if (currentOpenChatId == incomingChatId) return;
 
@@ -181,15 +192,23 @@ class SocketServices {
     }
   }
 
-  static void on(String event, Function(dynamic data) handler,
-      {String namespace = "/"}) {
+  static void on(
+    String event,
+    Function(dynamic data) handler, {
+    String namespace = "/",
+  }) {
     if (namespace != "/" && _sockets[namespace]?.connected != true) {
       debugPrint(
-          ">>>>>>>>>>>> ⚠️ Namespace $namespace not connected, listening on root for $event <<<<<<<<<<<<");
+        ">>>>>>>>>>>> ⚠️ Namespace $namespace not connected, listening on root for $event <<<<<<<<<<<<",
+      );
       getSocket("/").on(event, handler);
     } else {
       getSocket(namespace).on(event, handler);
     }
+  }
+
+  static void off(String event, {String namespace = "/"}) {
+    _sockets[namespace]?.off(event);
   }
 
   static void emit(String event, dynamic data, {String namespace = "/"}) {
@@ -201,8 +220,11 @@ class SocketServices {
   }
 
   static void emitWithAck(
-      String event, dynamic data, Function(dynamic data) handler,
-      {String namespace = "/"}) {
+    String event,
+    dynamic data,
+    Function(dynamic data) handler, {
+    String namespace = "/",
+  }) {
     if (namespace != "/" && _sockets[namespace]?.connected != true) {
       getSocket("/").emitWithAck(event, data, ack: handler);
     } else {

@@ -21,8 +21,6 @@ import '../../../../../config/api/api_end_point.dart';
 import '../../../../../utils/app_utils.dart';
 
 class SignUpController extends GetxController {
-
-
   bool isPopUpOpen = false;
   bool isLoading = false;
   bool isLoadingVerify = false;
@@ -55,9 +53,15 @@ class SignUpController extends GetxController {
     text: kDebugMode ? "MD IBRAHIM  NAZMUL" : "",
   );
   TextEditingController emailController = TextEditingController();
-  TextEditingController passwordController = TextEditingController(text: kDebugMode ? 'password123' : '',);
-  TextEditingController confirmPasswordController = TextEditingController(text: kDebugMode ? 'password123' : '',);
-  TextEditingController numberController = TextEditingController(text: kDebugMode ? '1865965581' : '',);
+  TextEditingController passwordController = TextEditingController(
+    text: kDebugMode ? 'password123' : '',
+  );
+  TextEditingController confirmPasswordController = TextEditingController(
+    text: kDebugMode ? 'password123' : '',
+  );
+  TextEditingController numberController = TextEditingController(
+    text: kDebugMode ? '1865965581' : '',
+  );
   TextEditingController otpController = TextEditingController();
 
   final TextEditingController dateController = TextEditingController();
@@ -130,23 +134,29 @@ class SignUpController extends GetxController {
       if (response.statusCode == 200 || response.statusCode == 201) {
         startTimer();
         Get.toNamed(AppRoutes.verifyUser);
-
       } else if (response.statusCode == 400) {
-        Utils.errorSnackBar("Invalid Data", "Please check your information and try again");
-
+        Utils.errorSnackBar(
+          "Invalid Data",
+          "Please check your information and try again",
+        );
       } else if (response.statusCode == 401) {
-        Utils.errorSnackBar("Unauthorized", "You are not allowed to perform this action");
-
+        Utils.errorSnackBar(
+          "Unauthorized",
+          "You are not allowed to perform this action",
+        );
       } else if (response.statusCode == 409) {
-        Utils.errorSnackBar("Account Exists", "This email is already registered");
-
+        Utils.errorSnackBar(
+          "Account Exists",
+          "This email is already registered",
+        );
       } else if (response.statusCode >= 500) {
-        Utils.errorSnackBar("Server Error", "Something went wrong. Please try later");
-
+        Utils.errorSnackBar(
+          "Server Error",
+          "Something went wrong. Please try later",
+        );
       } else {
         Utils.errorSnackBar("Sign Up Failed", response.message);
       }
-
     } catch (e) {
       debugPrint("Sign Up Error: $e");
       Utils.errorSnackBar(
@@ -160,9 +170,6 @@ class SignUpController extends GetxController {
   }
 
   ///===========================================================================verify OTP
-
-
-
 
   Future<void> verifyOtpRepo() async {
     isLoadingVerify = true;
@@ -195,9 +202,9 @@ class SignUpController extends GetxController {
           _timer?.cancel();
 
           final String bearerToken = data['data']['accessToken'];
-          LocalStorage.token=bearerToken;
+          LocalStorage.token = bearerToken;
           LocalStorage.setString(LocalStorageKeys.token, bearerToken);
-          
+
           // Connect Socket immediately after verification
           SocketServices.connectToSocket();
 
@@ -247,13 +254,11 @@ class SignUpController extends GetxController {
           "OTP Resent",
           "A new OTP has been sent to your email",
         );
-
       } else {
-        Utils.errorSnackBar("Error ", response.message ,);
+        Utils.errorSnackBar("Error ", response.message);
       }
     } catch (e) {
       debugPrint("❌ Resend OTP Error: $e");
-
 
       try {
         debugPrint("📤 Trying alternative resend method...");
@@ -275,7 +280,7 @@ class SignUpController extends GetxController {
             "A new OTP has been sent to your email",
           );
         } else {
-          Utils.errorSnackBar("Error", response.message,);
+          Utils.errorSnackBar("Error", response.message);
         }
       } catch (alternativeError) {
         debugPrint("Alternative Resend Error: $alternativeError");
@@ -644,9 +649,18 @@ class SignUpController extends GetxController {
   }
 
   @override
-  void dispose() {
+  void onClose() {
     _timer?.cancel();
-    // mapController?.dispose();
-    super.dispose();
+    nameController.dispose();
+    emailController.dispose();
+    passwordController.dispose();
+    confirmPasswordController.dispose();
+    numberController.dispose();
+    otpController.dispose();
+    dateController.dispose();
+    addressController.dispose();
+    ageController.dispose();
+    bioController.dispose();
+    super.onClose();
   }
 }

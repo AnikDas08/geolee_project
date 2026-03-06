@@ -15,6 +15,7 @@ class NotificationsController extends GetxController {
   bool hasNoData = false;
 
   int page = 0;
+  bool _isScrollListenerAdded = false;
 
   final ScrollController scrollController = ScrollController();
   final NotificationRepository repository = NotificationRepository();
@@ -55,6 +56,8 @@ class NotificationsController extends GetxController {
 
   /// Pagination
   void moreNotification() {
+    if (_isScrollListenerAdded) return;
+    _isScrollListenerAdded = true;
     scrollController.addListener(() async {
       if (scrollController.position.pixels ==
           scrollController.position.maxScrollExtent) {
@@ -95,8 +98,7 @@ class NotificationsController extends GetxController {
 
     update();
 
-    final success =
-    await repository.markNotificationAsRead(notification.id);
+    final success = await repository.markNotificationAsRead(notification.id);
 
     if (!success) {
       notifications[index] = notification.copyWith(read: false);
@@ -112,8 +114,7 @@ class NotificationsController extends GetxController {
     final previous = List<NotificationModel>.from(notifications);
     final previousUnread = unreadCount.value;
 
-    notifications =
-        notifications.map((n) => n.copyWith(read: true)).toList();
+    notifications = notifications.map((n) => n.copyWith(read: true)).toList();
     unreadCount.value = 0;
     update();
 
