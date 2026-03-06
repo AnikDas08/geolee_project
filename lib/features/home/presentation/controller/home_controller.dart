@@ -32,13 +32,11 @@ class HomeController extends GetxController {
 
   RxBool isNearbyActive = false.obs;
 
-
   var selectedPeriod = ''.obs;
   Rxn<DateTime> startDate = Rxn<DateTime>();
   Rxn<DateTime> endDate = Rxn<DateTime>();
   RxBool isDateFilterActive = false.obs;
   String? argument;
-
 
   RxSet<Heatmap> heatmaps = <Heatmap>{}.obs;
 
@@ -69,8 +67,9 @@ class HomeController extends GetxController {
     "Lovely Lady",
   ];
 
-  final MyProfileController myProfileController =
-  Get.put(MyProfileController());
+  final MyProfileController myProfileController = Get.put(
+    MyProfileController(),
+  );
 
   @override
   Future<void> onInit() async {
@@ -88,7 +87,6 @@ class HomeController extends GetxController {
         argument = Get.arguments;
         Get.find<HomeNavController>().refresh();
         Get.find<MyProfileController>().refresh();
-
 
         await getCurrentLocationAndUpdateProfile();
 
@@ -158,7 +156,6 @@ class HomeController extends GetxController {
     }
   }
 
-
   Color _getMarkerColor() {
     final clicker = clickerCount.value;
     if (clicker == "Great Vibes") return Colors.green;
@@ -167,10 +164,13 @@ class HomeController extends GetxController {
     if (clicker == "Lovely Lady") return Colors.pink;
     return Colors.red;
   }
+
   void clearMarkerCache() => _markerIconCache.clear();
 
   Future<BitmapDescriptor> _createCountMarkerIcon(
-      int count, Color bgColor) async {
+    int count,
+    Color bgColor,
+  ) async {
     final String cacheKey = '${count}_${bgColor.value}';
     if (_markerIconCache.containsKey(cacheKey)) {
       return _markerIconCache[cacheKey]!;
@@ -208,8 +208,10 @@ class HomeController extends GetxController {
         Offset(size / 2 - tp.width / 2, size / 2 - tp.height / 2),
       );
 
-      final ui.Image img =
-      await recorder.endRecording().toImage(size.toInt(), size.toInt());
+      final ui.Image img = await recorder.endRecording().toImage(
+        size.toInt(),
+        size.toInt(),
+      );
       final data = await img.toByteData(format: ui.ImageByteFormat.png);
       img.dispose();
 
@@ -244,11 +246,14 @@ class HomeController extends GetxController {
             double weight = 1.0;
             if (post.clickerType == "Great Vibes") {
               weight = 2.0;
-            } else if (post.clickerType == "Off Vibes") weight = 1.5;
+            } else if (post.clickerType == "Off Vibes")
+              weight = 1.5;
             else if (post.clickerType == "Charming Gentleman" ||
-                post.clickerType == "Lovely Lady") weight = 2.5;
+                post.clickerType == "Lovely Lady")
+              weight = 2.5;
             heatmapPoints.add(
-                WeightedLatLng(LatLng(post.lat, post.long), weight: weight));
+              WeightedLatLng(LatLng(post.lat, post.long), weight: weight),
+            );
           }
         } catch (e) {
           debugPrint('Error processing post ${post.id}: $e');
@@ -308,18 +313,22 @@ class HomeController extends GetxController {
         final double lat = double.parse(parts[0]);
         final double lng = double.parse(parts[1]);
         final int count = entry.value.length;
-        final BitmapDescriptor icon =
-        await _createCountMarkerIcon(count, markerColor);
+        final BitmapDescriptor icon = await _createCountMarkerIcon(
+          count,
+          markerColor,
+        );
 
-        newMarkers.add(Marker(
-          markerId: MarkerId(entry.key),
-          position: LatLng(lat, lng),
-          icon: icon,
-          infoWindow: InfoWindow(
-            title: '$count ${count == 1 ? 'Post' : 'Posts'}',
-            snippet: entry.value.first.clickerType ?? '',
+        newMarkers.add(
+          Marker(
+            markerId: MarkerId(entry.key),
+            position: LatLng(lat, lng),
+            icon: icon,
+            infoWindow: InfoWindow(
+              title: '$count ${count == 1 ? 'Post' : 'Posts'}',
+              snippet: entry.value.first.clickerType ?? '',
+            ),
           ),
-        ));
+        );
       }
 
       markerList.assignAll(newMarkers);
@@ -338,10 +347,12 @@ class HomeController extends GetxController {
     try {
       if (!mapController.isCompleted) return;
       final ctrl = await mapController.future;
-      ctrl.animateCamera(CameraUpdate.newLatLngZoom(
-        LatLng(currentLatitude.value, currentLongitude.value),
-        12,
-      ));
+      ctrl.animateCamera(
+        CameraUpdate.newLatLngZoom(
+          LatLng(currentLatitude.value, currentLongitude.value),
+          12,
+        ),
+      );
     } catch (e) {
       debugPrint('Error moving map: $e');
     }
@@ -361,7 +372,13 @@ class HomeController extends GetxController {
         calculatedStart = now.subtract(Duration(hours: hours));
       } else if (period == '1 Month') {
         calculatedStart = DateTime(
-            now.year, now.month - 1, now.day, now.hour, now.minute, now.second);
+          now.year,
+          now.month - 1,
+          now.day,
+          now.hour,
+          now.minute,
+          now.second,
+        );
       } else if (period.endsWith('d')) {
         final int days = int.parse(period.replaceAll('d', ''));
         calculatedStart = now.subtract(Duration(days: days));
@@ -378,10 +395,13 @@ class HomeController extends GetxController {
       update();
     } catch (e) {
       debugPrint('Error in applyPeriodFilter: $e');
-      Get.snackbar('Filter Error', 'Failed to apply period filter.',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red.withOpacity(0.7),
-          colorText: Colors.white);
+      Get.snackbar(
+        'Filter Error',
+        'Failed to apply period filter.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red.withOpacity(0.7),
+        colorText: Colors.white,
+      );
     }
   }
 
@@ -421,7 +441,6 @@ class HomeController extends GetxController {
     }
   }
 
-
   Future<void> fetchPostsWithFilter() async {
     try {
       isLoading = true;
@@ -436,7 +455,11 @@ class HomeController extends GetxController {
         final String start = startDate.value!.toUtc().toIso8601String();
         final String end = endDate.value!.toUtc().toIso8601String();
         url +=
-        "&startDate=${Uri.encodeComponent(start)}&endDate=${Uri.encodeComponent(end)}";
+            "&startDate=${Uri.encodeComponent(start)}&endDate=${Uri.encodeComponent(end)}";
+      }
+
+      if (LocalStorage.token.isEmpty) {
+        url += "&privacy=public";
       }
 
       debugPrint('Fetch URL: $url');
@@ -497,8 +520,9 @@ class HomeController extends GetxController {
     isLoading = true;
     update();
     try {
-      final response = await ApiService.get(ApiEndPoint.profile)
-          .timeout(const Duration(seconds: 30));
+      final response = await ApiService.get(
+        ApiEndPoint.profile,
+      ).timeout(const Duration(seconds: 30));
 
       if (response.statusCode == 200) {
         final data = response.data;
@@ -515,9 +539,7 @@ class HomeController extends GetxController {
         LocalStorage.setString(LocalStorageKeys.myImage, LocalStorage.myImage);
         LocalStorage.setString(LocalStorageKeys.myName, LocalStorage.myName);
         LocalStorage.setString(LocalStorageKeys.myEmail, LocalStorage.myEmail);
-      } else {
-
-      }
+      } else {}
     } catch (e) {
       // Get.snackbar("Error", e.toString());
     } finally {
@@ -549,8 +571,10 @@ class HomeController extends GetxController {
 
   Future<String?> getAddressFromCoordinate(double lat, double lng) async {
     try {
-      final List<Placemark> placemarks =
-      await placemarkFromCoordinates(lat, lng);
+      final List<Placemark> placemarks = await placemarkFromCoordinates(
+        lat,
+        lng,
+      );
       if (placemarks.isNotEmpty) {
         final Placemark p = placemarks.first;
         return "${p.street}, ${p.subLocality}, ${p.locality}, "
@@ -565,13 +589,18 @@ class HomeController extends GetxController {
 
   Future<void> updateProfile(double longitude, double latitude) async {
     try {
-      final String? address = await getAddressFromCoordinate(latitude, longitude);
-      final response = await ApiService.patch( ApiEndPoint.updateProfile,body: {
-        "isLocationVisible": true,
-        "location": [longitude, latitude],
-        "address": address ?? "Location Unavailable",
-
-      });
+      final String? address = await getAddressFromCoordinate(
+        latitude,
+        longitude,
+      );
+      final response = await ApiService.patch(
+        ApiEndPoint.updateProfile,
+        body: {
+          "isLocationVisible": true,
+          "location": [longitude, latitude],
+          "address": address ?? "Location Unavailable",
+        },
+      );
       if (response.statusCode == 200) {
         debugPrint('Profile location updated');
       }
@@ -601,22 +630,20 @@ class HomeController extends GetxController {
     }
   }
 
-
-
   void searchPosts(String query) {
     try {
       searchQuery = query.toLowerCase();
       filteredPosts = searchQuery.isEmpty
           ? allPosts
           : allPosts.where((post) {
-        try {
-          return post.title.toLowerCase().contains(searchQuery) ||
-              post.description.toLowerCase().contains(searchQuery) ||
-              post.user.name.toLowerCase().contains(searchQuery);
-        } catch (_) {
-          return false;
-        }
-      }).toList();
+              try {
+                return post.title.toLowerCase().contains(searchQuery) ||
+                    post.description.toLowerCase().contains(searchQuery) ||
+                    post.user.name.toLowerCase().contains(searchQuery);
+              } catch (_) {
+                return false;
+              }
+            }).toList();
       _generateHeatmapFromPosts(filteredPosts);
       update();
     } catch (e) {
@@ -627,8 +654,9 @@ class HomeController extends GetxController {
   Future<void> fetchFriendRequests() async {
     try {
       IsLoading.value = true;
-      final response =
-      await ApiService.get("${ApiEndPoint.getMyFriendRequest}");
+      final response = await ApiService.get(
+        "${ApiEndPoint.getMyFriendRequest}",
+      );
       if (response.statusCode == 200) {
         try {
           final dataList = response.data['data'] as List<dynamic>;

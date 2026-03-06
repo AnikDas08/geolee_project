@@ -90,6 +90,7 @@ class MessageController extends GetxController {
   // GENERAL LOADING STATE
   // ------------------------------------------------
   bool isLoading = false;
+  RxBool isInitialLoading = true.obs;
 
   // ------------------------------------------------
   // SCROLL CONTROLLER
@@ -341,6 +342,30 @@ class MessageController extends GetxController {
   }
 
   // ================================================
+  // INITIALIZATION
+  // ================================================
+  Future<void> initializeChat(String targetUserId) async {
+    isInitialLoading.value = true;
+    update();
+
+    try {
+      if (targetUserId.isNotEmpty) {
+        await checkFriendshipStatus(targetUserId);
+      } else {
+        isFriend.value = true;
+        friendStatus.value = FriendStatus.friends;
+        friendStatusLoaded.value = true;
+      }
+      await loadMessages(showLoading: false);
+    } catch (e) {
+      appLog("❌ Initialization error: $e");
+    } finally {
+      isInitialLoading.value = false;
+      update();
+    }
+  }
+
+  // ================================================
   // 7. LOAD MESSAGES
   // ================================================
   Future<void> loadMessages({bool showLoading = true}) async {
@@ -376,19 +401,27 @@ class MessageController extends GetxController {
                 ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
         }
 
-        // ✅ Panel Visibility Logic: If not friends, check who sent the last message
+        // ✅ Panel Visibility Logic: If not friends, check who sent the last interaction
         if (friendStatus.value != FriendStatus.friends) {
-          if (messages.isEmpty) {
-            // No messages yet, person opening the chat is the sender
+          if (friendStatusValue.value == 'pending') {
+            // I sent the request — I am the sender, show input
+            isFriend.value = true;
+          } else if (friendStatusValue.value == 'received') {
+            // They sent the request — I am the receiver, show panel
+            if (friendStatusValue.value != 'none_continued') {
+              isFriend.value = false;
+            }
+          } else if (messages.isEmpty) {
+            // No messages yet — I am starting the chat, show input
             isFriend.value = true;
           } else {
+            // No request — check who sent the last message
             final lastMsg = messages.last;
             if (lastMsg.isCurrentUser) {
-              // I sent the last message, I should see the input
+              // I sent the last message — I am the sender, show input
               isFriend.value = true;
             } else {
-              // Other person sent the last message and we aren't friends, show panel
-              // But only if I haven't clicked "Continue with Chat" already
+              // They sent the last message — I am the receiver, show panel
               if (friendStatusValue.value != 'none_continued') {
                 isFriend.value = false;
               }
@@ -597,10 +630,7 @@ class MessageController extends GetxController {
         }
         update();
       } else {
-        Utils.errorSnackBar(
-          "Error",
-          response.message ?? "Failed to send request",
-        );
+        Utils.errorSnackBar("Error", response.message);
       }
     } catch (e) {
       debugPrint("❌ Friend request error: $e");
@@ -629,13 +659,59 @@ class MessageController extends GetxController {
         Utils.successSnackBar("Cancelled", "Friend request cancelled");
         update();
       } else {
-        Utils.errorSnackBar(
-          "Error",
-          response.message ?? "Failed to cancel request",
-        );
+        Utils.errorSnackBar("Error", response.message);
       }
     } catch (e) {
       debugPrint("❌ Cancel error: $e");
+    }
+  }
+
+  Future<void> acceptFriendRequest(String userId) async {
+    try {
+      final url = ApiEndPoint.friendStatusUpdate + userId;
+      final response = await ApiService.patch(
+        url,
+        body: {"status": 'accepted'},
+      );
+
+      if (response.statusCode == 200) {
+        isFriend.value = true;
+        friendStatusValue.value = 'friends';
+        friendStatus.value = FriendStatus.friends;
+        Utils.successSnackBar("Accepted", "Friend request accepted");
+        if (Get.isRegistered<MyFriendController>()) {
+          Get.find<MyFriendController>().fetchFriendRequests();
+        }
+        update();
+      } else {
+        Utils.errorSnackBar("Info", response.message);
+      }
+    } catch (e) {
+      debugPrint("acceptFriendRequest error => ${e.toString()}");
+      Utils.errorSnackBar("Error", "Something went wrong");
+    }
+  }
+
+  Future<void> rejectFriendRequest(String userId) async {
+    try {
+      final url = ApiEndPoint.friendStatusUpdate + userId;
+      final response = await ApiService.patch(
+        url,
+        body: {"status": 'rejected'},
+      );
+
+      if (response.statusCode == 200) {
+        isFriend.value = false;
+        friendStatusValue.value = 'none';
+        friendStatus.value = FriendStatus.none;
+        Utils.successSnackBar("Rejected", "Friend request rejected");
+        update();
+      } else {
+        Utils.errorSnackBar("Error", response.message);
+      }
+    } catch (e) {
+      debugPrint("rejectFriendRequest error => ${e.toString()}");
+      Utils.errorSnackBar("Error", "Something went wrong");
     }
   }
 

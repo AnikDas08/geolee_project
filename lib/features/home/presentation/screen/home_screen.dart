@@ -30,7 +30,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   final Completer<GoogleMapController> _mapController =
-  Completer<GoogleMapController>();
+      Completer<GoogleMapController>();
   late final MyFriendController myFriendController;
 
   @override
@@ -177,8 +177,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         borderRadius: BorderRadius.circular(10.r),
         child: Stack(
           children: [
-            Obx(
-                  () => GoogleMap(
+            Obx(() {
+              // Ensure at least one observable is accessed to avoid "Improper use of GetX" error
+              controller.heatmaps.length;
+              controller.markerList.length;
+
+              return GoogleMap(
                 mapType: MapType.satellite,
                 initialCameraPosition: _initialPosition,
                 myLocationEnabled: true,
@@ -194,14 +198,13 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                         controller.mapController.complete(mapController);
                       }
 
-                      final double lat =
-                      controller.currentLatitude.value != 0.0
+                      final double lat = controller.currentLatitude.value != 0.0
                           ? controller.currentLatitude.value
                           : LocalStorage.lat != 0.0
                           ? LocalStorage.lat
                           : 1.3521;
                       final double lng =
-                      controller.currentLongitude.value != 0.0
+                          controller.currentLongitude.value != 0.0
                           ? controller.currentLongitude.value
                           : LocalStorage.long != 0.0
                           ? LocalStorage.long
@@ -209,10 +212,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
                       await mapController.animateCamera(
                         CameraUpdate.newCameraPosition(
-                          CameraPosition(
-                            target: LatLng(lat, lng),
-                            zoom: 14.0,
-                          ),
+                          CameraPosition(target: LatLng(lat, lng), zoom: 14.0),
                         ),
                       );
                     }
@@ -225,8 +225,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                     'Map tapped: ${position.latitude}, ${position.longitude}',
                   );
                 },
-              ),
-            ),
+              );
+            }),
 
             // ── Overlay buttons (clicker + filter)
             Positioned(
@@ -240,9 +240,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               Positioned(
                 bottom: 16.h,
                 left: 16.w,
-                child: IgnorePointer(
-                  child: _buildHeatmapInfoBadge(controller),
-                ),
+                child: IgnorePointer(child: _buildHeatmapInfoBadge(controller)),
               ),
           ],
         ),
@@ -274,7 +272,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             child: Row(
               children: [
                 Obx(
-                      () => Text(
+                  () => Text(
                     controller.clickerCount.value ?? 'Select Clicker',
                     style: TextStyle(fontSize: 12.sp, color: Colors.black87),
                   ),
@@ -289,7 +287,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               Get.dialog(FilterDialog(onApply: controller.applyFilter));
             },
             child: Obx(
-                  () => Row(
+              () => Row(
                 children: [
                   if (controller.isDateFilterActive.value)
                     Container(
@@ -397,83 +395,106 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             },
           ),
 
-          if (isLoggedIn) ...[
-            // ── Chat Nearby ✅ with active indicator
-            Obx(
-                  () => Item(
+          // ── Chat Nearby ✅ with active indicator
+          GetX<HomeController>(
+            builder: (controller) {
+              final isNearby = controller.isNearbyActive.value;
+              return Item(
                 imageSrc: AppIcons.bubbleChat,
                 title: 'Chat Nearby',
-                trailing: controller.isNearbyActive.value
+                trailing: isLoggedIn && isNearby
                     ? Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const _NearbyActiveDot(),
-                    SizedBox(width: 5.w),
-                    Text(
-                      'ON',
-                      style: TextStyle(
-                        fontSize: 11.sp,
-                        fontWeight: FontWeight.w700,
-                        color: const Color(0xFF22C55E),
-                      ),
-                    ),
-                  ],
-                )
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const _NearbyActiveDot(),
+                          SizedBox(width: 5.w),
+                          Text(
+                            'ON',
+                            style: TextStyle(
+                              fontSize: 11.sp,
+                              fontWeight: FontWeight.w700,
+                              color: const Color(0xFF22C55E),
+                            ),
+                          ),
+                        ],
+                      )
                     : null,
-                onTap: _handleLocationAndNavigate,
-              ),
-            ),
+                onTap: () {
+                  if (isLoggedIn) {
+                    _handleLocationAndNavigate();
+                  } else {
+                    _showRegistrationDialog();
+                  }
+                },
+              );
+            },
+          ),
 
-            // ── My Post
-            Item(
-              imageSrc: AppIcons.myPost,
-              title: 'My Post',
-              onTap: () {
+          // ── My Post
+          Item(
+            imageSrc: AppIcons.myPost,
+            title: 'My Post',
+            onTap: () {
+              if (isLoggedIn) {
                 try {
                   Get.to(() => const MyPostScreen());
                 } catch (e) {
                   Get.snackbar('Error', 'Failed to open My Post');
                 }
-              },
-            ),
+              } else {
+                _showRegistrationDialog();
+              }
+            },
+          ),
 
-            // ── My Friend
-            Item(
-              imageSrc: AppIcons.myFriend,
-              title: 'My Friend',
-              onTap: () {
+          // ── My Friend
+          Item(
+            imageSrc: AppIcons.myFriend,
+            title: 'My Friend',
+            onTap: () {
+              if (isLoggedIn) {
                 try {
                   Get.to(() => const MyFriendScreen());
                 } catch (e) {
                   Get.snackbar('Error', 'Failed to open My Friend');
                 }
-              },
-            ),
+              } else {
+                _showRegistrationDialog();
+              }
+            },
+          ),
 
-            // ── Friend Request with badge
-            Obx(
-                  () {
-                final pendingRequests = myFriendController.requests
-                    .where((r) => r.status == "pending")
-                    .toList();
+          // ── Friend Request with badge
+          GetX<MyFriendController>(
+            builder: (myFriendController) {
+              // Always touch 'requests' observable to avoid GetX error in Guest mode
+              final requests = myFriendController.requests;
+              requests.length; // Access property to register dependency
 
-                return Item(
-                  imageSrc: AppIcons.friend,
-                  title: 'Friend Request',
-                  badgeText: pendingRequests.isEmpty
-                      ? null
-                      : pendingRequests.length.toString(),
-                  onTap: () {
+              final pendingRequests = isLoggedIn
+                  ? requests.where((r) => r.status == "pending").toList()
+                  : [];
+
+              return Item(
+                imageSrc: AppIcons.friend,
+                title: 'Friend Request',
+                badgeText: pendingRequests.isEmpty
+                    ? null
+                    : pendingRequests.length.toString(),
+                onTap: () {
+                  if (isLoggedIn) {
                     try {
                       Get.to(() => FriendRequestScreen());
                     } catch (e) {
                       Get.snackbar('Error', 'Failed to open Friend Request');
                     }
-                  },
-                );
-              },
-            ),
-          ],
+                  } else {
+                    _showRegistrationDialog();
+                  }
+                },
+              );
+            },
+          ),
         ],
       );
     } catch (e) {
@@ -506,7 +527,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             children: [
               const Text(
                 'By Enabling Location, Your Nearby Activity May Be Visible To Others, '
-                    'And Your Location Data Will Be Stored Temporarily.',
+                'And Your Location Data Will Be Stored Temporarily.',
                 textAlign: TextAlign.start,
                 style: TextStyle(
                   fontSize: 14,
@@ -548,24 +569,23 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
                           if (status.isGranted) {
                             final bool serviceEnabled =
-                            await Geolocator.isLocationServiceEnabled();
+                                await Geolocator.isLocationServiceEnabled();
                             if (!serviceEnabled) {
                               Get.back();
                               Get.snackbar(
                                 'GPS Disabled',
                                 'Please enable GPS/Location services',
                                 snackPosition: SnackPosition.BOTTOM,
-                                backgroundColor:
-                                Colors.orange.withOpacity(0.7),
+                                backgroundColor: Colors.orange.withOpacity(0.7),
                                 colorText: Colors.white,
                               );
                               return;
                             }
 
                             final Position position =
-                            await Geolocator.getCurrentPosition(
-                              desiredAccuracy: LocationAccuracy.high,
-                            );
+                                await Geolocator.getCurrentPosition(
+                                  desiredAccuracy: LocationAccuracy.high,
+                                );
 
                             Get.back();
 
@@ -574,7 +594,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
                             // ✅ Nearby active indicator চালু করো
                             Get.find<HomeController>().isNearbyActive.value =
-                            true;
+                                true;
 
                             Get.to(() => const ChatNearbyScreen());
                           } else {
@@ -617,6 +637,47 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     } catch (e) {
       debugPrint('Error showing confirmation dialog: $e');
     }
+  }
+
+  void _showRegistrationDialog() {
+    Get.dialog(
+      AlertDialog(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12.r),
+        ),
+        title: Text(
+          'Registration required',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 18.sp,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+          ),
+        ),
+        content: Text(
+          'Please sign up to use this feature',
+          textAlign: TextAlign.center,
+          style: TextStyle(fontSize: 14.sp, color: Colors.grey[700]),
+        ),
+        actions: [
+          Center(
+            child: ElevatedButton(
+              onPressed: () => Get.back(),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primaryColor,
+                padding: EdgeInsets.symmetric(horizontal: 30.w, vertical: 10.h),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8.r),
+                ),
+              ),
+              child: const Text('OK', style: TextStyle(color: Colors.white)),
+            ),
+          ),
+          SizedBox(height: 10.h),
+        ],
+      ),
+    );
   }
 }
 
@@ -667,8 +728,9 @@ class _NearbyActiveDotState extends State<_NearbyActiveDot>
           shape: BoxShape.circle,
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF22C55E)
-                  .withOpacity(0.4 + (_anim.value * 0.3)),
+              color: const Color(
+                0xFF22C55E,
+              ).withOpacity(0.4 + (_anim.value * 0.3)),
               blurRadius: 4 + (_anim.value * 4),
               spreadRadius: _anim.value * 2,
             ),

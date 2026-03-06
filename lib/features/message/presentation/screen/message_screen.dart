@@ -38,17 +38,9 @@ class _MessageScreenState extends State<MessageScreen> {
     _initScreen();
   }
 
-  // ✅ আগে friendship check, তারপর messages load
+  // ✅ আগে friendship check, তারপর messages load - এখন unified
   Future<void> _initScreen() async {
-    if (messageController.userId.isNotEmpty) {
-      await messageController.checkFriendshipStatus(messageController.userId);
-      await messageController.loadMessages();
-    } else {
-      messageController.isFriend.value = true;
-      messageController.friendStatus.value = FriendStatus.friends;
-      messageController.friendStatusLoaded.value = true;
-      await messageController.loadMessages();
-    }
+    await messageController.initializeChat(messageController.userId);
   }
 
   String _getImageUrl(String? path) {
@@ -179,56 +171,59 @@ class _MessageScreenState extends State<MessageScreen> {
           child: Scaffold(
             backgroundColor: const Color(0xFFF5F7FA),
             appBar: _buildAppBar(controller),
-            body: Column(
-              children: [
-                // ── Messages list
-                Expanded(
-                  child: controller.isLoading
-                      ? _buildLoadingShimmer()
-                      : controller.messages.isEmpty
-                      ? _buildEmptyState()
-                      : ListView.builder(
-                          controller: controller.scrollController,
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 16.w,
-                            vertical: 12.h,
+            body: Obx(() {
+              if (controller.isInitialLoading.value) {
+                return _buildLoadingShimmer();
+              }
+              return Column(
+                children: [
+                  // ── Messages list
+                  Expanded(
+                    child: controller.isLoading
+                        ? _buildLoadingShimmer()
+                        : controller.messages.isEmpty
+                        ? _buildEmptyState()
+                        : ListView.builder(
+                            controller: controller.scrollController,
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 16.w,
+                              vertical: 12.h,
+                            ),
+                            itemCount: controller.messages.length,
+                            itemBuilder: (context, index) {
+                              final msg = controller.messages[index];
+                              final prevMsg = index > 0
+                                  ? controller.messages[index - 1]
+                                  : null;
+                              final showAvatar =
+                                  prevMsg == null ||
+                                  prevMsg.senderId != msg.senderId;
+                              final showTime =
+                                  index == controller.messages.length - 1 ||
+                                  controller.messages[index + 1].senderId !=
+                                      msg.senderId;
+                              return _buildMessageBubble(
+                                context,
+                                msg,
+                                showAvatar,
+                                showTime,
+                              );
+                            },
                           ),
-                          itemCount: controller.messages.length,
-                          itemBuilder: (context, index) {
-                            final msg = controller.messages[index];
-                            final prevMsg = index > 0
-                                ? controller.messages[index - 1]
-                                : null;
-                            final showAvatar =
-                                prevMsg == null ||
-                                prevMsg.senderId != msg.senderId;
-                            final showTime =
-                                index == controller.messages.length - 1 ||
-                                controller.messages[index + 1].senderId !=
-                                    msg.senderId;
-                            return _buildMessageBubble(
-                              context,
-                              msg,
-                              showAvatar,
-                              showTime,
-                            );
-                          },
-                        ),
-                ),
+                  ),
 
-                // ── Picked file preview
-                _buildPickedFilePreview(controller),
+                  // ── Picked file preview
+                  _buildPickedFilePreview(controller),
 
-                // ── Upload progress
-                if (controller.isUploadingImage ||
-                    controller.isUploadingMedia ||
-                    controller.isUploadingDocument)
-                  _buildUploadProgress(),
+                  // ── Upload progress
+                  if (controller.isUploadingImage ||
+                      controller.isUploadingMedia ||
+                      controller.isUploadingDocument)
+                    _buildUploadProgress(),
 
-                // ── Bottom input / non-friend panel
-                Obx(() {
-                  if (!controller.friendStatusLoaded.value) {
-                    return Container(
+                  // ── Bottom input / non-friend panel
+                  if (!controller.friendStatusLoaded.value)
+                    Container(
                       color: Colors.white,
                       padding: EdgeInsets.all(16.h),
                       child: const Center(
@@ -241,15 +236,14 @@ class _MessageScreenState extends State<MessageScreen> {
                           ),
                         ),
                       ),
-                    );
-                  }
-                  if (controller.isFriend.value) {
-                    return _buildInputArea(context, controller);
-                  }
-                  return _buildNonFriendPanel(context, controller);
-                }),
-              ],
-            ),
+                    )
+                  else if (controller.isFriend.value)
+                    _buildInputArea(context, controller)
+                  else
+                    _buildNonFriendPanel(context, controller),
+                ],
+              );
+            }),
           ),
         );
       },
@@ -1183,19 +1177,47 @@ class _MessageScreenState extends State<MessageScreen> {
                     ),
                     SizedBox(height: 10.h),
 
-                    // Add Friend tile
-                    _nonFriendTile(
-                      icon: Icons.person_add_alt_1_rounded,
-                      iconColor: AppColors.primaryColor,
-                      label: status == 'pending'
-                          ? 'Friend Request Sent ✓'
-                          : 'Add Friend',
-                      disabled: status == 'pending',
-                      onTap: () async => await controller.sendFriendRequest(
-                        controller.otherUserId.value,
+                    // Accept Request (if received)
+                    if (status == 'received')
+                      _nonFriendTile(
+                        icon: Icons.check_circle_outline_rounded,
+                        iconColor: Colors.green.shade600,
+                        label: 'Accept Friend Request',
+                        onTap: () async => await controller.acceptFriendRequest(
+                          controller.pendingRequestId.value,
+                        ),
                       ),
-                    ),
-                    Divider(height: 1, color: Colors.grey.shade100),
+                    if (status == 'received')
+                      Divider(height: 1, color: Colors.grey.shade100),
+
+                    // Reject Request (if received)
+                    if (status == 'received')
+                      _nonFriendTile(
+                        icon: Icons.remove_circle_outline_rounded,
+                        iconColor: Colors.red.shade400,
+                        label: 'Reject Request',
+                        onTap: () async => await controller.rejectFriendRequest(
+                          controller.pendingRequestId.value,
+                        ),
+                      ),
+                    if (status == 'received')
+                      Divider(height: 1, color: Colors.grey.shade100),
+
+                    // Add Friend tile (only if not pending/received/friends)
+                    if (status != 'received' && status != 'friends')
+                      _nonFriendTile(
+                        icon: Icons.person_add_alt_1_rounded,
+                        iconColor: AppColors.primaryColor,
+                        label: status == 'pending'
+                            ? 'Friend Request Sent ✓'
+                            : 'Add Friend',
+                        disabled: status == 'pending',
+                        onTap: () async => await controller.sendFriendRequest(
+                          controller.otherUserId.value,
+                        ),
+                      ),
+                    if (status != 'received' && status != 'friends')
+                      Divider(height: 1, color: Colors.grey.shade100),
 
                     // Ignore tile
                     _nonFriendTile(

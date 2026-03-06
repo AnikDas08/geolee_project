@@ -60,10 +60,11 @@ class _HomeNavState extends State<HomeNav> {
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
 
       floatingActionButton: Obx(() {
+        // Unconditionally access observable
+        final showNavBar = controller.showNavBar.value;
         final bool isKeyboardVisible =
             MediaQuery.of(context).viewInsets.bottom > 0;
-        if (!controller.showNavBar.value || isKeyboardVisible)
-          return const SizedBox.shrink();
+        if (!showNavBar || isKeyboardVisible) return const SizedBox.shrink();
 
         return SizedBox(
           height: 70.w,
@@ -88,10 +89,11 @@ class _HomeNavState extends State<HomeNav> {
       }),
 
       bottomNavigationBar: Obx(() {
+        // Unconditionally access observable
+        final showNavBar = controller.showNavBar.value;
         final bool isKeyboardVisible =
             MediaQuery.of(context).viewInsets.bottom > 0;
-        if (!controller.showNavBar.value || isKeyboardVisible)
-          return const SizedBox.shrink();
+        if (!showNavBar || isKeyboardVisible) return const SizedBox.shrink();
 
         final bool isUser = LocalStorage.role == "user";
 
@@ -131,8 +133,8 @@ class _HomeNavState extends State<HomeNav> {
     required String label,
   }) {
     return Obx(() {
+      // Unconditionally access observable to prevent GetX error
       final bool isSelected = controller.currentIndex.value == index;
-      final chatController = Get.find<ChatController>();
 
       return GestureDetector(
         onTap: () {
