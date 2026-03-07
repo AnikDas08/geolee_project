@@ -14,7 +14,7 @@ class CommonLoader extends StatelessWidget {
         height: size.sp,
         width: size.sp,
         child: CircularProgressIndicator.adaptive(
-          // backgroundColor: Colors.blue,
+           backgroundColor: Colors.white,
           strokeWidth: strokeWidth),
       ),
     );

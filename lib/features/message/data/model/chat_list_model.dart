@@ -17,9 +17,9 @@ class ChatModel {
   final double? distanceInKm;
   final String? joinRequestStatus;
   final String? joinRequestId;
-  final String? friendRequestStatus; // ✅ new — 'none' | 'pending'
-  final String? friendRequestId; // ✅ new — cancel করার জন্য
-  final String? description; // ✅ group description
+  final String? friendRequestStatus;
+  final String? friendRequestId;
+  final String? description;
 
   ChatModel({
     required this.id,
@@ -64,8 +64,8 @@ class ChatModel {
     double? distanceInKm,
     String? joinRequestStatus,
     String? joinRequestId,
-    String? friendRequestStatus, // ✅
-    String? friendRequestId, // ✅
+    String? friendRequestStatus,
+    String? friendRequestId,
     String? description,
   }) {
     return ChatModel(

@@ -1,4 +1,4 @@
-import 'dart:async'; // Added for Timer
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../data/model/chat_list_model.dart';
@@ -27,31 +27,54 @@ class ChatController extends GetxController {
 
   int _groupTotalPages = 1;
   int _singleTotalPages = 1;
+
   bool get hasMoreGroups => page < _groupTotalPages;
+
   bool get hasMoreSingles => singlePage < _singleTotalPages;
+
+  // ✅ Currently open chat track করার জন্য
+  String? _currentOpenChatId;
 
   ScrollController scrollController = ScrollController();
   ScrollController singleScrollController = ScrollController();
   TextEditingController searchController = TextEditingController();
 
-  Timer? _searchDebounce; // Added for server-side search timing
+  Timer? _searchDebounce;
 
   static ChatController get instance => Get.put(ChatController());
 
-  // Getter for the number of chats (users/groups) with unread messages
-  int get unreadCountUser {
-    int count = 0;
-    // Use a Set to avoid counting the same chatId twice if it exists in multiple lists (unlikely but safe)
-    Set<String> unreadChatIds = {};
-
+  int get totalUnreadCount {
+    int total = 0;
     for (var chat in singleChats) {
-      if (chat.unreadCount > 0) unreadChatIds.add(chat.id);
+      total += chat.unreadCount;
     }
     for (var chat in chats) {
-      if (chat.unreadCount > 0) unreadChatIds.add(chat.id);
+      total += chat.unreadCount;
     }
+    return total;
+  }
 
-    return unreadChatIds.length;
+  int unreadCountForChat(String chatId) {
+    final single = singleChats.firstWhereOrNull((c) => c.id == chatId);
+    if (single != null) return single.unreadCount;
+
+    final group = chats.firstWhereOrNull((c) => c.id == chatId);
+    if (group != null) return group.unreadCount;
+
+    return 0;
+  }
+
+  void setOpenChat(String chatId) {
+    _currentOpenChatId = chatId;
+    markChatAsSeen(chatId);
+    debugPrint(" Chat opened: $chatId");
+  }
+
+  // ===================================
+
+  void clearOpenChat() {
+    debugPrint(" Chat closed: $_currentOpenChatId");
+    _currentOpenChatId = null;
   }
 
   void clearSearch() {
@@ -67,17 +90,12 @@ class ChatController extends GetxController {
     chats.sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
   }
 
-  // UPDATED: Now calls the server instead of filtering locally
   void searchChats(String query) {
     if (_searchDebounce?.isActive ?? false) _searchDebounce!.cancel();
-
-    // Small delay to wait for user to stop typing
     _searchDebounce = Timer(const Duration(milliseconds: 500), () {
-      // Re-fetch data from server using the search query
       getChatRepos();
       getChatRepos(isGroup: true);
     });
-
     update();
   }
 
@@ -91,16 +109,24 @@ class ChatController extends GetxController {
     });
   }
 
+  void setupSinglePagination() {
+    singleScrollController.addListener(() async {
+      if (singleScrollController.position.pixels >=
+          singleScrollController.position.maxScrollExtent - 200) {
+        if (isLoadingMoreSingle || !hasMoreSingles) return;
+        await _loadMoreSingles();
+      }
+    });
+  }
+
   Future<void> sendFriendRequest(String userId, String chatId) async {
     try {
       final response = await ApiService.post(
         ApiEndPoint.createFriendRequest,
         body: {"receiver": userId},
       );
-
       if (response.statusCode == 200 || response.statusCode == 201) {
         final requestId = response.data['data']?['_id'] ?? '';
-        // ✅ UI update
         _updateFriendRequestStatus(chatId, 'pending', requestId);
       }
     } catch (e) {
@@ -119,9 +145,7 @@ class ChatController extends GetxController {
         "${ApiEndPoint.cancelFriendRequest}$requestId",
         body: {"status": "cancelled"},
       );
-
       if (response.statusCode == 200 || response.statusCode == 201) {
-        // ✅ UI update
         _updateFriendRequestStatus(chatId, 'none', '');
       }
     } catch (e) {
@@ -151,16 +175,6 @@ class ChatController extends GetxController {
     }
   }
 
-  void setupSinglePagination() {
-    singleScrollController.addListener(() async {
-      if (singleScrollController.position.pixels >=
-          singleScrollController.position.maxScrollExtent - 200) {
-        if (isLoadingMoreSingle || !hasMoreSingles) return;
-        await _loadMoreSingles();
-      }
-    });
-  }
-
   Future<void> _loadMoreGroups() async {
     if (isLoadingMore || !hasMoreGroups) return;
     isLoadingMore = true;
@@ -173,7 +187,6 @@ class ChatController extends GetxController {
         searchController.text.trim(),
         true,
       );
-
       _groupTotalPages = response.totalPage;
       final allGroups = response.data.where((item) => item.isGroup).toList();
       chats.addAll(allGroups);
@@ -199,7 +212,6 @@ class ChatController extends GetxController {
         searchController.text.trim(),
         false,
       );
-
       _singleTotalPages = response.totalPage;
       final singles = response.data.where((item) => !item.isGroup).toList();
       singleChats.addAll(singles);
@@ -258,8 +270,14 @@ class ChatController extends GetxController {
         filteredSingleChats = List.from(singleChats);
         await _markFriendStatus();
       }
+
+      // ===============================================
+
+      if (_currentOpenChatId != null) {
+        markChatAsSeen(_currentOpenChatId!);
+      }
     } catch (e) {
-      print(">>>>>>>>>>>> ❌ getChatRepos Error: $e <<<<<<<<<<<<");
+      debugPrint(">>>>>>>>>>>>getChatRepos Error: $e <<<<<<<<<<<<");
     } finally {
       if (isGroup) {
         isGroupLoading = false;
@@ -312,6 +330,7 @@ class ChatController extends GetxController {
 
   Future<void> listenChat() async {
     SocketServices.on("chat:update", (data) {
+      //getChatRepos currentOpenChatId check ========================
       getChatRepos(showLoading: false);
       getChatRepos(showLoading: false, isGroup: true);
     });
@@ -322,6 +341,7 @@ class ChatController extends GetxController {
       singlePage = 1;
       chats.clear();
       singleChats.clear();
+
       for (var item in data) {
         try {
           final chat = ChatModel.fromJson(item);
@@ -332,9 +352,16 @@ class ChatController extends GetxController {
           }
         } catch (e) {}
       }
+
       _sortChats();
       filteredChats = List.from(chats);
       filteredSingleChats = List.from(singleChats);
+
+
+      if (_currentOpenChatId != null) {
+        markChatAsSeen(_currentOpenChatId!);
+      }
+
       update();
       _markFriendStatus();
     });
@@ -343,34 +370,36 @@ class ChatController extends GetxController {
   void markChatAsSeen(String chatId) {
     bool found = false;
 
-    // Update single chats
+    // Update single chats===================================
     int index = singleChats.indexWhere((chat) => chat.id == chatId);
     if (index != -1) {
       singleChats[index] = singleChats[index].copyWith(unreadCount: 0);
       int fIndex = filteredSingleChats.indexWhere((c) => c.id == chatId);
-      if (fIndex != -1)
+      if (fIndex != -1) {
         filteredSingleChats[fIndex] = filteredSingleChats[fIndex].copyWith(
           unreadCount: 0,
         );
+      }
       found = true;
     }
 
-    // Update group chats
+    // Update group chats ======================================
     int gIndex = chats.indexWhere((chat) => chat.id == chatId);
     if (gIndex != -1) {
       chats[gIndex] = chats[gIndex].copyWith(unreadCount: 0);
       int fgIndex = filteredChats.indexWhere((c) => c.id == chatId);
-      if (fgIndex != -1)
+      if (fgIndex != -1) {
         filteredChats[fgIndex] = filteredChats[fgIndex].copyWith(
           unreadCount: 0,
         );
+      }
       found = true;
     }
 
     if (found) {
       update();
       debugPrint(
-        "✅ Chat $chatId marked as seen. Current unread user count: $unreadCountUser",
+        "Chat $chatId marked as seen. Total unread: $totalUnreadCount",
       );
     }
   }
@@ -386,7 +415,7 @@ class ChatController extends GetxController {
 
   @override
   void onClose() {
-    _searchDebounce?.cancel(); // Cancel timer on close
+    _searchDebounce?.cancel();
     singleScrollController.dispose();
     scrollController.dispose();
     super.onClose();

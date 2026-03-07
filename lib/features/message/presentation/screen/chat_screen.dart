@@ -317,9 +317,8 @@ class _ChatListScreenState extends State<ChatListScreen> {
                                         ),
                                       );
                                     }
-                                    final ChatModel item =
-                                        controller.filteredSingleChats[index];
-                                    return GestureDetector(
+                                  final ChatModel item = controller.filteredSingleChats[index];
+                                  return GestureDetector(
                                       onTap: () {
                                         Get.toNamed(
                                           AppRoutes.message,
@@ -343,8 +342,9 @@ class _ChatListScreenState extends State<ChatListScreen> {
                                           },
                                         );
                                       },
+                                  //============================================
                                       /* onTap: () {
-                                  Get.toNamed(
+                                    Get.toNamed(
                                     AppRoutes.message,
                                     parameters: {
                                       "userId": item.participant.sId,
@@ -356,9 +356,10 @@ class _ChatListScreenState extends State<ChatListScreen> {
                                       "image": item.isGroup
                                           ? (item.chatImage ?? "")
                                           : item.participant.image,
+                                      },
+                                     );
                                     },
-                                  );
-                                },*/
+                                  */
                                       child: chatListItem(
                                         item: item,
                                         isFriend: item.isFriend,
@@ -372,7 +373,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
                                   },
                                 ),
 
-                          // ─── Group Tab ──────────────────────────────
+                          //Group Tab ==========================================
                           switch (controller.status) {
                             Status.loading => const CommonLoader(),
                             Status.error => SizedBox(

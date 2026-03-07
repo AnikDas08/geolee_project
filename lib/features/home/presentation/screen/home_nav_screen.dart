@@ -167,7 +167,8 @@ class _HomeNavState extends State<HomeNav> {
                   if (index == 2 && LocalStorage.role == "user")
                     GetBuilder<ChatController>(
                       builder: (chatCtrl) {
-                        final count = chatCtrl.unreadCountUser;
+                        final count = chatCtrl.totalUnreadCount;
+                        debugPrint("Unread Count is:==============${chatCtrl.totalUnreadCount}");
                         if (count <= 0) return const SizedBox.shrink();
                         return Positioned(
                           right: -8.w,

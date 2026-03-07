@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
+import 'package:giolee78/component/button/common_button.dart';
+import 'package:giolee78/config/route/app_routes.dart';
 import 'package:giolee78/features/friend/presentation/controller/my_friend_controller.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -165,9 +167,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     );
   }
 
-  // ─────────────────────────────────────────────
+  //==============================================
   // Map Section
-  // ─────────────────────────────────────────────
+  //==============================================
   Widget _buildMapSection(HomeController controller) {
     return Container(
       height: 350.h,
@@ -228,14 +230,14 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               );
             }),
 
-            // ── Overlay buttons (clicker + filter)
+            ////==============================================Overlay buttons (clicker + filter)
             Positioned(
               top: 16.h,
               right: 16.w,
               child: _buildOverlayButtons(controller),
             ),
 
-            // ── Heatmap info badge
+            // //==============================================Heatmap info badge
             if (controller.heatmaps.isNotEmpty)
               Positioned(
                 bottom: 16.h,
@@ -248,9 +250,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     );
   }
 
-  // ─────────────────────────────────────────────
+  //==============================================
   // Overlay Buttons
-  // ─────────────────────────────────────────────
+  //==============================================
   Widget _buildOverlayButtons(HomeController controller) {
     try {
       return Row(
@@ -341,9 +343,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     );
   }
 
-  // ─────────────────────────────────────────────
+//==============================================
   // Heatmap Info Badge
-  // ─────────────────────────────────────────────
+//==============================================
   Widget _buildHeatmapInfoBadge(HomeController controller) {
     try {
       int totalPoints = 0;
@@ -373,9 +375,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     }
   }
 
-  // ─────────────────────────────────────────────
+//==============================================
   // Action List
-  // ─────────────────────────────────────────────
+//==============================================
   Widget _buildActionList(HomeController controller) {
     try {
       final bool isLoggedIn = LocalStorage.token.isNotEmpty;
@@ -404,20 +406,20 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 title: 'Chat Nearby',
                 trailing: isLoggedIn && isNearby
                     ? Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const _NearbyActiveDot(),
-                          SizedBox(width: 5.w),
-                          Text(
-                            'ON',
-                            style: TextStyle(
-                              fontSize: 11.sp,
-                              fontWeight: FontWeight.w700,
-                              color: const Color(0xFF22C55E),
-                            ),
-                          ),
-                        ],
-                      )
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const _NearbyActiveDot(),
+                    SizedBox(width: 5.w),
+                    Text(
+                      'ON',
+                      style: TextStyle(
+                        fontSize: 11.sp,
+                        fontWeight: FontWeight.w700,
+                        color: const Color(0xFF22C55E),
+                      ),
+                    ),
+                  ],
+                )
                     : null,
                 onTap: () {
                   if (isLoggedIn) {
@@ -464,7 +466,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             },
           ),
 
-          // ── Friend Request with badge
+          //Friend Request with badge ==============================================
           GetX<MyFriendController>(
             builder: (myFriendController) {
               // Always touch 'requests' observable to avoid GetX error in Guest mode
@@ -503,9 +505,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     }
   }
 
-  // ─────────────────────────────────────────────
+//==============================================
   // Location & Navigation
-  // ─────────────────────────────────────────────
+//==============================================
   Future<void> _handleLocationAndNavigate() async {
     try {
       _showConfirmationDialog();
@@ -650,7 +652,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           'Registration required',
           textAlign: TextAlign.center,
           style: TextStyle(
-            fontSize: 18.sp,
+            fontSize: 22.sp,
             fontWeight: FontWeight.bold,
             color: Colors.black,
           ),
@@ -662,17 +664,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         ),
         actions: [
           Center(
-            child: ElevatedButton(
-              onPressed: () => Get.back(),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primaryColor,
-                padding: EdgeInsets.symmetric(horizontal: 30.w, vertical: 10.h),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8.r),
-                ),
-              ),
-              child: const Text('OK', style: TextStyle(color: Colors.white)),
-            ),
+            child: CommonButton(
+                onTap: (){
+                  Get.offAllNamed(AppRoutes.signIn);
+                },
+                titleText: "Ok"),
           ),
           SizedBox(height: 10.h),
         ],
@@ -681,9 +677,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 }
 
-// ══════════════════════════════════════════════
-// ✅ Pulsing green dot — Nearby Active indicator
-// ══════════════════════════════════════════════
+//==============================================
+// Pulsing green dot — Nearby Active indicator
+//==============================================
 class _NearbyActiveDot extends StatefulWidget {
   const _NearbyActiveDot();
 

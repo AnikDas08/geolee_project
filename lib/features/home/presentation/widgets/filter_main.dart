@@ -208,14 +208,18 @@ class _FilterDialogState extends State<FilterDialog>
                   label: option,
                   isSelected: isSelected,
                   isCustom: isCustomOption,
-                  onTap: () => setState(() {
-                    selectedPeriod = option;
-                    // Reset date picks when switching away from custom
-                    if (!isCustomOption) {
-                      pickedStartDate = null;
-                      pickedEndDate = null;
-                    }
-                  }),
+                  onTap: () {
+                    setState(() {
+                      selectedPeriod = option;
+                      if (!isCustomOption) {
+                        pickedStartDate = null;
+                        pickedEndDate = null;
+
+                        controller.applyPeriodFilter(selectedPeriod);
+                        Get.back();
+                      }
+                    });
+                  },
                 );
               }).toList(),
             ),
@@ -360,7 +364,7 @@ class _FilterDialogState extends State<FilterDialog>
               ? [
             BoxShadow(
               color: (isCustom ? Colors.indigo : Colors.blue)
-                  .withOpacity(0.3),
+                  .withValues(alpha: 0.3),
               blurRadius: 6,
               offset: const Offset(0, 2),
             )
@@ -403,7 +407,7 @@ class _FilterDialogState extends State<FilterDialog>
           width: date != null ? 1.5 : 1.0,
         ),
         borderRadius: BorderRadius.circular(8.r),
-        color: date != null ? Colors.blue.withOpacity(0.04) : Colors.white,
+        color: date != null ? Colors.blue.withValues(alpha: 0.04) : Colors.white,
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,

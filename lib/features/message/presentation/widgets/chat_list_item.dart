@@ -160,6 +160,7 @@ Widget chatListItem({
               SizedBox(height: 3.h),
 
               Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
                     formatTimeAgo(item.updatedAt),
@@ -168,10 +169,29 @@ Widget chatListItem({
                       color: const Color(0xFF797C7B),
                     ),
                   ),
-                  // CommonText(
-                  //   fontSize: 10.sp,
-                  //   text: item.unreadCount.toString(),
-                  // ),
+                  const SizedBox(height: 4),
+                  if (item.unreadCount > 0)
+                    Container(
+                      constraints: BoxConstraints(minWidth: 20.sp),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: item.unreadCount > 99 ? 5.sp : 4.sp,
+                        vertical: 2.sp,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF00A884), // WhatsApp-style green, change as needed
+                        borderRadius: BorderRadius.circular(10.sp),
+                      ),
+                      alignment: Alignment.center,
+                      child: Text(
+                        item.unreadCount > 99 ? '99+' : item.unreadCount.toString(),
+                        style: TextStyle(
+                          fontSize: 10.sp,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                          height: 1.2,
+                        ),
+                      ),
+                    ),
                 ],
               ),
             ],

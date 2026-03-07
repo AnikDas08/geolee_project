@@ -68,6 +68,7 @@ class SignUpController extends GetxController {
   final TextEditingController addressController = TextEditingController();
   final TextEditingController ageController = TextEditingController();
   final TextEditingController bioController = TextEditingController();
+  final TextEditingController dateOfBirthTEController=TextEditingController();
 
   String? selectedGender;
   final List<String> genderOptions = ['Male', 'Female', 'Other'];
@@ -110,6 +111,22 @@ class SignUpController extends GetxController {
   }
 
   //============================================Sign Up
+
+
+  Future<void> pickDateOfBirth() async {
+    final DateTime? pickedDate = await showDatePicker(
+
+      context: Get.context!,
+      initialDate: DateTime(2000),
+      firstDate: DateTime(1950),
+      lastDate: DateTime.now(),
+    );
+
+    if (pickedDate != null) {
+      dateOfBirthTEController.text = "${pickedDate.year}-${pickedDate.month.toString().padLeft(2, '0')}-${pickedDate.day.toString().padLeft(2, '0')}";
+      update();
+    }
+  }
 
   Future<void> signUpUser(GlobalKey<FormState> signUpFormKey) async {
     if (!signUpFormKey.currentState!.validate()) return;
@@ -294,60 +311,46 @@ class SignUpController extends GetxController {
 
   ///========================================== Update Profile and Complete Profile
   Future<void> updateProfile() async {
-    if (image == null || image!.isEmpty) {
-      Get.snackbar('Validation Error', 'Please select a profile image');
-      return;
-    }
+    // if (image == null || image!.isEmpty) {
+    //   Get.snackbar('Validation Error', 'Please select a profile image');
+    //   return;
+    // }
 
-    if (bioController.text.trim().isEmpty) {
-      Get.snackbar('Validation Error', 'Please enter a bio');
-      return;
-    }
+    // if (bioController.text.trim().isEmpty) {
+    //   Get.snackbar('Validation Error', 'Please enter a bio');
+    //   return;
+    // }
 
-    if (ageController.text.trim().isEmpty) {
-      Get.snackbar('Validation Error', 'Please enter your age');
-      return;
-    }
+    // if (dateOfBirthTEController.text.trim().isEmpty) {
+    //   Get.snackbar('Date of Birth Error', 'Please select your date of birth');
+    //   return;
+    // }
 
-    if (selectedGender == null || selectedGender!.isEmpty) {
-      Get.snackbar('Validation Error', 'Please select your gender');
-      return;
-    }
+    // if (selectedGender == null || selectedGender!.isEmpty) {
+    //   Get.snackbar('Validation Error', 'Please select your gender');
+    //   return;
+    // }
 
     isLoading = true;
     update();
 
-    String formattedDob = "";
-
-    if (dateController.text.isNotEmpty) {
-      try {
-        final DateTime parsedDate = DateFormat(
-          'dd MMMM yyyy',
-        ).parse(dateController.text.trim());
-        formattedDob = parsedDate.toUtc().toIso8601String();
-      } catch (e) {
-        debugPrint("❌ Invalid DOB format: ${dateController.text}");
-        formattedDob = "";
-      }
-    }
-
-    final Map<String, String> body = {
-      "gender": selectedGender!.toLowerCase(),
-      "dob": formattedDob.isNotEmpty
-          ? formattedDob
-          : "2000-11-24T12:44:23.000Z",
-      'address': addressController.text.isNotEmpty
-          ? addressController.text
-          : "Dhaka",
-      "bio": bioController.text.toString(),
-      "age": ageController.text.trim(), // ✅ age add করুন
-    };
-
     try {
+      final dobText = dateOfBirthTEController.text.trim();
+
+      final DateTime dobDate = DateTime.parse(dobText);
+
+      final Map<String, String> body = {
+        "gender": selectedGender!.toLowerCase(),
+        "dob": dobDate.toUtc().toIso8601String(),
+        "address": addressController.text.isNotEmpty
+            ? addressController.text
+            : "Dhaka",
+        "bio": bioController.text.trim(),
+      };
+
       ApiResponseModel response;
 
       if (image != null && image!.isNotEmpty) {
-        debugPrint("📸 Uploading profile image: $image");
         response = await ApiService.multipart(
           ApiEndPoint.updateProfile,
           body: body,
@@ -355,7 +358,6 @@ class SignUpController extends GetxController {
           method: "PATCH",
         );
       } else {
-        debugPrint("No image selected, updating profile without image");
         response = await ApiService.patch(
           ApiEndPoint.updateProfile,
           body: body,
@@ -367,13 +369,12 @@ class SignUpController extends GetxController {
           Get.context!,
           title: "Your Registration Successfully Complete.",
         );
+
         Get.offAllNamed(AppRoutes.signIn);
       } else {
         Utils.errorSnackBar("Error ${response.statusCode}", response.message);
-        debugPrint("error is ====${response.message}");
       }
     } catch (e) {
-      debugPrint("error is ====${e.toString()}");
       Utils.errorSnackBar("Error", e.toString());
     } finally {
       isLoading = false;

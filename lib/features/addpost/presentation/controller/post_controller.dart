@@ -32,11 +32,11 @@ class PostController extends GetxController {
   final selectedPriorityLevel = ''.obs;
   final selectedGender = ''.obs;
 
-  final List<String> priorityLevels = ['Friends', 'Public', 'Only me'];
+  final List<String> priorityLevels = ['Public', 'Friends', 'Only me'];
 
   final Map<String, String> privacyImages = {
-    'Friends': 'assets/images/fri.png',
-    'Public': 'assets/images/pub.png',
+    'Public': 'assets/images/fri.png',
+    'Friends': 'assets/images/pub.png',
     'Only me': 'assets/images/only.png',
   };
 

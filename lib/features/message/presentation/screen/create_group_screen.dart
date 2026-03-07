@@ -352,47 +352,40 @@ class CreateGroupScreen extends StatelessWidget {
                             ),
                           )
                         : ListView.builder(
-                            itemCount: controller.availableMembers.length,
-                            itemBuilder: (context, index) {
-                              final member = controller.availableMembers[index];
-                              final isSelected = controller.selectedMembers.any(
-                                (m) => m.id == member.id,
-                              );
+                      itemCount: controller.availableMembers.length,
+                      itemBuilder: (context, index) {
+                        final member = controller.availableMembers[index];
 
-                              return ListTile(
-                                leading: CircleAvatar(
-                                  backgroundColor: AppColors.primaryColor,
-                                  backgroundImage: member.image != null
-                                      ? NetworkImage(
-                                          ApiEndPoint.imageUrl + member.image!,
-                                        )
-                                      : null,
-                                  child: member.image == null
-                                      ? Text(
-                                          member.name[0].toUpperCase(),
-                                          style: const TextStyle(
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        )
-                                      : null,
+                        return Obx(() {  // ✅ এটা add করো
+                          final isSelected = controller.selectedMembers.any(
+                                (m) => m.id == member.id,
+                          );
+
+                          return ListTile(
+                            leading: CircleAvatar(
+                              backgroundColor: AppColors.primaryColor,
+                              backgroundImage: member.image != null
+                                  ? NetworkImage(ApiEndPoint.imageUrl + member.image!)
+                                  : null,
+                              child: member.image == null
+                                  ? Text(
+                                member.name[0].toUpperCase(),
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
                                 ),
-                                title: Text(member.name),
-                                trailing: isSelected
-                                    ? const Icon(
-                                        Icons.check_circle,
-                                        color: Colors.green,
-                                      )
-                                    : const Icon(
-                                        Icons.add_circle_outline,
-                                        color: Colors.grey,
-                                      ),
-                                onTap: () {
-                                  controller.toggleMember(member);
-                                },
-                              );
-                            },
-                          ),
+                              )
+                                  : null,
+                            ),
+                            title: Text(member.name),
+                            trailing: isSelected
+                                ? const Icon(Icons.check_circle, color: Colors.green)
+                                : const Icon(Icons.add_circle_outline, color: Colors.grey),
+                            onTap: () => controller.toggleMember(member),
+                          );
+                        });
+                      },
+                    ),
                   ),
 
                   SizedBox(height: 20.h),

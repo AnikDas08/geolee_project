@@ -60,14 +60,27 @@ class CommonPostCards extends StatelessWidget {
                     radius: 18.r,
                     backgroundColor: Colors.transparent,
                     child: ClipOval(
-                      child: Image.network(
+                      child: userAvatar.isEmpty
+                          ? Image.asset(
+                        "assets/images/profilePlaceholder.jpg",
+                        width: 36.r,
+                        height: 36.r,
+                        fit: BoxFit.cover,
+                      )
+                          : Image.network(
                         userAvatar,
                         width: 36.r,
                         height: 36.r,
                         fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Image.asset(
+                            "assets/images/profilePlaceholder.jpg",
+                            fit: BoxFit.cover,
+                          );
+                        },
                       ),
                     ),
-                  ),
+                  )
                 ),
                 SizedBox(width: 10.w),
                 Flexible(
@@ -118,10 +131,7 @@ class CommonPostCards extends StatelessWidget {
                                   color: AppColors.secondaryText,
                                 ),
                                 SizedBox(width: 15.w),
-                                CommonImage(
-                                  size: 12,
-                                  imageSrc: privacyImage,
-                                ),
+                                CommonImage(size: 12, imageSrc: privacyImage),
                               ],
                             ),
                           ),
@@ -138,10 +148,7 @@ class CommonPostCards extends StatelessWidget {
           if (images != null && images!.isNotEmpty)
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 12.w),
-              child: _PostImageSlider(
-                images: images!,
-                onTapPhoto: onTapPhoto,
-              ),
+              child: _PostImageSlider(images: images!, onTapPhoto: onTapPhoto),
             ),
 
           /// ================= Clicker Type
@@ -179,10 +186,7 @@ class _PostImageSlider extends StatefulWidget {
   final List<String> images;
   final VoidCallback onTapPhoto;
 
-  const _PostImageSlider({
-    required this.images,
-    required this.onTapPhoto,
-  });
+  const _PostImageSlider({required this.images, required this.onTapPhoto});
 
   @override
   State<_PostImageSlider> createState() => _PostImageSliderState();
@@ -237,20 +241,20 @@ class _PostImageSliderState extends State<_PostImageSlider> {
                     borderRadius: BorderRadius.circular(20.r),
                     gradient: isActive
                         ? const LinearGradient(
-                      colors: [Color(0xFFFF0000), Color(0xFFF43C3C)],
-                    )
+                            colors: [Color(0xFFFF0000), Color(0xFFF43C3C)],
+                          )
                         : null,
                     color: isActive
                         ? null
                         : Colors.grey.withValues(alpha: 0.35),
                     boxShadow: isActive
                         ? [
-                      BoxShadow(
-                        color: const Color(0xFFF66666),
-                        blurRadius: 6.r,
-                        offset: const Offset(0, 2),
-                      ),
-                    ]
+                            BoxShadow(
+                              color: const Color(0xFFF66666),
+                              blurRadius: 6.r,
+                              offset: const Offset(0, 2),
+                            ),
+                          ]
                         : [],
                   ),
                 );

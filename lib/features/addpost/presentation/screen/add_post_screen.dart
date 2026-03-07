@@ -57,7 +57,7 @@ class AddPostScreen extends StatelessWidget {
                   SizedBox(height: 5.h),
                   _buildTextField(
                     controller: controller.description,
-                    hintText: "About The Role...",
+                    hintText: "Why is this clicker worthy.",
                     maxLines: 5,
                   ),
                   SizedBox(height: 16.h),
@@ -139,7 +139,7 @@ class AddPostScreen extends StatelessWidget {
                   Obx(
                         () => _buildDropdownWithIcons(
                       value: controller.selectedPriorityLevel.value.isEmpty
-                          ? null
+                          ? controller.priorityLevels.first // default, must exist in items
                           : controller.selectedPriorityLevel.value,
                       hint: "Select Privacy",
                       items: controller.priorityLevels,

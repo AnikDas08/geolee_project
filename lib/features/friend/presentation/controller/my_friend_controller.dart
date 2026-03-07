@@ -225,14 +225,16 @@ class MyFriendController extends GetxController {
       if (response.statusCode == 200) {
         requests.removeAt(index);
         requests.refresh();
-        Get.snackbar(
-          "Success",
-          "Friend request accepted",
-          colorText: Colors.white,
-        );
+        // Get.snackbar(
+        //   "Success",
+        //   "Friend request accepted",
+        //   colorText: Colors.white,
+        // );
       } else {
         debugPrint("acceptFriendRequest error => ${response.data}");
         Get.snackbar(
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
           "Info",
           response.data["message"] ?? "Cannot accept request",
         );

@@ -107,6 +107,7 @@ class MessageController extends GetxController {
     super.onInit();
     listenMessage();
     listenOnlineStatus();
+    ChatController.instance.setOpenChat(chatId);
   }
 
   @override
@@ -122,6 +123,7 @@ class MessageController extends GetxController {
 
     messageController.dispose();
     scrollController.dispose();
+    ChatController.instance.clearOpenChat();
     super.onClose();
   }
 
@@ -409,7 +411,7 @@ class MessageController extends GetxController {
                 ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
         }
 
-        // ✅ Panel Visibility Logic: If not friends, check who sent the last interaction
+        // Panel Visibility Logic: If not friends, check who sent the last interaction
         if (friendStatus.value != FriendStatus.friends) {
           if (friendStatusValue.value == 'pending') {
             // I sent the request — I am the sender, show input
@@ -514,7 +516,7 @@ class MessageController extends GetxController {
           break;
         case 'document':
         default:
-          imageName = "doc"; // ✅ server এ "doc" field expect করে
+          imageName = "doc";
           messageType = "document";
           break;
       }
@@ -565,7 +567,7 @@ class MessageController extends GetxController {
         final data = response.data['data'];
 
         if (data['isAlreadyFriend'] == true) {
-          // ✅ বন্ধু — normal input দেখাবে
+          // বন্ধু — normal input দেখাবে
           isFriend.value = true;
           hasPendingRequest.value = false;
           friendStatusValue.value = 'friends';

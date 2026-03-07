@@ -32,7 +32,6 @@ class _ClickerScreenState extends State<ClickerScreen> {
     NotificationsController(),
   );
 
-  // ScrollController to detect bottom scroll for pagination
   final ScrollController _scrollController = ScrollController();
 
   @override
@@ -196,7 +195,7 @@ class _ClickerScreenState extends State<ClickerScreen> {
                     : ListView.separated(
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
-                        itemCount: controller.filteredPosts.length,
+                        itemCount: LocalStorage.token.isEmpty?20:controller.filteredPosts.length,
                         separatorBuilder: (_, __) => SizedBox(height: 16.h),
                         itemBuilder: (context, index) {
                           final data = controller.filteredPosts[index];

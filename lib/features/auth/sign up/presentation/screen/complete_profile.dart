@@ -129,7 +129,7 @@ class _CompleteProfileState extends State<CompleteProfile> {
               ),
               CommonTextField(
                 controller: controller.bioController,
-                hintText: 'Type...',
+                hintText: 'Enter a few words about yourself',
                 hintTextColor: Colors.grey,
                 textColor: AppColors.black,
                 maxLines: 2,
@@ -137,7 +137,7 @@ class _CompleteProfileState extends State<CompleteProfile> {
 
               // Date of Birth Field
               CommonText(
-                text: 'Age',
+                text: 'Date of birth',
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
                 textAlign: TextAlign.left,
@@ -145,15 +145,19 @@ class _CompleteProfileState extends State<CompleteProfile> {
                 top: 8.h,
               ),
               CommonTextField(
-                controller: controller.ageController,
-                hintText: 'Type your age',
-                hintTextColor: AppColors.grey,
+                controller: controller.dateOfBirthTEController,
+                hintText: 'Date of Birth',
+                keyboardType: TextInputType.none,
+                hintTextColor: AppColors.secondaryText,
                 textColor: AppColors.black,
+                suffixIcon: const Icon(Icons.calendar_month,),
+                onTap: () {
+                  controller.pickDateOfBirth();
+                },
               ),
 
               SizedBox(height: 20.h),
 
-              // Gender Field
               CommonText(
                 text: 'Gender',
                 fontSize: 14,

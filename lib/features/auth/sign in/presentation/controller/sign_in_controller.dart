@@ -14,7 +14,7 @@ class SignInController extends GetxController {
   bool isLoading = false;
 
   TextEditingController emailController = TextEditingController(
-    text: kDebugMode ? 'ebrahimnazmul20032@gmail.com' : '',
+    text: kDebugMode ? 'ibrahimsparktech@gmail.com' : '',
   );
   TextEditingController passwordController = TextEditingController(
     text: kDebugMode ? 'password123' : "",
@@ -115,8 +115,8 @@ class SignInController extends GetxController {
 
   @override
   void onClose() {
-    emailController.dispose();
-    passwordController.dispose();
+    // emailController.dispose();
+    // passwordController.dispose();
     super.onClose();
   }
 }

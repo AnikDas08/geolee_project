@@ -17,7 +17,6 @@ class SearchFriendController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    // স্ক্রিনে ঢোকার সাথে সাথে ডাটা লোড হবে
     getSearchFriend();
   }
 
@@ -27,7 +26,6 @@ class SearchFriendController extends GetxController {
       final double lat = LocalStorage.lat ?? 0.0;
       final double lng = LocalStorage.long ?? 0.0;
 
-      // ১. নিয়ারবাই ইউজার গেট করা
       final url = "${ApiEndPoint.nearbyChat}?lat=$lat&lng=$lng&limit=50";
       final ApiResponseModel response = await ApiService.get(url);
 
@@ -37,7 +35,6 @@ class SearchFriendController extends GetxController {
 
         searchFriendList.value = fetchedUsers;
 
-        // ২. ইউজার লোড হওয়ার পর প্রত্যেকের ফ্রেন্ডশিপ স্ট্যাটাস চেক করা
         await _checkFriendshipForAll();
       }
     } catch (e) {
@@ -121,10 +118,11 @@ class SearchFriendController extends GetxController {
 
   List<SearchFriendUserModel> get filteredUsers {
     return searchFriendList.where((u) {
-      final nameMatch = u.name.toLowerCase().contains(searchQuery.value);
-      // রিকোয়ারমেন্ট অনুযায়ী যারা অলরেডি ফ্রেন্ড তাদের লিস্টে দেখাবে না
+      final query = searchQuery.value;
+      final nameMatch = u.name.toLowerCase().contains(query);
+      final emailMatch = u.email.toLowerCase().contains(query);
       final isNotFriend = u.friendStatus.value != FriendStatus.friends;
-      return nameMatch && isNotFriend;
+      return (nameMatch || emailMatch) && isNotFriend;
     }).toList();
   }
 }

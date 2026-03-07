@@ -8,6 +8,7 @@ import 'package:giolee78/features/message/data/model/chat_message.dart';
 import '../../../../component/image/common_image.dart';
 import '../../../../utils/constants/app_icons.dart';
 import 'package:giolee78/features/friend/presentation/screen/view_friend_screen.dart';
+import '../controller/chat_controller.dart';
 import '../controller/message_controller.dart';
 
 class MessageScreen extends StatefulWidget {
@@ -26,6 +27,7 @@ class _MessageScreenState extends State<MessageScreen> {
     messageController = Get.find<MessageController>();
     final params = Get.parameters;
 
+
     if (params['chatId'] != null) {
       messageController.chatId = params['chatId'] ?? '';
       messageController.name = params['name'] ?? '';
@@ -34,7 +36,6 @@ class _MessageScreenState extends State<MessageScreen> {
       messageController.isActive.value = params['isOnline'] == 'true';
       messageController.distance.value = params['distance'] ?? '';
     }
-
     _initScreen();
   }
 
@@ -184,32 +185,36 @@ class _MessageScreenState extends State<MessageScreen> {
                         : controller.messages.isEmpty
                         ? _buildEmptyState()
                         : ListView.builder(
-                            controller: controller.scrollController,
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 16.w,
-                              vertical: 12.h,
-                            ),
-                            itemCount: controller.messages.length,
-                            itemBuilder: (context, index) {
-                              final msg = controller.messages[index];
-                              final prevMsg = index > 0
-                                  ? controller.messages[index - 1]
-                                  : null;
-                              final showAvatar =
-                                  prevMsg == null ||
-                                  prevMsg.senderId != msg.senderId;
-                              final showTime =
-                                  index == controller.messages.length - 1 ||
-                                  controller.messages[index + 1].senderId !=
-                                      msg.senderId;
-                              return _buildMessageBubble(
-                                context,
-                                msg,
-                                showAvatar,
-                                showTime,
-                              );
-                            },
-                          ),
+                      reverse: true,
+                      controller: controller.scrollController,
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 16.w,
+                        vertical: 12.h,
+                      ),
+                      itemCount: controller.messages.length,
+                      itemBuilder: (context, index) {
+                        final reversedIndex = controller.messages.length - 1 - index;
+                        final msg = controller.messages[reversedIndex];
+
+                        final prevMsg = reversedIndex < controller.messages.length - 1
+                            ? controller.messages[reversedIndex + 1]
+                            : null;
+
+                        final showAvatar =
+                            prevMsg == null || prevMsg.senderId != msg.senderId;
+
+                        final showTime =
+                            reversedIndex == 0 ||
+                                controller.messages[reversedIndex - 1].senderId != msg.senderId;
+
+                        return _buildMessageBubble(
+                          context,
+                          msg,
+                          showAvatar,
+                          showTime,
+                        );
+                      },
+                    ),
                   ),
 
                   // ── Picked file preview

@@ -22,7 +22,7 @@ class EditProfileAllFiled extends StatelessWidget {
         CommonTextField(
           controller: controller.nameController,
           validator: OtherHelper.validator,
-          hintText: 'Enter Your Full Name',
+          hintText: 'Enter Your  Name',
           hintTextColor: AppColors.secondaryText,
           textColor: AppColors.black,
         ),
