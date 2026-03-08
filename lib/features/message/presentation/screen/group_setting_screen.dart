@@ -7,7 +7,6 @@ import 'package:giolee78/component/text/common_text.dart';
 import 'package:giolee78/utils/constants/app_colors.dart';
 import 'package:giolee78/config/route/app_routes.dart';
 import '../../../../config/api/api_end_point.dart';
-import '../../../../utils/log/app_log.dart';
 import '../controller/group_setting_controller.dart';
 
 class GroupSettingsScreen extends StatelessWidget {

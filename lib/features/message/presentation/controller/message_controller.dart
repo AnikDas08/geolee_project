@@ -27,6 +27,7 @@ class MessageController extends GetxController {
   // ================================================
   // FRIEND STATUS
   // ================================================
+
   RxBool isFriend = false.obs;
   RxBool hasPendingRequest = false.obs;
   RxString otherUserId = ''.obs;
@@ -67,6 +68,14 @@ class MessageController extends GetxController {
   // MESSAGES
   // ------------------------------------------------
   List<ChatMessage> messages = [];
+
+  // ------------------------------------------------
+  // PAGINATION
+  // ------------------------------------------------
+  var isLoadingMore = false.obs;
+  var hasMoreMessages = true.obs;
+  int _currentPage = 1;
+  final int _pageLimit = 20;
 
   // ------------------------------------------------
   // CHAT VARIABLES
@@ -115,7 +124,6 @@ class MessageController extends GetxController {
     if (chatId.isNotEmpty) {
       SocketServices.leaveRoom(chatId);
     }
-    // Remove individual listeners to prevent memory leaks and duplicate triggers
     SocketServices.off("message:new");
     SocketServices.off("chat:update");
     SocketServices.off("user:online");
@@ -128,7 +136,7 @@ class MessageController extends GetxController {
   }
 
   // ================================================
-  // 0. LISTEN FOR NEW MESSAGES VIA SOCKET
+  // SOCKET LISTENERS
   // ================================================
   void listenMessage() {
     SocketServices.on("message:new", (data) {
@@ -185,26 +193,37 @@ class MessageController extends GetxController {
   // ================================================
   // PICKER METHODS
   // ================================================
+
   Future<void> pickImageFromGallery() async {
     try {
       isPickingImage = true;
       update();
-      final XFile? image = await _imagePicker.pickImage(
-        source: ImageSource.gallery,
-        imageQuality: 80,
-      );
-      if (image != null) {
-        pickedImage = image;
-        pickedImagePath = image.path;
+
+      final XFile? picked = await _imagePicker.pickMedia();
+
+      if (picked != null) {
+        final ext = picked.path.toLowerCase().split('.').last;
+        final isVideo = [
+          'mp4',
+          'mov',
+          'avi',
+          'mkv',
+          'flv',
+          'wmv',
+          '3gp',
+        ].contains(ext);
+
+        pickedImage = picked;
+        pickedImagePath = picked.path;
         pickedFile = null;
         pickedFilePath = null;
         hasPickedImage = true;
         hasPickedFile = false;
-        pickedFileType = 'image';
+        pickedFileType = isVideo ? 'media' : 'image';
         update();
       }
     } catch (e) {
-      _showErrorSnackBar('Failed to pick image: $e');
+      _showErrorSnackBar('Failed to pick media: $e');
     } finally {
       isPickingImage = false;
       update();
@@ -246,27 +265,12 @@ class MessageController extends GetxController {
         allowedExtensions: [
           'pdf',
           'doc',
-          'docx',
-          'xls',
-          'xlsx',
-          'ppt',
-          'pptx',
           'txt',
-          'csv',
           'jpg',
           'jpeg',
           'png',
-          'gif',
-          'webp',
-          'bmp',
-          'heic',
           'mp3',
           'mp4',
-          'avi',
-          'mov',
-          'mkv',
-          'flv',
-          'wav',
         ],
       );
       if (result != null && result.files.isNotEmpty) {
@@ -376,13 +380,17 @@ class MessageController extends GetxController {
   }
 
   // ================================================
-  // 7. LOAD MESSAGES
+  // LOAD MESSAGES (প্রথমবার — page 1 থেকে শুরু)
   // ================================================
   Future<void> loadMessages({bool showLoading = true}) async {
     if (showLoading) {
       isLoading = true;
       update();
     }
+
+    // ── Pagination reset করা হচ্ছে প্রতিবার fresh load এ
+    _currentPage = 1;
+    hasMoreMessages.value = true;
 
     try {
       if (chatId.isNotEmpty) {
@@ -392,7 +400,10 @@ class MessageController extends GetxController {
         }
       }
 
-      final response = await ApiService.get("${ApiEndPoint.messages}/$chatId");
+      // ── page=1 & limit দিয়ে প্রথম batch load
+      final response = await ApiService.get(
+        "${ApiEndPoint.messages}/$chatId?page=1&limit=$_pageLimit",
+      );
 
       if (response.statusCode == 200) {
         final data = response.data['data'] as List?;
@@ -409,35 +420,14 @@ class MessageController extends GetxController {
                   .whereType<ChatMessage>()
                   .toList()
                 ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
-        }
 
-        // Panel Visibility Logic: If not friends, check who sent the last interaction
-        if (friendStatus.value != FriendStatus.friends) {
-          if (friendStatusValue.value == 'pending') {
-            // I sent the request — I am the sender, show input
-            isFriend.value = true;
-          } else if (friendStatusValue.value == 'received') {
-            // They sent the request — I am the receiver, show panel
-            if (friendStatusValue.value != 'none_continued') {
-              isFriend.value = false;
-            }
-          } else if (messages.isEmpty) {
-            // No messages yet — I am starting the chat, show input
-            isFriend.value = true;
-          } else {
-            // No request — check who sent the last message
-            final lastMsg = messages.last;
-            if (lastMsg.isCurrentUser) {
-              // I sent the last message — I am the sender, show input
-              isFriend.value = true;
-            } else {
-              // They sent the last message — I am the receiver, show panel
-              if (friendStatusValue.value != 'none_continued') {
-                isFriend.value = false;
-              }
-            }
+          // যদি প্রথম page তেই limit এর চেয়ে কম আসে — আর নেই
+          if (data.length < _pageLimit) {
+            hasMoreMessages.value = false;
           }
         }
+
+        _applyFriendPanelLogic();
       }
     } catch (e) {
       appLog("❌ Load messages error: $e");
@@ -449,7 +439,105 @@ class MessageController extends GetxController {
   }
 
   // ================================================
-  // 8. SEND METHODS
+  // LOAD MORE MESSAGES (pagination — উপরে scroll করলে)
+  // ================================================
+  Future<void> loadMoreMessages() async {
+    // ── Already loading বা আর message নেই — skip
+    if (isLoadingMore.value || !hasMoreMessages.value) return;
+
+    isLoadingMore.value = true;
+
+    try {
+      final nextPage = _currentPage + 1;
+
+      final response = await ApiService.get(
+        "${ApiEndPoint.messages}/$chatId?page=$nextPage&limit=$_pageLimit",
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data['data'] as List?;
+
+        if (data == null || data.isEmpty) {
+          // ── আর কোনো message নেই
+          hasMoreMessages.value = false;
+          return;
+        }
+
+        final newMessages =
+            data
+                .map((json) {
+                  try {
+                    return ChatMessage.fromJson(json);
+                  } catch (_) {
+                    return null;
+                  }
+                })
+                .whereType<ChatMessage>()
+                .toList()
+              ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
+
+        if (newMessages.isEmpty) {
+          hasMoreMessages.value = false;
+          return;
+        }
+
+        // ── Duplicate avoid করে পুরনো messages এর আগে insert
+        final existingIds = messages.map((m) => m.id).toSet();
+        final uniqueNew = newMessages
+            .where((m) => !existingIds.contains(m.id))
+            .toList();
+
+        if (uniqueNew.isEmpty) {
+          hasMoreMessages.value = false;
+          return;
+        }
+
+        // ── পুরনো messages গুলো list এর শুরুতে যোগ (সময়ের ক্রমে)
+        messages = [...uniqueNew, ...messages];
+        _currentPage = nextPage;
+
+        // ── limit এর চেয়ে কম আসলে শেষ page
+        if (data.length < _pageLimit) {
+          hasMoreMessages.value = false;
+        }
+
+        update();
+      }
+    } catch (e) {
+      appLog("❌ Load more messages error: $e");
+    } finally {
+      isLoadingMore.value = false;
+    }
+  }
+
+  // ================================================
+  // FRIEND PANEL VISIBILITY LOGIC (আলাদা method)
+  // ================================================
+  void _applyFriendPanelLogic() {
+    if (friendStatus.value != FriendStatus.friends) {
+      if (friendStatusValue.value == 'pending') {
+        isFriend.value = true;
+      } else if (friendStatusValue.value == 'received') {
+        if (friendStatusValue.value != 'none_continued') {
+          isFriend.value = false;
+        }
+      } else if (messages.isEmpty) {
+        isFriend.value = true;
+      } else {
+        final lastMsg = messages.last;
+        if (lastMsg.isCurrentUser) {
+          isFriend.value = true;
+        } else {
+          if (friendStatusValue.value != 'none_continued') {
+            isFriend.value = false;
+          }
+        }
+      }
+    }
+  }
+
+  // ================================================
+  // SEND METHODS
   // ================================================
   Future<void> sendMessage() async => await sendTextAndFile();
 
@@ -501,7 +589,6 @@ class MessageController extends GetxController {
       }
       update();
 
-      // ✅ type অনুযায়ী আলাদা imageName পাঠাচ্ছি
       String imageName;
       String messageType;
 
@@ -545,7 +632,7 @@ class MessageController extends GetxController {
   }
 
   // ================================================
-  // 9. FRIENDSHIP METHODS
+  // FRIENDSHIP METHODS
   // ================================================
   Future<void> checkFriendshipStatus(String targetUserId) async {
     if (targetUserId.isEmpty) {
@@ -567,7 +654,6 @@ class MessageController extends GetxController {
         final data = response.data['data'];
 
         if (data['isAlreadyFriend'] == true) {
-          // বন্ধু — normal input দেখাবে
           isFriend.value = true;
           hasPendingRequest.value = false;
           friendStatusValue.value = 'friends';
@@ -580,25 +666,19 @@ class MessageController extends GetxController {
               pendingRequest['sender']?.toString() ??
               '';
 
-          // ✅ AppBar এর জন্য
           friendStatus.value = FriendStatus.requested;
           pendingRequestId.value = pendingRequest['_id']?.toString() ?? '';
 
           if (requestSenderId == LocalStorage.userId) {
-            // আমি পাঠিয়েছি — normal input দেখাবে
             isFriend.value = true;
             hasPendingRequest.value = true;
             friendStatusValue.value = 'pending';
           } else {
-            // অন্যজন পাঠিয়েছে — non-friend panel দেখাবে
             isFriend.value = false;
             hasPendingRequest.value = false;
             friendStatusValue.value = 'received';
           }
         } else {
-          // ✅ কোনো relation নেই
-          // Default এ isFriend = true থাকবে কারণ আমি message পাঠাতে এসেছি
-          // loadMessages এ চেক হবে যদি অন্যজন লাস্ট মেসেজ দেয় তবে প্যানেল আসবে
           isFriend.value = true;
           hasPendingRequest.value = false;
           friendStatusValue.value = 'none';
@@ -660,7 +740,6 @@ class MessageController extends GetxController {
       );
 
       if (response.statusCode == 200) {
-        // ✅ Cancel হলে non-friend panel দেখাবে
         isFriend.value = false;
         hasPendingRequest.value = false;
         friendStatusValue.value = 'none';
@@ -738,7 +817,11 @@ class MessageController extends GetxController {
   void _scrollToBottom() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (scrollController.hasClients) {
-        scrollController.jumpTo(scrollController.position.maxScrollExtent);
+        scrollController.animateTo(
+          0, // reverse: true তে 0 মানেই সবচেয়ে নিচে (latest message)
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
       }
     });
   }

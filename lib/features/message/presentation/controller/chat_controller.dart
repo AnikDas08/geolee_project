@@ -32,7 +32,7 @@ class ChatController extends GetxController {
 
   bool get hasMoreSingles => singlePage < _singleTotalPages;
 
-  // ✅ Currently open chat track করার জন্য
+
   String? _currentOpenChatId;
 
   ScrollController scrollController = ScrollController();

@@ -27,7 +27,7 @@ class EditPostControllers extends GetxController {
   final serviceTimeController = TextEditingController();
   final selectedGender = ''.obs;
 
-  final List<String> priorityLevels = ['Friend', 'Public', 'Only Me'];
+  final List<String> priorityLevels = ['Friends', 'Public', 'Only Me'];
 
   final ImagePicker _picker = ImagePicker();
   Rxn<SinglePostData> mySinglePost = Rxn<SinglePostData>();
@@ -90,16 +90,14 @@ class EditPostControllers extends GetxController {
 
   String _capitalizePrivacy(String value) {
     switch (value.toLowerCase()) {
-      case 'friend':
-        return 'Friend';
+      case 'friends':
+        return 'Friends';
       case 'public':
         return 'Public';
       case 'only me':
         return 'Only Me';
       default:
-        return value.isEmpty
-            ? ''
-            : value[0].toUpperCase() + value.substring(1);
+        return value.isEmpty ? '' : value[0].toUpperCase() + value.substring(1);
     }
   }
 
@@ -118,10 +116,7 @@ class EditPostControllers extends GetxController {
 
       final List<Map<String, dynamic>> files = [];
       for (var file in selectedImages) {
-        files.add({
-          'name': 'image',
-          'image': file.path,
-        });
+        files.add({'name': 'image', 'image': file.path});
       }
 
       final response = await ApiService.multipartImage(
@@ -135,11 +130,10 @@ class EditPostControllers extends GetxController {
         // Utils.successSnackBar("Post Updated", "Successfully saved changes");
         removedImages.clear();
 
-        MyPostController myPostController=Get.find();
+        MyPostController myPostController = Get.find();
         myPostController.fetchMyPosts();
         Get.back(result: true);
-
-      }else {
+      } else {
         Utils.errorSnackBar("Update Failed", response.message ?? "Error");
       }
     } catch (e) {

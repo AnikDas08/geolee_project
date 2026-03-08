@@ -238,11 +238,11 @@ Dio _getMyDio() {
         options
         ..headers['authorization'] ??= 'Bearer ${LocalStorage.token}'
           ..headers['Content-Type'] ??= 'application/json'
-          ..connectTimeout = const Duration(seconds: 30)
-          ..sendTimeout = const Duration(seconds: 30)
+          ..connectTimeout = const Duration(seconds: 40)
+          ..sendTimeout = const Duration(seconds: 40)
           ..receiveDataWhenStatusError = true
           ..responseType = ResponseType.json
-          ..receiveTimeout = const Duration(seconds: 30)
+          ..receiveTimeout = const Duration(seconds: 40)
           ..baseUrl = options.path.startsWith('http')
               ? ''
               : ApiEndPoint.baseUrl;

@@ -116,6 +116,7 @@ class SocketServices {
     }
   }
 
+
   static void _handleNewMessageNotification(dynamic data) {
     try {
       final Map<String, dynamic> messageData = data as Map<String, dynamic>;
@@ -155,7 +156,8 @@ class SocketServices {
         'message': body,
       });
 
-      // ✅ unread count বাড়াও
+      // ==========================================
+
       if (Get.isRegistered<NotificationsController>()) {
         final controller = Get.find<NotificationsController>();
         controller.unreadCount.value++;
@@ -163,8 +165,11 @@ class SocketServices {
       }
 
       debugPrint("✅ Message notification shown from: $senderName");
+
     } catch (e) {
+
       debugPrint("❌ Error handling message notification: $e");
+
     }
   }
 

@@ -28,6 +28,9 @@ class GroupMessageController extends GetxController {
   bool hasPickedImage = false;
   bool hasPickedFile = false;
 
+  var isLoadingMore = false.obs;
+  var hasMoreMessages = true.obs;
+
   final RxString avatarFilePath = "".obs;
 
   /// ========== UPLOAD STATE ==========

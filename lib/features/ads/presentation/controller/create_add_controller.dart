@@ -50,7 +50,7 @@ class CreateAdsController extends GetxController {
   String get planId {
     if (selectedPricingPlan.value.isEmpty || plans.isEmpty) return '';
     final plan = plans.firstWhere(
-      (p) => p.name.toLowerCase() == selectedPricingPlan.value.toLowerCase(),
+          (p) => p.name.toLowerCase() == selectedPricingPlan.value.toLowerCase(),
       orElse: () => plans.first,
     );
     return plan.id;
@@ -59,7 +59,7 @@ class CreateAdsController extends GetxController {
   double get selectedPrice {
     if (plans.isEmpty) return 0;
     final plan = plans.firstWhere(
-      (p) => p.name.toLowerCase() == selectedPricingPlan.value.toLowerCase(),
+          (p) => p.name.toLowerCase() == selectedPricingPlan.value.toLowerCase(),
       orElse: () => plans.first,
     );
     return plan.price;
@@ -77,7 +77,7 @@ class CreateAdsController extends GetxController {
     }
   }
 
-  /// ---------------- PLACES AUTOCOMPLETE ----------------
+  // PLACES AUTOCOMPLETE ================================
 
   Future<void> searchPlaces(String query) async {
     if (query.trim().length < 2) {
@@ -95,8 +95,8 @@ class CreateAdsController extends GetxController {
 
       final url = Uri.parse(
         'https://maps.googleapis.com/maps/api/place/autocomplete/json'
-        '?input=${Uri.encodeComponent(query)}'
-        '&key=$_googleApiKey',
+            '?input=${Uri.encodeComponent(query)}'
+            '&key=$_googleApiKey',
       );
 
       final response = await http.get(url);
@@ -109,13 +109,13 @@ class CreateAdsController extends GetxController {
           placeSuggestions.value = predictions
               .map(
                 (p) => {
-                  'place_id': p['place_id'],
-                  'description': p['description'],
-                  'main_text':
-                      p['structured_formatting']?['main_text'] ??
-                      p['description'],
-                },
-              )
+              'place_id': p['place_id'],
+              'description': p['description'],
+              'main_text':
+              p['structured_formatting']?['main_text'] ??
+                  p['description'],
+            },
+          )
               .toList();
         } else {
           placeSuggestions.clear();
@@ -138,7 +138,6 @@ class CreateAdsController extends GetxController {
       focusAreaController.text = description;
       selectedLocationName.value = description;
 
-      // Suggestions hide করো
       placeSuggestions.clear();
 
       await _fetchPlaceCoordinates(placeId);
@@ -151,9 +150,9 @@ class CreateAdsController extends GetxController {
     try {
       final url = Uri.parse(
         'https://maps.googleapis.com/maps/api/place/details/json'
-        '?place_id=$placeId'
-        '&fields=geometry,name'
-        '&key=$_googleApiKey',
+            '?place_id=$placeId'
+            '&fields=geometry,name'
+            '&key=$_googleApiKey',
       );
 
       final response = await http.get(url);
@@ -171,7 +170,6 @@ class CreateAdsController extends GetxController {
           );
         } else {
           debugPrint("Place Details API status: ${data['status']}");
-          // Fallback coordinates
           selectedLatitude.value = '0.0';
           selectedLongitude.value = '0.0';
         }
@@ -183,12 +181,11 @@ class CreateAdsController extends GetxController {
     }
   }
 
-  /// Suggestions dismiss করা (outside tap এ)
   void clearSuggestions() {
     placeSuggestions.clear();
   }
 
-  /// ---------------- VALIDATION ----------------
+  // VALIDATION ================================
   bool _validate() {
     if (coverImagePath.value.isEmpty) {
       Get.snackbar("Error", "Please select a cover image");
@@ -206,13 +203,8 @@ class CreateAdsController extends GetxController {
       Get.snackbar("Error", "Please enter focus area");
       return false;
     }
-
     if (selectedLatitude.value.isEmpty || selectedLatitude.value == '0.0') {
       Get.snackbar("Error", "Please select a valid location from suggestions");
-      return false;
-    }
-    if (websiteLinkController.text.trim().isEmpty) {
-      Get.snackbar("Error", "Please enter website link");
       return false;
     }
     if (adStartDateController.text.trim().isEmpty) {
@@ -226,7 +218,8 @@ class CreateAdsController extends GetxController {
     return true;
   }
 
-  /// ---------------- DATE HELPERS ----------------
+  //DATE HELPERS ================================
+
   DateTime _parseUiDate() {
     final parts = adStartDateController.text.split(' ');
     return DateTime(
@@ -248,41 +241,22 @@ class CreateAdsController extends GetxController {
 
   int _monthToNumber(String month) {
     const map = {
-      'Jan': 1,
-      'Feb': 2,
-      'Mar': 3,
-      'Apr': 4,
-      'May': 5,
-      'Jun': 6,
-      'Jul': 7,
-      'Aug': 8,
-      'Sep': 9,
-      'Oct': 10,
-      'Nov': 11,
-      'Dec': 12,
+      'Jan': 1, 'Feb': 2, 'Mar': 3, 'Apr': 4,
+      'May': 5, 'Jun': 6, 'Jul': 7, 'Aug': 8,
+      'Sep': 9, 'Oct': 10, 'Nov': 11, 'Dec': 12,
     };
     return map[month]!;
   }
 
   String _month(int m) {
     const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
     ];
     return months[m - 1];
   }
 
-  /// ---------------- FETCH PLANS ----------------
+  //FETCH PLANS ================================
   Future<void> fetchPlans() async {
     try {
       isPlansLoading.value = true;
@@ -301,7 +275,7 @@ class CreateAdsController extends GetxController {
             .map((e) => PlanModel.fromJson(e))
             .toList();
 
-        debugPrint(" Plans loaded: ${plans.length} items");
+        debugPrint("✅ Plans loaded: ${plans.length} items");
 
         if (plans.isNotEmpty) {
           selectedPricingPlan.value = plans.first.name;
@@ -317,7 +291,7 @@ class CreateAdsController extends GetxController {
     }
   }
 
-  // ---------------- CREATE ADS + PAYMENT ----------------
+  // CREATE ADS + PAYMENT ================================
 
   Future<void> createAds() async {
     if (!_validate()) return;
@@ -325,19 +299,24 @@ class CreateAdsController extends GetxController {
     try {
       isLoading.value = true;
 
+      final Map<String, String> body = {
+        "title": titleController.text.trim(),
+        "description": descriptionController.text.trim(),
+        "focusArea": focusAreaController.text.trim(),
+        "latitude": selectedLatitude.value,
+        "longitude": selectedLongitude.value,
+        "startAt": getIsoStartDate(),
+        "plan": planId,
+      };
+
+      if (websiteLinkController.text.trim().isNotEmpty) {
+        body["websiteUrl"] = websiteLinkController.text.trim();
+      }
+
       final ApiResponseModel response = await ApiService.multipartUpdate(
         ApiEndPoint.createAds,
         method: "POST",
-        body: {
-          "title": titleController.text.trim(),
-          "description": descriptionController.text.trim(),
-          "focusArea": focusAreaController.text.trim(),
-          "latitude": selectedLatitude.value,
-          "longitude": selectedLongitude.value,
-          "websiteUrl": websiteLinkController.text.trim(),
-          "startAt": getIsoStartDate(),
-          "plan": planId,
-        },
+        body: body,
         imagePath: coverImagePath.value,
       );
 
@@ -363,28 +342,11 @@ class CreateAdsController extends GetxController {
     }
   }
 
-  /*  /// ---------------- PAYMENT LAUNCH ----------------
-  Future<void> _launchPayment(String url) async {
-    try {
-      final uri = Uri.parse(url);
-      final bool launched = await launchUrl(
-        uri,
-        mode: LaunchMode.externalApplication,
-      );
-
-      if (!launched) {
-        Get.snackbar("Error", "Could not open payment page");
-      }
-    } catch (e) {
-      debugPrint("❌ Launch error: $e");
-    }
-  }*/
-
-  /// ---------------- DATE PICKER ----------------
+  //DATE PICKER ================================
   Future<void> selectDate(
-    BuildContext context,
-    TextEditingController controller,
-  ) async {
+      BuildContext context,
+      TextEditingController controller,
+      ) async {
     final picked = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
@@ -393,21 +355,21 @@ class CreateAdsController extends GetxController {
     );
     if (picked != null) {
       controller.text =
-          "${picked.day.toString().padLeft(2, '0')} ${_month(picked.month)} ${picked.year}";
+      "${picked.day.toString().padLeft(2, '0')} ${_month(picked.month)} ${picked.year}";
     }
   }
 
-  /// ---------------- SUCCESS ----------------
+  //SUCCESS================================
   void _showSuccessPopup() {
     successPopUps(
       message:
-          'Your Ad submitted successfully. Please wait for admin approval.',
+      'Your Ad submitted successfully. Please wait for admin approval.',
       buttonTitle: 'Done',
       onTap: () => Get.offAllNamed(AppRoutes.homeNav),
     );
   }
 
-  /// ---------------- DISPOSE ----------------
+  //DISPOSE ================================
   @override
   void onClose() {
     titleController.dispose();

@@ -166,7 +166,7 @@ class ChatBubbleMessage extends StatelessWidget {
                                           },
                                     ),
                             ),
-                            // Show uploading overlay
+
                             if (isUploading)
                               Positioned.fill(
                                 child: Container(

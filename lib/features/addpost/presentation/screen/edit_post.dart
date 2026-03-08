@@ -28,7 +28,7 @@ class _EditPostState extends State<EditPost> {
   @override
   void initState() {
     super.initState();
-    debugPrint("📌 Post ID from widget: ${widget.postId}");
+    debugPrint("Post ID from widget: ${widget.postId}");
 
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -90,7 +90,7 @@ class _EditPostState extends State<EditPost> {
                       ),
                       SizedBox(height: 16.h),
 
-                      // Select Clicker
+                      // Select Clicker===========================
                       CommonText(
                         text: "Select Clicker",
                         fontSize: 14.sp,
@@ -100,7 +100,7 @@ class _EditPostState extends State<EditPost> {
                         () => Column(
                           children: [
 
-                            // First Row
+                            // First Row==========================
                             Row(
                               children: [
                                 Expanded(
@@ -170,7 +170,7 @@ class _EditPostState extends State<EditPost> {
                       ),
                       SizedBox(height: 16.h),
 
-                      // Privacy
+                      // Privacy================================================
                       CommonText(
                         text: "Privacy",
                         fontSize: 14.sp,
@@ -222,12 +222,12 @@ class _EditPostState extends State<EditPost> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Grid of Images (Existing + New)
+        // Grid of Images (Existing + New)==================
         if (totalImages > 0) _buildAllImagesGrid(context),
 
         SizedBox(height: totalImages > 0 ? 16.h : 0),
 
-        // Add Image Buttons
+        // Add Image Buttons===============================
         Row(
           children: [
             Expanded(
@@ -323,7 +323,7 @@ class _EditPostState extends State<EditPost> {
               child: Container(
                 padding: EdgeInsets.all(2.w),
                 decoration: BoxDecoration(
-                  color: Colors.red.withOpacity(0.8),
+                  color: Colors.red.withValues(alpha: 0.8),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(Icons.close, color: Colors.white, size: 16.sp),
@@ -336,7 +336,7 @@ class _EditPostState extends State<EditPost> {
             child: Container(
               padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
               decoration: BoxDecoration(
-                color: Colors.blue.withOpacity(0.8),
+                color: Colors.blue.withValues(alpha: 0.8),
                 borderRadius: BorderRadius.circular(4.r),
               ),
               child: Text(
@@ -382,7 +382,7 @@ class _EditPostState extends State<EditPost> {
               child: Container(
                 padding: EdgeInsets.all(2.w),
                 decoration: BoxDecoration(
-                  color: Colors.red.withOpacity(0.8),
+                  color: Colors.red.withValues(alpha: 0.8),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(Icons.close, color: Colors.white, size: 16.sp),
@@ -395,7 +395,7 @@ class _EditPostState extends State<EditPost> {
             child: Container(
               padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
               decoration: BoxDecoration(
-                color: Colors.green.withOpacity(0.8),
+                color: Colors.green.withValues(alpha: 0.8),
                 borderRadius: BorderRadius.circular(4.r),
               ),
               child: Text(

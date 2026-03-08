@@ -32,7 +32,7 @@ class SearchFriendScreen extends StatelessWidget {
               controller: controller.searchController,
               onChanged: controller.onSearch,
               decoration: InputDecoration(
-                hintText: "Search by name",
+                hintText: "Search Friend",
                 prefixIcon: const Icon(Icons.search),
                 filled: true,
                 fillColor: Colors.grey[100],
