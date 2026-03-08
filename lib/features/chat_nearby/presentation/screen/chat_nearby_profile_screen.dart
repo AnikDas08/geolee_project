@@ -4,7 +4,8 @@ import 'package:get/get.dart';
 import 'package:giolee78/config/api/api_end_point.dart';
 import 'package:giolee78/features/chat_nearby/data/nearby_friends_model.dart';
 import 'package:giolee78/features/chat_nearby/presentation/controller/chat_nearby_profile_controller.dart';
-import 'package:giolee78/features/clicker/presentation/controller/clicker_controller.dart' hide FriendStatus; // ✅ Import ClickerController
+import 'package:giolee78/features/clicker/presentation/controller/clicker_controller.dart'
+    hide FriendStatus; // ✅ Import ClickerController
 
 import '../../../../component/button/common_button.dart';
 import '../../../../component/image/common_image.dart';
@@ -61,7 +62,6 @@ class _ChatNearbyProfileScreenState extends State<ChatNearbyProfileScreen> {
     });
   }
 
-
   void _monitorFriendStatus() {
     ever<FriendStatus>(controller.friendStatus, (status) {
       if (!_navigationHandled && mounted && status == FriendStatus.friends) {
@@ -89,23 +89,23 @@ class _ChatNearbyProfileScreenState extends State<ChatNearbyProfileScreen> {
       backgroundColor: AppColors.background,
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(kToolbarHeight),
-        child: Obx(() => _ChatNearbyProfileAppBar(
-          status: controller.friendStatus.value,
-          onTapAdd: () {
-            controller.addFriend(widget.user.id.toString());
-          },
-          onTapCancel: () {
-            controller.cancelRequest(widget.user.id.toString());
-          },
-        )),
+        child: Obx(
+          () => _ChatNearbyProfileAppBar(
+            status: controller.friendStatus.value,
+            onTapAdd: () {
+              controller.addFriend(widget.user.id.toString());
+            },
+            onTapCancel: () {
+              controller.cancelRequest(widget.user.id.toString());
+            },
+          ),
+        ),
       ),
       body: SafeArea(
         child: Obx(() {
           if (controller.isLoading.value) {
             return const Center(
-              child: CircularProgressIndicator(
-                color: AppColors.primaryColor,
-              ),
+              child: CircularProgressIndicator(color: AppColors.primaryColor),
             );
           }
 
@@ -141,18 +141,20 @@ class _ChatNearbyProfileScreenState extends State<ChatNearbyProfileScreen> {
                 SizedBox(height: 24.h),
                 _GreetingsInput(controller: greetingsController),
                 SizedBox(height: 24.h),
-                Obx(() => CommonButton(
-                  titleText: controller.isLoading.value
-                      ? 'Sending...'
-                      : 'Send Greetings',
-                  buttonHeight: 48.h,
-                  buttonRadius: 6.r,
-                  onTap: () {
-                    if (mounted) {
-                      controller.sendGreeting(greetingsController);
-                    }
-                  },
-                )),
+                Obx(
+                  () => CommonButton(
+                    titleText: controller.isLoading.value
+                        ? 'Sending...'
+                        : 'Send Greetings',
+                    buttonHeight: 48.h,
+                    buttonRadius: 6.r,
+                    onTap: () {
+                      if (mounted) {
+                        controller.sendGreeting(greetingsController);
+                      }
+                    },
+                  ),
+                ),
               ],
             ),
           );
@@ -187,21 +189,29 @@ class _ChatNearbyProfileAppBar extends StatelessWidget {
               IconButton(
                 onPressed: () => Get.back(),
                 icon: Icon(
-                  Icons.arrow_back_ios_new,
-                  size: 18.sp,
+                  Icons.arrow_back,
+                  size: 24.sp,
                   color: AppColors.black,
                 ),
               ),
-              const Spacer(),
-
+              Expanded(
+                child: Center(
+                  child: CommonText(
+                    text: 'Profile',
+                    fontSize: 18.sp,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textColorFirst,
+                  ),
+                ),
+              ),
+              const SizedBox(
+                width: 40,
+              ), // Balanced spacing for title center alignment if needed, or adjust based on suffix icons
               // Logic for the action icon
               if (status == FriendStatus.none)
                 IconButton(
                   onPressed: onTapAdd,
-                  icon: CommonImage(
-                    imageSrc: AppIcons.addFriend,
-                    size: 22.sp,
-                  ),
+                  icon: CommonImage(imageSrc: AppIcons.addFriend, size: 22.sp),
                 )
               else if (status == FriendStatus.requested)
                 IconButton(
@@ -214,16 +224,20 @@ class _ChatNearbyProfileAppBar extends StatelessWidget {
                 )
               else if (status == FriendStatus.friends)
                 // ✅ Show message icon when already friends
-                  IconButton(
-                    onPressed: () {
-                      debugPrint("💬 Already friends - Message icon visible");
-                    },
-                    icon: Icon(
-                      Icons.chat_bubble_outline,
-                      color: AppColors.primaryColor,
-                      size: 22.sp,
-                    ),
+                IconButton(
+                  onPressed: () {
+                    debugPrint("💬 Already friends - Message icon visible");
+                  },
+                  icon: Icon(
+                    Icons.chat_bubble_outline,
+                    color: AppColors.primaryColor,
+                    size: 22.sp,
                   ),
+                )
+              else
+                const SizedBox(
+                  width: 48,
+                ), // Placeholder to keep title centered if no icon
             ],
           ),
         ),
@@ -254,20 +268,13 @@ class _ProfileHeader extends StatelessWidget {
             width: 100.w,
             child: imageUrl.isNotEmpty
                 ? CommonImage(
-              imageSrc: ApiEndPoint.imageUrl + imageUrl,
-              defaultImage: AppImages.placeHolderImage,
-            )
-                : Image.asset(
-              AppImages.placeHolderImage,
-              fit: BoxFit.cover,
-            ),
+                    imageSrc: ApiEndPoint.imageUrl + imageUrl,
+                    defaultImage: AppImages.placeHolderImage,
+                  )
+                : Image.asset(AppImages.placeHolderImage, fit: BoxFit.cover),
           ),
         ),
-        CommonText(
-          text: name,
-          fontWeight: FontWeight.w600,
-          top: 16,
-        ),
+        CommonText(text: name, fontWeight: FontWeight.w600, top: 16),
         CommonText(
           text: bio,
           fontSize: 13,
@@ -278,13 +285,13 @@ class _ProfileHeader extends StatelessWidget {
           top: 4,
         ),
         SizedBox(height: 8.h),
-        if(distance !=null)
-        CommonText(
-          text: 'Within $distance KM',
-          fontSize: 12,
-          fontWeight: FontWeight.w500,
-          color: AppColors.primaryColor2,
-        ),
+        if (distance != null)
+          CommonText(
+            text: 'Within $distance KM',
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+            color: AppColors.primaryColor2,
+          ),
         SizedBox(height: 8.h),
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
@@ -366,9 +373,9 @@ class ProfileAvatar extends StatelessWidget {
             width: 100.w,
             child: imageUrl.isNotEmpty
                 ? CommonImage(
-              imageSrc: ApiEndPoint.imageUrl + imageUrl,
-              defaultImage: AppImages.profileImage,
-            )
+                    imageSrc: ApiEndPoint.imageUrl + imageUrl,
+                    defaultImage: AppImages.profileImage,
+                  )
                 : Image.asset(AppImages.profileImage, fit: BoxFit.cover),
           ),
         ),

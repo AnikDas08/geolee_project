@@ -62,7 +62,7 @@ class GroupSettingsScreen extends StatelessWidget {
 
     Get.dialog(
       Obx(
-            () => Dialog(
+        () => Dialog(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
@@ -140,16 +140,16 @@ class GroupSettingsScreen extends StatelessWidget {
                         onTap: isLoading.value
                             ? null
                             : () async {
-                          try {
-                            isLoading.value = true;
-                            controller.onUpdateGroupName(
-                              textController.text.trim(),
-                            );
-                            Get.back();
-                          } finally {
-                            isLoading.value = false;
-                          }
-                        },
+                                try {
+                                  isLoading.value = true;
+                                  controller.onUpdateGroupName(
+                                    textController.text.trim(),
+                                  );
+                                  Get.back();
+                                } finally {
+                                  isLoading.value = false;
+                                }
+                              },
                         child: Container(
                           padding: EdgeInsets.symmetric(vertical: 12.h),
                           decoration: BoxDecoration(
@@ -159,21 +159,159 @@ class GroupSettingsScreen extends StatelessWidget {
                           alignment: Alignment.center,
                           child: isLoading.value
                               ? SizedBox(
-                            height: 18.h,
-                            width: 18.h,
-                            child: const CircularProgressIndicator(
-                              color: Colors.white,
-                              strokeWidth: 2,
-                            ),
-                          )
+                                  height: 18.h,
+                                  width: 18.h,
+                                  child: const CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 2,
+                                  ),
+                                )
                               : Text(
-                            "Save",
+                                  "Save",
+                                  style: TextStyle(
+                                    fontSize: 14.sp,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void showEditDescriptionDialog(GroupSettingsController controller) {
+    final TextEditingController textController = TextEditingController(
+      text: controller.description.value,
+    );
+    final RxBool isSubmitting = false.obs;
+
+    Get.dialog(
+      Obx(
+        () => Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          insetPadding: EdgeInsets.symmetric(horizontal: 24.w),
+          child: Container(
+            padding: EdgeInsets.all(20.w),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.description,
+                  size: 50.sp,
+                  color: AppColors.primaryColor,
+                ),
+                SizedBox(height: 12.h),
+                Text(
+                  "Edit Description",
+                  style: TextStyle(
+                    fontSize: 20.sp,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 8.h),
+                Text(
+                  "Describe what this group is about",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    color: Colors.grey.shade700,
+                  ),
+                ),
+                SizedBox(height: 16.h),
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 12.w),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade100,
+                    borderRadius: BorderRadius.circular(8.r),
+                  ),
+                  child: TextField(
+                    controller: textController,
+                    maxLines: 4,
+                    autofocus: true,
+                    decoration: const InputDecoration(
+                      border: InputBorder.none,
+                      hintText: "Enter group description",
+                    ),
+                  ),
+                ),
+                SizedBox(height: 20.h),
+                Row(
+                  children: [
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () => Get.back(),
+                        child: Container(
+                          padding: EdgeInsets.symmetric(vertical: 12.h),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8.r),
+                            border: Border.all(color: Colors.grey.shade400),
+                            color: Colors.grey.shade100,
+                          ),
+                          alignment: Alignment.center,
+                          child: Text(
+                            "Cancel",
                             style: TextStyle(
                               fontSize: 14.sp,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.white,
+                              color: Colors.grey.shade800,
                             ),
                           ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: 12.w),
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: isSubmitting.value
+                            ? null
+                            : () async {
+                                try {
+                                  isSubmitting.value = true;
+                                  await controller.updateGroupProfile(
+                                    newDescription: textController.text.trim(),
+                                  );
+                                  Get.back();
+                                } finally {
+                                  isSubmitting.value = false;
+                                }
+                              },
+                        child: Container(
+                          padding: EdgeInsets.symmetric(vertical: 12.h),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8.r),
+                            color: AppColors.primaryColor,
+                          ),
+                          alignment: Alignment.center,
+                          child: isSubmitting.value
+                              ? SizedBox(
+                                  height: 18.h,
+                                  width: 18.h,
+                                  child: const CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : Text(
+                                  "Save",
+                                  style: TextStyle(
+                                    fontSize: 14.sp,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.white,
+                                  ),
+                                ),
                         ),
                       ),
                     ),
@@ -200,10 +338,18 @@ class GroupSettingsScreen extends StatelessWidget {
             backgroundColor: AppColors.background,
             leading: IconButton(
               onPressed: () => Navigator.pop(context),
-              icon: Icon(Icons.arrow_back_ios_new, size: 18.sp, color: AppColors.black),
+              icon: Icon(
+                Icons.arrow_back_ios_new,
+                size: 18.sp,
+                color: AppColors.black,
+              ),
             ),
             centerTitle: true,
-            title: const CommonText(text: 'Settings', fontSize: 20, fontWeight: FontWeight.w600),
+            title: const CommonText(
+              text: 'Settings',
+              fontSize: 20,
+              fontWeight: FontWeight.w600,
+            ),
           ),
           body: Obx(() {
             if (controller.isLoading.value) {
@@ -211,13 +357,13 @@ class GroupSettingsScreen extends StatelessWidget {
             }
 
             final bool isAuthor = controller.isAuthor;
-            final String access = controller.accessType.value; // 'open', 'restricted', 'private'
+            final String access =
+                controller.accessType.value; // 'open', 'restricted', 'private'
 
             // ✅ Add Member permission
             // public(open) = anyone, private = owner only, restricted = anyone (owner approves)
-            final bool canAddMember = isAuthor ||
-                access == 'open' ||
-                access == 'restricted';
+            final bool canAddMember =
+                isAuthor || access == 'open' || access == 'restricted';
 
             return SingleChildScrollView(
               padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
@@ -225,7 +371,9 @@ class GroupSettingsScreen extends StatelessWidget {
                 children: [
                   // ─── Group Avatar — only owner can change ───
                   GestureDetector(
-                    onTap: isAuthor ? controller.pickGroupImage : null, // ✅ only owner
+                    onTap: isAuthor
+                        ? controller.pickGroupImage
+                        : null, // ✅ only owner
                     child: Stack(
                       alignment: Alignment.bottomRight,
                       children: [
@@ -240,7 +388,8 @@ class GroupSettingsScreen extends StatelessWidget {
                           }
 
                           if (avatarPath.isNotEmpty) {
-                            final isNetworkImage = avatarPath.startsWith('http') ||
+                            final isNetworkImage =
+                                avatarPath.startsWith('http') ||
                                 !avatarPath.contains('/data/user/');
 
                             return CircleAvatar(
@@ -248,26 +397,33 @@ class GroupSettingsScreen extends StatelessWidget {
                               backgroundColor: Colors.grey.shade300,
                               backgroundImage: isNetworkImage
                                   ? NetworkImage(
-                                avatarPath.startsWith('http')
-                                    ? avatarPath
-                                    : () {
-                                  String baseUrl = ApiEndPoint.imageUrl;
-                                  if (!baseUrl.endsWith('/')) baseUrl = '$baseUrl/';
-                                  final String cleanPath = avatarPath.startsWith('/')
-                                      ? avatarPath.substring(1)
-                                      : avatarPath;
-                                  return "$baseUrl$cleanPath";
-                                }(),
-                              )
-                                  : FileImage(File(avatarPath)) as ImageProvider,
+                                      avatarPath.startsWith('http')
+                                          ? avatarPath
+                                          : () {
+                                              String baseUrl =
+                                                  ApiEndPoint.imageUrl;
+                                              if (!baseUrl.endsWith('/'))
+                                                baseUrl = '$baseUrl/';
+                                              final String cleanPath =
+                                                  avatarPath.startsWith('/')
+                                                  ? avatarPath.substring(1)
+                                                  : avatarPath;
+                                              return "$baseUrl$cleanPath";
+                                            }(),
+                                    )
+                                  : FileImage(File(avatarPath))
+                                        as ImageProvider,
                             );
                           } else {
                             return CircleAvatar(
                               radius: 50.r,
-                              backgroundColor: AppColors.primaryColor.withValues(alpha: 0.8),
+                              backgroundColor: AppColors.primaryColor
+                                  .withValues(alpha: 0.8),
                               child: CommonText(
                                 text: controller.groupName.value.isNotEmpty
-                                    ? controller.groupName.value.substring(0, 1).toUpperCase()
+                                    ? controller.groupName.value
+                                          .substring(0, 1)
+                                          .toUpperCase()
                                     : '?',
                                 fontSize: 32.sp,
                                 fontWeight: FontWeight.bold,
@@ -285,7 +441,11 @@ class GroupSettingsScreen extends StatelessWidget {
                             child: CircleAvatar(
                               radius: 12.r,
                               backgroundColor: AppColors.primaryColor,
-                              child: Icon(Icons.edit, size: 14.sp, color: AppColors.white),
+                              child: Icon(
+                                Icons.edit,
+                                size: 14.sp,
+                                color: AppColors.white,
+                              ),
                             ),
                           ),
                       ],
@@ -295,33 +455,86 @@ class GroupSettingsScreen extends StatelessWidget {
 
                   // ─── Group Name — only owner can edit ───
                   GestureDetector(
-                    onTap: isAuthor // ✅ only owner
+                    onTap:
+                        isAuthor // ✅ only owner
                         ? () => showEditGroupNameDialog(controller)
                         : null,
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Obx(() => CommonText(
-                          text: controller.groupName.value,
-                          fontSize: 18.sp,
-                          fontWeight: FontWeight.w600,
-                        )),
+                        Obx(
+                          () => CommonText(
+                            text: controller.groupName.value,
+                            fontSize: 18.sp,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                         SizedBox(width: 4.w),
                         // ✅ Edit icon — only owner দেখবে
                         if (isAuthor)
-                          Icon(Icons.edit, size: 16.sp, color: Colors.grey.shade600),
+                          Icon(
+                            Icons.edit,
+                            size: 16.sp,
+                            color: Colors.grey.shade600,
+                          ),
                       ],
                     ),
                   ),
+                  SizedBox(height: 8.h),
+
+                  // ─── Group Description — only owner can edit ───
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 40.w),
+                    child: GestureDetector(
+                      onTap: isAuthor
+                          ? () => showEditDescriptionDialog(controller)
+                          : null,
+                      child: Obx(
+                        () => Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Flexible(
+                              child: Text(
+                                controller.description.value.isEmpty
+                                    ? 'No description'
+                                    : controller.description.value,
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 13.sp,
+                                  color: Colors.grey.shade600,
+                                ),
+                                maxLines: 3,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            if (isAuthor) ...[
+                              SizedBox(width: 4.w),
+                              Icon(
+                                Icons.edit,
+                                size: 14.sp,
+                                color: Colors.grey.shade400,
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 12.h),
                   SizedBox(height: 4.h),
 
                   // ─── Member Count ───
-                  Obx(() => CommonText(
-                    text: '${controller.memberCount.value} Member${controller.memberCount.value != 1 ? 's' : ''}',
-                    fontSize: 14.sp,
-                    color: AppColors.secondaryText,
-                  )),
+                  Obx(
+                    () => CommonText(
+                      text:
+                          '${controller.memberCount.value} Member${controller.memberCount.value != 1 ? 's' : ''}',
+                      fontSize: 14.sp,
+                      color: AppColors.secondaryText,
+                    ),
+                  ),
                   SizedBox(height: 30.h),
 
                   // ─── Add Member ───
@@ -352,37 +565,41 @@ class GroupSettingsScreen extends StatelessWidget {
                     ),
 
                     // Admin Approval toggle — only owner
-                    Obx(() => Container(
-                      height: 56.h,
-                      margin: EdgeInsets.only(bottom: 12.h),
-                      decoration: BoxDecoration(
-                        color: AppColors.white,
-                        borderRadius: BorderRadius.circular(10.r),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.05),
-                            blurRadius: 5.r,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
+                    Obx(
+                      () => Container(
+                        height: 56.h,
+                        margin: EdgeInsets.only(bottom: 12.h),
+                        decoration: BoxDecoration(
+                          color: AppColors.white,
+                          borderRadius: BorderRadius.circular(10.r),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.05),
+                              blurRadius: 5.r,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        padding: EdgeInsets.symmetric(horizontal: 16.w),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            CommonText(
+                              text: 'Admin Approval',
+                              fontSize: 16.sp,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            CupertinoSwitch(
+                              value:
+                                  controller.accessType.value == 'restricted',
+                              activeTrackColor: AppColors.primaryColor,
+                              onChanged: (value) =>
+                                  controller.toggleAdminApproval(value),
+                            ),
+                          ],
+                        ),
                       ),
-                      padding: EdgeInsets.symmetric(horizontal: 16.w),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          CommonText(
-                            text: 'Admin Approval',
-                            fontSize: 16.sp,
-                            fontWeight: FontWeight.w500,
-                          ),
-                          CupertinoSwitch(
-                            value: controller.accessType.value == 'restricted',
-                            activeTrackColor: AppColors.primaryColor,
-                            onChanged: (value) => controller.toggleAdminApproval(value),
-                          ),
-                        ],
-                      ),
-                    )),
+                    ),
 
                     // Delete Group — only owner
                     _SettingsTile(

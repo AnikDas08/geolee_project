@@ -41,19 +41,13 @@ class AddPostScreen extends StatelessWidget {
                   SizedBox(height: 20.h),
 
                   // Upload Image Section
-                  CommonText(
-                    text: "Upload Images",
-                    fontSize: 14.sp,
-                  ),
+                  CommonText(text: "Upload Images", fontSize: 14.sp),
                   SizedBox(height: 10.h),
                   Obx(() => _buildImageUploadSection(context)),
                   SizedBox(height: 20.h),
 
                   // Description
-                  CommonText(
-                    text: "Description",
-                    fontSize: 14.sp,
-                  ),
+                  CommonText(text: "Description", fontSize: 14.sp),
                   SizedBox(height: 5.h),
                   _buildTextField(
                     controller: controller.description,
@@ -62,25 +56,22 @@ class AddPostScreen extends StatelessWidget {
                   ),
                   SizedBox(height: 16.h),
 
-                  CommonText(
-                    text: "Select Clicker",
-                    fontSize: 14.sp,
-                  ),
+                  CommonText(text: "Select Clicker", fontSize: 14.sp),
                   SizedBox(height: 6.h),
                   Obx(
-                        () => Column(
+                    () => Column(
                       children: [
-
                         Row(
                           children: [
                             Expanded(
                               child: _buildPricingOption(
                                 title: "Great Vibes",
                                 isSelected:
-                                controller.selectedPricingOption.value ==
+                                    controller.selectedPricingOption.value ==
                                     'Great Vibes',
-                                onTap: () =>
-                                    controller.selectPricingOption('Great Vibes'),
+                                onTap: () => controller.selectPricingOption(
+                                  'Great Vibes',
+                                ),
                               ),
                             ),
                             SizedBox(width: 8.w),
@@ -88,7 +79,7 @@ class AddPostScreen extends StatelessWidget {
                               child: _buildPricingOption(
                                 title: "Off Vibes",
                                 isSelected:
-                                controller.selectedPricingOption.value ==
+                                    controller.selectedPricingOption.value ==
                                     'Off Vibes',
                                 onTap: () =>
                                     controller.selectPricingOption('Off Vibes'),
@@ -104,10 +95,11 @@ class AddPostScreen extends StatelessWidget {
                               child: _buildPricingOption(
                                 title: "Charming Gentleman",
                                 isSelected:
-                                controller.selectedPricingOption.value ==
+                                    controller.selectedPricingOption.value ==
                                     'Charming Gentleman',
-                                onTap: () => controller
-                                    .selectPricingOption('Charming Gentleman'),
+                                onTap: () => controller.selectPricingOption(
+                                  'Charming Gentleman',
+                                ),
                               ),
                             ),
                             SizedBox(width: 8.w),
@@ -115,10 +107,11 @@ class AddPostScreen extends StatelessWidget {
                               child: _buildPricingOption(
                                 title: "Lovely Lady",
                                 isSelected:
-                                controller.selectedPricingOption.value ==
+                                    controller.selectedPricingOption.value ==
                                     'Lovely Lady',
-                                onTap: () =>
-                                    controller.selectPricingOption('Lovely Lady'),
+                                onTap: () => controller.selectPricingOption(
+                                  'Lovely Lady',
+                                ),
                               ),
                             ),
                           ],
@@ -137,10 +130,8 @@ class AddPostScreen extends StatelessWidget {
                   ),
                   SizedBox(height: 8.h),
                   Obx(
-                        () => _buildDropdownWithIcons(
-                      value: controller.selectedPriorityLevel.value.isEmpty
-                          ? controller.priorityLevels.first // default, must exist in items
-                          : controller.selectedPriorityLevel.value,
+                    () => _buildDropdownWithIcons(
+                      value: controller.selectedPriorityLevel.value,
                       hint: "Select Privacy",
                       items: controller.priorityLevels,
                       onChanged: (value) {
@@ -211,7 +202,10 @@ class AddPostScreen extends StatelessWidget {
 
   // Grid View for Selected Images
   Widget _buildSelectedImagesGrid(
-      BuildContext context, List<File> images, int max) {
+    BuildContext context,
+    List<File> images,
+    int max,
+  ) {
     // Add an empty spot if we haven't reached the max limit
     int itemCount = images.length;
     final bool showEmptySlot = images.length < max;
@@ -309,8 +303,11 @@ class AddPostScreen extends StatelessWidget {
             borderRadius: BorderRadius.circular(8.r),
           ),
           child: Center(
-            child: Icon(Icons.add_a_photo_outlined,
-                size: 28.sp, color: AppColors.textSecond),
+            child: Icon(
+              Icons.add_a_photo_outlined,
+              size: 28.sp,
+              color: AppColors.textSecond,
+            ),
           ),
         ),
       ),
@@ -370,9 +367,7 @@ class AddPostScreen extends StatelessWidget {
         height: 100.h,
         width: double.infinity,
         decoration: BoxDecoration(
-          border: Border.all(
-            color: Colors.grey[300]!,
-          ),
+          border: Border.all(color: Colors.grey[300]!),
           borderRadius: BorderRadius.circular(12.r),
         ),
         child: Column(
@@ -459,8 +454,11 @@ class AddPostScreen extends StatelessWidget {
             ],
           ),
           isExpanded: true,
-          icon: Icon(Icons.keyboard_arrow_down,
-              color: Colors.grey[600], size: 20.sp),
+          icon: Icon(
+            Icons.keyboard_arrow_down,
+            color: Colors.grey[600],
+            size: 20.sp,
+          ),
 
           /// ✅ Selected item UI
           selectedItemBuilder: (BuildContext context) {
@@ -514,6 +512,7 @@ class AddPostScreen extends StatelessWidget {
       ),
     );
   }
+
   // Pricing Option Button
   Widget _buildPricingOption({
     required String title,

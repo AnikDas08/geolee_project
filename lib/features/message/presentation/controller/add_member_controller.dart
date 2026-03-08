@@ -13,6 +13,7 @@ import '../../data/model/friend_response_model.dart';
 class AddMemberController extends GetxController {
   final RxBool isLoading = false.obs;
   final RxString authorId = ''.obs;
+  final RxString accessType = 'open'.obs; // Tracks if the group is restricted
   final RxString searchKeyword = ''.obs;
   String chatId = '';
   Timer? _debounce;
@@ -77,6 +78,7 @@ class AddMemberController extends GetxController {
         );
         currentMembers.assignAll(groupData.data.participants);
         authorId.value = groupData.data.author;
+        accessType.value = groupData.data.accessType;
 
         appLog("✅ Current members count: ${currentMembers.length}");
         for (var member in currentMembers) {
@@ -189,7 +191,41 @@ class AddMemberController extends GetxController {
       }
 
       appLog("➕ Adding: ${friend.name} to Chat: $chatId");
+      appLog("📊 Current accessType: ${accessType.value}");
+      appLog(
+        "📊 Is current user author: $isAuthor (Author ID: ${authorId.value})",
+      );
 
+      if (accessType.value == 'restricted' && !isAuthor) {
+        appLog(
+          "🛡️ Group is restricted and user is NOT admin. Sending join request...",
+        );
+        // Enforce admin approval: create join request
+        final joinUrl = ApiEndPoint.createJoinRequest;
+        final joinResponse = await ApiService.post(
+          joinUrl,
+          body: {"chatId": chatId, "user": friend.id},
+        );
+
+        appLog("📊 Join Request Status: ${joinResponse.statusCode}");
+
+        if (joinResponse.statusCode == 200 || joinResponse.statusCode == 201) {
+          Utils.successSnackBar(
+            "Request Sent",
+            "Join request for ${friend.name} sent to admin",
+          );
+          appLog("✅ Join request sent successfully for ${friend.name}");
+        } else {
+          Utils.errorSnackBar(
+            "Error",
+            "Failed to send join request. Status: ${joinResponse.statusCode}",
+          );
+          appLog("❌ Failed to send join request: ${joinResponse.message}");
+        }
+        return;
+      }
+
+      appLog("🚀 Adding member directly (Public group or admin action)...");
       final url = "${ApiEndPoint.addMember}$chatId";
 
       appLog("📤 Sending payload: {members: [${friend.id}]}");
@@ -210,6 +246,12 @@ class AddMemberController extends GetxController {
 
         Utils.successSnackBar("Success", "${friend.name} added to group");
         appLog("✅ ${friend.name} added successfully");
+      } else {
+        Utils.errorSnackBar(
+          "Error",
+          "Add failed with status: ${response.statusCode}",
+        );
+        appLog("❌ Add failed: ${response.message}");
       }
     } catch (e) {
       appLog("❌ Error adding member: $e");

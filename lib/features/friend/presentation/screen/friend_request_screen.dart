@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:giolee78/component/button/common_button.dart';
 import 'package:giolee78/config/api/api_end_point.dart';
 import 'package:intl/intl.dart';
+import 'package:giolee78/utils/log/app_log.dart';
 import '../controller/my_friend_controller.dart';
 
 class FriendRequestScreen extends StatelessWidget {
@@ -13,12 +14,23 @@ class FriendRequestScreen extends StatelessWidget {
   final controller = Get.find<MyFriendController>();
 
   // ✅ createdAt (UTC) → local time → readable string
-  String _formatRequestTime(DateTime createdAt) {
-    final DateTime localTime = createdAt.toLocal();
+  // ✅ createdAt/updatedAt → local time → readable string
+  String _formatRequestTime(DateTime createdAt, DateTime updatedAt) {
+    // Backend bug check: Use the more recent of created/updated
+    final DateTime displayTime = updatedAt.isAfter(createdAt)
+        ? updatedAt
+        : createdAt;
+
+    final DateTime localTime = displayTime.toLocal();
     final DateTime now = DateTime.now();
     final Duration diff = now.difference(localTime);
 
-    if (diff.inSeconds < 60) {
+    appLog("🕒 Time Debug: RAW_CREATED: $createdAt | RAW_UPDATED: $updatedAt");
+    appLog(
+      "🕒 Time Debug: DISPLAY_LOCAL: $localTime | NOW_LOCAL: $now | DIFF_HOURS: ${diff.inHours}",
+    );
+
+    if (diff.isNegative || diff.inSeconds < 60) {
       return 'Just now';
     } else if (diff.inMinutes < 60) {
       return '${diff.inMinutes}m ago';
@@ -27,7 +39,6 @@ class FriendRequestScreen extends StatelessWidget {
     } else if (diff.inDays < 7) {
       return '${diff.inDays}d ago';
     } else {
-      // ৭ দিনের বেশি হলে actual date দেখাও
       return DateFormat('dd MMM yyyy').format(localTime);
     }
   }
@@ -56,8 +67,11 @@ class FriendRequestScreen extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.people_outline_rounded,
-                    size: 52.sp, color: Colors.grey[300]),
+                Icon(
+                  Icons.people_outline_rounded,
+                  size: 52.sp,
+                  color: Colors.grey[300],
+                ),
                 SizedBox(height: 12.h),
                 Text(
                   'No friend requests',
@@ -107,13 +121,19 @@ class FriendRequestScreen extends StatelessWidget {
                       fit: BoxFit.cover,
                       placeholder: (_, __) => Container(
                         color: Colors.grey[200],
-                        child: Icon(Icons.person_rounded,
-                            color: Colors.grey[400], size: 28.sp),
+                        child: Icon(
+                          Icons.person_rounded,
+                          color: Colors.grey[400],
+                          size: 28.sp,
+                        ),
                       ),
                       errorWidget: (_, __, ___) => Container(
                         color: Colors.grey[200],
-                        child: Icon(Icons.person_rounded,
-                            color: Colors.grey[400], size: 28.sp),
+                        child: Icon(
+                          Icons.person_rounded,
+                          color: Colors.grey[400],
+                          size: 28.sp,
+                        ),
                       ),
                     ),
                   ),
@@ -143,7 +163,10 @@ class FriendRequestScreen extends StatelessWidget {
                             SizedBox(width: 8.w),
                             // ✅ Local time
                             Text(
-                              _formatRequestTime(data.createdAt),
+                              _formatRequestTime(
+                                data.createdAt,
+                                data.updatedAt,
+                              ),
                               style: TextStyle(
                                 fontSize: 11.sp,
                                 color: Colors.grey[400],
@@ -172,8 +195,11 @@ class FriendRequestScreen extends StatelessWidget {
                           SizedBox(height: 3.h),
                           Row(
                             children: [
-                              Icon(Icons.location_on_rounded,
-                                  size: 12.sp, color: Colors.grey[400]),
+                              Icon(
+                                Icons.location_on_rounded,
+                                size: 12.sp,
+                                color: Colors.grey[400],
+                              ),
                               SizedBox(width: 3.w),
                               Expanded(
                                 child: Text(

@@ -29,7 +29,7 @@ class PostController extends GetxController {
   final serviceTimeController = TextEditingController();
 
   final selectedPricingOption = ''.obs;
-  final selectedPriorityLevel = ''.obs;
+  final selectedPriorityLevel = 'Public'.obs;
   final selectedGender = ''.obs;
 
   final List<String> priorityLevels = ['Public', 'Friends', 'Only me'];
@@ -90,10 +90,12 @@ class PostController extends GetxController {
 
       final List<MultipartFile> imageFiles = [];
       for (var file in selectedImages) {
-        imageFiles.add(await MultipartFile.fromFile(
-          file.path,
-          filename: file.path.split('/').last,
-        ));
+        imageFiles.add(
+          await MultipartFile.fromFile(
+            file.path,
+            filename: file.path.split('/').last,
+          ),
+        );
       }
 
       final FormData formData = FormData.fromMap({
@@ -120,7 +122,7 @@ class PostController extends GetxController {
         description.clear();
         selectedImages.clear();
         selectedPricingOption.value = '';
-        selectedPriorityLevel.value = '';
+        selectedPriorityLevel.value = 'Public';
       } else {
         _showError('Failed to create post');
       }

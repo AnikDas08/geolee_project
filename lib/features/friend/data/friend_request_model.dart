@@ -50,9 +50,24 @@ class FriendData {
     sender: Sender.fromJson(json["sender"]),
     receiver: json["receiver"],
     status: json["status"],
-    createdAt: DateTime.parse(json["createdAt"]),
-    updatedAt: DateTime.parse(json["updatedAt"]),
+    createdAt: _safeParseUTC(json["createdAt"]),
+    updatedAt: _safeParseUTC(json["updatedAt"]),
   );
+
+  static DateTime _safeParseUTC(dynamic value) {
+    if (value == null || value == "") return DateTime.now();
+    try {
+      final String raw = value.toString();
+      // If it doesn't have timezone info, many servers mean UTC
+      if (!raw.contains('Z') && !raw.contains('+') && !raw.contains('T')) {
+        // Maybe it's a simple space format?
+        return DateTime.parse(raw).toUtc();
+      }
+      return DateTime.parse(raw);
+    } catch (e) {
+      return DateTime.now();
+    }
+  }
 
   Map<String, dynamic> toJson() => {
     "_id": id,

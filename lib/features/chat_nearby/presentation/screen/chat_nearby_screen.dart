@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:giolee78/config/api/api_end_point.dart';
 import 'package:giolee78/config/route/app_routes.dart';
@@ -96,15 +95,15 @@ class ChatNearbyScreen extends StatelessWidget {
               itemBuilder: (context, index) {
                 if (index == controller.nearbyChatList.length) {
                   return Obx(
-                        () => controller.isPaginationLoading.value
+                    () => controller.isPaginationLoading.value
                         ? Center(
-                      child: Padding(
-                        padding: EdgeInsets.all(16.h),
-                        child: const CircularProgressIndicator(
-                          color: AppColors.primaryColor,
-                        ),
-                      ),
-                    )
+                            child: Padding(
+                              padding: EdgeInsets.all(16.h),
+                              child: const CircularProgressIndicator(
+                                color: AppColors.primaryColor,
+                              ),
+                            ),
+                          )
                         : const SizedBox.shrink(),
                   );
                 }
@@ -124,7 +123,6 @@ class ChatNearbyScreen extends StatelessWidget {
   }
 }
 
-
 class _ChatNearbyAppBar extends StatelessWidget {
   Future<void> updateProfileAndLocationVisible() async {
     try {
@@ -142,10 +140,6 @@ class _ChatNearbyAppBar extends StatelessWidget {
       if (response.statusCode == 200) {
         debugPrint('Backend updated: Location hidden');
 
-        // 2. Open phone's location settings so user can turn off GPS
-        // Requires: import 'package:geolocator/geolocator.dart';
-        await Geolocator.openLocationSettings();
-
         // 3. Go back to Home
         Get.offAllNamed(AppRoutes.homeNav);
       } else {
@@ -156,7 +150,7 @@ class _ChatNearbyAppBar extends StatelessWidget {
     }
   }
 
-// ChatNearbyScreen file-er moddhe _ChatNearbyAppBar class-e:
+  // ChatNearbyScreen file-er moddhe _ChatNearbyAppBar class-e:
 
   void showClearLocationDialog() {
     Get.dialog(
@@ -171,7 +165,6 @@ class _ChatNearbyAppBar extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-
               /// icon
               Container(
                 height: 60.h,
@@ -180,18 +173,14 @@ class _ChatNearbyAppBar extends StatelessWidget {
                   color: Colors.red.withOpacity(.1),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(
-                  Icons.location_off,
-                  color: Colors.red,
-                  size: 30.sp,
-                ),
+                child: Icon(Icons.location_off, color: Colors.red, size: 30.sp),
               ),
 
               SizedBox(height: 16.h),
 
               /// title
               Text(
-                "Turn Off Location",
+                "Clear Location Data",
                 style: TextStyle(
                   decoration: TextDecoration.none,
                   fontSize: 18.sp,
@@ -203,7 +192,7 @@ class _ChatNearbyAppBar extends StatelessWidget {
 
               /// description
               Text(
-                "Are you sure you want to turn off your location? Nearby users will not be able to see you.",
+                "Are you sure you want to clear your location? Nearby users will not be able to see you until you visit this screen again.",
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   decoration: TextDecoration.none,
@@ -217,7 +206,6 @@ class _ChatNearbyAppBar extends StatelessWidget {
               /// buttons
               Row(
                 children: [
-
                   /// cancel
                   Expanded(
                     child: OutlinedButton(
@@ -228,10 +216,7 @@ class _ChatNearbyAppBar extends StatelessWidget {
                           borderRadius: BorderRadius.circular(8.r),
                         ),
                       ),
-                      child: Text(
-                        "Cancel",
-                        style: TextStyle(fontSize: 14.sp),
-                      ),
+                      child: Text("Cancel", style: TextStyle(fontSize: 14.sp)),
                     ),
                   ),
 
@@ -246,9 +231,8 @@ class _ChatNearbyAppBar extends StatelessWidget {
                         await updateProfileAndLocationVisible();
 
                         if (Get.isRegistered<HomeController>()) {
-                          Get.find<HomeController>()
-                              .isNearbyActive
-                              .value = false;
+                          Get.find<HomeController>().isNearbyActive.value =
+                              false;
                         }
 
                         Get.offAllNamed(AppRoutes.homeNav);
@@ -261,7 +245,7 @@ class _ChatNearbyAppBar extends StatelessWidget {
                         ),
                       ),
                       child: Text(
-                        "Turn Off",
+                        "Clear",
                         style: TextStyle(
                           decoration: TextDecoration.none,
                           fontSize: 14.sp,
@@ -312,16 +296,20 @@ class _ChatNearbyAppBar extends StatelessWidget {
                     showClearLocationDialog();
                   }
                 },
-                itemBuilder: (BuildContext context) =>
-                <PopupMenuEntry<String>>[
+                itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
                   PopupMenuItem<String>(
                     value: 'clear_data',
                     child: Row(
                       children: [
-                        const Icon(Icons.delete_outline_rounded,
-                            color: AppColors.black),
+                        const Icon(
+                          Icons.delete_outline_rounded,
+                          color: AppColors.black,
+                        ),
                         SizedBox(width: 8.w),
-                        CommonText(text: 'Clear Location', fontSize: 14.sp),
+                        CommonText(
+                          text: 'Clear Location Data',
+                          fontSize: 14.sp,
+                        ),
                       ],
                     ),
                   ),
@@ -336,7 +324,6 @@ class _ChatNearbyAppBar extends StatelessWidget {
     );
   }
 }
-
 
 class _NearbyUserCard extends StatelessWidget {
   const _NearbyUserCard({
@@ -386,7 +373,6 @@ class _NearbyUserCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-
       final isFriend = nearbyChatUser.isFriendRx.value;
 
       return GestureDetector(
@@ -399,10 +385,7 @@ class _NearbyUserCard extends StatelessWidget {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8),
               side: isFriend
-                  ? const BorderSide(
-                color: AppColors.primaryColor,
-                width: 0.05,
-              )
+                  ? const BorderSide(color: AppColors.primaryColor, width: 0.05)
                   : BorderSide.none,
             ),
             shadows: const [
@@ -421,21 +404,23 @@ class _NearbyUserCard extends StatelessWidget {
                 backgroundColor: AppColors.primaryColor2.withValues(alpha: 0.1),
                 child: nearbyChatUser.privacy == "public"
                     ? ClipOval(
-                  child: nearbyChatUser.image != null &&
-                      nearbyChatUser.image!.isNotEmpty
-                      ? CommonImage(
-                    imageSrc: ApiEndPoint.imageUrl +
-                        nearbyChatUser.image!,
-                    size: 40.r,
-                    fill: BoxFit.cover,
-                  )
-                      : CommonImage(
-                    imageSrc:
-                    "assets/images/profilePlaceholder.jpg",
-                    size: 40.r,
-                    fill: BoxFit.cover,
-                  ),
-                )
+                        child:
+                            nearbyChatUser.image != null &&
+                                nearbyChatUser.image!.isNotEmpty
+                            ? CommonImage(
+                                imageSrc:
+                                    ApiEndPoint.imageUrl +
+                                    nearbyChatUser.image!,
+                                size: 40.r,
+                                fill: BoxFit.cover,
+                              )
+                            : CommonImage(
+                                imageSrc:
+                                    "assets/images/profilePlaceholder.jpg",
+                                size: 40.r,
+                                fill: BoxFit.cover,
+                              ),
+                      )
                     : Image.asset(AppImages.private),
               ),
               SizedBox(width: 16.w),
@@ -453,7 +438,7 @@ class _NearbyUserCard extends StatelessWidget {
                     SizedBox(height: 4.h),
                     CommonText(
                       text:
-                      "Within ${nearbyChatUser.distance?.toStringAsFixed(2) ?? "0"} KM",
+                          "Within ${nearbyChatUser.distance?.toStringAsFixed(2) ?? "0"} KM",
                       fontSize: 12.sp,
                       color: AppColors.primaryColor2,
                       textAlign: TextAlign.start,

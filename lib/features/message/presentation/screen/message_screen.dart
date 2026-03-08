@@ -52,6 +52,7 @@ class _MessageScreenState extends State<MessageScreen> {
       _initScreen();
     });
   }
+
   @override
   void dispose() {
     messageController.scrollController.removeListener(_onScroll);
@@ -92,9 +93,9 @@ class _MessageScreenState extends State<MessageScreen> {
   }
 
   void _showAttachmentPicker(
-      BuildContext context,
-      MessageController controller,
-      ) {
+    BuildContext context,
+    MessageController controller,
+  ) {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -267,7 +268,8 @@ class _MessageScreenState extends State<MessageScreen> {
             ? controller.messages[reversedIndex + 1]
             : null;
         final showAvatar = prevMsg == null || prevMsg.senderId != msg.senderId;
-        final showTime = reversedIndex == 0 ||
+        final showTime =
+            reversedIndex == 0 ||
             controller.messages[reversedIndex - 1].senderId != msg.senderId;
 
         return _MessageBubble(
@@ -299,7 +301,7 @@ class _MessageScreenState extends State<MessageScreen> {
         },
       ),
       title: Obx(
-            () => Row(
+        () => Row(
           children: [
             Stack(
               children: [
@@ -311,10 +313,10 @@ class _MessageScreenState extends State<MessageScreen> {
                       : null,
                   child: controller.image.isEmpty
                       ? Icon(
-                    Icons.person_rounded,
-                    size: 22.sp,
-                    color: Colors.grey[400],
-                  )
+                          Icons.person_rounded,
+                          size: 22.sp,
+                          color: Colors.grey[400],
+                        )
                       : null,
                 ),
                 if (controller.isActive.value)
@@ -338,23 +340,36 @@ class _MessageScreenState extends State<MessageScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    controller.name.isNotEmpty ? controller.name : 'Chat',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w700,
-                      fontSize: 15.sp,
-                      color: Colors.black87,
-                      letterSpacing: -0.2,
+                  GestureDetector(
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => ViewFriendScreen(
+                          isFriend:
+                              controller.friendStatus.value ==
+                              FriendStatus.friends,
+                          userId: controller.userId,
+                        ),
+                      ),
                     ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                    child: Text(
+                      controller.name.isNotEmpty ? controller.name : 'Chat',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 15.sp,
+                        color: Colors.black87,
+                        letterSpacing: -0.2,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
                   Text(
                     controller.isActive.value
                         ? 'Active now'
                         : (controller.friendStatus.value !=
-                        FriendStatus.friends &&
-                        controller.distance.value.isNotEmpty)
+                                  FriendStatus.friends &&
+                              controller.distance.value.isNotEmpty)
                         ? 'Distance: ${controller.distance.value}'
                         : 'Offline',
                     style: TextStyle(
@@ -362,8 +377,8 @@ class _MessageScreenState extends State<MessageScreen> {
                       color: controller.isActive.value
                           ? const Color(0xFF22C55E)
                           : (controller.friendStatus.value !=
-                          FriendStatus.friends &&
-                          controller.distance.value.isNotEmpty)
+                                    FriendStatus.friends &&
+                                controller.distance.value.isNotEmpty)
                           ? const Color(0xFFF48201)
                           : Colors.grey[400],
                       fontWeight: FontWeight.w500,
@@ -409,26 +424,12 @@ class _MessageScreenState extends State<MessageScreen> {
               ),
             );
 
-          return IconButton(
-            icon: Icon(
-              Icons.person_outline_rounded,
-              color: AppColors.primaryColor,
-              size: 24.sp,
-            ),
-            onPressed: () => Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => ViewFriendScreen(
-                  isFriend: true,
-                  userId: controller.userId,
-                ),
-              ),
-            ),
-          );
+          return const SizedBox.shrink();
         }),
       ],
     );
   }
+
   void _showAcceptRequestDialog(MessageController controller) {
     Get.dialog(
       Dialog(
@@ -455,10 +456,7 @@ class _MessageScreenState extends State<MessageScreen> {
               SizedBox(height: 14.h),
               Text(
                 'Friend Request',
-                style: TextStyle(
-                  fontSize: 17.sp,
-                  fontWeight: FontWeight.w700,
-                ),
+                style: TextStyle(fontSize: 17.sp, fontWeight: FontWeight.w700),
               ),
               SizedBox(height: 8.h),
               Text(
@@ -486,10 +484,7 @@ class _MessageScreenState extends State<MessageScreen> {
                       ),
                       child: Text(
                         'Decline',
-                        style: TextStyle(
-                          fontSize: 13.sp,
-                          color: Colors.red,
-                        ),
+                        style: TextStyle(fontSize: 13.sp, color: Colors.red),
                       ),
                     ),
                   ),
@@ -524,7 +519,6 @@ class _MessageScreenState extends State<MessageScreen> {
       ),
     );
   }
-
 
   void _showAddFriendDialog(MessageController controller) {
     Get.dialog(
@@ -711,7 +705,6 @@ class _MessageScreenState extends State<MessageScreen> {
   }
 }
 
-
 class _MessageBubble extends StatelessWidget {
   final ChatMessage message;
   final bool showAvatar;
@@ -733,7 +726,8 @@ class _MessageBubble extends StatelessWidget {
     if (diff.inSeconds < 60) return 'Just now';
     if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
     if (diff.inHours < 24) return DateFormat('hh:mm a').format(time);
-    if (diff.inDays == 1) return 'Yesterday ${DateFormat('hh:mm a').format(time)}';
+    if (diff.inDays == 1)
+      return 'Yesterday ${DateFormat('hh:mm a').format(time)}';
     if (diff.inDays < 7) return '${diff.inDays} days ago';
     return DateFormat('dd MMM, hh:mm a').format(time);
   }
@@ -747,8 +741,9 @@ class _MessageBubble extends StatelessWidget {
         top: showAvatar && !isMe ? 4.h : 0,
       ),
       child: Row(
-        mainAxisAlignment:
-        isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
+        mainAxisAlignment: isMe
+            ? MainAxisAlignment.end
+            : MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           if (!isMe) ...[
@@ -756,24 +751,28 @@ class _MessageBubble extends StatelessWidget {
               width: 30.w,
               child: showAvatar
                   ? CircleAvatar(
-                radius: 13.r,
-                backgroundColor: Colors.grey.shade200,
-                backgroundImage: message.senderImage.isNotEmpty
-                    ? NetworkImage(getImageUrl(message.senderImage))
-                    : null,
-                child: message.senderImage.isEmpty
-                    ? Icon(Icons.person_rounded,
-                    size: 13.sp, color: Colors.grey)
-                    : null,
-              )
+                      radius: 13.r,
+                      backgroundColor: Colors.grey.shade200,
+                      backgroundImage: message.senderImage.isNotEmpty
+                          ? NetworkImage(getImageUrl(message.senderImage))
+                          : null,
+                      child: message.senderImage.isEmpty
+                          ? Icon(
+                              Icons.person_rounded,
+                              size: 13.sp,
+                              color: Colors.grey,
+                            )
+                          : null,
+                    )
                   : const SizedBox(),
             ),
             SizedBox(width: 6.w),
           ],
           Flexible(
             child: Column(
-              crossAxisAlignment:
-              isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+              crossAxisAlignment: isMe
+                  ? CrossAxisAlignment.end
+                  : CrossAxisAlignment.start,
               children: [
                 BubbleContent(
                   message: message,
@@ -805,4 +804,3 @@ class _MessageBubble extends StatelessWidget {
     );
   }
 }
-

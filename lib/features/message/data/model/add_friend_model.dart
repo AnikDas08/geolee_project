@@ -67,11 +67,27 @@ class TotalMemberByIdData {
       privacy: json['privacy'] ?? '',
       accessType: json['accessType'] ?? '',
       requestStatus: json['requestStatus'] ?? '',
-      latestMessage: LatestMessage.fromJson(json['latestMessage']),
+      latestMessage: json['latestMessage'] != null
+          ? LatestMessage.fromJson(json['latestMessage'])
+          : LatestMessage(
+              id: '',
+              chat: '',
+              sender: '',
+              type: '',
+              content: '',
+              seenBy: [],
+              isDeleted: false,
+              createdAt: DateTime.now(),
+              updatedAt: DateTime.now(),
+            ),
       status: json['status'] ?? '',
       isDeleted: json['isDeleted'] ?? false,
-      createdAt: DateTime.parse(json['createdAt']),
-      updatedAt: DateTime.parse(json['updatedAt']),
+      createdAt: json['createdAt'] != null
+          ? DateTime.parse(json['createdAt'])
+          : DateTime.now(),
+      updatedAt: json['updatedAt'] != null
+          ? DateTime.parse(json['updatedAt'])
+          : DateTime.now(),
     );
   }
 }
@@ -81,11 +97,7 @@ class Participant {
   final String name;
   final String image;
 
-  Participant({
-    required this.id,
-    required this.name,
-    required this.image,
-  });
+  Participant({required this.id, required this.name, required this.image});
 
   factory Participant.fromJson(Map<String, dynamic> json) {
     return Participant(

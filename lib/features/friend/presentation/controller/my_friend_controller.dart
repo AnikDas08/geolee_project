@@ -225,6 +225,7 @@ class MyFriendController extends GetxController {
       if (response.statusCode == 200) {
         requests.removeAt(index);
         requests.refresh();
+        await getMyAllFriends();
         // Get.snackbar(
         //   "Success",
         //   "Friend request accepted",

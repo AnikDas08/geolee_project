@@ -25,7 +25,6 @@ class SuggestedFriendResponseModel {
   void operator [](int other) {}
 }
 
-
 class PaginationModel {
   final int total;
   final int limit;
@@ -48,7 +47,6 @@ class PaginationModel {
     );
   }
 }
-
 
 class SuggestedFriendUserModel {
   final String id;
@@ -123,7 +121,6 @@ class SuggestedFriendUserModel {
   }
 }
 
-
 class AdvertiserModel {
   final String id;
   final String user;
@@ -162,8 +159,8 @@ class AdvertiserModel {
       phone: json['phone'] ?? '',
       bio: json['bio'] ?? '',
       isDeleted: json['isDeleted'] ?? false,
-      createdAt: DateTime.parse(json['createdAt']),
-      updatedAt: DateTime.parse(json['updatedAt']),
+      createdAt: DateTime.parse(json['createdAt']).toLocal(),
+      updatedAt: DateTime.parse(json['updatedAt']).toLocal(),
     );
   }
 }
@@ -172,10 +169,7 @@ class LocationModel {
   final String type;
   final List<double> coordinates;
 
-  LocationModel({
-    required this.type,
-    required this.coordinates,
-  });
+  LocationModel({required this.type, required this.coordinates});
 
   factory LocationModel.fromJson(Map<String, dynamic> json) {
     return LocationModel(

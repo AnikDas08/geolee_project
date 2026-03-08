@@ -307,6 +307,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
               const CommonImage(imageSrc: AppIcons.onboarding),
               60.height,
               CommonText(
+                maxLines: 5,
                 text: AppString.onboardingTitle,
                 fontSize: 16.sp,
                 fontWeight: FontWeight.w600,

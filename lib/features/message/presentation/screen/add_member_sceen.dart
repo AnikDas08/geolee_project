@@ -196,7 +196,9 @@ class AddMemberScreen extends StatelessWidget {
                   return _buildPersonCard(
                     imageUrl: imageUrl,
                     name: member.name,
-                    subtitle: 'Member',
+                    subtitle: member.id == controller.authorId.value
+                        ? 'Admin'
+                        : 'Member',
                     trailing:
                         (controller.isAuthor &&
                             member.id != LocalStorage.userId)
