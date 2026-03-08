@@ -198,30 +198,12 @@ class AddMemberController extends GetxController {
 
       if (accessType.value == 'restricted' && !isAuthor) {
         appLog(
-          "🛡️ Group is restricted and user is NOT admin. Sending join request...",
+          "🛡️ Group is restricted and user is NOT admin. Cannot add members.",
         );
-        // Enforce admin approval: create join request
-        final joinUrl = ApiEndPoint.createJoinRequest;
-        final joinResponse = await ApiService.post(
-          joinUrl,
-          body: {"chatId": chatId, "user": friend.id},
+        Utils.errorSnackBar(
+          "Not Allowed",
+          "Only the group admin can add members to this group",
         );
-
-        appLog("📊 Join Request Status: ${joinResponse.statusCode}");
-
-        if (joinResponse.statusCode == 200 || joinResponse.statusCode == 201) {
-          Utils.successSnackBar(
-            "Request Sent",
-            "Join request for ${friend.name} sent to admin",
-          );
-          appLog("✅ Join request sent successfully for ${friend.name}");
-        } else {
-          Utils.errorSnackBar(
-            "Error",
-            "Failed to send join request. Status: ${joinResponse.statusCode}",
-          );
-          appLog("❌ Failed to send join request: ${joinResponse.message}");
-        }
         return;
       }
 
