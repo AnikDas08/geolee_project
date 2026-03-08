@@ -17,6 +17,7 @@ import '../../../../component/text/common_text.dart';
 import '../../../../services/api/api_service.dart';
 import '../../../../services/storage/storage_services.dart';
 import '../../../../utils/constants/app_colors.dart';
+import '../../../../utils/enum/enum.dart';
 import '../../../home/presentation/controller/home_controller.dart';
 
 class ChatNearbyScreen extends StatelessWidget {

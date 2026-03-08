@@ -13,6 +13,7 @@ import '../../../../component/text_field/common_text_field.dart';
 import '../../../../utils/constants/app_colors.dart';
 import '../../../../utils/constants/app_icons.dart';
 import '../../../../utils/constants/app_images.dart';
+import '../../../../utils/enum/enum.dart';
 
 class ChatNearbyProfileScreen extends StatefulWidget {
   const ChatNearbyProfileScreen({
@@ -338,6 +339,9 @@ class FriendActionButton extends StatelessWidget {
             buttonColor: Colors.grey,
             onTap: () {},
           );
+        case FriendStatus.received:
+          // TODO: Handle this case.
+          throw UnimplementedError();
       }
     });
   }

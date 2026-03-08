@@ -13,8 +13,8 @@ import 'package:giolee78/utils/log/app_log.dart';
 
 import '../../../../services/storage/storage_services.dart';
 import '../../../../utils/app_utils.dart';
+import '../../../../utils/enum/enum.dart';
 
-enum FriendStatus { none, requested, friends }
 
 class MessageController extends GetxController {
   RxBool isActive = false.obs;
@@ -634,6 +634,7 @@ class MessageController extends GetxController {
   // ================================================
   // FRIENDSHIP METHODS
   // ================================================
+
   Future<void> checkFriendshipStatus(String targetUserId) async {
     if (targetUserId.isEmpty) {
       isFriend.value = true;
@@ -654,49 +655,31 @@ class MessageController extends GetxController {
         final data = response.data['data'];
 
         if (data['isAlreadyFriend'] == true) {
-          isFriend.value = true;
-          hasPendingRequest.value = false;
-          friendStatusValue.value = 'friends';
           friendStatus.value = FriendStatus.friends;
+          isFriend.value = true;
           pendingRequestId.value = '';
         } else if (data['pendingFriendRequest'] != null) {
-          final pendingRequest = data['pendingFriendRequest'];
-          final String requestSenderId =
-              pendingRequest['sender']?['_id']?.toString() ??
-              pendingRequest['sender']?.toString() ??
-              '';
-
           friendStatus.value = FriendStatus.requested;
-          pendingRequestId.value = pendingRequest['_id']?.toString() ?? '';
-
-          if (requestSenderId == LocalStorage.userId) {
-            isFriend.value = true;
-            hasPendingRequest.value = true;
-            friendStatusValue.value = 'pending';
-          } else {
-            isFriend.value = false;
-            hasPendingRequest.value = false;
-            friendStatusValue.value = 'received';
-          }
-        } else {
+          pendingRequestId.value =
+              data['pendingFriendRequest']['_id']?.toString() ?? '';
           isFriend.value = true;
-          hasPendingRequest.value = false;
-          friendStatusValue.value = 'none';
+        } else {
           friendStatus.value = FriendStatus.none;
+          isFriend.value = false;
           pendingRequestId.value = '';
         }
       } else {
-        isFriend.value = false;
         friendStatus.value = FriendStatus.none;
-        friendStatusValue.value = 'none';
+        isFriend.value = false;
       }
     } catch (e) {
       debugPrint("❌ Friendship check error: $e");
-      isFriend.value = false;
       friendStatus.value = FriendStatus.none;
-      friendStatusValue.value = 'none';
+      isFriend.value = false;
     } finally {
       friendStatusLoaded.value = true;
+      hasPendingRequest.value = false;
+      friendStatusValue.value = '';
     }
   }
 
@@ -710,10 +693,8 @@ class MessageController extends GetxController {
       if (response.statusCode == 200 || response.statusCode == 201) {
         final reqData = response.data['data'];
         pendingRequestId.value = (reqData?['_id'] ?? '').toString();
-        friendStatusValue.value = 'pending';
-        friendStatus.value = FriendStatus.requested;
+        friendStatus.value = FriendStatus.requested; // ✅ একবারই
         isFriend.value = true;
-        hasPendingRequest.value = true;
         Utils.successSnackBar("Sent", "Friend request sent successfully");
         if (Get.isRegistered<MyFriendController>()) {
           Get.find<MyFriendController>().fetchFriendRequests();

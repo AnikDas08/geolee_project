@@ -9,6 +9,7 @@ import '../../../../component/image/common_image.dart';
 import '../../../../utils/constants/app_icons.dart';
 import 'package:giolee78/features/friend/presentation/screen/view_friend_screen.dart';
 
+import '../../../../utils/enum/enum.dart';
 import '../controller/message_controller.dart';
 import '../widgets/attachment_select_option.dart';
 import '../widgets/bubble_content.dart';
@@ -376,7 +377,6 @@ class _MessageScreenState extends State<MessageScreen> {
       ),
       actions: [
         Obx(() {
-          final status = controller.friendStatus.value;
           if (!controller.friendStatusLoaded.value) {
             return Padding(
               padding: EdgeInsets.symmetric(horizontal: 14.w),
@@ -392,25 +392,14 @@ class _MessageScreenState extends State<MessageScreen> {
               ),
             );
           }
-          if (status == FriendStatus.friends) {
+
+          if (controller.friendStatus.value == FriendStatus.none)
             return IconButton(
-              icon: Icon(
-                Icons.person_outline_rounded,
-                color: AppColors.primaryColor,
-                size: 24.sp,
-              ),
-              onPressed: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => ViewFriendScreen(
-                    isFriend: true,
-                    userId: controller.userId,
-                  ),
-                ),
-              ),
+              onPressed: () => _showAddFriendDialog(controller),
+              icon: CommonImage(imageSrc: AppIcons.addFriend, size: 22.sp),
             );
-          }
-          if (status == FriendStatus.requested) {
+
+          if (controller.friendStatus.value == FriendStatus.requested)
             return IconButton(
               onPressed: () => _showCancelRequestDialog(controller),
               icon: Icon(
@@ -419,15 +408,123 @@ class _MessageScreenState extends State<MessageScreen> {
                 size: 22.sp,
               ),
             );
-          }
+
           return IconButton(
-            onPressed: () => _showAddFriendDialog(controller),
-            icon: CommonImage(imageSrc: AppIcons.addFriend, size: 22.sp),
+            icon: Icon(
+              Icons.person_outline_rounded,
+              color: AppColors.primaryColor,
+              size: 24.sp,
+            ),
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => ViewFriendScreen(
+                  isFriend: true,
+                  userId: controller.userId,
+                ),
+              ),
+            ),
           );
         }),
       ],
     );
   }
+  void _showAcceptRequestDialog(MessageController controller) {
+    Get.dialog(
+      Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16.r),
+        ),
+        child: Padding(
+          padding: EdgeInsets.all(22.w),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: EdgeInsets.all(16.w),
+                decoration: BoxDecoration(
+                  color: Colors.green.shade50,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.person_add_rounded,
+                  color: Colors.green,
+                  size: 30.sp,
+                ),
+              ),
+              SizedBox(height: 14.h),
+              Text(
+                'Friend Request',
+                style: TextStyle(
+                  fontSize: 17.sp,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              SizedBox(height: 8.h),
+              Text(
+                '${controller.name} sent you a friend request',
+                style: TextStyle(fontSize: 13.sp, color: Colors.grey[600]),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: 22.h),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () async {
+                        Get.back();
+                        await controller.rejectFriendRequest(
+                          controller.pendingRequestId.value,
+                        );
+                      },
+                      style: OutlinedButton.styleFrom(
+                        side: BorderSide(color: Colors.red.shade300),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10.r),
+                        ),
+                        padding: EdgeInsets.symmetric(vertical: 12.h),
+                      ),
+                      child: Text(
+                        'Decline',
+                        style: TextStyle(
+                          fontSize: 13.sp,
+                          color: Colors.red,
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 10.w),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        Get.back();
+                        await controller.acceptFriendRequest(
+                          controller.pendingRequestId.value,
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10.r),
+                        ),
+                        padding: EdgeInsets.symmetric(vertical: 12.h),
+                      ),
+                      child: Text(
+                        'Accept',
+                        style: TextStyle(fontSize: 13.sp, color: Colors.white),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
 
   void _showAddFriendDialog(MessageController controller) {
     Get.dialog(
@@ -443,7 +540,7 @@ class _MessageScreenState extends State<MessageScreen> {
               Container(
                 padding: EdgeInsets.all(16.w),
                 decoration: BoxDecoration(
-                  color: AppColors.primaryColor.withOpacity(0.1),
+                  color: AppColors.primaryColor.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(

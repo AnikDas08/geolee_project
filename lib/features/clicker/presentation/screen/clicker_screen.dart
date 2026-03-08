@@ -173,7 +173,7 @@ class _ClickerScreenState extends State<ClickerScreen> {
 
                 SizedBox(height: 16.h),
 
-                // ── Header & Filter===================================
+                //Header & Filter===================================
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -195,7 +195,9 @@ class _ClickerScreenState extends State<ClickerScreen> {
                     : ListView.separated(
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
-                        itemCount: LocalStorage.token.isEmpty?20:controller.filteredPosts.length,
+                       itemCount: LocalStorage.token.isEmpty
+                      ? controller.filteredPosts.length.clamp(0, 20)
+                      : controller.filteredPosts.length,
                         separatorBuilder: (_, __) => SizedBox(height: 16.h),
                         itemBuilder: (context, index) {
                           final data = controller.filteredPosts[index];

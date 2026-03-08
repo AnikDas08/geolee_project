@@ -6,8 +6,7 @@ import 'package:giolee78/services/storage/storage_services.dart';
 import '../../../../config/api/api_end_point.dart';
 import '../../../../services/api/api_service.dart';
 import '../../../../utils/app_utils.dart';
-
-enum FriendStatus { none, requested, friends }
+import '../../../../utils/enum/enum.dart';
 
 class ChatNearbyProfileController extends GetxController {
   var isLoading = false.obs;

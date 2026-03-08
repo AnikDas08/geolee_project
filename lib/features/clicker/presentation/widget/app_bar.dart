@@ -157,6 +157,7 @@ class _CustomAppBarState extends State<CustomAppBar> {
                             color: AppColors.textColorFirst,
                             fontWeight: FontWeight.w600,
                           ),
+                          if(LocalStorage.token.isNotEmpty)
                           Text(
                             displayLocation,
                             maxLines: 1,
