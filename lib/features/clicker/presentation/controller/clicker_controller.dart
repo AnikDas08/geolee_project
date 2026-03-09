@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
@@ -10,6 +11,7 @@ import 'package:giolee78/features/friend/presentation/controller/my_friend_contr
 import 'package:giolee78/services/api/api_service.dart';
 import 'package:giolee78/services/storage/storage_services.dart';
 import 'package:giolee78/utils/app_utils.dart';
+import 'package:http/http.dart' as http;
 import '../../../../config/api/api_end_point.dart';
 import '../../../../config/route/app_routes.dart';
 import '../../../friend/data/post_model_by_id.dart';
@@ -87,6 +89,52 @@ class ClickerController extends GetxController {
     } catch (e) {
       debugPrint('Error updating profile: $e');
     }
+  }
+
+
+  /// ================= Location Suggestions
+  var locationSuggestions = <String>[].obs;
+  var isSearchingSuggestions = false.obs;
+  final String _googleApiKey = 'AIzaSyAp3rwzXU0fAqaPCTRfx81ixNMu5flXnPo';
+
+// Call this to fetch Google Places suggestions
+  Future<void> fetchLocationSuggestions(String input) async {
+    if (input.isEmpty) {
+      locationSuggestions.clear();
+      return;
+    }
+
+    try {
+      isSearchingSuggestions.value = true;
+      final url = Uri.parse(
+        'https://maps.googleapis.com/maps/api/place/autocomplete/json'
+            '?input=${Uri.encodeComponent(input)}'
+            '&key=$_googleApiKey'
+            '&types=geocode',
+      );
+
+      final response = await http.get(url);
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final predictions = data['predictions'] as List;
+        locationSuggestions.assignAll(
+          predictions.map((p) => p['description'] as String).toList(),
+        );
+      }
+    } catch (e) {
+      debugPrint("Suggestion Error: $e");
+    } finally {
+      isSearchingSuggestions.value = false;
+    }
+  }
+
+
+
+  void onLocationSelected(String location) {
+    searchController.text = location;
+    searchText.value = location;
+    locationSuggestions.clear();
+    getAllPosts(searchTerm: location); // search in DB
   }
 
   @override
@@ -172,10 +220,10 @@ class ClickerController extends GetxController {
     }
   }
 
-  // ================= Get All Posts (with Pagination)
   Future<void> getAllPosts({
     String? clickerType,
     bool isLoadMore = false,
+    String? searchTerm,
   }) async {
     try {
       if (isLoadMore) {
@@ -199,24 +247,27 @@ class ClickerController extends GetxController {
       if (filter != 'All') queryParams.add("clickerType=$filter");
       if (LocalStorage.token.isEmpty) queryParams.add("privacy=public");
 
+      // 👇 ADD THIS
+      final term = searchTerm ?? searchText.value;
+      if (term.isNotEmpty) queryParams.add("searchTerm=${Uri.encodeComponent(term)}");
+
       if (queryParams.isNotEmpty) url += "?${queryParams.join('&')}";
 
       final response = await ApiService.get(url);
 
       if (response.statusCode == 200) {
         final AllPostModel responseData = AllPostModel.fromJson(response.data);
-
         totalPages.value = responseData.pagination.totalPage;
 
-        final visiblePosts = responseData.data.where((post) {
-          return post.privacy == 'public';
-        }).toList();
+        final visiblePosts = responseData.data
+            .where((post) => post.privacy == 'public')
+            .toList();
+
         if (isLoadMore) {
           posts.addAll(visiblePosts);
         } else {
           posts.assignAll(visiblePosts);
         }
-
         _filterPosts();
       }
     } catch (e) {
@@ -225,6 +276,11 @@ class ClickerController extends GetxController {
       isLoading.value = false;
       isLoadingMore.value = false;
     }
+  }
+
+  void _onSearchChanged() {
+    searchText.value = searchController.text;
+    _filterPosts();
   }
 
   // ================= Get Posts By Specific User ID
@@ -358,10 +414,6 @@ class ClickerController extends GetxController {
   }
 
   // ================= Search/Filter Logic
-  void _onSearchChanged() {
-    searchText.value = searchController.text;
-    _filterPosts();
-  }
 
   void _filterPosts() {
     List<PostData> filtered = posts.toList();

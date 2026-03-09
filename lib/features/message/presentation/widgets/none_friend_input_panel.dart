@@ -7,22 +7,6 @@ import '../../../../utils/constants/app_colors.dart';
 import '../controller/message_controller.dart';
 import 'package:giolee78/features/message/presentation/controller/chat_controller.dart';
 
-
-// "2.5 KM" → 2.5, "500 M" → 0.5, "" → 0.0
-double _parseDistanceToKm(String distanceStr) {
-  if (distanceStr.isEmpty) return 0.0;
-  final upper = distanceStr.toUpperCase().trim();
-  if (upper.contains('KM')) {
-    final numStr = upper.replaceAll('KM', '').trim();
-    return double.tryParse(numStr) ?? 0.0;
-  } else if (upper.contains('M')) {
-    final numStr = upper.replaceAll('M', '').trim();
-    final meters = double.tryParse(numStr) ?? 0.0;
-    return meters / 1000;
-  }
-  return double.tryParse(distanceStr) ?? 0.0;
-}
-
 class NonFriendPanel extends StatelessWidget {
   final MessageController controller;
 

@@ -161,11 +161,9 @@ class ChatController extends GetxController {
     }
   }
 
-  void _updateFriendRequestStatus(
-    String chatId,
-    String status,
-    String requestId,
-  ) {
+  void _updateFriendRequestStatus(String chatId,
+      String status,
+      String requestId,) {
     final index = singleChats.indexWhere((c) => c.id == chatId);
     if (index != -1) {
       singleChats[index] = singleChats[index].copyWith(
@@ -412,7 +410,7 @@ class ChatController extends GetxController {
     }
   }
 
-
+//============================address From Coordinate   ===========================
   Future<String?> getAddressFromCoordinate(double lat, double lng) async {
     try {
       final List<Placemark> placemarks = await placemarkFromCoordinates(
@@ -430,7 +428,7 @@ class ChatController extends GetxController {
       return null;
     }
   }
-
+  //============================update Profile ===========================
 
   Future<void> updateProfile(double longitude, double latitude) async {
     try {
@@ -454,6 +452,7 @@ class ChatController extends GetxController {
     }
   }
 
+  //====================Current Location gate and update profile===========================
   Future<void> getCurrentLocationAndUpdateProfile() async {
     try {
       isLocationUpdating.value = true;
@@ -474,8 +473,7 @@ class ChatController extends GetxController {
     }
   }
 
-
-
+//============================================get current location
   Future<Position?> getCurrentLocation() async {
     try {
       final bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
@@ -512,13 +510,11 @@ class ChatController extends GetxController {
   }
 
 
-
-
   @override
-  void onInit()async{
+  void onInit() async {
     super.onInit();
-     await getCurrentLocationAndUpdateProfile();
-     await getRadius();
+    await getCurrentLocationAndUpdateProfile();
+    await getRadius();
 
     fetchInitialData();
     listenChat();

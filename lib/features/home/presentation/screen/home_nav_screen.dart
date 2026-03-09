@@ -5,7 +5,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:giolee78/features/home/presentation/controller/home_nav_controller.dart';
 import 'package:giolee78/features/message/presentation/controller/chat_controller.dart';
 
+import '../../../../component/button/common_button.dart';
 import '../../../../component/image/common_image.dart';
+import '../../../../config/route/app_routes.dart';
 import '../../../../services/storage/storage_services.dart';
 import '../../../../utils/constants/app_colors.dart';
 import '../../../../utils/constants/app_icons.dart';
@@ -75,10 +77,7 @@ class _HomeNavState extends State<HomeNav> {
             shape: const CircleBorder(),
             onPressed: () {
               if (isGuest) {
-                Get.snackbar(
-                  "Login required",
-                  "Please login to use this feature",
-                );
+                _showRegistrationDialog();
                 return;
               }
               controller.changeIndex(1);
@@ -139,10 +138,7 @@ class _HomeNavState extends State<HomeNav> {
       return GestureDetector(
         onTap: () {
           if (isGuest && index != 0) {
-            Get.snackbar(
-              "Login required",
-              "Please sign up to use this feature.",
-            );
+           _showRegistrationDialog();
             return;
           }
           controller.changeIndex(index);
@@ -214,4 +210,41 @@ class _HomeNavState extends State<HomeNav> {
       );
     });
   }
+
+
+  void _showRegistrationDialog() {
+    Get.dialog(
+      AlertDialog(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12.r),
+        ),
+        title: Text(
+          'Registration required',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 22.sp,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+          ),
+        ),
+        content: Text(
+          'Please sign up to use this feature',
+          textAlign: TextAlign.center,
+          style: TextStyle(fontSize: 14.sp, color: Colors.grey[700]),
+        ),
+        actions: [
+          Center(
+            child: CommonButton(
+                onTap: (){
+                  Get.offAllNamed(AppRoutes.signIn);
+                },
+                titleText: "Ok"),
+          ),
+          SizedBox(height: 10.h),
+        ],
+      ),
+    );
+  }
+
 }

@@ -47,7 +47,7 @@ class _ClickerScreenState extends State<ClickerScreen> {
     super.dispose();
   }
 
-  // Trigger load more when within 300px of bottom
+  // Trigger load more when within 300px of bottom==================
   void _onScroll() {
     if (_scrollController.position.pixels >=
         _scrollController.position.maxScrollExtent - 300) {
@@ -93,20 +93,61 @@ class _ClickerScreenState extends State<ClickerScreen> {
                 SizedBox(height: 16.h),
 
                 if (LocalStorage.token.isNotEmpty)
-                  CommonTextField(
-                    controller: controller.searchController,
-                    prefixIcon: const Icon(Icons.search),
-                    hintText: "Search",
-                    borderRadius: 20.r,
-                    suffixIcon: controller.searchText.value.isNotEmpty
-                        ? IconButton(
-                            icon: const Icon(Icons.clear),
-                            onPressed: () {
-                              controller.searchController.clear();
-                              FocusScope.of(context).unfocus();
+                  Column(
+                    children: [
+                      CommonTextField(
+                        controller: controller.searchController,
+                        prefixIcon: const Icon(Icons.search),
+                        hintText: "Search Location",
+                        borderRadius: 20.r,
+                        suffixIcon: controller.searchText.value.isNotEmpty
+                            ? IconButton(
+                          icon: const Icon(Icons.clear),
+                          onPressed: () {
+                            controller.searchController.clear();
+                            controller.locationSuggestions.clear();
+                            controller.getAllPosts(); // reset
+                            FocusScope.of(context).unfocus();
+                          },
+                        )
+                            : const SizedBox.shrink(),
+                      ),
+                      // 👇 Suggestions dropdown
+                      Obx(() {
+                        if (controller.locationSuggestions.isEmpty) return const SizedBox.shrink();
+                        return Container(
+                          margin: EdgeInsets.only(top: 4.h),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(12.r),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black12,
+                                blurRadius: 6,
+                                offset: const Offset(0, 3),
+                              ),
+                            ],
+                          ),
+                          child: ListView.separated(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: controller.locationSuggestions.length,
+                            separatorBuilder: (_, __) => const Divider(height: 1),
+                            itemBuilder: (context, index) {
+                              final suggestion = controller.locationSuggestions[index];
+                              return ListTile(
+                                leading: const Icon(Icons.location_on_outlined, size: 18),
+                                title: Text(suggestion, style: TextStyle(fontSize: 14.sp)),
+                                onTap: () {
+                                  controller.onLocationSelected(suggestion);
+                                  FocusScope.of(context).unfocus();
+                                },
+                              );
                             },
-                          )
-                        : const SizedBox.shrink(),
+                          ),
+                        );
+                      }),
+                    ],
                   ),
                 SizedBox(height: 16.h),
 

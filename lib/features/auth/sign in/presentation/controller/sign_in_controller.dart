@@ -57,7 +57,7 @@ class SignInController extends GetxController {
         );
 
         await getUserData();
-        Get.snackbar(barBlur: 0.5, "Welcome Back", "Logged In Successfully");
+        // Get.snackbar(barBlur: 0.5, "Welcome Back", "Logged In Successfully");
 
         Get.toNamed(AppRoutes.homeNav);
 
