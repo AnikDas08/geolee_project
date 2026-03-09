@@ -1,6 +1,5 @@
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:get_storage/get_storage.dart';
 import 'package:giolee78/features/message/presentation/controller/chat_controller.dart';
 import 'package:giolee78/features/message/presentation/controller/group_message_controller.dart';
 import 'package:giolee78/services/storage/storage_services.dart';
@@ -95,7 +94,16 @@ class GroupSettingsController extends GetxController {
   Future<void> toggleAdminApproval(bool value) async {
     try {
       final newAccessType = value ? 'restricted' : 'open';
-      await updateGroupProfile(newAccessType: newAccessType);
+
+      final String endpoint = ApiEndPoint.updateChatById(chatId);
+      final Map<String, String> body = {'accessType': newAccessType};
+
+      final response = await ApiService.multipartUpdate(endpoint, body: body);
+
+      if (response.statusCode == 200) {
+        accessType.value = newAccessType;
+        Get.find<ChatController>().getChatRepos();
+      }
     } catch (e) {
       appLog("❌ Toggle error: $e");
     }
@@ -129,9 +137,10 @@ class GroupSettingsController extends GetxController {
         imageCache.clear();
         imageCache.clearLiveImages();
 
-        await fetchGroupDetails();
-        Get.find<ChatController>().getChatRepos();
+        // await fetchGroupDetails();
 
+        Get.find<ChatController>().getChatRepos();
+/*
         Get.snackbar(
           'Success',
           newAccessType != null
@@ -141,7 +150,7 @@ class GroupSettingsController extends GetxController {
               : 'Group updated successfully!',
           backgroundColor: AppColors.primaryColor,
           colorText: Colors.white,
-        );
+        );*/
       }
     } finally {
       isSaving.value = false;

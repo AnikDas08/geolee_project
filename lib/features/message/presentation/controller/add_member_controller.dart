@@ -13,7 +13,7 @@ import '../../data/model/friend_response_model.dart';
 class AddMemberController extends GetxController {
   final RxBool isLoading = false.obs;
   final RxString authorId = ''.obs;
-  final RxString accessType = 'open'.obs; // Tracks if the group is restricted
+  final RxString accessType = 'open'.obs;
   final RxString searchKeyword = ''.obs;
   String chatId = '';
   Timer? _debounce;
@@ -182,7 +182,6 @@ class AddMemberController extends GetxController {
   }
 
   /// Add member to group
-  /// Add member to group
   Future<void> onAddMember(Participant friend) async {
     try {
       if (chatId.isEmpty) {
@@ -196,7 +195,7 @@ class AddMemberController extends GetxController {
         "📊 Is current user author: $isAuthor (Author ID: ${authorId.value})",
       );
 
-      if (accessType.value == 'restricted' && !isAuthor) {
+      /*   if (accessType.value == 'restricted' && !isAuthor) {
         appLog(
           "🛡️ Group is restricted and user is NOT admin. Cannot add members.",
         );
@@ -215,7 +214,22 @@ class AddMemberController extends GetxController {
       final response = await ApiService.patch(
         url,
         body: {
-          "members": [friend.id], // Friend ID array hishebe body-te jabe
+          "members": [friend.id],
+        },
+      );
+*/
+
+      if (accessType.value == 'restricted' && !isAuthor) {
+        await _sendJoinRequest(friend.id);
+        return;
+      }
+
+      final url = "${ApiEndPoint.addMember}$chatId";
+
+      final response = await ApiService.patch(
+        url,
+        body: {
+          "members": [friend.id],
         },
       );
 
@@ -233,11 +247,36 @@ class AddMemberController extends GetxController {
           "Error",
           "Add failed with status: ${response.statusCode}",
         );
-        appLog("❌ Add failed: ${response.message}");
+        appLog(" Add failed: ${response.message}");
       }
     } catch (e) {
-      appLog("❌ Error adding member: $e");
+      appLog("Error adding member: $e");
       Utils.errorSnackBar("Error", "Could not add member");
+    }
+  }
+
+  Future<void> _sendJoinRequest(String friendId) async {
+    try {
+      final response = await ApiService.patch(
+        "${ApiEndPoint.addMyFriendToGroup}${chatId}",
+
+        body: {
+          'members': [friendId],
+        },
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        Get.snackbar(
+          colorText: Colors.white,
+          backgroundColor: Colors.green,
+          "Request Sent",
+          "Your join request has been sent",
+        );
+      } else {
+        Get.snackbar("Error", response.message ?? "Failed to send request");
+      }
+    } catch (e) {
+      Get.snackbar("Error", e.toString());
     }
   }
 

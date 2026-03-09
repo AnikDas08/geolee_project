@@ -121,9 +121,10 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
               },
               borderRadius: BorderRadius.circular(4.r),
               child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 120,
-                  vertical: 17,
+                width: double.maxFinite,
+                padding:EdgeInsets.symmetric(
+                horizontal: 10.w,
+                  vertical: 17.h,
                 ),
                 decoration: ShapeDecoration(
                   color: AppColors.white,
@@ -141,6 +142,7 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     const CommonImage(
                       imageSrc: AppIcons.attachment,

@@ -63,13 +63,16 @@ class CommonImage extends StatelessWidget {
           image: DecorationImage(image: imageProvider, fit: fill),
         ),
       ),
-      progressIndicatorBuilder: (context, url, downloadProgress) =>
-          CircularProgressIndicator(value: downloadProgress.progress),
-      errorWidget: (context, url, error) {
-        errorLog(error, source: "Common Image");
-
-        return _buildErrorWidget();
-      },
+      progressIndicatorBuilder: (context, url, downloadProgress) => Center(
+        child: SizedBox(
+          width: 40,
+          height: 40,
+          child: CircularProgressIndicator(
+            strokeWidth: 2,
+            color: Colors.blue,
+              value: downloadProgress.progress),
+        ),
+      ),
     );
   }
 

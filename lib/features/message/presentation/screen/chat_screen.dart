@@ -71,6 +71,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
   @override
   void initState() {
     super.initState();
+    con.getCurrentLocationAndUpdateProfile();
   }
 
   @override
@@ -299,79 +300,87 @@ class _ChatListScreenState extends State<ChatListScreen> {
                                     ),
                                   ),
                                 )
-                              : ListView.builder(
-                                  controller: controller.singleScrollController,
-                                  itemCount:
-                                      controller.filteredSingleChats.length +
-                                      (controller.isLoadingMoreSingle ? 1 : 0),
-                                  padding: EdgeInsets.only(top: 16.h),
-                                  itemBuilder: (context, index) {
-                                    if (index ==
-                                        controller.filteredSingleChats.length) {
-                                      return Padding(
-                                        padding: EdgeInsets.all(16.h),
-                                        child: const Center(
-                                          child: CircularProgressIndicator(
-                                            color: AppColors.primaryColor,
+                              : RefreshIndicator(
+
+                            onRefresh: ()async{
+                              await con.getCurrentLocationAndUpdateProfile();
+                              await con.getRadius();
+                              await con.fetchInitialData();
+                            },
+                                child: ListView.builder(
+                                    controller: controller.singleScrollController,
+                                    itemCount:
+                                        controller.filteredSingleChats.length +
+                                        (controller.isLoadingMoreSingle ? 1 : 0),
+                                    padding: EdgeInsets.only(top: 16.h),
+                                    itemBuilder: (context, index) {
+                                      if (index ==
+                                          controller.filteredSingleChats.length) {
+                                        return Padding(
+                                          padding: EdgeInsets.all(16.h),
+                                          child: const Center(
+                                            child: CircularProgressIndicator(
+                                              color: AppColors.primaryColor,
+                                            ),
                                           ),
+                                        );
+                                      }
+                                    final ChatModel item = controller.filteredSingleChats[index];
+                                    return GestureDetector(
+                                        onTap: () {
+                                          Get.toNamed(
+                                            AppRoutes.message,
+                                            parameters: {
+                                              "userId": item.participant.sId,
+                                              "chatId": item.id,
+                                              'isOnline': item
+                                                  .participant
+                                                  .isOnline
+                                                  .toString(),
+                                              "name": item.isGroup
+                                                  ? (item.chatName ??
+                                                        "Unnamed Group")
+                                                  : item.participant.fullName,
+                                              "image": item.isGroup
+                                                  ? (item.chatImage ?? "")
+                                                  : item.participant.image,
+                                              "distance": formatDistance(
+                                                item.distanceInKm,
+                                              ),
+                                            },
+                                          );
+                                        },
+                                    //============================================
+                                        /* onTap: () {
+                                      Get.toNamed(
+                                      AppRoutes.message,
+                                      parameters: {
+                                        "userId": item.participant.sId,
+                                        "chatId": item.id,
+                                        'isOnline': item.isOnline.toString(),
+                                        "name": item.isGroup
+                                            ? (item.chatName ?? "Unnamed Group")
+                                            : item.participant.fullName,
+                                        "image": item.isGroup
+                                            ? (item.chatImage ?? "")
+                                            : item.participant.image,
+                                        },
+                                       );
+                                      },
+                                    */
+                                        child: chatListItem(
+                                          item: item,
+                                          isFriend: item.isFriend,
+                                          isSearching: controller
+                                              .searchController
+                                              .text
+                                              .trim()
+                                              .isNotEmpty,
                                         ),
                                       );
-                                    }
-                                  final ChatModel item = controller.filteredSingleChats[index];
-                                  return GestureDetector(
-                                      onTap: () {
-                                        Get.toNamed(
-                                          AppRoutes.message,
-                                          parameters: {
-                                            "userId": item.participant.sId,
-                                            "chatId": item.id,
-                                            'isOnline': item
-                                                .participant
-                                                .isOnline
-                                                .toString(),
-                                            "name": item.isGroup
-                                                ? (item.chatName ??
-                                                      "Unnamed Group")
-                                                : item.participant.fullName,
-                                            "image": item.isGroup
-                                                ? (item.chatImage ?? "")
-                                                : item.participant.image,
-                                            "distance": formatDistance(
-                                              item.distanceInKm,
-                                            ),
-                                          },
-                                        );
-                                      },
-                                  //============================================
-                                      /* onTap: () {
-                                    Get.toNamed(
-                                    AppRoutes.message,
-                                    parameters: {
-                                      "userId": item.participant.sId,
-                                      "chatId": item.id,
-                                      'isOnline': item.isOnline.toString(),
-                                      "name": item.isGroup
-                                          ? (item.chatName ?? "Unnamed Group")
-                                          : item.participant.fullName,
-                                      "image": item.isGroup
-                                          ? (item.chatImage ?? "")
-                                          : item.participant.image,
-                                      },
-                                     );
                                     },
-                                  */
-                                      child: chatListItem(
-                                        item: item,
-                                        isFriend: item.isFriend,
-                                        isSearching: controller
-                                            .searchController
-                                            .text
-                                            .trim()
-                                            .isNotEmpty,
-                                      ),
-                                    );
-                                  },
-                                ),
+                                  ),
+                              ),
 
                           //Group Tab ==========================================
                           switch (controller.status) {

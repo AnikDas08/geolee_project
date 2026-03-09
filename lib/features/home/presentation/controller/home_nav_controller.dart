@@ -27,16 +27,18 @@ class HomeNavController extends GetxController {
     final bool isUser = LocalStorage.role == "user";
 
     if (isUser) {
-      // Users always stay on userScreens
       isUserScreenActive.value = true;
     } else {
-      // Advertisers:
-      // index 0 -> Home (User Screen List)
-      // index 1 & 2 -> Advertise Screen List
       isUserScreenActive.value = (index == 0);
     }
 
-    // Navbar visibility logic (show for Home, Add/Ads, and Message/Dashboard)
-    showNavBar.value = true;
+
+
+    if (isUser && index == 2) {
+
+      showNavBar.value = false;
+    } else {
+      showNavBar.value = true;
+    }
   }
 }

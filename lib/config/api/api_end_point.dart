@@ -18,6 +18,7 @@ class ApiEndPoint {
   static const String verifyOtp = "$baseUrl/auth/verify-email";
   static const String resetPassword = "$baseUrl/auth/reset-password";
   static const String changePassword = "$baseUrl/auth/change-password";
+  static const String getRadius= "$baseUrl/settings";
 
   // User ===========================================
   static const String updateProfile = "$baseUrl/users/profile";
@@ -71,6 +72,7 @@ class ApiEndPoint {
   static const String getSingleChatById = "$baseUrl/chats/single";
   static const String createAds = "$baseUrl/advertisements/create";
   static const String createJoinRequest = "$baseUrl/join-requests/create";
+  static const String addMyFriendToGroup= "$baseUrl/chats/add-member/";
   static const String cancelJoinRequest = "$baseUrl/join-requests/update/";
   static const String getAdvertisementMe = "$baseUrl/advertisements/me";
   static const String getAdvertisementById = "$baseUrl/advertisements/single/";

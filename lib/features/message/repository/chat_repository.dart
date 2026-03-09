@@ -47,7 +47,6 @@ Future<ChatRepositoryResponse> chatRepository(
   debugPrint("LAT: ${LocalStorage.lat}, LNG: ${LocalStorage.long}");
 
   final response = await ApiService.get(url);
-
   if (response.statusCode == 200) {
     final paginationData = response.data['pagination'] ?? {};
     final int totalPage = paginationData['totalPage'] ?? 1;

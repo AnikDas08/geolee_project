@@ -75,7 +75,6 @@ class HomeController extends GetxController {
     super.onInit();
     try {
       clickerCount.value = "All";
-
       final DateTime now = DateTime.now();
       selectedPeriod.value = '24h';
       startDate.value = now.subtract(const Duration(hours: 24));

@@ -589,12 +589,15 @@ class GroupSettingsScreen extends StatelessWidget {
                               fontSize: 16.sp,
                               fontWeight: FontWeight.w500,
                             ),
-                            CupertinoSwitch(
-                              value:
-                                  controller.accessType.value == 'restricted',
-                              activeTrackColor: AppColors.primaryColor,
-                              onChanged: (value) =>
-                                  controller.toggleAdminApproval(value),
+                            Transform.scale(
+                              scale: 0.6,
+                              child: CupertinoSwitch(
+                                value:
+                                    controller.accessType.value == 'restricted',
+                                activeTrackColor: AppColors.primaryColor,
+                                onChanged: (value) =>
+                                    controller.toggleAdminApproval(value),
+                              ),
                             ),
                           ],
                         ),

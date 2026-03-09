@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:giolee78/component/text/common_text.dart';
@@ -74,21 +75,38 @@ Widget chatListItem({
     ),
     child: Row(
       children: [
-        // ─── Avatar ─────────────────────────────────
+        // Avatar ================================
         CircleAvatar(
           radius: 28.sp,
           backgroundColor: Colors.grey[200],
           child: ClipOval(
-            child: CommonImage(
-              imageSrc: item.isGroup
+            child: CachedNetworkImage(
+              imageUrl: item.isGroup
                   ? "${ApiEndPoint.imageUrl}${item.chatImage ?? ""}"
                   : "${ApiEndPoint.imageUrl}${item.participant.image}",
-              fill: BoxFit.cover,
-              size: 56,
+              height: 56,
+              width: 56,
+              fit: BoxFit.cover,
+              placeholder: (context, url) => Container(
+                height: 56,
+                width: 56,
+                color: Colors.grey.shade300,
+                child: Center(
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Colors.grey.shade500,
+                  ),
+                ),
+              ),
+              errorWidget: (context, url, error) => Image.asset(
+                "assets/images/profilePlaceholder.jpg",
+                height: 56,
+                width: 56,
+                fit: BoxFit.cover,
+              ),
             ),
           ),
         ),
-
         12.width,
 
         // ─── Name + Message ──────────────────────────

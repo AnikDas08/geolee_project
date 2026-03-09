@@ -47,7 +47,7 @@ class CreateGroupScreen extends StatelessWidget {
                 TextField(
                   controller: controller.groupNameController,
                   decoration: InputDecoration(
-                    hintText: "Write group description here.",
+                    hintText: "Group Name",
                     hintStyle: TextStyle(
                       fontSize: 14.sp,
                       color: Colors.grey[400],

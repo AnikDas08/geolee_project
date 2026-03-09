@@ -1,5 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:file_picker/file_picker.dart';
@@ -19,6 +21,9 @@ import '../../../../utils/enum/enum.dart';
 class MessageController extends GetxController {
   RxBool isActive = false.obs;
   RxString distance = ''.obs;
+
+  RxDouble rawDistanceKm = 0.0.obs;
+
 
   var error = ''.obs;
   var friendStatus = FriendStatus.none.obs;
@@ -89,6 +94,7 @@ class MessageController extends GetxController {
   // ------------------------------------------------
   // SERVICE INFO
   // ------------------------------------------------
+
   String serviceTitle = '';
   String serviceImage = '';
   num price = 0;
@@ -117,7 +123,11 @@ class MessageController extends GetxController {
     listenMessage();
     listenOnlineStatus();
     ChatController.instance.setOpenChat(chatId);
+
   }
+
+
+
 
   @override
   void onClose() {
@@ -168,6 +178,8 @@ class MessageController extends GetxController {
       }
     });
   }
+
+
 
   // ================================================
   // ONLINE STATUS
@@ -785,6 +797,31 @@ class MessageController extends GetxController {
     }
   }
 
+
+  // ── MessageController এ যোগ করো
+
+  Future<void> calculateDistanceFromOtherUser(double otherLat, double otherLng) async {
+    try {
+      final double myLat = LocalStorage.lat;
+      final double myLng = LocalStorage.long;
+
+      final double distanceInMeters = Geolocator.distanceBetween(
+        myLat,
+        myLng,
+        otherLat,
+        otherLng,
+      );
+
+      final double distanceInKm = distanceInMeters / 1000;
+      distance.value = distanceInKm.toStringAsFixed(2);
+
+      debugPrint('📍 Distance: ${distance.value} km | Radius: ${LocalStorage.radius} km');
+    } catch (e) {
+      debugPrint('Distance calculation error: $e');
+      distance.value = '0';
+    }
+  }
+
   void _showErrorSnackBar(String message) {
     Get.snackbar(
       'Error',
@@ -806,4 +843,6 @@ class MessageController extends GetxController {
       }
     });
   }
+
+
 }

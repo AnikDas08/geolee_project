@@ -20,6 +20,18 @@ import '../widgets/loading_shimer.dart';
 import '../widgets/none_friend_input_panel.dart';
 import '../widgets/picked_file_preview.dart';
 import '../widgets/upload_progress.dart';
+double _parseDistanceToKm(String distanceStr) {
+  if (distanceStr.isEmpty) return 0.0;
+  final upper = distanceStr.toUpperCase().trim();
+  if (upper.contains('KM')) {
+    return double.tryParse(upper.replaceAll('KM', '').trim()) ?? 0.0;
+  } else if (upper.contains('M')) {
+    final meters = double.tryParse(upper.replaceAll('M', '').trim()) ?? 0.0;
+    return meters / 1000;
+  }
+  return double.tryParse(distanceStr) ?? 0.0;
+}
+
 
 class MessageScreen extends StatefulWidget {
   const MessageScreen({super.key});
@@ -48,7 +60,9 @@ class _MessageScreenState extends State<MessageScreen> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       messageController.isActive.value = params['isOnline'] == 'true';
-      messageController.distance.value = params['distance'] ?? '';
+      final String distanceStr = params['distance'] ?? '';
+      messageController.distance.value = distanceStr;
+      messageController.rawDistanceKm.value = _parseDistanceToKm(distanceStr);
       _initScreen();
     });
   }

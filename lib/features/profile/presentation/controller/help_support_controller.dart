@@ -123,7 +123,7 @@ class HelpSupportController extends GetxController {
 
               // Message
               const Text(
-                "Thank you for your inquiry. Our team is looking into this and will get back to you soon",
+                "Thank you for your inquiry. Our team is looking into this and will get back to you soon.",
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 16),
               ),

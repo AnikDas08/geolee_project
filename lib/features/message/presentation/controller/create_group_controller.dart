@@ -35,7 +35,7 @@ class GroupMember {
   }
 }
 
-enum PrivacyType { public, private, }
+enum PrivacyType { public, private }
 
 class CreateGroupController extends GetxController {
   // Text controllers
@@ -50,15 +50,11 @@ class CreateGroupController extends GetxController {
   var selectedPrivacyType = PrivacyType.public.obs;
 
   // Privacy options for dropdown
-  final privacyTypes = [
-    "Public Group",
-    "Private Group",
-  ];
+  final privacyTypes = ["Public Group", "Private Group"];
 
   final privacyOptions = {
     PrivacyType.public: "Public Group",
     PrivacyType.private: "Private Group",
-
   };
 
   // Members
@@ -91,7 +87,6 @@ class CreateGroupController extends GetxController {
       case "Private Group":
         selectedPrivacyType.value = PrivacyType.private;
         break;
-
     }
     update();
   }
@@ -208,7 +203,6 @@ class CreateGroupController extends GetxController {
     }
   }
 
-
   Future<void> createGroup() async {
     if (!_validateInputs()) return;
 
@@ -231,7 +225,8 @@ class CreateGroupController extends GetxController {
         final data = response.data['data'];
 
         final createdGroupId = data?['_id'] ?? "";
-        final createdGroupName = data?['chatName'] ?? groupNameController.text.trim();
+        final createdGroupName =
+            data?['chatName'] ?? groupNameController.text.trim();
         final memberCount = selectedMembers.length;
 
         debugPrint("✅ Group created successfully!");
@@ -255,15 +250,15 @@ class CreateGroupController extends GetxController {
         selectedMembers.clear();
         selectedPrivacyType.value = PrivacyType.public;
 
-        // Refresh chat list if controller exists
+        // After successful group creation
         if (Get.isRegistered<ChatController>()) {
-          Get.find<ChatController>().getChatRepos();
+          final chatController = Get.find<ChatController>();
+          await chatController.getChatRepos();
+          chatController.update();
         }
 
-        // Navigate to group message screen after a brief delay
         Future.delayed(const Duration(milliseconds: 500), () {
           if (createdGroupId.isNotEmpty) {
-            debugPrint("🚀 Navigating to group message screen...");
             Get.offNamed(
               AppRoutes.groupMessageScreen,
               arguments: {
@@ -302,7 +297,6 @@ class CreateGroupController extends GetxController {
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );
-
     } finally {
       isCreating.value = false;
     }

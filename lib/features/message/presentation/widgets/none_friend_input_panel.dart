@@ -1,10 +1,27 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:giolee78/services/storage/storage_services.dart';
 
 import '../../../../utils/constants/app_colors.dart';
 import '../controller/message_controller.dart';
+import 'package:giolee78/features/message/presentation/controller/chat_controller.dart';
+
+
+// "2.5 KM" → 2.5, "500 M" → 0.5, "" → 0.0
+double _parseDistanceToKm(String distanceStr) {
+  if (distanceStr.isEmpty) return 0.0;
+  final upper = distanceStr.toUpperCase().trim();
+  if (upper.contains('KM')) {
+    final numStr = upper.replaceAll('KM', '').trim();
+    return double.tryParse(numStr) ?? 0.0;
+  } else if (upper.contains('M')) {
+    final numStr = upper.replaceAll('M', '').trim();
+    final meters = double.tryParse(numStr) ?? 0.0;
+    return meters / 1000;
+  }
+  return double.tryParse(distanceStr) ?? 0.0;
+}
 
 class NonFriendPanel extends StatelessWidget {
   final MessageController controller;
@@ -15,13 +32,22 @@ class NonFriendPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Obx(() {
       final status = controller.friendStatusValue.value;
+
+      final double distanceKm = controller.rawDistanceKm.value;
+      final double radiusKm = double.tryParse(
+        Get.isRegistered<ChatController>()
+            ? Get.find<ChatController>().currentRadius.value
+            : LocalStorage.radius,
+      ) ?? 0.0;
+      final bool isOutOfRange = radiusKm > 0 && distanceKm > radiusKm;
+
       return Container(
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.07),
+              color: Colors.black.withValues(alpha: 0.07),
               blurRadius: 16,
               offset: const Offset(0, -4),
             ),
@@ -59,13 +85,48 @@ class NonFriendPanel extends StatelessWidget {
                         ),
                       ],
                     ),
+
+                    // ── Out of range warning banner
+                    if (isOutOfRange) ...[
+                      SizedBox(height: 8.h),
+                      Container(
+                        width: double.infinity,
+                        padding: EdgeInsets.symmetric(
+                            horizontal: 12.w, vertical: 8.h),
+                        decoration: BoxDecoration(
+                          color: Colors.red.shade50,
+                          borderRadius: BorderRadius.circular(10.r),
+                          border: Border.all(color: Colors.red.shade100),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(Icons.location_off_rounded,
+                                size: 14.sp, color: Colors.red.shade400),
+                            SizedBox(width: 6.w),
+                            Expanded(
+                              child: Text(
+                                'This user is out of your range. Messaging is disabled.',
+                                style: TextStyle(
+                                  fontSize: 11.sp,
+                                  color: Colors.red.shade400,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+
                     SizedBox(height: 10.h),
+
                     if (status == 'received')
                       _NonFriendTile(
                         icon: Icons.check_circle_outline_rounded,
                         iconColor: Colors.green.shade600,
                         label: 'Accept Friend Request',
-                        onTap: () async => await controller.acceptFriendRequest(
+                        onTap: () async =>
+                        await controller.acceptFriendRequest(
                             controller.pendingRequestId.value),
                       ),
                     if (status == 'received')
@@ -75,7 +136,8 @@ class NonFriendPanel extends StatelessWidget {
                         icon: Icons.remove_circle_outline_rounded,
                         iconColor: Colors.red.shade400,
                         label: 'Reject Request',
-                        onTap: () async => await controller.rejectFriendRequest(
+                        onTap: () async =>
+                        await controller.rejectFriendRequest(
                             controller.pendingRequestId.value),
                       ),
                     if (status == 'received')
@@ -88,8 +150,8 @@ class NonFriendPanel extends StatelessWidget {
                             ? 'Friend Request Sent ✓'
                             : 'Add Friend',
                         disabled: status == 'pending',
-                        onTap: () async => await controller.sendFriendRequest(
-                            controller.otherUserId.value),
+                        onTap: () async => await controller
+                            .sendFriendRequest(controller.otherUserId.value),
                       ),
                     if (status != 'received' && status != 'friends')
                       Divider(height: 1, color: Colors.grey.shade100),
@@ -115,6 +177,8 @@ class NonFriendPanel extends StatelessWidget {
                   ],
                 ),
               ),
+
+              // ── Message Input Row
               Padding(
                 padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 0),
                 child: Row(
@@ -123,14 +187,19 @@ class NonFriendPanel extends StatelessWidget {
                       child: Container(
                         height: 46.h,
                         decoration: BoxDecoration(
-                          color: Colors.grey[100],
+                          color: isOutOfRange
+                              ? Colors.grey[200]
+                              : Colors.grey[100],
                           borderRadius: BorderRadius.circular(22.r),
                         ),
                         child: TextField(
                           controller: controller.messageController,
+                          enabled: !isOutOfRange,
                           style: TextStyle(fontSize: 14.sp),
                           decoration: InputDecoration(
-                            hintText: 'Reply',
+                            hintText: isOutOfRange
+                                ? 'Out of range to message'
+                                : 'Reply',
                             hintStyle: TextStyle(
                                 fontSize: 14.sp, color: Colors.grey[400]),
                             border: InputBorder.none,
@@ -142,15 +211,22 @@ class NonFriendPanel extends StatelessWidget {
                     ),
                     SizedBox(width: 8.w),
                     GestureDetector(
-                      onTap: controller.sendMessage,
+                      onTap: isOutOfRange ? null : controller.sendMessage,
                       child: Container(
                         width: 46.w,
                         height: 46.w,
                         decoration: BoxDecoration(
-                            color: AppColors.primaryColor,
-                            shape: BoxShape.circle),
-                        child: Icon(Icons.send_rounded,
-                            color: Colors.white, size: 18.sp),
+                          color: isOutOfRange
+                              ? Colors.grey[300]
+                              : AppColors.primaryColor,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.send_rounded,
+                          color:
+                          isOutOfRange ? Colors.grey[500] : Colors.white,
+                          size: 18.sp,
+                        ),
                       ),
                     ),
                   ],

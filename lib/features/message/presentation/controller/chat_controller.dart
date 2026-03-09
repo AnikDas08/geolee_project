@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import '../../data/model/chat_list_model.dart';
 import '../../repository/chat_repository.dart';
@@ -24,6 +26,12 @@ class ChatController extends GetxController {
   bool hasNoSingleData = false;
   int page = 0;
   int singlePage = 0;
+  RxString currentRadius = (LocalStorage.radius).obs;
+
+  RxDouble currentLatitude = 0.0.obs;
+  RxDouble currentLongitude = 0.0.obs;
+  RxBool isLocationUpdating = false.obs;
+
 
   int _groupTotalPages = 1;
   int _singleTotalPages = 1;
@@ -404,9 +412,114 @@ class ChatController extends GetxController {
     }
   }
 
+
+  Future<String?> getAddressFromCoordinate(double lat, double lng) async {
+    try {
+      final List<Placemark> placemarks = await placemarkFromCoordinates(
+        lat,
+        lng,
+      );
+      if (placemarks.isNotEmpty) {
+        final Placemark p = placemarks.first;
+        return "${p.street}, ${p.subLocality}, ${p.locality}, "
+            "${p.administrativeArea}, ${p.country}";
+      }
+      return null;
+    } catch (e) {
+      debugPrint("getAddress error: $e");
+      return null;
+    }
+  }
+
+
+  Future<void> updateProfile(double longitude, double latitude) async {
+    try {
+      final String? address = await getAddressFromCoordinate(
+        latitude,
+        longitude,
+      );
+      final response = await ApiService.patch(
+        ApiEndPoint.updateProfile,
+        body: {
+          "isLocationVisible": true,
+          "location": [longitude, latitude],
+          "address": address ?? "Location Unavailable",
+        },
+      );
+      if (response.statusCode == 200) {
+        debugPrint('Profile location updated');
+      }
+    } catch (e) {
+      debugPrint('Error updating profile: $e');
+    }
+  }
+
+  Future<void> getCurrentLocationAndUpdateProfile() async {
+    try {
+      isLocationUpdating.value = true;
+      final Position? position = await getCurrentLocation();
+      if (position != null) {
+        currentLatitude.value = position.latitude;
+        currentLongitude.value = position.longitude;
+
+        LocalStorage.lat = position.latitude;
+        LocalStorage.long = position.longitude;
+
+        await updateProfile(position.longitude, position.latitude);
+      }
+    } catch (e) {
+      debugPrint('Location update error: $e');
+    } finally {
+      isLocationUpdating.value = false;
+    }
+  }
+
+
+
+  Future<Position?> getCurrentLocation() async {
+    try {
+      final bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) return null;
+
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) return null;
+      }
+      if (permission == LocationPermission.deniedForever) return null;
+
+      return await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.medium, // ✅ medium saves memory
+      );
+    } catch (e) {
+      debugPrint('Error getting location: $e');
+      return null;
+    }
+  }
+
+
+  Future<void> getRadius() async {
+    try {
+      final response = await ApiService.get(ApiEndPoint.getRadius);
+      if (response.statusCode == 200) {
+        final data = response.data['data'];
+        LocalStorage.radius = data['nearbyRange'].toString();
+        currentRadius.value = LocalStorage.radius;
+      }
+    } catch (e) {
+      debugPrint("getRadius error: $e");
+    }
+  }
+
+
+
+
   @override
-  void onInit() {
+  void onInit()async{
     super.onInit();
+     await getCurrentLocationAndUpdateProfile();
+     await getRadius();
+
     fetchInitialData();
     listenChat();
     setupGroupPagination();
