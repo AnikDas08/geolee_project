@@ -111,8 +111,17 @@ class MyFriendController extends GetxController {
     await _initLocationThenFetch();
     debugPrint("📍 Lat: ${LocalStorage.lat} | Long: ${LocalStorage.long}");
 
-    debounce(searchQuery, (query) {
-      getMyAllFriends(searchTerm: query);
+    debounce(searchQuery, (query) async {
+      if (query.isEmpty) {
+        // Restore both lists from server
+        await Future.wait([getMyAllFriends(), getSuggestedFriend()]);
+      } else {
+        // Search both sections on the server simultaneously
+        await Future.wait([
+          getMyAllFriends(searchTerm: query),
+          searchGlobalUsers(query),
+        ]);
+      }
     }, time: const Duration(milliseconds: 500));
   }
 
@@ -264,7 +273,7 @@ class MyFriendController extends GetxController {
           final userId = requests[index].sender.id;
           requests.removeAt(index);
           requests.refresh();
-          
+
           // Update status in maps for other screens
           friendStatusMap[userId] = FriendStatus.friends;
           pendingRequestIdMap.remove(userId);
@@ -275,7 +284,10 @@ class MyFriendController extends GetxController {
         Utils.successSnackBar("Success", "Friend request accepted");
       } else {
         debugPrint("acceptFriendRequest error => ${response.data}");
-        Utils.errorSnackBar("Error", response.data["message"] ?? "Cannot accept request");
+        Utils.errorSnackBar(
+          "Error",
+          response.data["message"] ?? "Cannot accept request",
+        );
       }
     } catch (e) {
       debugPrint("acceptFriendRequest error => ${e.toString()}");
@@ -317,7 +329,10 @@ class MyFriendController extends GetxController {
         Utils.successSnackBar("Rejected", "Friend request rejected");
       } else {
         debugPrint("rejectFriendRequest error => ${response.data}");
-        Utils.errorSnackBar("Failed", response.data["message"] ?? "Could not reject request");
+        Utils.errorSnackBar(
+          "Failed",
+          response.data["message"] ?? "Could not reject request",
+        );
       }
     } catch (e) {
       debugPrint("rejectFriendRequest error => ${e.toString()}");
@@ -515,25 +530,31 @@ class MyFriendController extends GetxController {
     await getSuggestedFriend(isRefresh: false);
   }
 
-  // ================= Global Search (Search by name/email)
+  // ================= Global Search (Search by name/email on server)
   Future<void> searchGlobalUsers(String query) async {
-    try {
-      if (query.isEmpty) {
-        await getSuggestedFriend();
-        return;
-      }
+    if (query.isEmpty) {
+      await getSuggestedFriend();
+      return;
+    }
 
+    try {
       isNearbyChatLoading.value = true;
       nearbyChatError.value = '';
-      
-      // Clear current list to show we are searching
       suggestedFriendList.clear();
 
+      // Build URL — try with location if available, otherwise search-only
       final double lat = LocalStorage.lat;
       final double lng = LocalStorage.long;
+      final String encoded = Uri.encodeComponent(query);
 
-      final url =
-          "${ApiEndPoint.nearbyChat}?lat=$lat&lng=$lng&searchTerm=${Uri.encodeComponent(query)}&limit=50";
+      String url;
+      if (lat != 0.0 && lng != 0.0) {
+        url =
+            "${ApiEndPoint.nearbyChat}?lat=$lat&lng=$lng&searchTerm=$encoded&limit=50";
+      } else {
+        // No location — fall back to plain user search endpoint
+        url = "${ApiEndPoint.searchUsers}?searchTerm=$encoded&limit=50";
+      }
       debugPrint("🌐 Global Search URL: $url");
 
       final ApiResponseModel response = await ApiService.get(url);
@@ -544,8 +565,7 @@ class MyFriendController extends GetxController {
         final List<SuggestedFriendUserModel> parsedList = [];
 
         if (rawList != null && rawList is List) {
-          final List data = rawList;
-          for (var item in data) {
+          for (var item in rawList) {
             try {
               final user = SuggestedFriendUserModel.fromJson(item);
               if (user.id != LocalStorage.userId) {
@@ -558,12 +578,11 @@ class MyFriendController extends GetxController {
         }
 
         suggestedFriendList.value = parsedList;
-        debugPrint("📋 Search results found: ${parsedList.length}");
+        debugPrint("📋 Search results: ${parsedList.length}");
 
         if (parsedList.isNotEmpty) {
-          // Parallelize friendship status checks
           final List<Future<void>> checks = parsedList
-              .map((user) => checkFriendship(user.id))
+              .map((u) => checkFriendship(u.id))
               .toList();
           await Future.wait(checks);
         }
@@ -596,9 +615,9 @@ class MyFriendController extends GetxController {
           final request = data['pendingFriendRequest'];
           final requestId = request['_id'];
           final senderId = request['sender'];
-          
+
           pendingRequestIdMap[userId] = requestId ?? '';
-          
+
           // If I am the sender, it's 'requested'. If I am NOT the sender, it's 'received'.
           if (senderId == LocalStorage.userId) {
             friendStatusMap[userId] = FriendStatus.requested;
@@ -621,12 +640,12 @@ class MyFriendController extends GetxController {
   Future<void> onTapAddFriendButton(String userId) async {
     // Save previous state for rollback
     final previousStatus = friendStatusMap[userId];
-    
+
     try {
       // Optimistic Update
       friendStatusMap[userId] = FriendStatus.requested;
       friendStatusMap.refresh();
-      
+
       loadingUserIds.add(userId);
       loadingUserIds.refresh();
 
@@ -646,7 +665,10 @@ class MyFriendController extends GetxController {
         // Rollback on non-200 response
         friendStatusMap[userId] = previousStatus ?? FriendStatus.none;
         friendStatusMap.refresh();
-        Utils.errorSnackBar("Failed", response.data['message'] ?? "Could not send request");
+        Utils.errorSnackBar(
+          "Failed",
+          response.data['message'] ?? "Could not send request",
+        );
       }
     } catch (e) {
       // Rollback on error
@@ -668,7 +690,7 @@ class MyFriendController extends GetxController {
       // Optimistic Update
       friendStatusMap[userId] = FriendStatus.none;
       friendStatusMap.refresh();
-      
+
       loadingUserIds.add(userId);
       loadingUserIds.refresh();
 
@@ -689,7 +711,10 @@ class MyFriendController extends GetxController {
         // Rollback
         friendStatusMap[userId] = previousStatus ?? FriendStatus.requested;
         friendStatusMap.refresh();
-        Utils.errorSnackBar("Failed", response.data['message'] ?? "Could not cancel request");
+        Utils.errorSnackBar(
+          "Failed",
+          response.data['message'] ?? "Could not cancel request",
+        );
       }
     } catch (e) {
       // Rollback

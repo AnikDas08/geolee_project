@@ -4,34 +4,20 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="bfaf5573-c330-40b0-a877-9f6fce0e988f" name="Changes" comment="advertiser role profile update,overview working">
-<<<<<<< HEAD
-<<<<<<< HEAD
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/features/ads/presentation/screen/history_ads_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/ads/presentation/screen/history_ads_screen.dart" afterDir="false" />
-=======
-      <change afterPath="$PROJECT_DIR$/lib/features/ads/data/single_ads_model.dart" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/features/ads/presentation/controller/view_ads_screen_controller.dart" afterDir="false" />
-=======
-      <change afterPath="$PROJECT_DIR$/lib/features/ads/presentation/controller/update_ads_controller.dart" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/features/dashboard/data/my_active_ads_model.dart" afterDir="false" />
->>>>>>> 780d33064744c6fb0988cbfd2762fa7703594d33
+    <list default="true" id="1927e093-4256-4d7d-8985-b0a9f6129813" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/copilot.data.migration.ask2agent.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/deviceManager.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dictionaries/project.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Dart_Packages.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Dart_Packages.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Dart_SDK.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Dart_SDK.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Flutter_Plugins.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Flutter_Plugins.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/config/api/api_end_point.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/config/api/api_end_point.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/config/dependency/dependency_injection.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/config/dependency/dependency_injection.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/features/ads/data/add_history_model.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/ads/data/add_history_model.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/features/ads/presentation/controller/history_ads_controller.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/ads/presentation/controller/history_ads_controller.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/features/ads/presentation/controller/view_ads_screen_controller.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/ads/presentation/controller/view_ads_screen_controller.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/features/ads/presentation/screen/edit_ads_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/ads/presentation/screen/edit_ads_screen.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/features/ads/presentation/screen/view_ads_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/ads/presentation/screen/view_ads_screen.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/features/auth/sign in/presentation/controller/sign_in_controller.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/auth/sign in/presentation/controller/sign_in_controller.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/features/dashboard/presentation/controller/dash_board_screen_controller.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/dashboard/presentation/controller/dash_board_screen_controller.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/features/dashboard/presentation/screen/dashboard_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/dashboard/presentation/screen/dashboard_screen.dart" afterDir="false" />
-<<<<<<< HEAD
->>>>>>> a1f849592a28b7c78c0bd8d7957c3da7d1608797
-=======
-      <change beforePath="$PROJECT_DIR$/lib/features/splash/splash_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/splash/splash_screen.dart" afterDir="false" />
->>>>>>> 780d33064744c6fb0988cbfd2762fa7703594d33
+      <change beforePath="$PROJECT_DIR$/lib/features/clicker/data/addbanner_model.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/clicker/data/addbanner_model.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/features/clicker/presentation/screen/clicker_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/clicker/presentation/screen/clicker_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/features/friend/presentation/controller/my_friend_controller.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/friend/presentation/controller/my_friend_controller.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/features/friend/presentation/screen/my_friend_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/friend/presentation/screen/my_friend_screen.dart" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -41,42 +27,19 @@
   <component name="ClangdSettings">
     <option name="formatViaClangd" value="false" />
   </component>
-  <component name="FileTemplateManagerImpl">
-    <option name="RECENT_TEMPLATES">
-      <list>
-        <option value="Dart File" />
-      </list>
-    </option>
-  </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="GitHubPullRequestSearchHistory">{
-  &quot;lastFilter&quot;: {
-    &quot;state&quot;: &quot;OPEN&quot;,
-    &quot;assignee&quot;: &quot;parentroots&quot;
-  }
-}</component>
-  <component name="GithubPullRequestsUISettings">{
-  &quot;selectedUrlAndAccountId&quot;: {
-    &quot;url&quot;: &quot;https://github.com/AnikDas08/geolee_project.git&quot;,
-    &quot;accountId&quot;: &quot;a2a08f8a-294c-4f08-8030-bc46d4f33c65&quot;
-  }
-}</component>
-  <component name="HighlightingSettingsPerFile">
-    <setting file="file://$PROJECT_DIR$/lib/features/profile/presentation/controller/my_profile_controller.dart" root0="FORCE_HIGHLIGHTING" />
-  </component>
-  <component name="ProjectColorInfo">{
-  &quot;associatedIndex&quot;: 8
-}</component>
-  <component name="ProjectId" id="38uyK3lwezYugnOFOIq05qdJRfJ" />
+  <component name="ProjectColorInfo"><![CDATA[{
+  "associatedIndex": 8
+}]]></component>
+  <component name="ProjectId" id="3AlLEzdF3DIbCcjWqMCcJgnnQ1q" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
-    "ASKED_MARK_IGNORED_FILES_AS_EXCLUDED": "true",
     "Flutter.main.dart.executor": "Run",
     "ModuleVcsDetector.initialDetectionPerformed": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
@@ -91,19 +54,10 @@
     "io.flutter.project.isFirstOpen": "true",
     "io.flutter.reload.alreadyRun": "true",
     "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "D:/geolee/geolee_project",
-    "settings.editor.selected.configurable": "dart.settings",
-    "settings.editor.splitter.proportion": "0.3058104",
+    "settings.editor.selected.configurable": "flutter.settings",
     "show.migrate.to.gradle.popup": "false"
   }
 }]]></component>
-  <component name="RecentsManager">
-    <key name="CopyFile.RECENT_KEYS">
-      <recent name="D:\geolee\geolee_project\assets\animation" />
-      <recent name="D:\geolee\geolee_project\assets\icons" />
-      <recent name="D:\geolee\geolee_project\assets\images" />
-    </key>
-  </component>
   <component name="RunManager">
     <configuration name="main.dart" type="FlutterRunConfigurationType" factoryName="Flutter">
       <option name="filePath" value="$PROJECT_DIR$/lib/main.dart" />
@@ -112,63 +66,12 @@
   </component>
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
-      <changelist id="bfaf5573-c330-40b0-a877-9f6fce0e988f" name="Changes" comment="" />
-      <created>1769663682398</created>
+      <changelist id="1927e093-4256-4d7d-8985-b0a9f6129813" name="Changes" comment="" />
+      <created>1773162102282</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
-      <updated>1769663682398</updated>
+      <updated>1773162102282</updated>
     </task>
-    <task id="LOCAL-00001" summary="ibrahim api integration">
-      <option name="closed" value="true" />
-      <created>1769689028133</created>
-      <option name="number" value="00001" />
-      <option name="presentableId" value="LOCAL-00001" />
-      <option name="project" value="LOCAL" />
-      <updated>1769689028133</updated>
-    </task>
-    <task id="LOCAL-00002" summary="ibrahim api terms,privacy,myFriend,add friend Reques">
-      <option name="closed" value="true" />
-      <created>1769934786669</created>
-      <option name="number" value="00002" />
-      <option name="presentableId" value="LOCAL-00002" />
-      <option name="project" value="LOCAL" />
-      <updated>1769934786669</updated>
-    </task>
-    <task id="LOCAL-00003" summary="Search Filter D">
-      <option name="closed" value="true" />
-      <created>1770172555515</created>
-      <option name="number" value="00003" />
-      <option name="presentableId" value="LOCAL-00003" />
-      <option name="project" value="LOCAL" />
-      <updated>1770172555515</updated>
-    </task>
-    <task id="LOCAL-00004" summary="done........">
-      <option name="closed" value="true" />
-      <created>1770199132045</created>
-      <option name="number" value="00004" />
-      <option name="presentableId" value="LOCAL-00004" />
-      <option name="project" value="LOCAL" />
-      <updated>1770199132046</updated>
-    </task>
-    <option name="localTasksCounter" value="5" />
     <servers />
-  </component>
-  <component name="VcsManagerConfiguration">
-    <MESSAGE value="ibrahim api integration" />
-    <MESSAGE value="ibrahim api terms,privacy,myFriend,add friend Reques" />
-    <MESSAGE value="Search Filter D" />
-    <MESSAGE value="done........" />
-    <option name="LAST_COMMIT_MESSAGE" value="done........" />
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" type="Dart">
-          <url>file://$PROJECT_DIR$/lib/features/friend/data/my_friends_model.dart</url>
-          <line>36</line>
-          <option name="timeStamp" value="1" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
   </component>
 </project>

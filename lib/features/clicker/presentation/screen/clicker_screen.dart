@@ -18,6 +18,7 @@ import 'package:giolee78/utils/constants/app_icons.dart';
 import '../../../addpost/presentation/widgets/full_screen_view_image.dart';
 import '../../../friend/presentation/screen/view_friend_screen.dart';
 import '../widget/webview_screen.dart';
+import '../screen/ad_detail_screen.dart';
 
 class ClickerScreen extends StatefulWidget {
   const ClickerScreen({super.key});
@@ -104,13 +105,13 @@ class _ClickerScreenState extends State<ClickerScreen> {
                         suffixIcon: controller.searchText.value.isNotEmpty
                             ? IconButton(
                                 icon: const Icon(Icons.clear),
-                          onPressed: () {
-                            controller.searchController.clear();
-                            controller.searchText.value = '';
-                            controller.locationSuggestions.clear();
-                            controller.getAllPosts(); // fresh load
-                            FocusScope.of(context).unfocus();
-                          },
+                                onPressed: () {
+                                  controller.searchController.clear();
+                                  controller.searchText.value = '';
+                                  controller.locationSuggestions.clear();
+                                  controller.getAllPosts(); // fresh load
+                                  FocusScope.of(context).unfocus();
+                                },
                               )
                             : const SizedBox.shrink(),
                       ),
@@ -182,15 +183,7 @@ class _ClickerScreenState extends State<ClickerScreen> {
                                 ),
                               );
                             } else {
-                              final String imageUrl =
-                                  ad.image.startsWith('http')
-                                  ? ad.image
-                                  : ad.image.startsWith('/')
-                                  ? "${ApiEndPoint.imageUrl}${ad.image}"
-                                  : "${ApiEndPoint.imageUrl}/${ad.image}";
-                              Get.to(
-                                () => FullScreenImageView(images: [imageUrl]),
-                              );
+                              Get.to(() => AdDetailScreen(ad: ad));
                             }
                           },
                           child: ClipRRect(
@@ -281,7 +274,6 @@ class _ClickerScreenState extends State<ClickerScreen> {
                               }
                             },
                             onTapProfile: () {
-
                               //condition for guest mood========================
 
                               if (LocalStorage.token.isNotEmpty) {

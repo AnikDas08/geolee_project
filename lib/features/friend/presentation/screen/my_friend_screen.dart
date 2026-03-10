@@ -55,7 +55,9 @@ class MyFriendScreen extends StatelessWidget {
                 final isSearching = controller.searchQuery.value.isNotEmpty;
                 final list = controller.filteredSuggestedFriends;
 
-                if (list.isEmpty && !controller.isNearbyChatLoading.value) {
+                if (list.isEmpty &&
+                    !controller.isNearbyChatLoading.value &&
+                    !controller.isLoading.value) {
                   if (isSearching) {
                     return Padding(
                       padding: EdgeInsets.symmetric(vertical: 10.h),
@@ -71,7 +73,8 @@ class MyFriendScreen extends StatelessWidget {
                           SizedBox(height: 12.h),
                           Center(
                             child: CommonText(
-                              text: 'No people found for "${controller.searchQuery.value}"',
+                              text:
+                                  'No people found for "${controller.searchQuery.value}"',
                               fontSize: 13,
                               color: AppColors.secondaryText,
                             ),
@@ -88,7 +91,9 @@ class MyFriendScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     CommonText(
-                      text: isSearching ? 'Search Results (Global Users)' : 'Suggested Friends',
+                      text: isSearching
+                          ? 'Search Results (Global Users)'
+                          : 'Suggested Friends',
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
                       textAlign: TextAlign.start,
@@ -100,7 +105,9 @@ class MyFriendScreen extends StatelessWidget {
                       ListView.builder(
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
-                        itemCount: isSearching ? list.length : (list.length > 6 ? 6 : list.length),
+                        itemCount: isSearching
+                            ? list.length
+                            : (list.length > 6 ? 6 : list.length),
                         itemBuilder: (context, index) {
                           final friend = list[index];
 
@@ -109,7 +116,7 @@ class MyFriendScreen extends StatelessWidget {
                             child: _SuggestedFriendCard(
                               userId: friend.id,
                               userName: friend.name,
-                              email: "",
+                              email: friend.email,
                               avatar: "${ApiEndPoint.imageUrl}${friend.image}",
                               controller: controller,
                             ),
@@ -122,7 +129,6 @@ class MyFriendScreen extends StatelessWidget {
               }),
 
               // ================= My Friends (Always visible or search results) =================
-
               if (controller.isLoading.value)
                 const Center(child: CircularProgressIndicator())
               else if (controller.filteredFriendsList.isEmpty)
@@ -162,7 +168,7 @@ class MyFriendScreen extends StatelessWidget {
                         friendshipId: data.id ?? "",
                         userId: friend?.id ?? "",
                         userName: friend?.name ?? "Unknown",
-                        email: "",
+                        email: friend?.email ?? "",
                         avatar: "${ApiEndPoint.imageUrl}${friend?.image ?? ""}",
                         controller: controller,
                       ),
@@ -185,7 +191,7 @@ class _SearchField extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = Get.find<MyFriendController>(); // directly find here
     return CommonTextField(
-      hintText: 'Search friends or anyone',
+      hintText: 'Search by name or email',
       paddingHorizontal: 14,
       paddingVertical: 12,
       onChanged: (value) => controller.searchQuery.value = value,
