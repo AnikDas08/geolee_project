@@ -49,25 +49,6 @@ class NearbyChatController extends GetxController {
     }
   }
 
-  // Future<void> checkAllFriendships() async {
-  //   for (var user in nearbyChatList) {
-  //     try {
-  //       final response = await ApiService.get(
-  //         "${ApiEndPoint.baseUrl}/friendships/check/${user.id}",
-  //       );
-  //       if (response.statusCode == 200) {
-  //         friendStatusMap[user.id] =
-  //             response.data['data']['isAlreadyFriend'] ?? false;
-  //       } else {
-  //         friendStatusMap[user.id] = false;
-  //       }
-  //     } catch (e) {
-  //       friendStatusMap[user.id] = false;
-  //       debugPrint(" Friendship check failed for ${user.id}: $e");
-  //     }
-  //   }
-  // }
-
   Future<void> getNearbyChat({bool isRefresh = true}) async {
     try {
       if (isRefresh) {
@@ -114,9 +95,10 @@ class NearbyChatController extends GetxController {
         for (int i = 0; i < data.length; i++) {
           try {
             final user = NearbyChatUserModel.fromJson(data[i]);
+            if (!user.isLocationVisible) continue;
             parsedList.add(user);
           } catch (e) {
-            debugPrint(" Failed to parse user at index [$i]: $e");
+            debugPrint("Failed to parse user at index [$i]: $e");
           }
         }
 
@@ -125,9 +107,6 @@ class NearbyChatController extends GetxController {
         } else {
           nearbyChatList.addAll(parsedList);
         }
-
-        // await checkAllFriendships();
-
       } else {
         nearbyChatError.value = response.message ?? "Something went wrong";
       }

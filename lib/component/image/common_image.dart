@@ -33,11 +33,14 @@ class CommonImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (imageSrc.isEmpty) {
+      return _buildErrorWidget();
+    }
     if (imageSrc.contains("assets/icons")) {
       return _buildSvgImage();
     } else if (imageSrc.contains("assets/images")) {
       return _buildPngImage();
-    } else if (imageSrc.startsWith('/') || imageSrc.startsWith('file://')) {
+    } else if (imageSrc.startsWith('file://')) {
       // Local file path
       return _buildFileImage();
     } else {
@@ -50,12 +53,18 @@ class CommonImage extends StatelessWidget {
   }
 
   Widget _buildNetworkImage() {
+    final String imageUrl = imageSrc.startsWith('http')
+        ? imageSrc
+        : imageSrc.isEmpty
+            ? ""
+            : imageSrc.startsWith('/')
+                ? "${ApiEndPoint.imageUrl}$imageSrc"
+                : "${ApiEndPoint.imageUrl}/$imageSrc";
+
     return CachedNetworkImage(
       height: size ?? height,
       width: size ?? width,
-      imageUrl: imageSrc.startsWith('http')
-          ? imageSrc
-          : ApiEndPoint.imageUrl + imageSrc,
+      imageUrl: imageUrl,
       fit: fill,
       imageBuilder: (context, imageProvider) => Container(
         decoration: BoxDecoration(
@@ -68,11 +77,12 @@ class CommonImage extends StatelessWidget {
           width: 40,
           height: 40,
           child: CircularProgressIndicator(
-            strokeWidth: 2,
-            color: Colors.blue,
+              strokeWidth: 2,
+              color: Colors.blue,
               value: downloadProgress.progress),
         ),
       ),
+      errorWidget: (context, url, error) => _buildErrorWidget(),
     );
   }
 

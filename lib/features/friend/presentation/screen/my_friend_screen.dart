@@ -50,41 +50,79 @@ class MyFriendScreen extends StatelessWidget {
 
               SizedBox(height: 16.h),
 
-              // ================= Suggested Friends (Only if not searching) =================
-              if (controller.searchQuery.value.isEmpty) ...[
-                const CommonText(
-                  text: 'Suggested Friends',
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  textAlign: TextAlign.start,
-                ),
-                SizedBox(height: 12.h),
-                if (controller.isNearbyChatLoading.value)
-                  const Center(child: CircularProgressIndicator())
-                else if (controller.filteredSuggestedFriends.isNotEmpty) ...[
-                  ListView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: controller.filteredSuggestedFriends.length,
-                    itemBuilder: (context, index) {
-                      final friend = controller.filteredSuggestedFriends[index];
+              // ================= Suggested Friends / Global Search Results =================
+              Obx(() {
+                final isSearching = controller.searchQuery.value.isNotEmpty;
+                final list = controller.filteredSuggestedFriends;
 
-                      return Padding(
-                        padding: EdgeInsets.only(bottom: 10.h),
-                        child: _SuggestedFriendCard(
-                          userId: friend.id,
-                          userName: friend.name,
-                          avatar: "${ApiEndPoint.imageUrl}${friend.image}",
-                          controller: controller,
-                        ),
-                      );
-                    },
-                  ),
-                  SizedBox(height: 20.h),
-                ],
-              ],
+                if (list.isEmpty && !controller.isNearbyChatLoading.value) {
+                  if (isSearching) {
+                    return Padding(
+                      padding: EdgeInsets.symmetric(vertical: 10.h),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const CommonText(
+                            text: 'Search Results (Global Users)',
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            textAlign: TextAlign.start,
+                          ),
+                          SizedBox(height: 12.h),
+                          Center(
+                            child: CommonText(
+                              text: 'No people found for "${controller.searchQuery.value}"',
+                              fontSize: 13,
+                              color: AppColors.secondaryText,
+                            ),
+                          ),
+                          SizedBox(height: 20.h),
+                        ],
+                      ),
+                    );
+                  }
+                  return const SizedBox.shrink();
+                }
+
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    CommonText(
+                      text: isSearching ? 'Search Results (Global Users)' : 'Suggested Friends',
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      textAlign: TextAlign.start,
+                    ),
+                    SizedBox(height: 12.h),
+                    if (controller.isNearbyChatLoading.value)
+                      const Center(child: CircularProgressIndicator())
+                    else
+                      ListView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: isSearching ? list.length : (list.length > 6 ? 6 : list.length),
+                        itemBuilder: (context, index) {
+                          final friend = list[index];
+
+                          return Padding(
+                            padding: EdgeInsets.only(bottom: 10.h),
+                            child: _SuggestedFriendCard(
+                              userId: friend.id,
+                              userName: friend.name,
+                              email: "",
+                              avatar: "${ApiEndPoint.imageUrl}${friend.image}",
+                              controller: controller,
+                            ),
+                          );
+                        },
+                      ),
+                    SizedBox(height: 20.h),
+                  ],
+                );
+              }),
 
               // ================= My Friends (Always visible or search results) =================
+
               if (controller.isLoading.value)
                 const Center(child: CircularProgressIndicator())
               else if (controller.filteredFriendsList.isEmpty)
@@ -124,6 +162,7 @@ class MyFriendScreen extends StatelessWidget {
                         friendshipId: data.id ?? "",
                         userId: friend?.id ?? "",
                         userName: friend?.name ?? "Unknown",
+                        email: "",
                         avatar: "${ApiEndPoint.imageUrl}${friend?.image ?? ""}",
                         controller: controller,
                       ),
@@ -146,7 +185,7 @@ class _SearchField extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = Get.find<MyFriendController>(); // directly find here
     return CommonTextField(
-      hintText: 'Search friends',
+      hintText: 'Search friends or anyone',
       paddingHorizontal: 14,
       paddingVertical: 12,
       onChanged: (value) => controller.searchQuery.value = value,
@@ -162,12 +201,14 @@ class _SuggestedFriendCard extends StatelessWidget {
   const _SuggestedFriendCard({
     required this.userId,
     required this.userName,
+    required this.email,
     required this.controller,
     this.avatar,
   });
 
   final String userId;
   final String userName;
+  final String email;
   final String? avatar;
   final MyFriendController controller;
 
@@ -212,6 +253,14 @@ class _SuggestedFriendCard extends StatelessWidget {
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
                   ),
+                  if (email.isNotEmpty) ...[
+                    SizedBox(height: 2.h),
+                    CommonText(
+                      text: email,
+                      fontSize: 11,
+                      color: AppColors.secondaryText.withValues(alpha: 0.8),
+                    ),
+                  ],
                   SizedBox(height: 2.h),
                   const CommonText(
                     text: 'People you may know',
@@ -319,6 +368,7 @@ class _FriendListItem extends StatelessWidget {
     required this.friendshipId,
     required this.userId,
     required this.userName,
+    required this.email,
     required this.controller,
     this.avatar,
   });
@@ -326,6 +376,7 @@ class _FriendListItem extends StatelessWidget {
   final String friendshipId;
   final String userId;
   final String userName;
+  final String email;
   final String? avatar;
   final MyFriendController controller;
 
@@ -391,6 +442,14 @@ class _FriendListItem extends StatelessWidget {
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
                   ),
+                  if (email.isNotEmpty) ...[
+                    SizedBox(height: 2.h),
+                    CommonText(
+                      text: email,
+                      fontSize: 11,
+                      color: AppColors.secondaryText.withOpacity(0.8),
+                    ),
+                  ],
                   SizedBox(height: 2.h),
                   const CommonText(
                     text: 'Tap to view profile',

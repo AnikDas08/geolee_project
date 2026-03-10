@@ -43,6 +43,7 @@ class MyFriendController extends GetxController {
       <String, FriendStatus>{}.obs;
   final RxMap<String, String> pendingRequestIdMap = <String, String>{}.obs;
   final RxSet<String> loadingUserIds = <String>{}.obs;
+  final RxSet<String> processingRequestIds = <String>{}.obs;
 
   // ================= Search
   final RxString searchQuery = ''.obs;
@@ -62,15 +63,35 @@ class MyFriendController extends GetxController {
 
   // ================= Suggested Friends Filtering
   List<SuggestedFriendUserModel> get filteredSuggestedFriends {
-    // Get all friend IDs
+    final currentUserId = LocalStorage.userId;
+
+    // Get all friend IDs from the main list
     final friendIds = myFriendsList
         .map((data) => data.friend?.id)
         .whereType<String>()
         .toSet();
 
-    // Filter suggested list to exclude those already in myFriendsList
+    // Filter suggested list
     return suggestedFriendList.where((user) {
-      return !friendIds.contains(user.id);
+      // 1. Exclude myself
+      if (user.id == currentUserId) return false;
+
+      // 2. Exclude if already in myFriendsList
+      if (friendIds.contains(user.id)) return false;
+
+      // 3. Exclude if they are already friends
+      final status = getFriendStatus(user.id);
+      if (status == FriendStatus.friends) return false;
+
+      // 4. Local Filter (Backup if DB search returns too many or unfiltered results)
+      if (searchQuery.value.isNotEmpty) {
+        final query = searchQuery.value.toLowerCase();
+        final matchesName = (user.name).toLowerCase().contains(query);
+        final matchesEmail = (user.email).toLowerCase().contains(query);
+        if (!matchesName && !matchesEmail) return false;
+      }
+
+      return true;
     }).toList();
   }
 
@@ -119,6 +140,15 @@ class MyFriendController extends GetxController {
       myFriendsList.value = await GetMyAllFriendsRepo().getFriendList(
         searchTerm: searchTerm,
       );
+
+      // Sync friendStatusMap for all confirmed friends
+      for (var f in myFriendsList) {
+        final userId = f.friend?.id;
+        if (userId != null && userId.isNotEmpty) {
+          friendStatusMap[userId] = FriendStatus.friends;
+        }
+      }
+      friendStatusMap.refresh();
     } catch (e) {
       debugPrint("Exception in getMyAllFriends: $e");
     } finally {
@@ -214,57 +244,87 @@ class MyFriendController extends GetxController {
   }
 
   // ================= Accept Friend Request
-  Future<void> acceptFriendRequest(String senderUserId, int index) async {
+  Future<void> acceptFriendRequest(String requestId) async {
+    if (processingRequestIds.contains(requestId)) return;
+
     try {
-      final url = ApiEndPoint.friendStatusUpdate + senderUserId;
+      processingRequestIds.add(requestId);
+      processingRequestIds.refresh();
+
+      final url = ApiEndPoint.friendStatusUpdate + requestId;
       final response = await ApiService.patch(
         url,
         body: {"status": 'accepted'},
       );
 
       if (response.statusCode == 200) {
-        requests.removeAt(index);
-        requests.refresh();
+        // Find index by requestId
+        final index = requests.indexWhere((r) => r.id == requestId);
+        if (index != -1) {
+          final userId = requests[index].sender.id;
+          requests.removeAt(index);
+          requests.refresh();
+          
+          // Update status in maps for other screens
+          friendStatusMap[userId] = FriendStatus.friends;
+          pendingRequestIdMap.remove(userId);
+          friendStatusMap.refresh();
+          pendingRequestIdMap.refresh();
+        }
         await getMyAllFriends();
-        // Get.snackbar(
-        //   "Success",
-        //   "Friend request accepted",
-        //   colorText: Colors.white,
-        // );
+        Utils.successSnackBar("Success", "Friend request accepted");
       } else {
         debugPrint("acceptFriendRequest error => ${response.data}");
-        Get.snackbar(
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
-          "Info",
-          response.data["message"] ?? "Cannot accept request",
-        );
+        Utils.errorSnackBar("Error", response.data["message"] ?? "Cannot accept request");
       }
     } catch (e) {
       debugPrint("acceptFriendRequest error => ${e.toString()}");
-      Get.snackbar("Error", "Network error");
+      Utils.errorSnackBar("Error", "Network error");
+    } finally {
+      processingRequestIds.remove(requestId);
+      processingRequestIds.refresh();
     }
   }
 
   // ================= Reject Friend Request
-  Future<void> rejectFriendRequest(String senderUserId, int index) async {
+  Future<void> rejectFriendRequest(String requestId) async {
+    if (processingRequestIds.contains(requestId)) return;
+
     try {
-      final url = ApiEndPoint.friendStatusUpdate + senderUserId;
+      processingRequestIds.add(requestId);
+      processingRequestIds.refresh();
+
+      final url = ApiEndPoint.friendStatusUpdate + requestId;
       final response = await ApiService.patch(
         url,
         body: {"status": 'rejected'},
       );
 
       if (response.statusCode == 200) {
-        requests.removeAt(index);
-        requests.refresh();
-        Get.snackbar("Rejected", "Friend request rejected");
+        // Find index by requestId
+        final index = requests.indexWhere((r) => r.id == requestId);
+        if (index != -1) {
+          final userId = requests[index].sender.id;
+          requests.removeAt(index);
+          requests.refresh();
+
+          // Reset status in maps
+          friendStatusMap[userId] = FriendStatus.none;
+          pendingRequestIdMap.remove(userId);
+          friendStatusMap.refresh();
+          pendingRequestIdMap.refresh();
+        }
+        Utils.successSnackBar("Rejected", "Friend request rejected");
       } else {
         debugPrint("rejectFriendRequest error => ${response.data}");
-        Get.snackbar("Rejected", "Friend request rejected");
+        Utils.errorSnackBar("Failed", response.data["message"] ?? "Could not reject request");
       }
     } catch (e) {
-      Get.snackbar("Error", "Network error");
+      debugPrint("rejectFriendRequest error => ${e.toString()}");
+      Utils.errorSnackBar("Error", "Network error");
+    } finally {
+      processingRequestIds.remove(requestId);
+      processingRequestIds.refresh();
     }
   }
 
@@ -350,6 +410,7 @@ class MyFriendController extends GetxController {
   }
 
   // ================= Fetch Suggested Friends (Nearby)
+
   Future<void> getSuggestedFriend({bool isRefresh = true}) async {
     try {
       if (isRefresh) {
@@ -402,13 +463,17 @@ class MyFriendController extends GetxController {
         debugPrint("📋 Raw list count: ${data.length}");
 
         final List<SuggestedFriendUserModel> parsedList = [];
+        final currentUserId = LocalStorage.userId;
         for (int i = 0; i < data.length; i++) {
           try {
             final user = SuggestedFriendUserModel.fromJson(data[i]);
-            parsedList.add(user);
-            debugPrint(
-              "✅ Parsed [$i]: ${user.name} | Distance: ${user.distance}",
-            );
+            // Filter out current user
+            if (user.id != currentUserId) {
+              parsedList.add(user);
+              debugPrint(
+                "✅ Parsed [$i]: ${user.name} | Distance: ${user.distance}",
+              );
+            }
           } catch (e) {
             debugPrint("❌ Failed to parse user [$i]: $e | Raw: ${data[i]}");
           }
@@ -460,23 +525,29 @@ class MyFriendController extends GetxController {
 
       isNearbyChatLoading.value = true;
       nearbyChatError.value = '';
+      
+      // Clear current list to show we are searching
+      suggestedFriendList.clear();
+
+      final double lat = LocalStorage.lat;
+      final double lng = LocalStorage.long;
 
       final url =
-          "${ApiEndPoint.nearByUsers}?searchTerm=${Uri.encodeComponent(query)}&limit=50";
+          "${ApiEndPoint.nearbyChat}?lat=$lat&lng=$lng&searchTerm=${Uri.encodeComponent(query)}&limit=50";
       debugPrint("🌐 Global Search URL: $url");
 
       final ApiResponseModel response = await ApiService.get(url);
+      debugPrint("✅ Global Search Status: ${response.statusCode}");
 
       if (response.isSuccess) {
         final rawList = response.data['data'];
-        if (rawList != null) {
-          final List data = rawList as List;
-          final List<SuggestedFriendUserModel> parsedList = [];
+        final List<SuggestedFriendUserModel> parsedList = [];
 
+        if (rawList != null && rawList is List) {
+          final List data = rawList;
           for (var item in data) {
             try {
               final user = SuggestedFriendUserModel.fromJson(item);
-              // Don't show ourselves in search results
               if (user.id != LocalStorage.userId) {
                 parsedList.add(user);
               }
@@ -484,10 +555,13 @@ class MyFriendController extends GetxController {
               debugPrint("❌ Failed to parse user in search: $e");
             }
           }
+        }
 
-          suggestedFriendList.value = parsedList;
+        suggestedFriendList.value = parsedList;
+        debugPrint("📋 Search results found: ${parsedList.length}");
 
-          // Parallelize friendship status checks for better performance
+        if (parsedList.isNotEmpty) {
+          // Parallelize friendship status checks
           final List<Future<void>> checks = parsedList
               .map((user) => checkFriendship(user.id))
               .toList();
@@ -495,10 +569,11 @@ class MyFriendController extends GetxController {
         }
       } else {
         nearbyChatError.value = response.message;
+        debugPrint("❌ Global Search API Error: ${response.message}");
       }
     } catch (e) {
       nearbyChatError.value = e.toString();
-      debugPrint("❌ Global Search Error: $e");
+      debugPrint("❌ Global Search Exception: $e");
     } finally {
       isNearbyChatLoading.value = false;
     }
@@ -513,23 +588,29 @@ class MyFriendController extends GetxController {
       if (response.statusCode == 200) {
         final data = response.data['data'];
 
+        debugPrint("🔍 checkFriendship raw data: $data");
+
         if (data['isAlreadyFriend'] == true) {
           friendStatusMap[userId] = FriendStatus.friends;
-          friendStatusMap.refresh();
         } else if (data['pendingFriendRequest'] != null) {
-          friendStatusMap[userId] = FriendStatus.requested;
-          pendingRequestIdMap[userId] =
-              data['pendingFriendRequest']['_id'] ?? '';
-          pendingRequestIdMap.refresh();
-          friendStatusMap.refresh();
+          final request = data['pendingFriendRequest'];
+          final requestId = request['_id'];
+          final senderId = request['sender'];
+          
+          pendingRequestIdMap[userId] = requestId ?? '';
+          
+          // If I am the sender, it's 'requested'. If I am NOT the sender, it's 'received'.
+          if (senderId == LocalStorage.userId) {
+            friendStatusMap[userId] = FriendStatus.requested;
+          } else {
+            friendStatusMap[userId] = FriendStatus.received;
+          }
         } else {
           friendStatusMap[userId] = FriendStatus.none;
-          friendStatusMap.refresh();
+          pendingRequestIdMap.remove(userId);
         }
-
-        debugPrint(
-          "🔍 checkFriendship [$userId] => ${friendStatusMap[userId]}",
-        );
+        friendStatusMap.refresh();
+        pendingRequestIdMap.refresh();
       }
     } catch (e) {
       debugPrint("Friendship Error [$userId]: $e");
@@ -538,7 +619,14 @@ class MyFriendController extends GetxController {
 
   // ================= Add Friend
   Future<void> onTapAddFriendButton(String userId) async {
+    // Save previous state for rollback
+    final previousStatus = friendStatusMap[userId];
+    
     try {
+      // Optimistic Update
+      friendStatusMap[userId] = FriendStatus.requested;
+      friendStatusMap.refresh();
+      
       loadingUserIds.add(userId);
       loadingUserIds.refresh();
 
@@ -553,13 +641,17 @@ class MyFriendController extends GetxController {
           pendingRequestIdMap[userId] = requestId;
           pendingRequestIdMap.refresh();
         }
-
-        friendStatusMap[userId] = FriendStatus.requested;
-        friendStatusMap.refresh();
-
         await fetchFriendRequests();
+      } else {
+        // Rollback on non-200 response
+        friendStatusMap[userId] = previousStatus ?? FriendStatus.none;
+        friendStatusMap.refresh();
+        Utils.errorSnackBar("Failed", response.data['message'] ?? "Could not send request");
       }
     } catch (e) {
+      // Rollback on error
+      friendStatusMap[userId] = previousStatus ?? FriendStatus.none;
+      friendStatusMap.refresh();
       Utils.errorSnackBar("Error", e.toString());
     } finally {
       loadingUserIds.remove(userId);
@@ -569,7 +661,14 @@ class MyFriendController extends GetxController {
 
   // ================= Cancel Friend Request
   Future<void> cancelFriendRequest(String userId) async {
+    // Save previous state for rollback
+    final previousStatus = friendStatusMap[userId];
+
     try {
+      // Optimistic Update
+      friendStatusMap[userId] = FriendStatus.none;
+      friendStatusMap.refresh();
+      
       loadingUserIds.add(userId);
       loadingUserIds.refresh();
 
@@ -584,13 +683,18 @@ class MyFriendController extends GetxController {
       );
 
       if (response.statusCode == 200) {
-        friendStatusMap[userId] = FriendStatus.none;
-        friendStatusMap.refresh();
-
         pendingRequestIdMap.remove(userId);
         pendingRequestIdMap.refresh();
+      } else {
+        // Rollback
+        friendStatusMap[userId] = previousStatus ?? FriendStatus.requested;
+        friendStatusMap.refresh();
+        Utils.errorSnackBar("Failed", response.data['message'] ?? "Could not cancel request");
       }
     } catch (e) {
+      // Rollback
+      friendStatusMap[userId] = previousStatus ?? FriendStatus.requested;
+      friendStatusMap.refresh();
       Utils.errorSnackBar("Error", e.toString());
     } finally {
       loadingUserIds.remove(userId);

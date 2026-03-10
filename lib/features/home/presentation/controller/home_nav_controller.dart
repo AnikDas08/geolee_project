@@ -32,10 +32,8 @@ class HomeNavController extends GetxController {
       isUserScreenActive.value = (index == 0);
     }
 
-
-
-    if (isUser && index == 2) {
-
+    // BottomNav control
+    if (index == 1) {   // Clicker / AddPost
       showNavBar.value = false;
     } else {
       showNavBar.value = true;

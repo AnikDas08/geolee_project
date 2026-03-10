@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:giolee78/utils/constants/app_colors.dart';
 import 'package:intl/intl.dart';
 import '../controller/home_controller.dart';
 
@@ -315,7 +316,7 @@ class _FilterDialogState extends State<FilterDialog>
               child: ElevatedButton(
                 onPressed: _applyFilter,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
+                  backgroundColor: AppColors.primaryColor,
                   padding: EdgeInsets.symmetric(vertical: 14.h),
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8.r)),

@@ -597,7 +597,7 @@ class HomeController extends GetxController {
       final response = await ApiService.patch(
         ApiEndPoint.updateProfile,
         body: {
-          "isLocationVisible": true,
+          "isLocationVisible": false,
           "location": [longitude, latitude],
           "address": address ?? "Location Unavailable",
         },
@@ -628,6 +628,24 @@ class HomeController extends GetxController {
       debugPrint('Location update error: $e');
     } finally {
       isLocationUpdating.value = false;
+    }
+  }
+
+
+  Future<void> onMyLocationVisibility() async {
+    try {
+      final response = await ApiService.patch(
+        ApiEndPoint.updateProfile,
+        body: {
+          "isLocationVisible": true,
+
+        },
+      );
+      if (response.statusCode == 200) {
+        debugPrint('Profile location updated');
+      }
+    } catch (e) {
+      debugPrint('Error updating profile: $e');
     }
   }
 

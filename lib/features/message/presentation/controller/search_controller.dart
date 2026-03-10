@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:giolee78/features/friend/presentation/controller/my_friend_controller.dart';
 import 'package:giolee78/features/message/data/model/search_friend_model.dart';
+import 'package:giolee78/utils/enum/enum.dart';
 import '../../../../config/api/api_end_point.dart';
 import '../../../../services/api/api_response_model.dart';
 import '../../../../services/api/api_service.dart';

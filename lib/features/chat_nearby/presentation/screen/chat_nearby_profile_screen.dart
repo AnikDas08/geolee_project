@@ -4,8 +4,7 @@ import 'package:get/get.dart';
 import 'package:giolee78/config/api/api_end_point.dart';
 import 'package:giolee78/features/chat_nearby/data/nearby_friends_model.dart';
 import 'package:giolee78/features/chat_nearby/presentation/controller/chat_nearby_profile_controller.dart';
-import 'package:giolee78/features/clicker/presentation/controller/clicker_controller.dart'
-    hide FriendStatus; // ✅ Import ClickerController
+import 'package:giolee78/features/clicker/presentation/controller/clicker_controller.dart';
 
 import '../../../../component/button/common_button.dart';
 import '../../../../component/image/common_image.dart';
@@ -92,11 +91,19 @@ class _ChatNearbyProfileScreenState extends State<ChatNearbyProfileScreen> {
         child: Obx(
           () => _ChatNearbyProfileAppBar(
             status: controller.friendStatus.value,
+            isProcessing: controller.isProcessingAction.value,
             onTapAdd: () {
               controller.addFriend(widget.user.id.toString());
             },
             onTapCancel: () {
               controller.cancelRequest(widget.user.id.toString());
+            },
+            onTapMessage: () {
+              clickerController.createOrGetChatAndGo(
+                receiverId: widget.user.id.toString(),
+                name: widget.user.name,
+                image: widget.user.image ?? '',
+              );
             },
           ),
         ),
@@ -167,13 +174,17 @@ class _ChatNearbyProfileScreenState extends State<ChatNearbyProfileScreen> {
 class _ChatNearbyProfileAppBar extends StatelessWidget {
   const _ChatNearbyProfileAppBar({
     required this.status,
+    this.isProcessing = false,
     required this.onTapAdd,
     required this.onTapCancel,
+    required this.onTapMessage,
   });
 
   final FriendStatus status;
+  final bool isProcessing;
   final VoidCallback onTapAdd;
   final VoidCallback onTapCancel;
+  final VoidCallback onTapMessage;
 
   @override
   Widget build(BuildContext context) {
@@ -210,24 +221,37 @@ class _ChatNearbyProfileAppBar extends StatelessWidget {
               // Logic for the action icon
               if (status == FriendStatus.none)
                 IconButton(
-                  onPressed: onTapAdd,
-                  icon: CommonImage(imageSrc: AppIcons.addFriend, size: 22.sp),
+                  onPressed: isProcessing ? () {} : onTapAdd,
+                  icon: isProcessing
+                      ? SizedBox(
+                          width: 22.sp,
+                          height: 22.sp,
+                          child: const CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : CommonImage(imageSrc: AppIcons.addFriend, size: 22.sp),
                 )
               else if (status == FriendStatus.requested)
                 IconButton(
-                  onPressed: onTapCancel,
-                  icon: Icon(
-                    Icons.person_remove_alt_1,
-                    color: Colors.red,
-                    size: 22.sp,
-                  ),
+                  onPressed: isProcessing ? () {} : onTapCancel,
+                  icon: isProcessing
+                      ? SizedBox(
+                          width: 22.sp,
+                          height: 22.sp,
+                          child: const CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.red,
+                          ),
+                        )
+                      : Icon(
+                          Icons.person_remove_alt_1,
+                          color: Colors.red,
+                          size: 22.sp,
+                        ),
                 )
               else if (status == FriendStatus.friends)
                 // ✅ Show message icon when already friends
                 IconButton(
-                  onPressed: () {
-                    debugPrint("💬 Already friends - Message icon visible");
-                  },
+                  onPressed: isProcessing ? null : onTapMessage,
                   icon: Icon(
                     Icons.chat_bubble_outline,
                     color: AppColors.primaryColor,

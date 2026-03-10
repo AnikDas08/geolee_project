@@ -1,7 +1,7 @@
 import 'package:get/get.dart';
+import 'package:giolee78/utils/enum/enum.dart';
 
-// ✅ FriendStatus enum defined here (single source of truth)
-enum FriendStatus { none, requested, friends }
+// Removed local FriendStatus enum to use the global one from enum.dart
 
 class SerarchFriendResponseModel {
   final bool success;

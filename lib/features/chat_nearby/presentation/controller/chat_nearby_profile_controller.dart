@@ -16,6 +16,7 @@ class ChatNearbyProfileController extends GetxController {
 
   var friendStatus = FriendStatus.none.obs;
   var pendingRequestId = ''.obs;
+  var isProcessingAction = false.obs;
 
   Future<void> initProfile(String userId) async {
     await Future.wait([
@@ -139,12 +140,18 @@ class ChatNearbyProfileController extends GetxController {
 
   Future<void> addFriend(String userId) async {
     try {
+      isProcessingAction.value = true;
       final response = await ApiService.post(
         ApiEndPoint.createFriendRequest,
         body: {"receiver": userId},
       );
 
       if (response.statusCode == 200) {
+        final requestId = response.data['data']?['_id'];
+        if (requestId != null) {
+          pendingRequestId.value = requestId;
+        }
+        
         friendStatus.value = FriendStatus.requested;
         Utils.successSnackBar(
             "Sent", "Friend request sent");
@@ -161,13 +168,20 @@ class ChatNearbyProfileController extends GetxController {
     } catch (e) {
       debugPrint("Error adding friend: $e");
       Utils.errorSnackBar("Error", "Something went wrong");
+    } finally {
+      isProcessingAction.value = false;
     }
   }
 
   Future<void> cancelRequest(String userId) async {
+    if (pendingRequestId.value.isEmpty) {
+      Utils.errorSnackBar("Wait", "Action in progress, please wait...");
+      return;
+    }
+
     try {
-      final idToUse =
-      pendingRequestId.value.isNotEmpty ? pendingRequestId.value : userId;
+      isProcessingAction.value = true;
+      final idToUse = pendingRequestId.value;
 
       final response = await ApiService.patch(
         ApiEndPoint.cancelFriendRequest + idToUse,
@@ -184,12 +198,13 @@ class ChatNearbyProfileController extends GetxController {
     } catch (e) {
       debugPrint("Error cancelling request: $e");
       Utils.errorSnackBar("Error", "Something went wrong");
+    } finally {
+      isProcessingAction.value = false;
     }
   }
 
   @override
   void onClose() {
-    // ✅ Clean up when controller is disposed
     super.onClose();
   }
 }

@@ -7,8 +7,7 @@ import 'package:giolee78/features/chat_nearby/data/nearby_friends_model.dart';
 import 'package:giolee78/features/chat_nearby/presentation/controller/nearby_chat_controller.dart';
 import 'package:giolee78/features/chat_nearby/presentation/controller/chat_nearby_profile_controller.dart';
 import 'package:giolee78/features/chat_nearby/presentation/screen/chat_nearby_profile_screen.dart';
-import 'package:giolee78/features/clicker/presentation/controller/clicker_controller.dart'
-    hide FriendStatus;
+import 'package:giolee78/features/clicker/presentation/controller/clicker_controller.dart';
 import 'package:giolee78/utils/constants/app_images.dart';
 
 import '../../../../component/image/common_image.dart';
@@ -192,7 +191,7 @@ class _ChatNearbyAppBar extends StatelessWidget {
 
               /// description
               Text(
-                "Are you sure you want to clear your location? Nearby users will not be able to see you until you visit this screen again.",
+                "Are you sure you want to clear location data? Nearby users will not be able to see you.",
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   decoration: TextDecoration.none,

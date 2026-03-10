@@ -99,7 +99,7 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
         CommonTextField(
           controller: HelpSupportController.instance.messageController,
           hintText:
-              'What do you need help with?”',
+              'What do you need help with',
           textInputAction: TextInputAction.newline,
           maxLines: 6,
           keyboardType: TextInputType.multiline,

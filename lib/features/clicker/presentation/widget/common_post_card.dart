@@ -56,31 +56,14 @@ class CommonPostCards extends StatelessWidget {
               children: [
                 InkWell(
                   onTap: onTapProfile,
-                  child: CircleAvatar(
-                    radius: 18.r,
-                    backgroundColor: Colors.transparent,
-                    child: ClipOval(
-                      child: userAvatar.isEmpty
-                          ? Image.asset(
-                        "assets/images/profilePlaceholder.jpg",
-                        width: 36.r,
-                        height: 36.r,
-                        fit: BoxFit.cover,
-                      )
-                          : Image.network(
-                        userAvatar,
-                        width: 36.r,
-                        height: 36.r,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          return Image.asset(
-                            "assets/images/profilePlaceholder.jpg",
-                            fit: BoxFit.cover,
-                          );
-                        },
-                      ),
-                    ),
-                  )
+                  child: CommonImage(
+                    imageSrc: userAvatar,
+                    width: 36.r,
+                    height: 36.r,
+                    borderRadius: 18.r,
+                    fill: BoxFit.cover,
+                    defaultImage: "assets/images/profilePlaceholder.jpg",
+                  ),
                 ),
                 SizedBox(width: 10.w),
                 Flexible(

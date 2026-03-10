@@ -37,7 +37,7 @@ class _HomeNavState extends State<HomeNav> {
 
   final List<Widget> advertiseScreens = [
     const HomeScreen(),
-    const CreateAdsScreen(),
+    const CreateAdsScreen(),//TODO===need  remove clicker bottom
     const DashboardScreen(),
   ];
 

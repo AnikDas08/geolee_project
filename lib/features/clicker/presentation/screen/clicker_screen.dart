@@ -37,6 +37,7 @@ class _ClickerScreenState extends State<ClickerScreen> {
   @override
   void initState() {
     super.initState();
+    controller.getAllPosts();
     _scrollController.addListener(_onScroll);
   }
 
@@ -102,19 +103,21 @@ class _ClickerScreenState extends State<ClickerScreen> {
                         borderRadius: 20.r,
                         suffixIcon: controller.searchText.value.isNotEmpty
                             ? IconButton(
-                          icon: const Icon(Icons.clear),
+                                icon: const Icon(Icons.clear),
                           onPressed: () {
                             controller.searchController.clear();
+                            controller.searchText.value = '';
                             controller.locationSuggestions.clear();
-                            controller.getAllPosts(); // reset
+                            controller.getAllPosts(); // fresh load
                             FocusScope.of(context).unfocus();
                           },
-                        )
+                              )
                             : const SizedBox.shrink(),
                       ),
                       // 👇 Suggestions dropdown
                       Obx(() {
-                        if (controller.locationSuggestions.isEmpty) return const SizedBox.shrink();
+                        if (controller.locationSuggestions.isEmpty)
+                          return const SizedBox.shrink();
                         return Container(
                           margin: EdgeInsets.only(top: 4.h),
                           decoration: BoxDecoration(
@@ -132,12 +135,20 @@ class _ClickerScreenState extends State<ClickerScreen> {
                             shrinkWrap: true,
                             physics: const NeverScrollableScrollPhysics(),
                             itemCount: controller.locationSuggestions.length,
-                            separatorBuilder: (_, __) => const Divider(height: 1),
+                            separatorBuilder: (_, __) =>
+                                const Divider(height: 1),
                             itemBuilder: (context, index) {
-                              final suggestion = controller.locationSuggestions[index];
+                              final suggestion =
+                                  controller.locationSuggestions[index];
                               return ListTile(
-                                leading: const Icon(Icons.location_on_outlined, size: 18),
-                                title: Text(suggestion, style: TextStyle(fontSize: 14.sp)),
+                                leading: const Icon(
+                                  Icons.location_on_outlined,
+                                  size: 18,
+                                ),
+                                title: Text(
+                                  suggestion,
+                                  style: TextStyle(fontSize: 14.sp),
+                                ),
                                 onTap: () {
                                   controller.onLocationSelected(suggestion);
                                   FocusScope.of(context).unfocus();
@@ -170,12 +181,22 @@ class _ClickerScreenState extends State<ClickerScreen> {
                                   title: ad.title,
                                 ),
                               );
+                            } else {
+                              final String imageUrl =
+                                  ad.image.startsWith('http')
+                                  ? ad.image
+                                  : ad.image.startsWith('/')
+                                  ? "${ApiEndPoint.imageUrl}${ad.image}"
+                                  : "${ApiEndPoint.imageUrl}/${ad.image}";
+                              Get.to(
+                                () => FullScreenImageView(images: [imageUrl]),
+                              );
                             }
                           },
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(12.r),
                             child: CommonImage(
-                              imageSrc: "${ApiEndPoint.imageUrl}${ad.image}",
+                              imageSrc: ad.image,
                               height: 150.h,
                               width: double.infinity,
                               fill: BoxFit.cover,
@@ -236,16 +257,19 @@ class _ClickerScreenState extends State<ClickerScreen> {
                     : ListView.separated(
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
-                       itemCount: LocalStorage.token.isEmpty
-                      ? controller.filteredPosts.length.clamp(0, 20)
-                      : controller.filteredPosts.length,
+                        itemCount: LocalStorage.token.isEmpty
+                            ? controller.filteredPosts.length.clamp(0, 20)
+                            : controller.filteredPosts.length,
                         separatorBuilder: (_, __) => SizedBox(height: 16.h),
                         itemBuilder: (context, index) {
                           final data = controller.filteredPosts[index];
                           final List<String> postImages = data.photos.isNotEmpty
-                              ? data.photos
-                                    .map((p) => ApiEndPoint.imageUrl + p)
-                                    .toList()
+                              ? data.photos.map((p) {
+                                  if (p.startsWith('http')) return p;
+                                  return p.startsWith('/')
+                                      ? "${ApiEndPoint.imageUrl}$p"
+                                      : "${ApiEndPoint.imageUrl}/$p";
+                                }).toList()
                               : [];
 
                           return CommonPostCards(
@@ -257,7 +281,9 @@ class _ClickerScreenState extends State<ClickerScreen> {
                               }
                             },
                             onTapProfile: () {
-                              //condition for guest mood====================
+
+                              //condition for guest mood========================
+
                               if (LocalStorage.token.isNotEmpty) {
                                 Get.to(
                                   () => ViewFriendScreen(

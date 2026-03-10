@@ -219,34 +219,47 @@ class FriendRequestScreen extends StatelessWidget {
                         SizedBox(height: 12.h),
 
                         // ── Accept / Reject buttons
-                        Row(
-                          children: [
-                            Expanded(
-                              child: CommonButton(
-                                buttonHeight: 36.h,
-                                titleText: 'Accept',
-                                onTap: () => controller.acceptFriendRequest(
-                                  data.id,
-                                  index,
+                        Obx(() {
+                          final isProcessing =
+                              controller.processingRequestIds.contains(data.id);
+
+                          return Row(
+                            children: [
+                              Expanded(
+                                child: CommonButton(
+                                  buttonHeight: 36.h,
+                                  titleText: isProcessing ? '...' : 'Accept',
+                                  onTap: isProcessing
+                                      ? () {}
+                                      : () async {
+                                          final requestId = data.id;
+                                          if (requestId.isEmpty) return;
+                                          await controller
+                                              .acceptFriendRequest(requestId);
+                                        },
                                 ),
                               ),
-                            ),
-                            SizedBox(width: 10.w),
-                            Expanded(
-                              child: CommonButton(
-                                borderColor: Colors.transparent,
-                                buttonHeight: 36.h,
-                                titleText: 'Reject',
-                                buttonColor: const Color(0xFFDEE2E3),
-                                titleColor: const Color(0xFF737373),
-                                onTap: () => controller.rejectFriendRequest(
-                                  data.id,
-                                  index,
+                              SizedBox(width: 10.w),
+                              Expanded(
+                                child: CommonButton(
+                                  borderColor: Colors.transparent,
+                                  buttonHeight: 36.h,
+                                  titleText: isProcessing ? '...' : 'Reject',
+                                  buttonColor: const Color(0xFFDEE2E3),
+                                  titleColor: const Color(0xFF737373),
+                                  onTap: isProcessing
+                                      ? () {}
+                                      : () async {
+                                          final requestId = data.id;
+                                          if (requestId.isEmpty) return;
+                                          await controller
+                                              .rejectFriendRequest(requestId);
+                                        },
                                 ),
                               ),
-                            ),
-                          ],
-                        ),
+                            ],
+                          );
+                        }),
                       ],
                     ),
                   ),

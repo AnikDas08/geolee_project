@@ -16,8 +16,7 @@ import '../../../../config/api/api_end_point.dart';
 import '../../../../config/route/app_routes.dart';
 import '../../../friend/data/post_model_by_id.dart';
 import '../../data/addbanner_model.dart';
-
-enum FriendStatus { none, requested, friends }
+import 'package:giolee78/utils/enum/enum.dart';
 
 class ClickerController extends GetxController {
   /// ================= Search & UI State
@@ -66,6 +65,42 @@ class ClickerController extends GetxController {
   var friendStatus = FriendStatus.none.obs;
   var pendingRequestId = ''.obs;
 
+
+  @override
+  void onInit() {
+    super.onInit();
+    getAllPosts();
+    _getUniqueDeviceId();
+    getCurrentLocation();
+    updateProfileAndLocationVisible();
+    if (LocalStorage.token.isNotEmpty) {
+      getBanners();
+      searchController.addListener(_onSearchChanged);
+
+      // Trigger location suggestions as user types, with 500ms debounce
+      debounce(searchText, (String? value) {
+        if (value != null) {
+          fetchLocationSuggestions(value);
+        }
+      }, time: const Duration(milliseconds: 500));
+
+      // Listen for friendship status changes to refresh user posts
+      if (Get.isRegistered<MyFriendController>()) {
+        final friendC = Get.find<MyFriendController>();
+        ever(friendC.friendStatusMap, (_) {
+          _filterPosts();
+          _filterUserPosts();
+        });
+      }
+    }
+  }
+
+  @override
+  void onClose() {
+    searchController.removeListener(_onSearchChanged);
+    super.onClose();
+  }
+
   Future<void> updateProfileAndLocationVisible() async {
     try {
       final latitude = LocalStorage.lat.toDouble();
@@ -76,7 +111,7 @@ class ClickerController extends GetxController {
         ApiEndPoint.updateProfile,
 
         body: {
-          'isLocationVisible': true,
+          'isLocationVisible': false,
           "location": [longitude, latitude],
         },
       );
@@ -137,24 +172,7 @@ class ClickerController extends GetxController {
     getAllPosts(searchTerm: location); // search in DB
   }
 
-  @override
-  void onInit() {
-    super.onInit();
-    getAllPosts();
-    _getUniqueDeviceId();
-    getCurrentLocation();
-    updateProfileAndLocationVisible();
-    if (LocalStorage.token.isNotEmpty) {
-      getBanners();
-      searchController.addListener(_onSearchChanged);
-    }
-  }
 
-  @override
-  void onClose() {
-    searchController.removeListener(_onSearchChanged);
-    super.onClose();
-  }
 
   Future<void> createOrGetChatAndGo({
     required String receiverId,
@@ -220,11 +238,7 @@ class ClickerController extends GetxController {
     }
   }
 
-  Future<void> getAllPosts({
-    String? clickerType,
-    bool isLoadMore = false,
-    String? searchTerm,
-  }) async {
+  Future<void> getAllPosts({String? clickerType, bool isLoadMore = false, String? searchTerm,}) async {
     try {
       if (isLoadMore) {
         if (currentPage.value >= totalPages.value) return;
@@ -241,32 +255,29 @@ class ClickerController extends GetxController {
       final List<String> queryParams = [];
 
       queryParams.add("page=${currentPage.value}");
-      queryParams.add("limit=10");
+      queryParams.add("limit=50");
 
       final String filter = clickerType ?? selectedFilter;
       if (filter != 'All') queryParams.add("clickerType=$filter");
-      if (LocalStorage.token.isEmpty) queryParams.add("privacy=public");
 
-      // 👇 ADD THIS
       final term = searchTerm ?? searchText.value;
       if (term.isNotEmpty) queryParams.add("searchTerm=${Uri.encodeComponent(term)}");
 
       if (queryParams.isNotEmpty) url += "?${queryParams.join('&')}";
+      debugPrint("🌐 Fetching Posts: $url");
 
       final response = await ApiService.get(url);
 
-      if (response.statusCode == 200) {
+        if (response.statusCode == 200) {
         final AllPostModel responseData = AllPostModel.fromJson(response.data);
         totalPages.value = responseData.pagination.totalPage;
 
-        final visiblePosts = responseData.data
-            .where((post) => post.privacy == 'public')
-            .toList();
+        debugPrint("✅ Received ${responseData.data.length} posts from server");
 
         if (isLoadMore) {
-          posts.addAll(visiblePosts);
+          posts.addAll(responseData.data);
         } else {
-          posts.assignAll(visiblePosts);
+          posts.assignAll(responseData.data);
         }
         _filterPosts();
       }
@@ -413,14 +424,19 @@ class ClickerController extends GetxController {
     }
   }
 
-  // ================= Search/Filter Logic
-
   void _filterPosts() {
     List<PostData> filtered = posts.toList();
 
+
+    debugPrint("🔍 Total posts received from server: ${posts.length}");
     filtered = filtered.where((post) {
-      if (post.privacy == 'public') return true;
-      return post.user.id == LocalStorage.userId;
+      final p = post.privacy.toLowerCase().trim();
+      final isPublic = p == 'public';
+      
+      // LOG EVERY POST'S PRIVACY
+      debugPrint("📦 Post ${post.id} | Privacy: [${post.privacy}] | Render: $isPublic");
+      
+      return isPublic;
     }).toList();
 
     if (selectedFilter != 'All') {
@@ -432,12 +448,10 @@ class ClickerController extends GetxController {
     if (searchText.value.isNotEmpty) {
       final query = searchText.value.toLowerCase();
       filtered = filtered
-          .where(
-            (post) =>
-                post.user.name.toLowerCase().contains(query) ||
-                post.description.toLowerCase().contains(query) ||
-                post.address.toLowerCase().contains(query),
-          )
+          .where((post) =>
+      post.user.name.toLowerCase().contains(query) ||
+          post.description.toLowerCase().contains(query) ||
+          post.address.toLowerCase().contains(query))
           .toList();
     }
 
@@ -451,7 +465,7 @@ class ClickerController extends GetxController {
     getAllPosts(clickerType: newFilter);
   }
 
-  // ================= Friendship Logic
+  // ================= Friendship Logic=============
   Future<void> checkFriendship(String userId) async {
     try {
       final response = await ApiService.get(
@@ -467,7 +481,7 @@ class ClickerController extends GetxController {
         } else {
           friendStatus.value = FriendStatus.none;
         }
-        _filterUserPosts(); // Re-filter posts based on newly fetched status
+        _filterUserPosts();
       }
     } catch (e) {
       debugPrint("Friendship Error: $e");
@@ -495,6 +509,9 @@ class ClickerController extends GetxController {
   }
 
   Future<void> cancelFriendRequest(String userId) async {
+    // Save previous state for rollback
+    final previousStatus = friendStatus.value;
+
     try {
       isLoading.value = true;
       final idToUse = pendingRequestId.value.isNotEmpty
@@ -511,8 +528,14 @@ class ClickerController extends GetxController {
         friendStatus.value = FriendStatus.none;
         pendingRequestId.value = '';
         Utils.successSnackBar("Cancelled", "Friend request cancelled");
+      } else {
+        // Rollback
+        friendStatus.value = previousStatus;
+        Utils.errorSnackBar("Failed", response.data['message'] ?? "Could not cancel request");
       }
     } catch (e) {
+      // Rollback
+      friendStatus.value = previousStatus;
       Utils.errorSnackBar("Error", e.toString());
     } finally {
       isLoading.value = false;
@@ -527,25 +550,30 @@ class ClickerController extends GetxController {
     }
 
     final String currentUserId = LocalStorage.userId;
+    final MyFriendController friendC = Get.isRegistered<MyFriendController>()
+        ? Get.find<MyFriendController>()
+        : Get.put(MyFriendController());
+
     final List<PostById> filtered = _allUserPostsRaw.where((post) {
-      // 1. Owner sees everything
+
       if (post.user.id == currentUserId) return true;
 
       final privacy = post.privacy.toLowerCase().trim();
 
-      // 2. Hide "Only me" from everyone else
       if (privacy == 'only me' || privacy == 'onlyme') return false;
 
-      // 3. "Friend" posts only visible to friends
       if (privacy == 'friend' || privacy == 'friends') {
-        return friendStatus.value == FriendStatus.friends;
+        final status = friendC.getFriendStatus(post.user.id);
+        return status == FriendStatus.friends;
       }
 
-      // 4. "Public" posts visible to everyone
-      return true;
+      if (privacy == 'public') return true;
+
+      return false;
     }).toList();
 
     usersPosts.assignAll(filtered);
     usersPosts.refresh();
   }
+
 }

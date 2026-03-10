@@ -86,19 +86,24 @@ class PostData {
   });
 
   factory PostData.fromJson(Map<String, dynamic> json) => PostData(
-    id: json["_id"],
-    user: User.fromJson(json["user"]),
-    photos: List<String>.from(json["photos"].map((x) => x)),
-    description: json["description"],
-    address: json["address"],
-    location: Location.fromJson(json["location"]),
-    clickerType: json["clickerType"],
-    privacy: json["privacy"],
-    status: json["status"],
-    isDeleted: json["isDeleted"],
-    // ✅ UTC → device local timezone এ convert
-    createdAt: DateTime.parse(json["createdAt"]).toLocal(),
-    updatedAt: DateTime.parse(json["updatedAt"]).toLocal(),
+    id: json["_id"] ?? "",
+    user: User.fromJson(json["user"] ?? {}),
+    photos: json["photos"] != null
+        ? List<String>.from(json["photos"].map((x) => x ?? ""))
+        : [],
+    description: json["description"] ?? "",
+    address: json["address"] ?? "",
+    location: Location.fromJson(json["location"] ?? {}),
+    clickerType: json["clickerType"] ?? "",
+    privacy: json["privacy"] ?? "public",
+    status: json["status"] ?? "active",
+    isDeleted: json["isDeleted"] ?? false,
+    createdAt: json["createdAt"] != null 
+        ? DateTime.parse(json["createdAt"]).toLocal()
+        : DateTime.now(),
+    updatedAt: json["updatedAt"] != null
+        ? DateTime.parse(json["updatedAt"]).toLocal()
+        : DateTime.now(),
   );
 
   Map<String, dynamic> toJson() => {
@@ -132,10 +137,10 @@ class User {
   });
 
   factory User.fromJson(Map<String, dynamic> json) => User(
-    id: json["_id"],
-    name: json["name"],
-    email: json["email"],
-    image: json["image"],
+    id: json["_id"] ?? "",
+    name: json["name"] ?? "Anonymous",
+    email: json["email"] ?? "",
+    image: json["image"] ?? "",
   );
 
   Map<String, dynamic> toJson() => {
@@ -156,9 +161,10 @@ class Location {
   });
 
   factory Location.fromJson(Map<String, dynamic> json) => Location(
-    type: json["type"],
-    coordinates: List<double>.from(
-        json["coordinates"].map((x) => x.toDouble())),
+    type: json["type"] ?? "Point",
+    coordinates: json["coordinates"] != null
+        ? List<double>.from(json["coordinates"].map((x) => x?.toDouble() ?? 0.0))
+        : [0.0, 0.0],
   );
 
   Map<String, dynamic> toJson() => {
