@@ -210,8 +210,8 @@ class EditAdsScreen extends StatelessWidget {
                   imageUrl,
                   fit: BoxFit.cover,
                   errorBuilder: (context, error, stackTrace) {
-                    print("❌ Image load error: $error");
-                    print("❌ URL: $imageUrl");
+                    debugPrint("❌ Image load error: $error");
+                    debugPrint("❌ URL: $imageUrl");
                     return Container(
                       color: Colors.grey.shade200,
                       child: Column(

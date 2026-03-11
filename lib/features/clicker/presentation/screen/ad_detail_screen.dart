@@ -54,20 +54,19 @@ class _AdDetailScreenState extends State<AdDetailScreen>
       value: SystemUiOverlayStyle.light,
       child: Scaffold(
         backgroundColor: const Color(0xFFF6F4F1),
-        body: CustomScrollView(
-          physics: const BouncingScrollPhysics(),
-          slivers: [
-            _buildSliverAppBar(),
-            SliverToBoxAdapter(
-              child: FadeTransition(
-                opacity: _fadeIn,
-                child: SlideTransition(
-                  position: _slideUp,
-                  child: _buildBody(),
+        body: SafeArea(
+          child: CustomScrollView(
+            physics: const BouncingScrollPhysics(),
+            slivers: [
+              _buildSliverAppBar(),
+              SliverToBoxAdapter(
+                child: FadeTransition(
+                  opacity: _fadeIn,
+                  child: SlideTransition(position: _slideUp, child: _buildBody()),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
         bottomNavigationBar: _buildBottomBar(),
       ),
@@ -86,8 +85,11 @@ class _AdDetailScreenState extends State<AdDetailScreen>
         padding: EdgeInsets.all(8.r),
         child: _GlassButton(
           onTap: () => Get.back(),
-          child: const Icon(Icons.arrow_back_ios_new_rounded,
-              color: Colors.white, size: 18),
+          child: const Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: Colors.white,
+            size: 18,
+          ),
         ),
       ),
       flexibleSpace: FlexibleSpaceBar(
@@ -104,8 +106,11 @@ class _AdDetailScreenState extends State<AdDetailScreen>
                 errorBuilder: (_, __, ___) => Container(
                   color: const Color(0xFF2A2A2A),
                   child: const Center(
-                    child: Icon(Icons.image_not_supported,
-                        size: 60, color: Colors.white30),
+                    child: Icon(
+                      Icons.image_not_supported,
+                      size: 60,
+                      color: Colors.white30,
+                    ),
                   ),
                 ),
               ),
@@ -144,9 +149,10 @@ class _AdDetailScreenState extends State<AdDetailScreen>
                   height: 1.25,
                   shadows: const [
                     Shadow(
-                        color: Colors.black38,
-                        blurRadius: 12,
-                        offset: Offset(0, 2))
+                      color: Colors.black38,
+                      blurRadius: 12,
+                      offset: Offset(0, 2),
+                    ),
                   ],
                 ),
               ),
@@ -187,8 +193,7 @@ class _AdDetailScreenState extends State<AdDetailScreen>
   }
 
   Widget _buildContactChips() {
-    final hasPhone =
-        widget.ad.phone != null && widget.ad.phone!.isNotEmpty;
+    final hasPhone = widget.ad.phone != null && widget.ad.phone!.isNotEmpty;
     final hasWeb =
         widget.ad.websiteUrl != null && widget.ad.websiteUrl!.isNotEmpty;
 
@@ -217,8 +222,7 @@ class _AdDetailScreenState extends State<AdDetailScreen>
   // ─── Bottom action bar ────────────────────────────────────────────────────
 
   Widget _buildBottomBar() {
-    final hasPhone =
-        widget.ad.phone != null && widget.ad.phone!.isNotEmpty;
+    final hasPhone = widget.ad.phone != null && widget.ad.phone!.isNotEmpty;
     final hasWeb =
         widget.ad.websiteUrl != null && widget.ad.websiteUrl!.isNotEmpty;
 
@@ -258,10 +262,12 @@ class _AdDetailScreenState extends State<AdDetailScreen>
                 icon: Icons.language_rounded,
                 isPrimary: !hasPhone,
                 onTap: () {
-                  Get.to(() => CommonWebViewScreen(
-                    url: widget.ad.websiteUrl!,
-                    title: widget.ad.title,
-                  ));
+                  Get.to(
+                    () => CommonWebViewScreen(
+                      url: widget.ad.websiteUrl!,
+                      title: widget.ad.title,
+                    ),
+                  );
                 },
               ),
             ),
@@ -275,6 +281,7 @@ class _AdDetailScreenState extends State<AdDetailScreen>
 
 class _BusinessCard extends StatelessWidget {
   final AdBannerModel ad;
+
   const _BusinessCard({required this.ad});
 
   @override
@@ -309,8 +316,11 @@ class _BusinessCard extends StatelessWidget {
                 end: Alignment.bottomRight,
               ),
             ),
-            child: Icon(Icons.business_rounded,
-                color: Colors.white, size: 26.r),
+            child: Icon(
+              Icons.business_rounded,
+              color: Colors.white,
+              size: 26.r,
+            ),
           ),
           SizedBox(width: 14.w),
           Expanded(
@@ -331,7 +341,9 @@ class _BusinessCard extends StatelessWidget {
                     padding: EdgeInsets.only(top: 3.h),
                     child: Container(
                       padding: EdgeInsets.symmetric(
-                          horizontal: 8.w, vertical: 3.h),
+                        horizontal: 8.w,
+                        vertical: 3.h,
+                      ),
                       decoration: BoxDecoration(
                         color: AppColors.primaryColor.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(6.r),
@@ -350,8 +362,11 @@ class _BusinessCard extends StatelessWidget {
               ],
             ),
           ),
-          Icon(Icons.verified_rounded,
-              color: AppColors.primaryColor, size: 22.r),
+          Icon(
+            Icons.verified_rounded,
+            color: AppColors.primaryColor,
+            size: 22.r,
+          ),
         ],
       ),
     );
@@ -360,6 +375,7 @@ class _BusinessCard extends StatelessWidget {
 
 class _DescriptionCard extends StatelessWidget {
   final String description;
+
   const _DescriptionCard({required this.description});
 
   @override
@@ -423,8 +439,12 @@ class _InfoChip extends StatelessWidget {
   final IconData icon;
   final String label;
   final Color color;
-  const _InfoChip(
-      {required this.icon, required this.label, required this.color});
+
+  const _InfoChip({
+    required this.icon,
+    required this.label,
+    required this.color,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -482,12 +502,12 @@ class _ActionButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(16.r),
           boxShadow: isPrimary
               ? [
-            BoxShadow(
-              color: AppColors.primaryColor.withOpacity(0.35),
-              blurRadius: 16,
-              offset: const Offset(0, 6),
-            )
-          ]
+                  BoxShadow(
+                    color: AppColors.primaryColor.withOpacity(0.35),
+                    blurRadius: 16,
+                    offset: const Offset(0, 6),
+                  ),
+                ]
               : null,
         ),
         child: Row(
@@ -519,6 +539,7 @@ class _ActionButton extends StatelessWidget {
 class _GlassButton extends StatelessWidget {
   final VoidCallback onTap;
   final Widget child;
+
   const _GlassButton({required this.onTap, required this.child});
 
   @override
@@ -529,9 +550,9 @@ class _GlassButton extends StatelessWidget {
         width: 38.r,
         height: 38.r,
         decoration: BoxDecoration(
-          color: Colors.black.withOpacity(0.35),
+          color: Colors.black.withValues(alpha:0.35),
           shape: BoxShape.circle,
-          border: Border.all(color: Colors.white.withOpacity(0.2)),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
         ),
         child: Center(child: child),
       ),

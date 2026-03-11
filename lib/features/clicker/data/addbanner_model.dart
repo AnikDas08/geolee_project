@@ -7,6 +7,7 @@ class AdBannerModel {
   final String? businessName;
   final String? businessType;
   final String? phone;
+  final String?focusArea;
 
   AdBannerModel({
     required this.id,
@@ -16,7 +17,7 @@ class AdBannerModel {
     this.description,
     this.businessName,
     this.businessType,
-    this.phone,
+    this.phone, this.focusArea,
   });
 
   factory AdBannerModel.fromJson(Map<String, dynamic> json) {
@@ -32,6 +33,7 @@ class AdBannerModel {
       businessName: advertiser?['businessName'] ?? json['businessName'],
       businessType: advertiser?['businessType'] ?? json['businessType'],
       phone: advertiser?['phone'] ?? json['phone'],
+      focusArea: advertiser?['focusArea']?? json['focusArea']
     );
   }
 }

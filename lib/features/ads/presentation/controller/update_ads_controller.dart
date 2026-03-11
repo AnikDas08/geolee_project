@@ -54,17 +54,17 @@ class UpdateAdsController extends GetxController {
 
     try {
       final endpoint = "${ApiEndPoint.getAdvertisementById}$adsId";
-      print("🌐 Fetching ad from: $endpoint");
+      debugPrint("🌐 Fetching ad from: $endpoint");
 
       final ApiResponseModel response = await ApiService.get(endpoint);
 
-      print("📦 Response Status: ${response.statusCode}");
-      print("📦 Response Data: ${response.data}");
+      debugPrint("📦 Response Status: ${response.statusCode}");
+      debugPrint("📦 Response Data: ${response.data}");
 
       if (response.statusCode == 200) {
         ad = SingleAdvertisement.fromJson(response.data['data']);
 
-        print("✅ Ad loaded: ${ad?.title}");
+        debugPrint("✅ Ad loaded: ${ad?.title}");
 
         // Set text fields
         titleController.text = ad?.title ?? '';
@@ -73,7 +73,7 @@ class UpdateAdsController extends GetxController {
         websiteLinkController.text = ad?.websiteUrl ?? '';
 
         // Handle date
-        print("📅 Raw startAt: ${ad?.startAt}");
+        debugPrint("📅 Raw startAt: ${ad?.startAt}");
 
         String? dateString;
         if (ad?.startAt != null) {
@@ -168,7 +168,7 @@ class UpdateAdsController extends GetxController {
     final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
     if (image != null) {
       coverImagePath.value = image.path;
-      print("🖼️ New image picked: ${coverImagePath.value}");
+      debugPrint("🖼️ New image picked: ${coverImagePath.value}");
     }
   }
 
@@ -298,7 +298,7 @@ class UpdateAdsController extends GetxController {
           selectedPricingPlan.value = plans.first.name;
         }
       } else {
-        Get.snackbar("Error", response.message ?? "Failed to load plans");
+        Get.snackbar("Error", response.message);
       }
     } catch (e) {
       debugPrint("❌ Fetch Plans Error: $e");
@@ -365,7 +365,7 @@ class UpdateAdsController extends GetxController {
     if (picked != null) {
       controller.text =
       "${picked.day.toString().padLeft(2, '0')} ${_month(picked.month)} ${picked.year}";
-      print("📅 Date selected: ${controller.text}");
+      debugPrint("📅 Date selected: ${controller.text}");
     }
   }
 
