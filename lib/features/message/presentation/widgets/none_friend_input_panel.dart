@@ -22,7 +22,8 @@ class NonFriendPanel extends StatelessWidget {
         Get.isRegistered<ChatController>()
             ? Get.find<ChatController>().currentRadius.value
             : LocalStorage.radius,
-      ) ?? 0.0;
+      ) ??
+          0.0;
       final bool isOutOfRange = radiusKm > 0 && distanceKm > radiusKm;
 
       return Container(
@@ -70,7 +71,6 @@ class NonFriendPanel extends StatelessWidget {
                       ],
                     ),
 
-                    // ── Out of range warning banner
                     if (isOutOfRange) ...[
                       SizedBox(height: 8.h),
                       Container(
@@ -115,6 +115,7 @@ class NonFriendPanel extends StatelessWidget {
                       ),
                     if (status == 'received')
                       Divider(height: 1, color: Colors.grey.shade100),
+
                     if (status == 'received')
                       _NonFriendTile(
                         icon: Icons.remove_circle_outline_rounded,
@@ -126,6 +127,7 @@ class NonFriendPanel extends StatelessWidget {
                       ),
                     if (status == 'received')
                       Divider(height: 1, color: Colors.grey.shade100),
+
                     if (status != 'received' && status != 'friends')
                       _NonFriendTile(
                         icon: Icons.person_add_alt_1_rounded,
@@ -139,30 +141,50 @@ class NonFriendPanel extends StatelessWidget {
                       ),
                     if (status != 'received' && status != 'friends')
                       Divider(height: 1, color: Colors.grey.shade100),
+
+                    /// IGNORE → REJECT API
                     _NonFriendTile(
                       icon: Icons.close_rounded,
                       iconColor: Colors.red.shade400,
                       label: 'Ignore',
-                      onTap: () {
+                      onTap: () async {
+                        if (controller.chatId.isNotEmpty) {
+                          await controller.updateRequestStatus("rejected");
+                        }
+
                         controller.clearAllPicks();
                         Get.back();
+
+                        if (Get.isRegistered<ChatController>()) {
+                          await Get.find<ChatController>().getChatRepos();
+                        }
                       },
                     ),
+
                     Divider(height: 1, color: Colors.grey.shade100),
+
+                    /// CONTINUE CHAT → ACCEPT API
                     _NonFriendTile(
                       icon: Icons.chat_rounded,
                       iconColor: Colors.green.shade600,
                       label: 'Continue with Chat',
-                      onTap: () {
+                      onTap: () async {
+                        if (controller.chatId.isNotEmpty) {
+                          await controller.updateRequestStatus("accepted");
+                        }
+
                         controller.isFriend.value = true;
                         controller.friendStatusValue.value = 'none_continued';
+
+                        if (Get.isRegistered<ChatController>()) {
+                          await Get.find<ChatController>().getChatRepos();
+                        }
                       },
                     ),
                   ],
                 ),
               ),
 
-              // ── Message Input Row
               Padding(
                 padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 0),
                 child: Row(

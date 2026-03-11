@@ -43,7 +43,12 @@ class NotificationsController extends GetxController {
       if (response.notifications.isEmpty) {
         hasNoData = true;
       } else {
-        notifications.addAll(response.notifications);
+        // Prevent duplicates by checking if notification ID already exists
+        for (var newNotification in response.notifications) {
+          if (!notifications.any((n) => n.id == newNotification.id)) {
+            notifications.add(newNotification);
+          }
+        }
         unreadCount.value = response.unreadCount;
       }
     } catch (e) {
@@ -73,7 +78,12 @@ class NotificationsController extends GetxController {
           if (response.notifications.isEmpty) {
             hasNoData = true;
           } else {
-            notifications.addAll(response.notifications);
+            // Prevent duplicates by checking if notification ID already exists
+            for (var newNotification in response.notifications) {
+              if (!notifications.any((n) => n.id == newNotification.id)) {
+                notifications.add(newNotification);
+              }
+            }
             unreadCount.value = response.unreadCount;
           }
         } catch (e) {

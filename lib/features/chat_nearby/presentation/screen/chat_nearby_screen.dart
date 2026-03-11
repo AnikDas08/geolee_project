@@ -14,6 +14,7 @@ import '../../../../component/image/common_image.dart';
 import '../../../../component/text/common_text.dart';
 import '../../../../services/api/api_service.dart';
 import '../../../../services/storage/storage_services.dart';
+import '../../../../services/storage/storage_keys.dart';
 import '../../../../utils/constants/app_colors.dart';
 import '../../../../utils/enum/enum.dart';
 import '../../../home/presentation/controller/home_controller.dart';
@@ -137,6 +138,7 @@ class _ChatNearbyAppBar extends StatelessWidget {
       );
 
       if (response.statusCode == 200) {
+        LocalStorage.setBool(LocalStorageKeys.isLocationVisible, false);
         debugPrint('Backend updated: Location hidden');
 
         // 3. Go back to Home

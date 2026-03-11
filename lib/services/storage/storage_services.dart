@@ -36,6 +36,7 @@ class LocalStorage {
   static bool accountInfoStatus = false;
   static String createdAt = "";
   static String updatedAt = "";
+  static bool isLocationVisible = false;
 
   static SharedPreferences? preferences;
 
@@ -68,6 +69,7 @@ class LocalStorage {
     accountInfoStatus = localStorage.getBool(LocalStorageKeys.accountInfoStatus) ?? false;
     createdAt = localStorage.getString(LocalStorageKeys.createdAt) ?? "";
     updatedAt = localStorage.getString(LocalStorageKeys.updatedAt) ?? "";
+    isLocationVisible = localStorage.getBool(LocalStorageKeys.isLocationVisible) ?? false;
     appLog(token, source: "Local Storage Data Loaded");
   }
 
@@ -90,6 +92,7 @@ class LocalStorage {
     await localStorage.setBool(key, value);
     if (key == LocalStorageKeys.isLogIn) isLogIn = value;
     if (key == LocalStorageKeys.verified) verified = value;
+    if (key == LocalStorageKeys.isLocationVisible) isLocationVisible = value;
   }
 
   static Future<void> setDouble(String key, double value) async {
@@ -151,5 +154,6 @@ class LocalStorage {
     dateOfBirth = "";
     gender = "";
     experience = "";
+    isLocationVisible = false;
   }
 }

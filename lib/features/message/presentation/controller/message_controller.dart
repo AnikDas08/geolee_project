@@ -37,6 +37,7 @@ class MessageController extends GetxController {
   RxBool hasPendingRequest = false.obs;
   RxString otherUserId = ''.obs;
   RxString friendStatusValue = ''.obs;
+  RxString initialRequestStatus = ''.obs;
   RxBool friendStatusLoaded = false.obs;
 
   // ================================================
@@ -659,6 +660,14 @@ class MessageController extends GetxController {
     otherUserId.value = targetUserId;
 
     try {
+      if (initialRequestStatus.value == 'accepted') {
+        isFriend.value = true;
+        friendStatus.value = FriendStatus.friends;
+        friendStatusValue.value = 'accepted';
+        friendStatusLoaded.value = true;
+        update();
+        return;
+      }
       final response = await ApiService.get(
         "${ApiEndPoint.checkFriendStatus}$targetUserId",
       );
@@ -842,6 +851,29 @@ class MessageController extends GetxController {
         );
       }
     });
+  }
+
+
+  Future<void> updateRequestStatus(String status) async {
+    try {
+      final response = await ApiService.patch(
+        "${ApiEndPoint.noneFriendChatUpdate}$chatId",
+        body: {
+          "requestStatus": status,
+        },
+      );
+
+      appLog("updateRequestStatus [$status] => ${response.statusCode} | ${response.data}");
+
+      if (response.statusCode == 200) {
+        if (Get.isRegistered<ChatController>()) {
+          await Get.find<ChatController>().getChatRepos();
+          update();
+        }
+      }
+    } catch (e) {
+      debugPrint("Update Request Status Error: $e");
+    }
   }
 
 

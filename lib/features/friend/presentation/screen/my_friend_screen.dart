@@ -116,7 +116,7 @@ class MyFriendScreen extends StatelessWidget {
                             child: _SuggestedFriendCard(
                               userId: friend.id,
                               userName: friend.name,
-                              email: friend.email,
+                              email: "",
                               avatar: "${ApiEndPoint.imageUrl}${friend.image}",
                               controller: controller,
                             ),

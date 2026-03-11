@@ -79,6 +79,18 @@ class SocketServices {
       _handleNewNotification(data);
     });
 
+    // Add user specific notification listener
+    if (LocalStorage.userId.isNotEmpty) {
+      final String userNotifEvent = "notification::${LocalStorage.userId}";
+      socket.on(userNotifEvent, (data) {
+        debugPrint(
+          ">>>>>>>>>>>> 🔔 User Notification via socket [$namespace] ($userNotifEvent): $data <<<<<<<<<<<<",
+        );
+        NotificationService.showNotification(data);
+        _handleNewNotification(data);
+      });
+    }
+
     socket.on("message:new", (data) {
       debugPrint(
         ">>>>>>>>>>>> 📩 New Message via socket [$namespace]: $data <<<<<<<<<<<<",
@@ -179,6 +191,7 @@ class SocketServices {
     connectToNamespace("/");
     connectToNamespace("messaging");
     connectToNamespace("notification");
+    connectToNamespace("notifications");
   }
 
   static void joinRoom(String chatId) {

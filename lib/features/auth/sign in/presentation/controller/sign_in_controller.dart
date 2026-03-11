@@ -50,13 +50,12 @@ class SignInController extends GetxController {
         ]);
         LocalStorage.isLogIn = true;
         LocalStorage.getAllPrefData();
+        await getUserData();
         SocketServices.connectToSocket();
 
         debugPrint(
           "My Token Is :===============💕💕💕 ${LocalStorage.token.toString()}",
         );
-
-        await getUserData();
         // Get.snackbar(barBlur: 0.5, "Welcome Back", "Logged In Successfully");
 
         Get.toNamed(AppRoutes.homeNav);

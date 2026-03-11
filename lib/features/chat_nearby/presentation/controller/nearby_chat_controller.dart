@@ -5,6 +5,8 @@ import 'package:giolee78/features/chat_nearby/data/nearby_friends_model.dart';
 import 'package:giolee78/services/api/api_response_model.dart';
 import 'package:giolee78/services/api/api_service.dart';
 import 'package:giolee78/services/storage/storage_services.dart';
+import 'package:giolee78/services/storage/storage_keys.dart';
+import '../../../../features/home/presentation/controller/home_controller.dart';
 
 class NearbyChatController extends GetxController {
   RxList<NearbyChatUserModel> nearbyChatList = <NearbyChatUserModel>[].obs;
@@ -40,6 +42,10 @@ class NearbyChatController extends GetxController {
       );
 
       if (response.statusCode == 200) {
+        LocalStorage.setBool(LocalStorageKeys.isLocationVisible, true);
+        if (Get.isRegistered<HomeController>()) {
+          Get.find<HomeController>().isNearbyActive.value = true;
+        }
         debugPrint('Profile location updated');
       } else {
         debugPrint('Failed to update profile: ${response.message}');

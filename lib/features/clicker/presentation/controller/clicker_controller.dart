@@ -69,10 +69,17 @@ class ClickerController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    debugPrint("🚀 ClickerController onInit called");
     getAllPosts();
     _getUniqueDeviceId();
     getCurrentLocation();
     updateProfileAndLocationVisible();
+
+    debugPrint("🔑 LocalStorage token: ${LocalStorage.token.isNotEmpty ? 'PRESENT' : 'EMPTY'}");
+
+    // Always call getBanners to see if it works for everyone
+    debugPrint("📡 Calling getBanners() from onInit (Global)");
+
     if (LocalStorage.token.isNotEmpty) {
       getBanners();
       searchController.addListener(_onSearchChanged);
@@ -111,7 +118,7 @@ class ClickerController extends GetxController {
         ApiEndPoint.updateProfile,
 
         body: {
-          'isLocationVisible': false,
+          // 'isLocationVisible': false,
           "location": [longitude, latitude],
         },
       );
@@ -210,29 +217,63 @@ class ClickerController extends GetxController {
 
   // ================= Fetch Dynamic Banners
   Future<void> getBanners() async {
+    debugPrint("📡 [getBanners] Started");
     try {
       isBannerLoading.value = true;
 
-      final Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.low,
-      );
+      debugPrint("📡 [getBanners] Fetching location (with 5s timeout)...");
+      Position position;
+      try {
+        position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.low,
+          timeLimit: const Duration(seconds: 5),
+        );
+        debugPrint("📡 [getBanners] Location fetched: ${position.latitude}, ${position.longitude}");
+      } catch (e) {
+        debugPrint("📡 [getBanners] Location error or timeout: $e. Using fallback (0,0).");
+        position = Position(
+          longitude: 0.0,
+          latitude: 0.0,
+          timestamp: DateTime.now(),
+          accuracy: 0.0,
+          altitude: 0.0,
+          heading: 0.0,
+          speed: 0.0,
+          speedAccuracy: 0.0,
+          altitudeAccuracy: 0.0,
+          headingAccuracy: 0.0,
+        );
+      }
 
       final String deviceId = await _getUniqueDeviceId();
+      final String path = ApiEndPoint.nearbyActiveAds;
 
       final String url =
-          "/advertisements/nearby-active"
+          "$path"
           "?lng=${position.longitude}"
           "&lat=${position.latitude}"
           "&deviceId=$deviceId";
 
+      debugPrint("🌐 Fetching Banners URL: ${ApiEndPoint.baseUrl}$url");
       final response = await ApiService.get(url);
 
+      debugPrint("📡 [getBanners] Response Status: ${response.statusCode}");
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data['data'];
+        debugPrint("✅ Banner Ads Received: ${data.length}");
         adList.assignAll(data.map((e) => AdBannerModel.fromJson(e)).toList());
+
+        // Log ad images to verify URLs
+        for (var ad in adList) {
+          debugPrint("🖼️ Ad image: ${ad.image}");
+        }
+
+        adList.refresh(); // Force refresh for UI
+      } else {
+        debugPrint("❌ [getBanners] Error response: ${response.data}");
       }
     } catch (e) {
-      debugPrint("Banner Error: $e");
+      debugPrint("❌ [getBanners] Exception: $e");
     } finally {
       isBannerLoading.value = false;
     }
@@ -432,10 +473,10 @@ class ClickerController extends GetxController {
     filtered = filtered.where((post) {
       final p = post.privacy.toLowerCase().trim();
       final isPublic = p == 'public';
-      
+
       // LOG EVERY POST'S PRIVACY
       debugPrint("📦 Post ${post.id} | Privacy: [${post.privacy}] | Render: $isPublic");
-      
+
       return isPublic;
     }).toList();
 

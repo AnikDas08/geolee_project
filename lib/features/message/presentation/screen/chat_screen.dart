@@ -327,29 +327,34 @@ class _ChatListScreenState extends State<ChatListScreen> {
                                       }
                                     final ChatModel item = controller.filteredSingleChats[index];
                                     return GestureDetector(
-                                        onTap: () {
-                                          Get.toNamed(
-                                            AppRoutes.message,
-                                            parameters: {
-                                              "userId": item.participant.sId,
-                                              "chatId": item.id,
-                                              'isOnline': item
-                                                  .participant
-                                                  .isOnline
-                                                  .toString(),
-                                              "name": item.isGroup
-                                                  ? (item.chatName ??
-                                                        "Unnamed Group")
-                                                  : item.participant.fullName,
-                                              "image": item.isGroup
-                                                  ? (item.chatImage ?? "")
-                                                  : item.participant.image,
-                                              "distance": formatDistance(
-                                                item.distanceInKm,
-                                              ),
+                                            onTap: () {
+                                              Get.toNamed(
+                                                AppRoutes.message,
+                                                parameters: {
+                                                  "userId":
+                                                      item.participant.sId,
+                                                  "chatId": item.id,
+                                                  'isOnline': item
+                                                      .participant
+                                                      .isOnline
+                                                      .toString(),
+                                                  "name": item.isGroup
+                                                      ? (item.chatName ??
+                                                            "Unnamed Group")
+                                                      : item.participant
+                                                          .fullName,
+                                                  "image": item.isGroup
+                                                      ? (item.chatImage ?? "")
+                                                      : item.participant.image,
+                                                  "distance": formatDistance(
+                                                    item.distanceInKm,
+                                                  ),
+                                                  "requestStatus":
+                                                      item.friendRequestStatus ??
+                                                      "",
+                                                },
+                                              );
                                             },
-                                          );
-                                        },
                                     //============================================
                                         /* onTap: () {
                                       Get.toNamed(

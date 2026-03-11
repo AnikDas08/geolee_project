@@ -40,7 +40,7 @@ class CommonImage extends StatelessWidget {
       return _buildSvgImage();
     } else if (imageSrc.contains("assets/images")) {
       return _buildPngImage();
-    } else if (imageSrc.startsWith('file://')) {
+    } else if (File(imageSrc).existsSync() || imageSrc.startsWith('file://')) {
       // Local file path
       return _buildFileImage();
     } else {

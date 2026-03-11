@@ -42,7 +42,7 @@ class _CompleteProfileState extends State<CompleteProfile> {
           onPressed: () => Get.back(),
         ),
         title: const CommonText(
-          text: 'Complete Your Profile',
+          text: 'Complete Your Profiles',
           fontSize: 24,
           fontWeight: FontWeight.w700,
           color: AppColors.primaryColor,

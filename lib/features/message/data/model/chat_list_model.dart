@@ -40,8 +40,8 @@ class ChatModel {
     this.distanceInKm,
     this.joinRequestStatus,
     this.joinRequestId,
-    this.friendRequestStatus, // ✅
-    this.friendRequestId, // ✅
+    this.friendRequestStatus,
+    this.friendRequestId,
     this.description,
   });
 
@@ -182,8 +182,8 @@ class ChatModel {
       distanceInKm: distanceInKm,
       joinRequestStatus: joinRequestStatus,
       joinRequestId: joinRequestId,
-      friendRequestStatus: null, // ✅ API থেকে আসে না — controller set করবে
-      friendRequestId: null, // ✅ API থেকে আসে না — controller set করবে
+      friendRequestStatus: json['requestStatus']?.toString(),
+      friendRequestId: null,
       description: json['description']?.toString(),
     );
   }

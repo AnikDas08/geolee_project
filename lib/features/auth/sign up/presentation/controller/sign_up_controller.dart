@@ -309,39 +309,23 @@ class SignUpController extends GetxController {
     }
   }
 
-  ///========================================== Update Profile and Complete Profile
+  ///========================================== Update Profile and Complete Profile====
   Future<void> updateProfile() async {
-    // if (image == null || image!.isEmpty) {
-    //   Get.snackbar('Validation Error', 'Please select a profile image');
-    //   return;
-    // }
-
-    // if (bioController.text.trim().isEmpty) {
-    //   Get.snackbar('Validation Error', 'Please enter a bio');
-    //   return;
-    // }
-
-    // if (dateOfBirthTEController.text.trim().isEmpty) {
-    //   Get.snackbar('Date of Birth Error', 'Please select your date of birth');
-    //   return;
-    // }
-
-    // if (selectedGender == null || selectedGender!.isEmpty) {
-    //   Get.snackbar('Validation Error', 'Please select your gender');
-    //   return;
-    // }
 
     isLoading = true;
     update();
 
     try {
       final dobText = dateOfBirthTEController.text.trim();
-
-      final DateTime dobDate = DateTime.parse(dobText);
+      String? dobIso;
+      if (dobText.isNotEmpty) {
+        final DateTime dobDate = DateTime.parse(dobText);
+        dobIso = dobDate.toUtc().toIso8601String();
+      }
 
       final Map<String, String> body = {
-        "gender": selectedGender!.toLowerCase(),
-        "dob": dobDate.toUtc().toIso8601String(),
+        if (selectedGender != null) "gender": selectedGender!.toLowerCase(),
+        if (dobIso != null) "dob": dobIso,
         "address": addressController.text.isNotEmpty
             ? addressController.text
             : "Dhaka",
@@ -372,10 +356,10 @@ class SignUpController extends GetxController {
 
         Get.offAllNamed(AppRoutes.signIn);
       } else {
-        Utils.errorSnackBar("Error ${response.statusCode}", response.message);
+        Utils.errorSnackBar("Error", response.message);
       }
     } catch (e) {
-      Utils.errorSnackBar("Error", e.toString());
+      debugPrint("Update Profile Error: $e");
     } finally {
       isLoading = false;
       update();
@@ -384,7 +368,7 @@ class SignUpController extends GetxController {
 
   void startTimer() {
     _timer?.cancel();
-    start = 300; //  5minutes
+    start = 300;
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (start > 0) {
         start--;

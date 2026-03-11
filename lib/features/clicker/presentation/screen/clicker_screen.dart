@@ -5,7 +5,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:giolee78/services/storage/storage_services.dart';
 import 'package:intl/intl.dart';
-
 import 'package:giolee78/component/image/common_image.dart';
 import 'package:giolee78/component/text_field/common_text_field.dart';
 import 'package:giolee78/config/api/api_end_point.dart';
@@ -50,6 +49,8 @@ class _ClickerScreenState extends State<ClickerScreen> {
   }
 
   // Trigger load more when within 300px of bottom==================
+
+
   void _onScroll() {
     if (_scrollController.position.pixels >=
         _scrollController.position.maxScrollExtent - 300) {
@@ -164,67 +165,69 @@ class _ClickerScreenState extends State<ClickerScreen> {
                 SizedBox(height: 16.h),
 
                 // ── Banner Slider=============================
-                if (controller.adList.isNotEmpty) ...[
-                  Obx(
-                    () => CarouselSlider(
-                      items: controller.adList.map((ad) {
-                        debugPrint(
-                          "=======================${controller.adList.length.toString()}",
-                        );
-                        return GestureDetector(
-                          onTap: () {
-                            controller.clickBanner(ad.id);
-                            if (ad.websiteUrl != null &&
-                                ad.websiteUrl!.isNotEmpty) {
-                              Get.to(
-                                () => CommonWebViewScreen(
-                                  url: ad.websiteUrl!,
-                                  title: ad.title,
-                                ),
-                              );
-                            } else {
-                              Get.to(() => AdDetailScreen(ad: ad));
-                            }
-                          },
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(12.r),
-                            child: CommonImage(
-                              imageSrc: ad.image,
-                              height: 150.h,
-                              width: double.infinity,
-                              fill: BoxFit.cover,
-                            ),
-                          ),
-                        );
-                      }).toList(),
-                      options: CarouselOptions(
-                        height: 150.h,
-                        viewportFraction: 0.85,
-                        autoPlay: true,
-                        enlargeCenterPage: true,
-                        onPageChanged: (index, _) =>
-                            controller.changePosition(index),
-                      ),
-                    ),
-                  ),
 
-                  SizedBox(height: 8.h),
-                  Center(
-                    child: DotsIndicator(
-                      dotsCount: controller.adList.length,
-                      position: controller.currentPosition,
-                      decorator: DotsDecorator(
-                        activeColor: AppColors.primaryColor,
-                        color: Colors.grey.shade300,
-                        size: const Size.square(8.0),
-                        activeSize: const Size(18.0, 8.0),
-                        activeShape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(5.0),
+                if(LocalStorage.token.isNotEmpty)
+                Obx(() {
+                  if (controller.adList.isEmpty) return const SizedBox.shrink();
+
+                  return Column(
+                    children: [
+                      CarouselSlider(
+                        items: controller.adList.map((ad) {
+                          return GestureDetector(
+                            onTap: () {
+                              controller.clickBanner(ad.id);
+                              if (ad.websiteUrl != null &&
+                                  ad.websiteUrl!.isNotEmpty) {
+                                Get.to(
+                                  () => CommonWebViewScreen(
+                                    url: ad.websiteUrl!,
+                                    title: ad.title,
+                                  ),
+                                );
+                              } else {
+                                Get.to(() => AdDetailScreen(ad: ad));
+                              }
+                            },
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(12.r),
+                              child: CommonImage(
+                                imageSrc: ad.image,
+                                height: 150.h,
+                                width: double.infinity,
+                                fill: BoxFit.cover,
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                        options: CarouselOptions(
+                          height: 150.h,
+                          viewportFraction: 0.85,
+                          autoPlay: true,
+                          enlargeCenterPage: true,
+                          onPageChanged: (index, _) =>
+                              controller.changePosition(index),
                         ),
                       ),
-                    ),
-                  ),
-                ],
+                      SizedBox(height: 8.h),
+                      Center(
+                        child: DotsIndicator(
+                          dotsCount: controller.adList.length,
+                          position: controller.currentPosition,
+                          decorator: DotsDecorator(
+                            activeColor: AppColors.primaryColor,
+                            color: Colors.grey.shade300,
+                            size: const Size.square(8.0),
+                            activeSize: const Size(18.0, 8.0),
+                            activeShape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(5.0),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                }),
 
                 SizedBox(height: 16.h),
 

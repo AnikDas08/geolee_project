@@ -439,7 +439,7 @@ class ChatController extends GetxController {
       final response = await ApiService.patch(
         ApiEndPoint.updateProfile,
         body: {
-          "isLocationVisible": false,
+          // "isLocationVisible": false,
           "location": [longitude, latitude],
           "address": address ?? "Location Unavailable",
         },

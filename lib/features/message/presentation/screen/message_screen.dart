@@ -54,6 +54,7 @@ class _MessageScreenState extends State<MessageScreen> {
       messageController.name = params['name'] ?? '';
       messageController.image = params['image'] ?? '';
       messageController.userId = params['userId'] ?? '';
+      messageController.initialRequestStatus.value = params['requestStatus'] ?? '';
     }
 
     messageController.scrollController.addListener(_onScroll);
@@ -282,14 +283,11 @@ class _MessageScreenState extends State<MessageScreen> {
             ? controller.messages[reversedIndex + 1]
             : null;
         final showAvatar = prevMsg == null || prevMsg.senderId != msg.senderId;
-        final showTime =
-            reversedIndex == 0 ||
-            controller.messages[reversedIndex - 1].senderId != msg.senderId;
 
         return _MessageBubble(
           message: msg,
           showAvatar: showAvatar,
-          showTime: showTime,
+          showTime: true,
           getImageUrl: _getImageUrl,
           onImageTap: (url) => _openImageFullScreen(context, url),
         );
@@ -751,13 +749,11 @@ class _MessageBubble extends StatelessWidget {
     final isMe = message.isCurrentUser;
     return Padding(
       padding: EdgeInsets.only(
-        bottom: showTime ? 10.h : 2.h,
+        bottom: 10.h,
         top: showAvatar && !isMe ? 4.h : 0,
       ),
       child: Row(
-        mainAxisAlignment: isMe
-            ? MainAxisAlignment.end
-            : MainAxisAlignment.start,
+        mainAxisAlignment: isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           if (!isMe) ...[
@@ -784,9 +780,8 @@ class _MessageBubble extends StatelessWidget {
           ],
           Flexible(
             child: Column(
-              crossAxisAlignment: isMe
-                  ? CrossAxisAlignment.end
-                  : CrossAxisAlignment.start,
+              crossAxisAlignment:
+                  isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
               children: [
                 BubbleContent(
                   message: message,
@@ -794,22 +789,21 @@ class _MessageBubble extends StatelessWidget {
                   getImageUrl: getImageUrl,
                   onImageTap: onImageTap,
                 ),
-                if (showTime)
-                  Padding(
-                    padding: EdgeInsets.only(
-                      top: 4.h,
-                      left: isMe ? 0 : 4.w,
-                      right: isMe ? 4.w : 0,
-                    ),
-                    child: Text(
-                      _formatMessageTime(message.createdAt),
-                      style: TextStyle(
-                        fontSize: 10.sp,
-                        color: Colors.grey[400],
-                        letterSpacing: 0.2,
-                      ),
+                Padding(
+                  padding: EdgeInsets.only(
+                    top: 4.h,
+                    left: isMe ? 0 : 4.w,
+                    right: isMe ? 4.w : 0,
+                  ),
+                  child: Text(
+                    _formatMessageTime(message.createdAt),
+                    style: TextStyle(
+                      fontSize: 10.sp,
+                      color: Colors.grey[400],
+                      letterSpacing: 0.2,
                     ),
                   ),
+                ),
               ],
             ),
           ),

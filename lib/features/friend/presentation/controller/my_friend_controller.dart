@@ -48,6 +48,21 @@ class MyFriendController extends GetxController {
   // ================= Search
   final RxString searchQuery = ''.obs;
 
+
+  ///TODO======================================
+  List<MyFriendsData> get filteredFriendsList {
+    if (searchQuery.value.isEmpty) return myFriendsList;
+
+    final query = searchQuery.value.toLowerCase();
+
+    return myFriendsList.where((data) {
+      final email = (data.friend?.email ?? '').toLowerCase();
+      // Only full email match
+      return email == query;
+    }).toList();
+  }
+
+/*
   List<MyFriendsData> get filteredFriendsList {
     if (searchQuery.value.isEmpty) return myFriendsList;
 
@@ -60,6 +75,7 @@ class MyFriendController extends GetxController {
       return name.contains(query) || email.contains(query);
     }).toList();
   }
+*/
 
   // ================= Suggested Friends Filtering
   List<SuggestedFriendUserModel> get filteredSuggestedFriends {
@@ -84,6 +100,13 @@ class MyFriendController extends GetxController {
       if (status == FriendStatus.friends) return false;
 
       // 4. Local Filter (Backup if DB search returns too many or unfiltered results)
+      ///TODO=========================================
+  /*    if (searchQuery.value.isNotEmpty) {
+        final query = searchQuery.value.toLowerCase();
+        final matchesEmail = (user.email).toLowerCase() == query; // Full match
+        if (!matchesEmail) return false;
+      }*/
+
       if (searchQuery.value.isNotEmpty) {
         final query = searchQuery.value.toLowerCase();
         final matchesName = (user.name).toLowerCase().contains(query);
@@ -542,18 +565,25 @@ class MyFriendController extends GetxController {
       nearbyChatError.value = '';
       suggestedFriendList.clear();
 
-      // Build URL — try with location if available, otherwise search-only
+
+
       final double lat = LocalStorage.lat;
       final double lng = LocalStorage.long;
       final String encoded = Uri.encodeComponent(query);
 
       String url;
       if (lat != 0.0 && lng != 0.0) {
-        url =
-            "${ApiEndPoint.nearbyChat}?lat=$lat&lng=$lng&searchTerm=$encoded&limit=50";
+
+        ///TODO ========== Nearby search with email filter
+           url = "${ApiEndPoint.nearbyChat}?lat=$lat&lng=$lng&email=$encoded&limit=50";
+
+        //url = "${ApiEndPoint.nearbyChat}?lat=$lat&lng=$lng&searchTerm=$encoded&limit=50";
       } else {
-        // No location — fall back to plain user search endpoint
-        url = "${ApiEndPoint.searchUsers}?searchTerm=$encoded&limit=50";
+        ///TODO===========================
+        // Fallback search by email only
+           url = "${ApiEndPoint.searchUsers}?email=$encoded&limit=50";
+
+        //url = "${ApiEndPoint.searchUsers}?searchTerm=$encoded&limit=50";
       }
       debugPrint("🌐 Global Search URL: $url");
 

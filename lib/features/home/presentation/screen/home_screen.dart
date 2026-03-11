@@ -21,6 +21,7 @@ import 'package:giolee78/utils/constants/app_colors.dart';
 import '../../../../config/api/api_end_point.dart';
 import '../../../../services/api/api_service.dart';
 import '../../../../services/storage/storage_services.dart';
+import '../../../../services/storage/storage_keys.dart';
 import '../controller/home_controller.dart';
 import '../widgets/clicker_main.dart';
 import '../widgets/filter_main.dart';
@@ -35,7 +36,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   final Completer<GoogleMapController> _mapController =
-  Completer<GoogleMapController>();
+      Completer<GoogleMapController>();
   late final MyFriendController myFriendController;
 
   @override
@@ -46,26 +47,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       myFriendController = Get.find<MyFriendController>();
     } else {
       myFriendController = Get.put(MyFriendController());
-    }
-  }
-
-  Future<void> onMyLocationVisibility() async {
-    try {
-      debugPrint('🔄 onMyLocationVisibility() called...');
-      final response = await ApiService.patch(
-        ApiEndPoint.updateProfile,
-        body: {
-          "isLocationVisible": true,
-        },
-      );
-      if (response.statusCode == 200) {
-        appLog("Location Visibility On");
-        debugPrint('✅ Profile location updated successfully');
-      } else {
-        debugPrint('⚠️ Unexpected status code: ${response.statusCode}');
-      }
-    } catch (e) {
-      debugPrint('❌ Error updating profile: $e');
     }
   }
 
@@ -212,14 +193,13 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                         controller.mapController.complete(mapController);
                       }
 
-                      final double lat =
-                      controller.currentLatitude.value != 0.0
+                      final double lat = controller.currentLatitude.value != 0.0
                           ? controller.currentLatitude.value
                           : LocalStorage.lat != 0.0
                           ? LocalStorage.lat
                           : 1.3521;
                       final double lng =
-                      controller.currentLongitude.value != 0.0
+                          controller.currentLongitude.value != 0.0
                           ? controller.currentLongitude.value
                           : LocalStorage.long != 0.0
                           ? LocalStorage.long
@@ -237,7 +217,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 },
                 onTap: (LatLng position) {
                   debugPrint(
-                      'Map tapped: ${position.latitude}, ${position.longitude}');
+                    'Map tapped: ${position.latitude}, ${position.longitude}',
+                  );
                 },
               );
             }),
@@ -250,8 +231,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               Positioned(
                 bottom: 16.h,
                 left: 16.w,
-                child:
-                IgnorePointer(child: _buildHeatmapInfoBadge(controller)),
+                child: IgnorePointer(child: _buildHeatmapInfoBadge(controller)),
               ),
           ],
         ),
@@ -280,7 +260,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             child: Row(
               children: [
                 Obx(
-                      () => Text(
+                  () => Text(
                     controller.clickerCount.value ?? 'Select Clicker',
                     style: TextStyle(fontSize: 12.sp, color: Colors.black87),
                   ),
@@ -295,7 +275,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               Get.dialog(FilterDialog(onApply: controller.applyFilter));
             },
             child: Obx(
-                  () => Row(
+              () => Row(
                 children: [
                   if (controller.isDateFilterActive.value)
                     Container(
@@ -403,24 +383,24 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 title: 'Chat Nearby',
                 trailing: isLoggedIn && isNearby
                     ? Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const _NearbyActiveDot(),
-                    SizedBox(width: 5.w),
-                    Text(
-                      'ON',
-                      style: TextStyle(
-                        fontSize: 11.sp,
-                        fontWeight: FontWeight.w700,
-                        color: const Color(0xFF22C55E),
-                      ),
-                    ),
-                  ],
-                )
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const _NearbyActiveDot(),
+                          SizedBox(width: 5.w),
+                          Text(
+                            'ON',
+                            style: TextStyle(
+                              fontSize: 11.sp,
+                              fontWeight: FontWeight.w700,
+                              color: const Color(0xFF22C55E),
+                            ),
+                          ),
+                        ],
+                      )
                     : null,
                 onTap: () {
                   if (isLoggedIn) {
-                    _handleLocationAndNavigate();
+                    _handleLocationAndNavigate(controller);
                   } else {
                     _showRegistrationDialog();
                   }
@@ -495,15 +475,20 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     }
   }
 
-  Future<void> _handleLocationAndNavigate() async {
+  Future<void> _handleLocationAndNavigate(HomeController controller) async {
     try {
-      _showConfirmationDialog();
+      if (controller.isNearbyActive.value) {
+        Get.to(() => const ChatNearbyScreen());
+      } else {
+        _showConfirmationDialog(controller);
+      }
     } catch (e) {
       debugPrint('Error handling location: $e');
+      _showConfirmationDialog(controller);
     }
   }
 
-  void _showConfirmationDialog() {
+  void _showConfirmationDialog(HomeController controller) {
     try {
       Get.dialog(
         AlertDialog(
@@ -516,7 +501,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             children: [
               const Text(
                 'By Enabling Location, Your Nearby Activity May Be Visible To Others, '
-                    'And Your Location Data Will Be Stored Temporarily.',
+                'And Your Location Data Will Be Stored Temporarily.',
                 textAlign: TextAlign.start,
                 style: TextStyle(
                   fontSize: 14,
@@ -539,8 +524,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   const SizedBox(width: 10),
                   Expanded(
                     child: ElevatedButton(
-                      // ✅ FIX: async function extracted to avoid dialog context issues
-                      onPressed: () => _onConfirmLocation(),
+                      onPressed: () => _onConfirmLocation(controller),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primaryColor,
                       ),
@@ -561,23 +545,14 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     }
   }
 
-  // ✅ FIX: Extracted to separate method — এটাই মূল সমস্যার সমাধান
-  // আগে inline async lambda ছিল, Get.back() এর পর context হারিয়ে যেত
-  // এখন named method হওয়ায় proper await chain কাজ করে
-  Future<void> _onConfirmLocation() async {
+  Future<void> _onConfirmLocation(HomeController controller) async {
     try {
-      // ✅ Step 1: Dialog বন্ধ করো
       Get.back();
-
-      // ✅ Step 2: Loading দেখাও
       Get.dialog(
-        const Center(
-          child: CircularProgressIndicator(color: Colors.blue),
-        ),
+        const Center(child: CircularProgressIndicator(color: Colors.blue)),
         barrierDismissible: false,
       );
 
-      // ✅ Step 3: Permission check
       var status = await Permission.location.status;
       debugPrint('📍 Initial permission status: $status');
 
@@ -587,11 +562,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       }
 
       if (status.isGranted) {
-        // ✅ Step 4: GPS service check
-        final bool serviceEnabled =
-        await Geolocator.isLocationServiceEnabled();
+        final bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
         if (!serviceEnabled) {
-          Get.back(); // loading dismiss
+          Get.back();
           Get.snackbar(
             'GPS Disabled',
             'Please enable GPS/Location services',
@@ -602,30 +575,22 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           return;
         }
 
-        // ✅ Step 5: Current position নাও
         final Position position = await Geolocator.getCurrentPosition(
           desiredAccuracy: LocationAccuracy.high,
         );
 
-        // ✅ Step 6: Loading dismiss
         Get.back();
-
-        // ✅ Step 7: Location save করো
         LocalStorage.lat = position.latitude;
         LocalStorage.long = position.longitude;
 
-        // ✅ Step 8: Nearby active করো
-        Get.find<HomeController>().isNearbyActive.value = true;
+        controller.isNearbyActive.value = true;
 
-        // ✅ Step 9: API call — এখন সঠিকভাবে await হবে
         debugPrint('🔄 Calling onMyLocationVisibility...');
-        await onMyLocationVisibility();
+        await controller.onMyLocationVisibility();
         debugPrint('✅ onMyLocationVisibility done');
 
-        // ✅ Step 10: Navigate
         Get.to(() => const ChatNearbyScreen());
       } else {
-        // ❌ Permission denied
         Get.back(); // loading dismiss
         debugPrint('❌ Permission denied: $status');
         Get.snackbar(
@@ -639,7 +604,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       }
     } catch (e) {
       debugPrint('❌ Error in _onConfirmLocation: $e');
-      // Loading dismiss (safety)
       try {
         Get.back();
       } catch (_) {}
@@ -735,8 +699,9 @@ class _NearbyActiveDotState extends State<_NearbyActiveDot>
           shape: BoxShape.circle,
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF22C55E)
-                  .withOpacity(0.4 + (_anim.value * 0.3)),
+              color: const Color(
+                0xFF22C55E,
+              ).withOpacity(0.4 + (_anim.value * 0.3)),
               blurRadius: 4 + (_anim.value * 4),
               spreadRadius: _anim.value * 2,
             ),

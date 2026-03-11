@@ -30,7 +30,7 @@ class HomeController extends GetxController {
   var clickerCount = RxnString();
   var filterOption = RxnString();
 
-  RxBool isNearbyActive = false.obs;
+  RxBool isNearbyActive = LocalStorage.isLocationVisible.obs;
 
   var selectedPeriod = ''.obs;
   Rxn<DateTime> startDate = Rxn<DateTime>();
@@ -96,6 +96,8 @@ class HomeController extends GetxController {
           debugPrint('Error fetching initial data: $e');
           return <dynamic>[];
         });
+
+
       } else {
         clickerCount.value = "All";
         allPosts = [];
@@ -535,14 +537,20 @@ class HomeController extends GetxController {
         LocalStorage.dateOfBirth = data['data']?['dob'];
         LocalStorage.gender = data['data']?['gender'];
 
+        final bool isLocationVisible =
+            data['data']?['isLocationVisible'] ?? false;
+        isNearbyActive.value = isLocationVisible;
+        LocalStorage.setBool(LocalStorageKeys.isLocationVisible, isLocationVisible);
+        debugPrint('📍 isLocationVisible from getUserData: $isLocationVisible');
+
         LocalStorage.setBool(LocalStorageKeys.isLogIn, LocalStorage.isLogIn);
         LocalStorage.setString(LocalStorageKeys.userId, LocalStorage.userId);
         LocalStorage.setString(LocalStorageKeys.myImage, LocalStorage.myImage);
         LocalStorage.setString(LocalStorageKeys.myName, LocalStorage.myName);
         LocalStorage.setString(LocalStorageKeys.myEmail, LocalStorage.myEmail);
-      } else {}
+      }
     } catch (e) {
-      // Get.snackbar("Error", e.toString());
+      debugPrint('Error getUserData: $e');
     } finally {
       isLoading = false;
       update();
@@ -597,7 +605,7 @@ class HomeController extends GetxController {
       final response = await ApiService.patch(
         ApiEndPoint.updateProfile,
         body: {
-          "isLocationVisible": false,
+          // "isLocationVisible": false,
           "location": [longitude, latitude],
           "address": address ?? "Location Unavailable",
         },
@@ -642,6 +650,8 @@ class HomeController extends GetxController {
         },
       );
       if (response.statusCode == 200) {
+        isNearbyActive.value = true;
+        LocalStorage.setBool(LocalStorageKeys.isLocationVisible, true);
         debugPrint('Profile location updated');
       }
     } catch (e) {
