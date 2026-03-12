@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
-import '../../../../services/storage/storage_services.dart';
 import '../../../../utils/constants/app_colors.dart';
 import '../controller/chat_controller.dart';
+import '../../../../services/storage/storage_services.dart';
 import '../controller/message_controller.dart';
 
 class FriendInputArea extends StatelessWidget {
@@ -22,13 +22,15 @@ class FriendInputArea extends StatelessWidget {
     return Obx(() {
       // ── Friend না হলে এই widget দেখাবে না
       if (!controller.isFriend.value) return const SizedBox.shrink();
+
       final double distanceKm = controller.rawDistanceKm.value;
       final double radiusKm = double.tryParse(
-        Get.isRegistered<ChatController>()
-            ? Get.find<ChatController>().currentRadius.value
-            : LocalStorage.radius,
-      ) ?? 0.0;
-      final bool isOutOfRange = radiusKm > 0 && distanceKm > radiusKm;
+            Get.isRegistered<ChatController>()
+                ? Get.find<ChatController>().currentRadius.value
+                : LocalStorage.radius,
+          ) ??
+          0.0;
+      final bool isOutOfRange = distanceKm > radiusKm;
 
       return Column(
         mainAxisSize: MainAxisSize.min,
@@ -57,7 +59,6 @@ class FriendInputArea extends StatelessWidget {
                 ],
               ),
             ),
-
           Container(
             decoration: BoxDecoration(
               color: Colors.white,
@@ -86,16 +87,12 @@ class FriendInputArea extends StatelessWidget {
                     height: 40.w,
                     margin: EdgeInsets.only(bottom: 1.h),
                     decoration: BoxDecoration(
-                      color: isOutOfRange
-                          ? Colors.grey[200]
-                          : Colors.grey[100],
+                      color: isOutOfRange ? Colors.grey[200] : Colors.grey[100],
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
                       Icons.attach_file,
-                      color: isOutOfRange
-                          ? Colors.grey[400]
-                          : Colors.grey[600],
+                      color: isOutOfRange ? Colors.grey[400] : Colors.grey[600],
                       size: 22.sp,
                     ),
                   ),
@@ -106,25 +103,22 @@ class FriendInputArea extends StatelessWidget {
                 Expanded(
                   child: Container(
                     constraints:
-                    BoxConstraints(minHeight: 42.h, maxHeight: 120.h),
+                        BoxConstraints(minHeight: 42.h, maxHeight: 120.h),
                     decoration: BoxDecoration(
-                      color: isOutOfRange
-                          ? Colors.grey[200]
-                          : Colors.grey[100],
+                      color: isOutOfRange ? Colors.grey[200] : Colors.grey[100],
                       borderRadius: BorderRadius.circular(22.r),
                     ),
                     child: TextField(
                       controller: controller.messageController,
                       enabled: !isOutOfRange,
                       maxLines: null,
-                      style:
-                      TextStyle(fontSize: 14.sp, color: Colors.black87),
+                      style: TextStyle(fontSize: 14.sp, color: Colors.black87),
                       decoration: InputDecoration(
                         hintText: isOutOfRange
                             ? 'Out of range to message'
                             : 'Write a message…',
-                        hintStyle: TextStyle(
-                            fontSize: 14.sp, color: Colors.grey[400]),
+                        hintStyle:
+                            TextStyle(fontSize: 14.sp, color: Colors.grey[400]),
                         border: InputBorder.none,
                         contentPadding: EdgeInsets.symmetric(
                             horizontal: 16.w, vertical: 11.h),
@@ -148,19 +142,16 @@ class FriendInputArea extends StatelessWidget {
                       boxShadow: isOutOfRange
                           ? []
                           : [
-                        BoxShadow(
-                          color:
-                          AppColors.primaryColor.withOpacity(0.3),
-                          blurRadius: 8,
-                          offset: const Offset(0, 3),
-                        ),
-                      ],
+                              BoxShadow(
+                                color: AppColors.primaryColor.withOpacity(0.3),
+                                blurRadius: 8,
+                                offset: const Offset(0, 3),
+                              ),
+                            ],
                     ),
                     child: Icon(
                       Icons.send_rounded,
-                      color: isOutOfRange
-                          ? Colors.grey[500]
-                          : Colors.white,
+                      color: isOutOfRange ? Colors.grey[500] : Colors.white,
                       size: 18.sp,
                     ),
                   ),

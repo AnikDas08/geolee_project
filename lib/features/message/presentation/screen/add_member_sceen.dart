@@ -107,7 +107,7 @@ class AddMemberScreen extends StatelessWidget {
                         color: Colors.grey[300],
                       ),
                       SizedBox(height: 12.h),
-                      CommonText(
+                      const CommonText(
                         text: 'No friends to add',
                         fontSize: 14,
                         color: Colors.grey,

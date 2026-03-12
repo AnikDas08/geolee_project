@@ -24,7 +24,7 @@ class NonFriendPanel extends StatelessWidget {
             : LocalStorage.radius,
       ) ??
           0.0;
-      final bool isOutOfRange = radiusKm > 0 && distanceKm > radiusKm;
+      final bool isOutOfRange = distanceKm > radiusKm;
 
       return Container(
         decoration: BoxDecoration(

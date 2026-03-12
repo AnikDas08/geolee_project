@@ -402,8 +402,9 @@ class GroupSettingsScreen extends StatelessWidget {
                                           : () {
                                               String baseUrl =
                                                   ApiEndPoint.imageUrl;
-                                              if (!baseUrl.endsWith('/'))
+                                              if (!baseUrl.endsWith('/')) {
                                                 baseUrl = '$baseUrl/';
+                                              }
                                               final String cleanPath =
                                                   avatarPath.startsWith('/')
                                                   ? avatarPath.substring(1)

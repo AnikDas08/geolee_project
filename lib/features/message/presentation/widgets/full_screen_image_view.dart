@@ -25,7 +25,6 @@ class FullScreenImageViewer extends StatelessWidget {
       ),
     ),
     body: InteractiveViewer(
-      panEnabled: true,
       minScale: 0.5,
       maxScale: 5.0,
       child: Center(

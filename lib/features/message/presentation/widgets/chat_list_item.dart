@@ -1,8 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:giolee78/component/text/common_text.dart';
-import '../../../../component/image/common_image.dart';
 import '../../../../config/api/api_end_point.dart';
 import '../../data/model/chat_list_model.dart';
 import '../../../../../utils/extensions/extension.dart';
@@ -117,7 +115,7 @@ Widget chatListItem({
               Text(
                 item.isGroup
                     ? (item.chatName ?? "Unnamed Group")
-                    : item.participant.fullName,
+                    :( item.participant.fullName),
                 style: TextStyle(
                   fontSize: 15.sp,
                   fontWeight: FontWeight.w600,

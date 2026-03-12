@@ -20,18 +20,6 @@ import '../widgets/loading_shimer.dart';
 import '../widgets/none_friend_input_panel.dart';
 import '../widgets/picked_file_preview.dart';
 import '../widgets/upload_progress.dart';
-double _parseDistanceToKm(String distanceStr) {
-  if (distanceStr.isEmpty) return 0.0;
-  final upper = distanceStr.toUpperCase().trim();
-  if (upper.contains('KM')) {
-    return double.tryParse(upper.replaceAll('KM', '').trim()) ?? 0.0;
-  } else if (upper.contains('M')) {
-    final meters = double.tryParse(upper.replaceAll('M', '').trim()) ?? 0.0;
-    return meters / 1000;
-  }
-  return double.tryParse(distanceStr) ?? 0.0;
-}
-
 
 class MessageScreen extends StatefulWidget {
   const MessageScreen({super.key});
@@ -47,23 +35,9 @@ class _MessageScreenState extends State<MessageScreen> {
   void initState() {
     super.initState();
     messageController = Get.find<MessageController>();
-    final params = Get.parameters;
-
-    if (params['chatId'] != null) {
-      messageController.chatId = params['chatId'] ?? '';
-      messageController.name = params['name'] ?? '';
-      messageController.image = params['image'] ?? '';
-      messageController.userId = params['userId'] ?? '';
-      messageController.initialRequestStatus.value = params['requestStatus'] ?? '';
-    }
-
     messageController.scrollController.addListener(_onScroll);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      messageController.isActive.value = params['isOnline'] == 'true';
-      final String distanceStr = params['distance'] ?? '';
-      messageController.distance.value = distanceStr;
-      messageController.rawDistanceKm.value = _parseDistanceToKm(distanceStr);
       _initScreen();
     });
   }
@@ -243,7 +217,7 @@ class _MessageScreenState extends State<MessageScreen> {
                   child: SizedBox(
                     width: 22.w,
                     height: 22.w,
-                    child: CircularProgressIndicator(
+                    child: const CircularProgressIndicator(
                       strokeWidth: 2.5,
                       color: AppColors.primaryColor,
                     ),
@@ -303,9 +277,9 @@ class _MessageScreenState extends State<MessageScreen> {
       leadingWidth: 42.w,
       leading: IconButton(
         icon: Icon(
-          Icons.arrow_back_ios_new_rounded,
+          Icons.arrow_back,
           color: Colors.black87,
-          size: 20.sp,
+          size: 26.sp,
         ),
         onPressed: () {
           controller.clearAllPicks();
@@ -377,22 +351,23 @@ class _MessageScreenState extends State<MessageScreen> {
                     ),
                   ),
                   Text(
-                    controller.isActive.value
-                        ? 'Active now'
-                        : (controller.friendStatus.value !=
-                                  FriendStatus.friends &&
-                              controller.distance.value.isNotEmpty)
-                        ? 'Distance: ${controller.distance.value}'
-                        : 'Offline',
+                    (controller.friendStatus.value != FriendStatus.friends)
+                        ? (controller.distance.value.isNotEmpty
+                            ? 'Distance: ${controller.distance.value}'
+                            : 'Offline')
+                        : (controller.isActive.value
+                            ? 'Active now'
+                            : 'Offline'),
                     style: TextStyle(
                       fontSize: 11.sp,
-                      color: controller.isActive.value
-                          ? const Color(0xFF22C55E)
-                          : (controller.friendStatus.value !=
-                                    FriendStatus.friends &&
-                                controller.distance.value.isNotEmpty)
-                          ? const Color(0xFFF48201)
-                          : Colors.grey[400],
+                      color: (controller.friendStatus.value !=
+                              FriendStatus.friends)
+                          ? (controller.distance.value.isNotEmpty
+                              ? const Color(0xFFF48201)
+                              : Colors.grey[400])
+                          : (controller.isActive.value
+                              ? const Color(0xFF22C55E)
+                              : Colors.grey[400]),
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -420,13 +395,14 @@ class _MessageScreenState extends State<MessageScreen> {
             );
           }
 
-          if (controller.friendStatus.value == FriendStatus.none)
+          if (controller.friendStatus.value == FriendStatus.none) {
             return IconButton(
               onPressed: () => _showAddFriendDialog(controller),
               icon: CommonImage(imageSrc: AppIcons.addFriend, size: 22.sp),
             );
+          }
 
-          if (controller.friendStatus.value == FriendStatus.requested)
+          if (controller.friendStatus.value == FriendStatus.requested) {
             return IconButton(
               onPressed: () => _showCancelRequestDialog(controller),
               icon: Icon(
@@ -435,6 +411,7 @@ class _MessageScreenState extends State<MessageScreen> {
                 size: 22.sp,
               ),
             );
+          }
 
           return const SizedBox.shrink();
         }),
@@ -738,8 +715,9 @@ class _MessageBubble extends StatelessWidget {
     if (diff.inSeconds < 60) return 'Just now';
     if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
     if (diff.inHours < 24) return DateFormat('hh:mm a').format(time);
-    if (diff.inDays == 1)
+    if (diff.inDays == 1) {
       return 'Yesterday ${DateFormat('hh:mm a').format(time)}';
+    }
     if (diff.inDays < 7) return '${diff.inDays} days ago';
     return DateFormat('dd MMM, hh:mm a').format(time);
   }
@@ -753,7 +731,9 @@ class _MessageBubble extends StatelessWidget {
         top: showAvatar && !isMe ? 4.h : 0,
       ),
       child: Row(
-        mainAxisAlignment: isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
+        mainAxisAlignment: isMe
+            ? MainAxisAlignment.end
+            : MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           if (!isMe) ...[
@@ -780,8 +760,9 @@ class _MessageBubble extends StatelessWidget {
           ],
           Flexible(
             child: Column(
-              crossAxisAlignment:
-                  isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+              crossAxisAlignment: isMe
+                  ? CrossAxisAlignment.end
+                  : CrossAxisAlignment.start,
               children: [
                 BubbleContent(
                   message: message,

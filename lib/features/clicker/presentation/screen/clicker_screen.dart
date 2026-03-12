@@ -118,18 +118,19 @@ class _ClickerScreenState extends State<ClickerScreen> {
                       ),
                       // 👇 Suggestions dropdown
                       Obx(() {
-                        if (controller.locationSuggestions.isEmpty)
+                        if (controller.locationSuggestions.isEmpty) {
                           return const SizedBox.shrink();
+                        }
                         return Container(
                           margin: EdgeInsets.only(top: 4.h),
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(12.r),
-                            boxShadow: [
+                            boxShadow: const [
                               BoxShadow(
                                 color: Colors.black12,
                                 blurRadius: 6,
-                                offset: const Offset(0, 3),
+                                offset: Offset(0, 3),
                               ),
                             ],
                           ),

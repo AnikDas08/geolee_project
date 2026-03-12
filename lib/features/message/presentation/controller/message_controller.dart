@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
@@ -17,13 +16,11 @@ import '../../../../services/storage/storage_services.dart';
 import '../../../../utils/app_utils.dart';
 import '../../../../utils/enum/enum.dart';
 
-
 class MessageController extends GetxController {
   RxBool isActive = false.obs;
   RxString distance = ''.obs;
 
   RxDouble rawDistanceKm = 0.0.obs;
-
 
   var error = ''.obs;
   var friendStatus = FriendStatus.none.obs;
@@ -121,14 +118,28 @@ class MessageController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    final params = Get.parameters;
+    if (params['chatId'] != null) {
+      chatId = params['chatId'] ?? '';
+      name = params['name'] ?? '';
+      image = params['image'] ?? '';
+      userId = params['userId'] ?? '';
+    }
     listenMessage();
     listenOnlineStatus();
-    ChatController.instance.setOpenChat(chatId);
-
+    // ChatController.instance.setOpenChat(chatId); // <--- Moved
   }
 
-
-
+  @override
+  void onReady() {
+    super.onReady();
+    final params = Get.parameters;
+    if (params['chatId'] != null) {
+      initialRequestStatus.value = params['requestStatus'] ?? '';
+      fetchUserProfile(userId);
+      ChatController.instance.setOpenChat(chatId);
+    }
+  }
 
   @override
   void onClose() {
@@ -179,8 +190,6 @@ class MessageController extends GetxController {
       }
     });
   }
-
-
 
   // ================================================
   // ONLINE STATUS
@@ -392,16 +401,12 @@ class MessageController extends GetxController {
     }
   }
 
-  // ================================================
-  // LOAD MESSAGES (প্রথমবার — page 1 থেকে শুরু)
-  // ================================================
   Future<void> loadMessages({bool showLoading = true}) async {
     if (showLoading) {
       isLoading = true;
       update();
     }
 
-    // ── Pagination reset করা হচ্ছে প্রতিবার fresh load এ
     _currentPage = 1;
     hasMoreMessages.value = true;
 
@@ -413,12 +418,15 @@ class MessageController extends GetxController {
         }
       }
 
-      // ── page=1 & limit দিয়ে প্রথম batch load
+      ///TODO===================================================================================
+
       final response = await ApiService.get(
         "${ApiEndPoint.messages}/$chatId?page=1&limit=$_pageLimit",
       );
 
       if (response.statusCode == 200) {
+        appLog("Message Loading by chat id${response.message}");
+
         final data = response.data['data'] as List?;
         if (data != null) {
           messages =
@@ -434,7 +442,6 @@ class MessageController extends GetxController {
                   .toList()
                 ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
 
-          // যদি প্রথম page তেই limit এর চেয়ে কম আসে — আর নেই
           if (data.length < _pageLimit) {
             hasMoreMessages.value = false;
           }
@@ -806,10 +813,12 @@ class MessageController extends GetxController {
     }
   }
 
-
   // ── MessageController এ যোগ করো
 
-  Future<void> calculateDistanceFromOtherUser(double otherLat, double otherLng) async {
+  Future<void> calculateDistanceFromOtherUser(
+    double otherLat,
+    double otherLng,
+  ) async {
     try {
       final double myLat = LocalStorage.lat;
       final double myLng = LocalStorage.long;
@@ -824,10 +833,41 @@ class MessageController extends GetxController {
       final double distanceInKm = distanceInMeters / 1000;
       distance.value = distanceInKm.toStringAsFixed(2);
 
-      debugPrint('📍 Distance: ${distance.value} km | Radius: ${LocalStorage.radius} km');
+      debugPrint(
+        '📍 Distance: ${distance.value} km | Radius: ${LocalStorage.radius} km',
+      );
     } catch (e) {
       debugPrint('Distance calculation error: $e');
       distance.value = '0';
+    }
+  }
+
+  Future<void> fetchUserProfile(String targetUserId) async {
+    try {
+      final lat = LocalStorage.lat;
+      final lng = LocalStorage.long;
+      
+      final response = await ApiService.get(
+        "${ApiEndPoint.getUserSingleProfileById}$targetUserId?lat=$lat&lng=$lng",
+      );
+
+      if (response.statusCode == 200) {
+        appLog("User profile fetched successfully");
+        final data = response.data['data'];
+        if (data != null) {
+          if (data['isOnline'] != null) {
+            isActive.value = data['isOnline'] == true;
+          }
+          
+          if (data['distance'] != null) {
+            final double distNum = double.tryParse(data['distance'].toString()) ?? 0.0;
+            rawDistanceKm.value = distNum;
+            distance.value = "${distNum.toStringAsFixed(2)}km";
+          }
+        }
+      }
+    } catch (e) {
+      appLog("❌ Fetch user profile error: $e");
     }
   }
 
@@ -853,17 +893,16 @@ class MessageController extends GetxController {
     });
   }
 
-
   Future<void> updateRequestStatus(String status) async {
     try {
       final response = await ApiService.patch(
         "${ApiEndPoint.noneFriendChatUpdate}$chatId",
-        body: {
-          "requestStatus": status,
-        },
+        body: {"requestStatus": status},
       );
 
-      appLog("updateRequestStatus [$status] => ${response.statusCode} | ${response.data}");
+      appLog(
+        "updateRequestStatus [$status] => ${response.statusCode} | ${response.data}",
+      );
 
       if (response.statusCode == 200) {
         if (Get.isRegistered<ChatController>()) {
@@ -875,6 +914,4 @@ class MessageController extends GetxController {
       debugPrint("Update Request Status Error: $e");
     }
   }
-
-
 }

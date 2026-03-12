@@ -49,7 +49,7 @@ class AdDetailScreen extends StatelessWidget {
 
             const SizedBox(height: 8),
 
-            Divider(height: 2,color: Colors.grey,),
+            const Divider(height: 2,color: Colors.grey,),
             
 
             const SizedBox(height: 16),

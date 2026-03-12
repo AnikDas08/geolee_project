@@ -377,10 +377,10 @@ class ChatController extends GetxController {
     bool found = false;
 
     // Update single chats===================================
-    int index = singleChats.indexWhere((chat) => chat.id == chatId);
+    final int index = singleChats.indexWhere((chat) => chat.id == chatId);
     if (index != -1) {
       singleChats[index] = singleChats[index].copyWith(unreadCount: 0);
-      int fIndex = filteredSingleChats.indexWhere((c) => c.id == chatId);
+      final int fIndex = filteredSingleChats.indexWhere((c) => c.id == chatId);
       if (fIndex != -1) {
         filteredSingleChats[fIndex] = filteredSingleChats[fIndex].copyWith(
           unreadCount: 0,
@@ -390,10 +390,10 @@ class ChatController extends GetxController {
     }
 
     // Update group chats ======================================
-    int gIndex = chats.indexWhere((chat) => chat.id == chatId);
+    final int gIndex = chats.indexWhere((chat) => chat.id == chatId);
     if (gIndex != -1) {
       chats[gIndex] = chats[gIndex].copyWith(unreadCount: 0);
-      int fgIndex = filteredChats.indexWhere((c) => c.id == chatId);
+      final int fgIndex = filteredChats.indexWhere((c) => c.id == chatId);
       if (fgIndex != -1) {
         filteredChats[fgIndex] = filteredChats[fgIndex].copyWith(
           unreadCount: 0,
@@ -511,7 +511,7 @@ class ChatController extends GetxController {
 
 
   @override
-  void onInit() async {
+  Future<void> onInit() async {
     super.onInit();
     await getCurrentLocationAndUpdateProfile();
     await getRadius();

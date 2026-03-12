@@ -179,7 +179,7 @@ class _CompleteProfileState extends State<CompleteProfile> {
                   ],
                 ),
                 child: DropdownButtonFormField<String>(
-                  value: controller.selectedGender,
+                  initialValue: controller.selectedGender,
                   decoration: InputDecoration(
                     contentPadding: EdgeInsets.symmetric(
                       horizontal: 16.w,

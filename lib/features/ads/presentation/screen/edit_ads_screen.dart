@@ -11,7 +11,6 @@ import 'package:giolee78/features/ads/presentation/controller/update_ads_control
 import 'package:giolee78/utils/constants/app_colors.dart';
 import 'package:giolee78/utils/constants/app_icons.dart';
 import '../../../../config/api/api_end_point.dart';
-import '../../../../config/route/app_routes.dart';
 import '../../../../utils/helpers/other_helper.dart';
 
 class EditAdsScreen extends StatelessWidget {

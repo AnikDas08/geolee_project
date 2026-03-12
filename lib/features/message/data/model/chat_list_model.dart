@@ -183,7 +183,6 @@ class ChatModel {
       joinRequestStatus: joinRequestStatus,
       joinRequestId: joinRequestId,
       friendRequestStatus: json['requestStatus']?.toString(),
-      friendRequestId: null,
       description: json['description']?.toString(),
     );
   }

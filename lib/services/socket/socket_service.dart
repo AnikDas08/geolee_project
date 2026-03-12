@@ -19,6 +19,8 @@ class SocketServices {
     return _sockets[namespace]!;
   }
 
+  static final Set<String> _processedNotificationIds = {};
+
   static void connectToNamespace(String namespace) {
     String baseUrl = ApiEndPoint.socketUrl;
     if (baseUrl.endsWith("/")) {
@@ -73,22 +75,14 @@ class SocketServices {
     });
 
     socket.on("notification:new", (data) {
-      debugPrint(
-        ">>>>>>>>>>>> 🔔 New Notification via socket [$namespace]: $data <<<<<<<<<<<<",
-      );
-      NotificationService.showNotification(data);
-      _handleNewNotification(data);
+      _onNotificationReceived(data, namespace, "notification:new");
     });
 
     // Add user specific notification listener
     if (LocalStorage.userId.isNotEmpty) {
       final String userNotifEvent = "notification::${LocalStorage.userId}";
       socket.on(userNotifEvent, (data) {
-        debugPrint(
-          ">>>>>>>>>>>> 🔔 User Notification via socket [$namespace] ($userNotifEvent): $data <<<<<<<<<<<<",
-        );
-        NotificationService.showNotification(data);
-        _handleNewNotification(data);
+        _onNotificationReceived(data, namespace, userNotifEvent);
       });
     }
 
@@ -110,6 +104,38 @@ class SocketServices {
     socket.connect();
   }
 
+  static void _onNotificationReceived(dynamic data, String namespace, String event) {
+    try {
+      final Map<String, dynamic> notifData = (data is Map && data.containsKey('data') && data['data'] is Map)
+          ? data['data'] as Map<String, dynamic>
+          : (data is Map<String, dynamic> ? data : {});
+
+      final String id = notifData['_id'] ?? notifData['id'] ?? '';
+
+      if (id.isNotEmpty) {
+        if (_processedNotificationIds.contains(id)) {
+          debugPrint("🚫 Duplicate notification ignored: ID=$id from namespace=$namespace via event=$event");
+          return;
+        }
+        _processedNotificationIds.add(id);
+        
+        // Safety: Keep the set small
+        if (_processedNotificationIds.length > 50) {
+          _processedNotificationIds.remove(_processedNotificationIds.first);
+        }
+      }
+
+      debugPrint(
+        ">>>>>>>>>>>> 🔔 New UNIQUE Notification via socket [$namespace] ($event): $data <<<<<<<<<<<<",
+      );
+      
+      NotificationService.showNotification(data);
+      _handleNewNotification(data);
+    } catch (e) {
+      debugPrint("Error in _onNotificationReceived: $e");
+    }
+  }
+
   //Notification handle
   static void _handleNewNotification(dynamic data) {
     try {
@@ -121,6 +147,13 @@ class SocketServices {
       final newNotification = NotificationModel.fromJson(
         data as Map<String, dynamic>,
       );
+
+      // Secondary check: avoid adding if ID already exists in the list
+      if (controller.notifications.any((n) => n.id == newNotification.id)) {
+        debugPrint("🚫 Skipping list insert: notification ${newNotification.id} already exists");
+        return;
+      }
+
       controller.notifications.insert(0, newNotification);
       controller.unreadCount.value++;
       controller.update();

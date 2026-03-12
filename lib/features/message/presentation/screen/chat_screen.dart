@@ -191,7 +191,6 @@ class _ChatListScreenState extends State<ChatListScreen> {
                   children: [
                     //Search bar===================================================================
                     TextField(
-                      autofocus: false,
                       controller: controller.searchController,
                       onChanged: (value) => controller.searchChats(value),
                       decoration: InputDecoration(

@@ -315,7 +315,6 @@ class _OnboardingScreenState extends State<OnboardingScreen>
               10.height,
               CommonText(
                 maxLines: 5,
-                textAlign: TextAlign.center,
                 text: AppString.onboardingSubText,
                 fontSize: 14.sp,
               ),

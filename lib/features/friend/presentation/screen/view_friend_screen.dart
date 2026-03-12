@@ -76,11 +76,7 @@ class _ViewFriendScreenState extends State<ViewFriendScreen> {
         backgroundColor: AppColors.background,
         leading: IconButton(
           onPressed: () => Navigator.of(context).pop(),
-          icon: Icon(
-            Icons.arrow_back_ios_new,
-            size: 18.sp,
-            color: AppColors.black,
-          ),
+          icon: Icon(Icons.arrow_back, size: 26.sp, color: AppColors.black),
         ),
         centerTitle: true,
       ),
@@ -104,7 +100,7 @@ class _ViewFriendScreenState extends State<ViewFriendScreen> {
                   textAlign: TextAlign.start,
                 ).start,
                 Obx(
-                      () => ListView.separated(
+                  () => ListView.separated(
                     padding: EdgeInsets.symmetric(
                       horizontal: 16.w,
                       vertical: 12.h,
@@ -127,12 +123,12 @@ class _ViewFriendScreenState extends State<ViewFriendScreen> {
                         onTapPhoto: () {
                           if (postImages.isNotEmpty) {
                             Get.to(
-                                  () => FullScreenImageView(images: postImages),
+                              () => FullScreenImageView(images: postImages),
                             );
                           }
                         },
                         onTapProfile: () => Get.to(
-                              () => ViewFriendScreen(
+                          () => ViewFriendScreen(
                             userId: data.user.id,
                             isFriend: false,
                           ),
@@ -149,7 +145,7 @@ class _ViewFriendScreenState extends State<ViewFriendScreen> {
                         images: postImages,
                         description: data.description,
                         isFriend:
-                        friendController.getFriendStatus(widget.userId) ==
+                            friendController.getFriendStatus(widget.userId) ==
                             FriendStatus.friends,
                         privacyImage: _getPrivacyIcon(data.privacy),
                       );
@@ -180,12 +176,11 @@ class _ViewFriendScreenState extends State<ViewFriendScreen> {
           Center(
             child: CircleAvatar(
               radius: 50,
-              backgroundImage: (user != null &&
-                  user.image != null &&
-                  user.image!.isNotEmpty)
+              backgroundImage:
+                  (user != null && user.image != null && user.image!.isNotEmpty)
                   ? NetworkImage("${ApiEndPoint.imageUrl}${user.image}")
                   : const AssetImage("assets/images/profile.png")
-              as ImageProvider,
+                        as ImageProvider,
             ),
           ),
 
@@ -266,7 +261,7 @@ class _ViewFriendScreenState extends State<ViewFriendScreen> {
                   onTap: loading
                       ? () {}
                       : () =>
-                      friendController.cancelFriendRequest(widget.userId),
+                            friendController.cancelFriendRequest(widget.userId),
                 );
               }
 
@@ -282,7 +277,7 @@ class _ViewFriendScreenState extends State<ViewFriendScreen> {
                 onTap: loading
                     ? () {}
                     : () =>
-                    friendController.onTapAddFriendButton(widget.userId),
+                          friendController.onTapAddFriendButton(widget.userId),
               );
             }),
         ],
@@ -329,7 +324,9 @@ class _ViewFriendScreenState extends State<ViewFriendScreen> {
   Widget _buildFriendRequest(String userId) {
     return Obx(() {
       final requestId = friendController.pendingRequestIdMap[userId] ?? "";
-      final isProcessing = friendController.processingRequestIds.contains(requestId);
+      final isProcessing = friendController.processingRequestIds.contains(
+        requestId,
+      );
 
       return Row(
         mainAxisSize: MainAxisSize.min,

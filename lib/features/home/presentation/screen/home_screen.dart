@@ -6,7 +6,6 @@ import 'package:get/get.dart';
 import 'package:giolee78/component/button/common_button.dart';
 import 'package:giolee78/config/route/app_routes.dart';
 import 'package:giolee78/features/friend/presentation/controller/my_friend_controller.dart';
-import 'package:giolee78/utils/log/app_log.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:giolee78/component/other_widgets/item.dart';
@@ -18,10 +17,7 @@ import 'package:giolee78/features/addpost/presentation/screen/my_post_screen.dar
 import 'package:giolee78/features/notifications/presentation/controller/notifications_controller.dart';
 import 'package:giolee78/utils/constants/app_icons.dart';
 import 'package:giolee78/utils/constants/app_colors.dart';
-import '../../../../config/api/api_end_point.dart';
-import '../../../../services/api/api_service.dart';
 import '../../../../services/storage/storage_services.dart';
-import '../../../../services/storage/storage_keys.dart';
 import '../controller/home_controller.dart';
 import '../widgets/clicker_main.dart';
 import '../widgets/filter_main.dart';

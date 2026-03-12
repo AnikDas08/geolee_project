@@ -216,7 +216,7 @@ class _CreateAdsScreenState extends State<CreateAdsScreen> {
                   child: SizedBox(
                     width: 12.w,
                     height: 12.h,
-                    child: CircularProgressIndicator(
+                    child: const CircularProgressIndicator(
                       strokeWidth: 1,
                       color: AppColors.primaryColor,
                     ),

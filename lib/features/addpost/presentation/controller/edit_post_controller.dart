@@ -130,7 +130,7 @@ class EditPostControllers extends GetxController {
         // Utils.successSnackBar("Post Updated", "Successfully saved changes");
         removedImages.clear();
 
-        MyPostController myPostController = Get.find();
+        final MyPostController myPostController = Get.find();
         myPostController.fetchMyPosts();
         Get.back(result: true);
       } else {
