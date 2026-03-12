@@ -20,7 +20,11 @@ class MessageController extends GetxController {
   RxBool isActive = false.obs;
   RxString distance = ''.obs;
 
-  RxDouble rawDistanceKm = 0.0.obs;
+  // -1  → distance unknown (API তে আসেনি)
+  //  0  → same location
+  // >0  → actual distance in km
+  RxDouble rawDistanceKm = (-1.0).obs;
+  RxBool isLocationVisible = true.obs;
 
   var error = ''.obs;
   var friendStatus = FriendStatus.none.obs;
@@ -29,13 +33,13 @@ class MessageController extends GetxController {
   // ================================================
   // FRIEND STATUS
   // ================================================
-
   RxBool isFriend = false.obs;
   RxBool hasPendingRequest = false.obs;
   RxString otherUserId = ''.obs;
   RxString friendStatusValue = ''.obs;
   RxString initialRequestStatus = ''.obs;
   RxBool friendStatusLoaded = false.obs;
+  RxBool isProfileLoaded = false.obs;
 
   // ================================================
   // TEXT CONTROLLER
@@ -92,7 +96,6 @@ class MessageController extends GetxController {
   // ------------------------------------------------
   // SERVICE INFO
   // ------------------------------------------------
-
   String serviceTitle = '';
   String serviceImage = '';
   num price = 0;
@@ -113,6 +116,94 @@ class MessageController extends GetxController {
   static MessageController get instance => Get.put(MessageController());
 
   // ================================================
+  // MESSAGING PERMISSION LOGIC
+  // ================================================
+  //
+  // ✅ Actual friend (friendStatus==friends && friendStatusValue=='friends')
+  //    → সবসময় allow
+  //
+  // ❌ বাকি সব (none, pending, received, none_continued):
+  //
+  //  rawDistanceKm values:
+  //   -1.0 → unknown (API তে distance আসেনি)  → BLOCK
+  //    0.0 → same location                    → ALLOW
+  //   >0.0 → actual distance                  → range check
+  //
+  //  Check order (important!):
+  //   1. isProfileLoaded false      → block
+  //   2. isLocationVisible false    → block
+  //   3. distance.value empty       → block  ← must be before rawDistanceKm check
+  //   4. rawDistanceKm == 0.0       → allow  ← same location
+  //   5. rawDistanceKm > radiusKm   → block
+  //   6. otherwise                  → allow
+  //
+  bool get isMessagingBlocked {
+    // ── Actual friend → no restriction
+    if (friendStatus.value == FriendStatus.friends &&
+        friendStatusValue.value == 'friends') {
+      return false;
+    }
+
+    // ── Profile load না হলে block
+    if (!isProfileLoaded.value) return true;
+
+    // ── Location visible না হলে block
+    if (!isLocationVisible.value) return true;
+
+    // ── Distance empty → block
+    // ── এই check টা rawDistanceKm == 0.0 এর আগে থাকা MUST
+    //    কারণ distance empty হলে rawDistanceKm = -1.0 set হয়
+    //    এবং -1.0 != 0.0 তাই range check এ যাবে, কিন্তু
+    //    distance string empty থাকলে আমরা সবার আগে block করব
+    if (distance.value.isEmpty) return true;
+
+    // ── Distance == 0.0 → same location → allow
+    if (rawDistanceKm.value == 0.0) return false;
+
+    // ── rawDistanceKm == -1.0 → unknown distance → block
+    //    (distance.value.isEmpty check এ আগেই ধরা পড়ার কথা,
+    //     কিন্তু extra safety এর জন্য রাখা হলো)
+    if (rawDistanceKm.value < 0) return true;
+
+    // ── Range check
+    final double radiusKm = double.tryParse(
+          Get.isRegistered<ChatController>()
+              ? Get.find<ChatController>().currentRadius.value
+              : LocalStorage.radius,
+        ) ??
+        0.0;
+
+    if (rawDistanceKm.value > radiusKm) return true;
+
+    return false;
+  }
+
+  // ================================================
+  // STATE RESET
+  // ================================================
+  void _resetState() {
+    isProfileLoaded.value = false;
+    distance.value = '';
+    rawDistanceKm.value = -1.0; // unknown
+    isLocationVisible.value = true;
+    friendStatus.value = FriendStatus.none;
+    friendStatusValue.value = '';
+    isFriend.value = false;
+    friendStatusLoaded.value = false;
+    hasPendingRequest.value = false;
+    pendingRequestId.value = '';
+    otherUserId.value = '';
+    isActive.value = false;
+    messages = [];
+    isLoading = false;
+    isInitialLoading.value = true;
+    _currentPage = 1;
+    hasMoreMessages.value = true;
+    isLoadingMore.value = false;
+    clearAllPicks();
+  }
+
+  // ================================================
   // LIFECYCLE
   // ================================================
   @override
@@ -127,7 +218,6 @@ class MessageController extends GetxController {
     }
     listenMessage();
     listenOnlineStatus();
-    // ChatController.instance.setOpenChat(chatId); // <--- Moved
   }
 
   @override
@@ -135,9 +225,44 @@ class MessageController extends GetxController {
     super.onReady();
     final params = Get.parameters;
     if (params['chatId'] != null) {
+      _resetState();
+
+      chatId = params['chatId'] ?? '';
+      name = params['name'] ?? '';
+      image = params['image'] ?? '';
+      userId = params['userId'] ?? '';
       initialRequestStatus.value = params['requestStatus'] ?? '';
-      fetchUserProfile(userId);
+
+      _initializeChatData();
       ChatController.instance.setOpenChat(chatId);
+    }
+  }
+
+  Future<void> _initializeChatData() async {
+    isInitialLoading.value = true;
+    update();
+
+    try {
+      if (userId.isNotEmpty) {
+        // ── profile + friendship parallel fetch
+        await Future.wait([
+          fetchUserProfile(userId),
+          checkFriendshipStatus(userId),
+        ]);
+      } else {
+        isFriend.value = true;
+        friendStatus.value = FriendStatus.friends;
+        friendStatusValue.value = 'friends';
+        friendStatusLoaded.value = true;
+        isProfileLoaded.value = true;
+      }
+
+      await loadMessages(showLoading: false);
+    } catch (e) {
+      appLog("❌ _initializeChatData error: $e");
+    } finally {
+      isInitialLoading.value = false;
+      update();
     }
   }
 
@@ -154,6 +279,13 @@ class MessageController extends GetxController {
     messageController.dispose();
     scrollController.dispose();
     ChatController.instance.clearOpenChat();
+
+    Future.microtask(() {
+      if (Get.isRegistered<MessageController>()) {
+        Get.delete<MessageController>(force: true);
+      }
+    });
+
     super.onClose();
   }
 
@@ -215,26 +347,15 @@ class MessageController extends GetxController {
   // ================================================
   // PICKER METHODS
   // ================================================
-
   Future<void> pickImageFromGallery() async {
     try {
       isPickingImage = true;
       update();
-
       final XFile? picked = await _imagePicker.pickMedia();
-
       if (picked != null) {
         final ext = picked.path.toLowerCase().split('.').last;
-        final isVideo = [
-          'mp4',
-          'mov',
-          'avi',
-          'mkv',
-          'flv',
-          'wmv',
-          '3gp',
-        ].contains(ext);
-
+        final isVideo =
+            ['mp4', 'mov', 'avi', 'mkv', 'flv', 'wmv', '3gp'].contains(ext);
         pickedImage = picked;
         pickedImagePath = picked.path;
         pickedFile = null;
@@ -319,15 +440,8 @@ class MessageController extends GetxController {
     final ext = fileName.toLowerCase().split('.').last;
     if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'heic'].contains(ext)) {
       pickedFileType = 'image';
-    } else if ([
-      'mp3',
-      'mp4',
-      'avi',
-      'mov',
-      'mkv',
-      'flv',
-      'wav',
-    ].contains(ext)) {
+    } else if (['mp3', 'mp4', 'avi', 'mov', 'mkv', 'flv', 'wav']
+        .contains(ext)) {
       pickedFileType = 'media';
     } else {
       pickedFileType = 'document';
@@ -378,19 +492,26 @@ class MessageController extends GetxController {
   }
 
   // ================================================
-  // INITIALIZATION
+  // INITIALIZATION (external call)
   // ================================================
   Future<void> initializeChat(String targetUserId) async {
+    _resetState();
+    userId = targetUserId;
     isInitialLoading.value = true;
     update();
 
     try {
       if (targetUserId.isNotEmpty) {
-        await checkFriendshipStatus(targetUserId);
+        await Future.wait([
+          fetchUserProfile(targetUserId),
+          checkFriendshipStatus(targetUserId),
+        ]);
       } else {
         isFriend.value = true;
         friendStatus.value = FriendStatus.friends;
+        friendStatusValue.value = 'friends';
         friendStatusLoaded.value = true;
+        isProfileLoaded.value = true;
       }
       await loadMessages(showLoading: false);
     } catch (e) {
@@ -418,35 +539,30 @@ class MessageController extends GetxController {
         }
       }
 
-      ///TODO===================================================================================
-
       final response = await ApiService.get(
         "${ApiEndPoint.messages}/$chatId?page=1&limit=$_pageLimit",
       );
 
       if (response.statusCode == 200) {
         appLog("Message Loading by chat id${response.message}");
-
         final data = response.data['data'] as List?;
         if (data != null) {
-          messages =
-              data
-                  .map((json) {
-                    try {
-                      return ChatMessage.fromJson(json);
-                    } catch (_) {
-                      return null;
-                    }
-                  })
-                  .whereType<ChatMessage>()
-                  .toList()
-                ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
+          messages = data
+              .map((json) {
+                try {
+                  return ChatMessage.fromJson(json);
+                } catch (_) {
+                  return null;
+                }
+              })
+              .whereType<ChatMessage>()
+              .toList()
+            ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
 
           if (data.length < _pageLimit) {
             hasMoreMessages.value = false;
           }
         }
-
         _applyFriendPanelLogic();
       }
     } catch (e) {
@@ -459,68 +575,54 @@ class MessageController extends GetxController {
   }
 
   // ================================================
-  // LOAD MORE MESSAGES (pagination — উপরে scroll করলে)
+  // LOAD MORE MESSAGES (pagination)
   // ================================================
   Future<void> loadMoreMessages() async {
-    // ── Already loading বা আর message নেই — skip
     if (isLoadingMore.value || !hasMoreMessages.value) return;
-
     isLoadingMore.value = true;
 
     try {
       final nextPage = _currentPage + 1;
-
       final response = await ApiService.get(
         "${ApiEndPoint.messages}/$chatId?page=$nextPage&limit=$_pageLimit",
       );
 
       if (response.statusCode == 200) {
         final data = response.data['data'] as List?;
-
         if (data == null || data.isEmpty) {
-          // ── আর কোনো message নেই
           hasMoreMessages.value = false;
           return;
         }
 
-        final newMessages =
-            data
-                .map((json) {
-                  try {
-                    return ChatMessage.fromJson(json);
-                  } catch (_) {
-                    return null;
-                  }
-                })
-                .whereType<ChatMessage>()
-                .toList()
-              ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
+        final newMessages = data
+            .map((json) {
+              try {
+                return ChatMessage.fromJson(json);
+              } catch (_) {
+                return null;
+              }
+            })
+            .whereType<ChatMessage>()
+            .toList()
+          ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
 
         if (newMessages.isEmpty) {
           hasMoreMessages.value = false;
           return;
         }
 
-        // ── Duplicate avoid করে পুরনো messages এর আগে insert
         final existingIds = messages.map((m) => m.id).toSet();
-        final uniqueNew = newMessages
-            .where((m) => !existingIds.contains(m.id))
-            .toList();
+        final uniqueNew =
+            newMessages.where((m) => !existingIds.contains(m.id)).toList();
 
         if (uniqueNew.isEmpty) {
           hasMoreMessages.value = false;
           return;
         }
 
-        // ── পুরনো messages গুলো list এর শুরুতে যোগ (সময়ের ক্রমে)
         messages = [...uniqueNew, ...messages];
         _currentPage = nextPage;
-
-        // ── limit এর চেয়ে কম আসলে শেষ page
-        if (data.length < _pageLimit) {
-          hasMoreMessages.value = false;
-        }
-
+        if (data.length < _pageLimit) hasMoreMessages.value = false;
         update();
       }
     } catch (e) {
@@ -531,28 +633,39 @@ class MessageController extends GetxController {
   }
 
   // ================================================
-  // FRIEND PANEL VISIBILITY LOGIC (আলাদা method)
+  // FRIEND PANEL VISIBILITY LOGIC
   // ================================================
   void _applyFriendPanelLogic() {
-    if (friendStatus.value != FriendStatus.friends) {
-      if (friendStatusValue.value == 'pending') {
-        isFriend.value = true;
-      } else if (friendStatusValue.value == 'received') {
-        if (friendStatusValue.value != 'none_continued') {
-          isFriend.value = false;
-        }
-      } else if (messages.isEmpty) {
-        isFriend.value = true;
-      } else {
-        final lastMsg = messages.last;
-        if (lastMsg.isCurrentUser) {
-          isFriend.value = true;
-        } else {
-          if (friendStatusValue.value != 'none_continued') {
-            isFriend.value = false;
-          }
-        }
-      }
+    // Actual friend → FriendInputArea
+    if (friendStatus.value == FriendStatus.friends &&
+        friendStatusValue.value == 'friends') {
+      isFriend.value = true;
+      return;
+    }
+
+    // none_continued → FriendInputArea (isMessagingBlocked চেক হবে)
+    if (friendStatusValue.value == 'none_continued') {
+      isFriend.value = true;
+      return;
+    }
+
+    // pending → FriendInputArea
+    if (friendStatusValue.value == 'pending') {
+      isFriend.value = true;
+      return;
+    }
+
+    // received → NonFriendPanel
+    if (friendStatusValue.value == 'received') {
+      isFriend.value = false;
+      return;
+    }
+
+    // none → last message check
+    if (messages.isEmpty) {
+      isFriend.value = true;
+    } else {
+      isFriend.value = messages.last.isCurrentUser;
     }
   }
 
@@ -654,11 +767,11 @@ class MessageController extends GetxController {
   // ================================================
   // FRIENDSHIP METHODS
   // ================================================
-
   Future<void> checkFriendshipStatus(String targetUserId) async {
     if (targetUserId.isEmpty) {
       isFriend.value = true;
       friendStatus.value = FriendStatus.friends;
+      friendStatusValue.value = 'friends';
       friendStatusLoaded.value = true;
       return;
     }
@@ -667,14 +780,8 @@ class MessageController extends GetxController {
     otherUserId.value = targetUserId;
 
     try {
-      if (initialRequestStatus.value == 'accepted') {
-        isFriend.value = true;
-        friendStatus.value = FriendStatus.friends;
-        friendStatusValue.value = 'accepted';
-        friendStatusLoaded.value = true;
-        update();
-        return;
-      }
+      // ── removed early return for 'accepted' status to force actual friendship check ──
+
       final response = await ApiService.get(
         "${ApiEndPoint.checkFriendStatus}$targetUserId",
       );
@@ -684,30 +791,45 @@ class MessageController extends GetxController {
 
         if (data['isAlreadyFriend'] == true) {
           friendStatus.value = FriendStatus.friends;
+          friendStatusValue.value = 'friends';
           isFriend.value = true;
           pendingRequestId.value = '';
         } else if (data['pendingFriendRequest'] != null) {
-          friendStatus.value = FriendStatus.requested;
-          pendingRequestId.value =
-              data['pendingFriendRequest']['_id']?.toString() ?? '';
-          isFriend.value = true;
+          final req = data['pendingFriendRequest'];
+          final String currentUserId = LocalStorage.userId ?? '';
+          final String senderId = req['sender']?.toString() ?? '';
+
+          if (senderId == currentUserId) {
+            // আমি request পাঠিয়েছি
+            friendStatus.value = FriendStatus.requested;
+            friendStatusValue.value = 'pending';
+            isFriend.value = true;
+          } else {
+            // অন্যজন আমাকে request পাঠিয়েছে
+            friendStatus.value = FriendStatus.requested;
+            friendStatusValue.value = 'received';
+            isFriend.value = false;
+          }
+          pendingRequestId.value = req['_id']?.toString() ?? '';
         } else {
           friendStatus.value = FriendStatus.none;
+          friendStatusValue.value = 'none';
           isFriend.value = false;
           pendingRequestId.value = '';
         }
       } else {
         friendStatus.value = FriendStatus.none;
+        friendStatusValue.value = 'none';
         isFriend.value = false;
       }
     } catch (e) {
       debugPrint("❌ Friendship check error: $e");
       friendStatus.value = FriendStatus.none;
+      friendStatusValue.value = 'none';
       isFriend.value = false;
     } finally {
       friendStatusLoaded.value = true;
       hasPendingRequest.value = false;
-      friendStatusValue.value = '';
     }
   }
 
@@ -721,7 +843,8 @@ class MessageController extends GetxController {
       if (response.statusCode == 200 || response.statusCode == 201) {
         final reqData = response.data['data'];
         pendingRequestId.value = (reqData?['_id'] ?? '').toString();
-        friendStatus.value = FriendStatus.requested; // ✅ একবারই
+        friendStatus.value = FriendStatus.requested;
+        friendStatusValue.value = 'pending';
         isFriend.value = true;
         Utils.successSnackBar("Sent", "Friend request sent successfully");
         if (Get.isRegistered<MyFriendController>()) {
@@ -767,10 +890,8 @@ class MessageController extends GetxController {
   Future<void> acceptFriendRequest(String userId) async {
     try {
       final url = ApiEndPoint.friendStatusUpdate + userId;
-      final response = await ApiService.patch(
-        url,
-        body: {"status": 'accepted'},
-      );
+      final response =
+          await ApiService.patch(url, body: {"status": 'accepted'});
 
       if (response.statusCode == 200) {
         isFriend.value = true;
@@ -793,10 +914,8 @@ class MessageController extends GetxController {
   Future<void> rejectFriendRequest(String userId) async {
     try {
       final url = ApiEndPoint.friendStatusUpdate + userId;
-      final response = await ApiService.patch(
-        url,
-        body: {"status": 'rejected'},
-      );
+      final response =
+          await ApiService.patch(url, body: {"status": 'rejected'});
 
       if (response.statusCode == 200) {
         isFriend.value = false;
@@ -813,32 +932,22 @@ class MessageController extends GetxController {
     }
   }
 
-  // ── MessageController এ যোগ করো
-
   Future<void> calculateDistanceFromOtherUser(
-    double otherLat,
-    double otherLng,
-  ) async {
+      double otherLat, double otherLng) async {
     try {
       final double myLat = LocalStorage.lat;
       final double myLng = LocalStorage.long;
-
-      final double distanceInMeters = Geolocator.distanceBetween(
-        myLat,
-        myLng,
-        otherLat,
-        otherLng,
-      );
-
+      final double distanceInMeters =
+          Geolocator.distanceBetween(myLat, myLng, otherLat, otherLng);
       final double distanceInKm = distanceInMeters / 1000;
-      distance.value = distanceInKm.toStringAsFixed(2);
-
+      rawDistanceKm.value = distanceInKm;
+      distance.value = "${distanceInKm.toStringAsFixed(2)}km";
       debugPrint(
-        '📍 Distance: ${distance.value} km | Radius: ${LocalStorage.radius} km',
-      );
+          '📍 Distance: ${distance.value} | Radius: ${LocalStorage.radius} km');
     } catch (e) {
       debugPrint('Distance calculation error: $e');
-      distance.value = '0';
+      distance.value = '';
+      rawDistanceKm.value = -1.0; // unknown
     }
   }
 
@@ -846,7 +955,7 @@ class MessageController extends GetxController {
     try {
       final lat = LocalStorage.lat;
       final lng = LocalStorage.long;
-      
+
       final response = await ApiService.get(
         "${ApiEndPoint.getUserSingleProfileById}$targetUserId?lat=$lat&lng=$lng",
       );
@@ -855,19 +964,48 @@ class MessageController extends GetxController {
         appLog("User profile fetched successfully");
         final data = response.data['data'];
         if (data != null) {
+          // ── Online status
           if (data['isOnline'] != null) {
             isActive.value = data['isOnline'] == true;
           }
-          
-          if (data['distance'] != null) {
-            final double distNum = double.tryParse(data['distance'].toString()) ?? 0.0;
-            rawDistanceKm.value = distNum;
-            distance.value = "${distNum.toStringAsFixed(2)}km";
+
+          // ── Distance
+          // API তে distance আসলে set করো
+          // না আসলে distance = '' এবং rawDistanceKm = -1.0 (unknown)
+          // -1.0 ব্যবহার করা হচ্ছে কারণ 0.0 মানে "same location" (allow)
+          // কিন্তু distance না থাকলে block করতে হবে
+          if (data['distance'] != null &&
+              data['distance'].toString().isNotEmpty) {
+            final double? distNum =
+                double.tryParse(data['distance'].toString());
+            if (distNum != null) {
+              rawDistanceKm.value = distNum;
+              distance.value = "${distNum.toStringAsFixed(2)}km";
+            } else {
+              // parse হলো না → unknown
+              distance.value = '';
+              rawDistanceKm.value = -1.0;
+            }
+          } else {
+            // API তে distance নেই → unknown
+            distance.value = '';
+            rawDistanceKm.value = -1.0;
+          }
+
+          // ── Location visibility
+          if (data['isLocationVisible'] != null) {
+            isLocationVisible.value = data['isLocationVisible'] == true;
           }
         }
       }
     } catch (e) {
       appLog("❌ Fetch user profile error: $e");
+      // Error হলেও unknown রাখো
+      distance.value = '';
+      rawDistanceKm.value = -1.0;
+    } finally {
+      isProfileLoaded.value = true;
+      update();
     }
   }
 
@@ -885,7 +1023,7 @@ class MessageController extends GetxController {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (scrollController.hasClients) {
         scrollController.animateTo(
-          0, // reverse: true তে 0 মানেই সবচেয়ে নিচে (latest message)
+          0,
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeOut,
         );
@@ -901,8 +1039,7 @@ class MessageController extends GetxController {
       );
 
       appLog(
-        "updateRequestStatus [$status] => ${response.statusCode} | ${response.data}",
-      );
+          "updateRequestStatus [$status] => ${response.statusCode} | ${response.data}");
 
       if (response.statusCode == 200) {
         if (Get.isRegistered<ChatController>()) {

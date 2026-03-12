@@ -3,9 +3,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../../../../utils/constants/app_colors.dart';
-import '../controller/chat_controller.dart';
-import '../../../../services/storage/storage_services.dart';
 import '../controller/message_controller.dart';
+import '../../../../utils/enum/enum.dart';
 
 class FriendInputArea extends StatelessWidget {
   final MessageController controller;
@@ -20,17 +19,18 @@ class FriendInputArea extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      // ── Friend না হলে এই widget দেখাবে না
+      // ── isFriend false হলে দেখাবে না
       if (!controller.isFriend.value) return const SizedBox.shrink();
 
-      final double distanceKm = controller.rawDistanceKm.value;
-      final double radiusKm = double.tryParse(
-            Get.isRegistered<ChatController>()
-                ? Get.find<ChatController>().currentRadius.value
-                : LocalStorage.radius,
-          ) ??
-          0.0;
-      final bool isOutOfRange = distanceKm > radiusKm;
+      // ── Actual friend = friendStatus.friends AND friendStatusValue == 'friends'
+      //    এই case এ কোনো restriction নেই
+      // ── বাকি সব (pending, none_continued) = isMessagingBlocked চেক হবে
+      final bool isActualFriend =
+          controller.friendStatus.value == FriendStatus.friends &&
+              controller.friendStatusValue.value == 'friends';
+
+      final bool isOutOfRange =
+          isActualFriend ? false : controller.isMessagingBlocked;
 
       return Column(
         mainAxisSize: MainAxisSize.min,
@@ -59,6 +59,7 @@ class FriendInputArea extends StatelessWidget {
                 ],
               ),
             ),
+
           Container(
             decoration: BoxDecoration(
               color: Colors.white,
@@ -117,8 +118,8 @@ class FriendInputArea extends StatelessWidget {
                         hintText: isOutOfRange
                             ? 'Out of range to message'
                             : 'Write a message…',
-                        hintStyle:
-                            TextStyle(fontSize: 14.sp, color: Colors.grey[400]),
+                        hintStyle: TextStyle(
+                            fontSize: 14.sp, color: Colors.grey[400]),
                         border: InputBorder.none,
                         contentPadding: EdgeInsets.symmetric(
                             horizontal: 16.w, vertical: 11.h),
@@ -164,4 +165,3 @@ class FriendInputArea extends StatelessWidget {
     });
   }
 }
-

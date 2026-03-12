@@ -7,6 +7,7 @@ import '../../data/model/chat_list_model.dart';
 import '../../repository/chat_repository.dart';
 import '../../../../services/socket/socket_service.dart';
 import '../../../../services/storage/storage_services.dart';
+import '../../../../services/storage/storage_keys.dart';
 import '../../../../utils/enum/enum.dart';
 import '../../../../config/api/api_end_point.dart';
 import '../../../../services/api/api_service.dart';
@@ -501,8 +502,9 @@ class ChatController extends GetxController {
       final response = await ApiService.get(ApiEndPoint.getRadius);
       if (response.statusCode == 200) {
         final data = response.data['data'];
-        LocalStorage.radius = data['nearbyRange'].toString();
-        currentRadius.value = LocalStorage.radius;
+        final String newRadius = data['nearbyRange'].toString();
+        await LocalStorage.setString(LocalStorageKeys.radius, newRadius);
+        currentRadius.value = newRadius;
       }
     } catch (e) {
       debugPrint("getRadius error: $e");

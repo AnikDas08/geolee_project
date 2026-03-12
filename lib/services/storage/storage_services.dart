@@ -70,6 +70,7 @@ class LocalStorage {
     createdAt = localStorage.getString(LocalStorageKeys.createdAt) ?? "";
     updatedAt = localStorage.getString(LocalStorageKeys.updatedAt) ?? "";
     isLocationVisible = localStorage.getBool(LocalStorageKeys.isLocationVisible) ?? false;
+    radius = localStorage.getString(LocalStorageKeys.radius) ?? "5";
     appLog(token, source: "Local Storage Data Loaded");
   }
 
@@ -85,6 +86,7 @@ class LocalStorage {
     if (key == LocalStorageKeys.myName) myName = value;
     if (key == LocalStorageKeys.myEmail) myEmail = value;
     if (key == LocalStorageKeys.token) token = value;
+    if (key == LocalStorageKeys.radius) radius = value;
   }
 
   static Future<void> setBool(String key, bool value) async {

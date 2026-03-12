@@ -30,4 +30,5 @@ class LocalStorageKeys {
   static const String updatedAt = "updatedAt";
   static const String forgotPasswordToken="forgotPasswordToken";
   static const String isLocationVisible = "isLocationVisible";
+  static const String radius = "radius";
 }

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:giolee78/services/storage/storage_services.dart';
 
 import '../../../../utils/constants/app_colors.dart';
 import '../controller/message_controller.dart';
+import '../../../../utils/enum/enum.dart';
 import 'package:giolee78/features/message/presentation/controller/chat_controller.dart';
 
 class NonFriendPanel extends StatelessWidget {
@@ -17,14 +17,8 @@ class NonFriendPanel extends StatelessWidget {
     return Obx(() {
       final status = controller.friendStatusValue.value;
 
-      final double distanceKm = controller.rawDistanceKm.value;
-      final double radiusKm = double.tryParse(
-        Get.isRegistered<ChatController>()
-            ? Get.find<ChatController>().currentRadius.value
-            : LocalStorage.radius,
-      ) ??
-          0.0;
-      final bool isOutOfRange = distanceKm > radiusKm;
+      // ── isMessagingBlocked: actual friend বাদে সবার জন্য distance/range check
+      final bool isOutOfRange = controller.isMessagingBlocked;
 
       return Container(
         decoration: BoxDecoration(
@@ -56,6 +50,7 @@ class NonFriendPanel extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // ── Header
                     Row(
                       children: [
                         Icon(Icons.info_outline_rounded,
@@ -71,6 +66,7 @@ class NonFriendPanel extends StatelessWidget {
                       ],
                     ),
 
+                    // ── Out of range warning
                     if (isOutOfRange) ...[
                       SizedBox(height: 8.h),
                       Container(
@@ -104,30 +100,31 @@ class NonFriendPanel extends StatelessWidget {
 
                     SizedBox(height: 10.h),
 
+                    // ── Accept friend request
                     if (status == 'received')
                       _NonFriendTile(
                         icon: Icons.check_circle_outline_rounded,
                         iconColor: Colors.green.shade600,
                         label: 'Accept Friend Request',
-                        onTap: () async =>
-                        await controller.acceptFriendRequest(
-                            controller.pendingRequestId.value),
+                        onTap: () async => await controller
+                            .acceptFriendRequest(controller.pendingRequestId.value),
                       ),
                     if (status == 'received')
                       Divider(height: 1, color: Colors.grey.shade100),
 
+                    // ── Reject friend request
                     if (status == 'received')
                       _NonFriendTile(
                         icon: Icons.remove_circle_outline_rounded,
                         iconColor: Colors.red.shade400,
                         label: 'Reject Request',
-                        onTap: () async =>
-                        await controller.rejectFriendRequest(
-                            controller.pendingRequestId.value),
+                        onTap: () async => await controller
+                            .rejectFriendRequest(controller.pendingRequestId.value),
                       ),
                     if (status == 'received')
                       Divider(height: 1, color: Colors.grey.shade100),
 
+                    // ── Add friend / pending
                     if (status != 'received' && status != 'friends')
                       _NonFriendTile(
                         icon: Icons.person_add_alt_1_rounded,
@@ -142,7 +139,7 @@ class NonFriendPanel extends StatelessWidget {
                     if (status != 'received' && status != 'friends')
                       Divider(height: 1, color: Colors.grey.shade100),
 
-                    /// IGNORE → REJECT API
+                    // ── Ignore → REJECT API
                     _NonFriendTile(
                       icon: Icons.close_rounded,
                       iconColor: Colors.red.shade400,
@@ -151,10 +148,8 @@ class NonFriendPanel extends StatelessWidget {
                         if (controller.chatId.isNotEmpty) {
                           await controller.updateRequestStatus("rejected");
                         }
-
                         controller.clearAllPicks();
                         Get.back();
-
                         if (Get.isRegistered<ChatController>()) {
                           await Get.find<ChatController>().getChatRepos();
                         }
@@ -163,18 +158,28 @@ class NonFriendPanel extends StatelessWidget {
 
                     Divider(height: 1, color: Colors.grey.shade100),
 
-                    /// CONTINUE CHAT → ACCEPT API
+                    // ── Continue with Chat → ACCEPT API
+                    // ── ✅ fetchUserProfile আবার call করা হচ্ছে
+                    //    যাতে distance fresh হয় এবং isMessagingBlocked সঠিক কাজ করে
                     _NonFriendTile(
                       icon: Icons.chat_rounded,
                       iconColor: Colors.green.shade600,
                       label: 'Continue with Chat',
                       onTap: () async {
+                        // ── API update
                         if (controller.chatId.isNotEmpty) {
                           await controller.updateRequestStatus("accepted");
                         }
 
-                        controller.isFriend.value = true;
+                        // ── Fresh profile fetch করো distance/location reset করতে
+                        if (controller.otherUserId.value.isNotEmpty) {
+                          await controller.fetchUserProfile(
+                              controller.otherUserId.value);
+                        }
+
+                        // ── Panel switch করো
                         controller.friendStatusValue.value = 'none_continued';
+                        controller.isFriend.value = true;
 
                         if (Get.isRegistered<ChatController>()) {
                           await Get.find<ChatController>().getChatRepos();
@@ -185,6 +190,7 @@ class NonFriendPanel extends StatelessWidget {
                 ),
               ),
 
+              // ── Message input row
               Padding(
                 padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 0),
                 child: Row(
@@ -203,9 +209,8 @@ class NonFriendPanel extends StatelessWidget {
                           enabled: !isOutOfRange,
                           style: TextStyle(fontSize: 14.sp),
                           decoration: InputDecoration(
-                            hintText: isOutOfRange
-                                ? 'Out of range to message'
-                                : 'Reply',
+                            hintText:
+                                isOutOfRange ? 'Out of range to message' : 'Reply',
                             hintStyle: TextStyle(
                                 fontSize: 14.sp, color: Colors.grey[400]),
                             border: InputBorder.none,
@@ -229,8 +234,7 @@ class NonFriendPanel extends StatelessWidget {
                         ),
                         child: Icon(
                           Icons.send_rounded,
-                          color:
-                          isOutOfRange ? Colors.grey[500] : Colors.white,
+                          color: isOutOfRange ? Colors.grey[500] : Colors.white,
                           size: 18.sp,
                         ),
                       ),
