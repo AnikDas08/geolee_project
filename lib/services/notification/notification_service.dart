@@ -1,5 +1,8 @@
 import 'dart:math';
+import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:get/get.dart';
+import 'package:giolee78/utils/constants/app_colors.dart';
 
 class NotificationService {
   static FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
@@ -28,10 +31,31 @@ class NotificationService {
     // Handle nested 'data' if it exists
     final Map<String, dynamic> data = (message is Map && message.containsKey('data') && message['data'] is Map)
         ? message['data'] as Map<String, dynamic>
-        : (message as Map<String, dynamic>);
+        : (message is Map<String, dynamic> ? message : {});
 
     final String title = data['title'] ?? message['message'] ?? "New Notification";
     final String body = data['message'] ?? "";
+
+    // Show in-app popup (Snackbar)
+    Get.snackbar(
+      title,
+      body,
+      backgroundColor: Colors.white.withOpacity(0.9),
+      colorText: Colors.black,
+      snackPosition: SnackPosition.TOP,
+      margin: const EdgeInsets.all(10),
+      borderRadius: 10,
+      icon: const Icon(Icons.notifications_active, color: AppColors.primaryColor),
+      duration: const Duration(seconds: 4),
+      boxShadows: [
+        BoxShadow(
+          color: Colors.black.withOpacity(0.1),
+          blurRadius: 10,
+          spreadRadius: 2,
+          offset: const Offset(0, 4),
+        ),
+      ],
+    );
 
     final AndroidNotificationChannel channel = AndroidNotificationChannel(
         Random.secure().nextInt(10000).toString(),

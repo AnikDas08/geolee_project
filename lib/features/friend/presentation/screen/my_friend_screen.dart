@@ -191,7 +191,7 @@ class _SearchField extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = Get.find<MyFriendController>(); // directly find here
     return CommonTextField(
-      hintText: 'Search by name or email',
+      hintText: 'Search by email',
       paddingHorizontal: 14,
       paddingVertical: 12,
       onChanged: (value) => controller.searchQuery.value = value,

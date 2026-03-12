@@ -5,6 +5,7 @@ import '../../config/api/api_end_point.dart';
 import '../../features/notifications/data/model/notification_model.dart';
 import '../../features/notifications/presentation/controller/notifications_controller.dart';
 import '../../features/message/presentation/controller/message_controller.dart';
+import '../../features/friend/presentation/controller/my_friend_controller.dart';
 import '../notification/notification_service.dart';
 import 'package:get/get.dart';
 
@@ -123,6 +124,26 @@ class SocketServices {
       controller.notifications.insert(0, newNotification);
       controller.unreadCount.value++;
       controller.update();
+
+      // Check if this is a friend request notification
+      // We check title or message keywords like 'friend request' or 'friendship'
+      final title = newNotification.title.toLowerCase();
+      final body = newNotification.message.toLowerCase();
+
+      if (title.contains('friend request') ||
+          body.contains('friend request') ||
+          title.contains('friendship') ||
+          body.contains('friendship')) {
+        debugPrint("🔄 Friend request detected in notification, refreshing MyFriendController...");
+        if (Get.isRegistered<MyFriendController>()) {
+          Get.find<MyFriendController>().fetchFriendRequests();
+        } else {
+          // If not registered, we can't refresh, but usually it's used in home
+          // Alternatively, put it to ensure it's loaded if needed
+          final myFriendController = Get.put(MyFriendController());
+          myFriendController.fetchFriendRequests();
+        }
+      }
     } catch (e) {
       debugPrint("Error handling notification: $e");
     }
