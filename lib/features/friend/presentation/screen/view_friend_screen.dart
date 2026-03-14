@@ -35,6 +35,7 @@ class ViewFriendScreen extends StatefulWidget {
 class _ViewFriendScreenState extends State<ViewFriendScreen> {
   late final ClickerController clickerController;
   late final MyFriendController friendController;
+  late final ScrollController _scrollController;
 
   @override
   void initState() {
@@ -51,10 +52,32 @@ class _ViewFriendScreenState extends State<ViewFriendScreen> {
     // Clear previous user data
     clickerController.usersPosts.clear();
     clickerController.userData.value = null;
+    clickerController.userPostsCurrentPage.value = 1;
+    clickerController.userPostsTotalPages.value = 1;
 
     clickerController.getPostsByUserId(widget.userId);
     clickerController.getUserById(widget.userId);
     friendController.checkFriendship(widget.userId);
+
+    // Scroll listener for pagination
+    _scrollController = ScrollController()
+      ..addListener(() {
+        if (_scrollController.position.pixels >=
+            _scrollController.position.maxScrollExtent - 200) {
+          if (!clickerController.isUserPostsLoadingMore.value) {
+            clickerController.getPostsByUserId(
+              widget.userId,
+              isLoadMore: true,
+            );
+          }
+        }
+      });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   String _formatPostTime(DateTime postTime) {
@@ -87,6 +110,7 @@ class _ViewFriendScreenState extends State<ViewFriendScreen> {
           }
 
           return SingleChildScrollView(
+            controller: _scrollController,
             child: Column(
               children: [
                 _buildHeader(),
@@ -100,7 +124,7 @@ class _ViewFriendScreenState extends State<ViewFriendScreen> {
                   textAlign: TextAlign.start,
                 ).start,
                 Obx(
-                  () => ListView.separated(
+                      () => ListView.separated(
                     padding: EdgeInsets.symmetric(
                       horizontal: 16.w,
                       vertical: 12.h,
@@ -112,23 +136,23 @@ class _ViewFriendScreenState extends State<ViewFriendScreen> {
 
                       final List<String> postImages = data.photos.isNotEmpty
                           ? data.photos.map((p) {
-                              if (p.startsWith('http')) return p;
-                              return p.startsWith('/')
-                                  ? "${ApiEndPoint.imageUrl}$p"
-                                  : "${ApiEndPoint.imageUrl}/$p";
-                            }).toList()
+                        if (p.startsWith('http')) return p;
+                        return p.startsWith('/')
+                            ? "${ApiEndPoint.imageUrl}$p"
+                            : "${ApiEndPoint.imageUrl}/$p";
+                      }).toList()
                           : [];
 
                       return CommonPostCards(
                         onTapPhoto: () {
                           if (postImages.isNotEmpty) {
                             Get.to(
-                              () => FullScreenImageView(images: postImages),
+                                  () => FullScreenImageView(images: postImages),
                             );
                           }
                         },
                         onTapProfile: () => Get.to(
-                          () => ViewFriendScreen(
+                              () => ViewFriendScreen(
                             userId: data.user.id,
                             isFriend: false,
                           ),
@@ -145,7 +169,7 @@ class _ViewFriendScreenState extends State<ViewFriendScreen> {
                         images: postImages,
                         description: data.description,
                         isFriend:
-                            friendController.getFriendStatus(widget.userId) ==
+                        friendController.getFriendStatus(widget.userId) ==
                             FriendStatus.friends,
                         privacyImage: _getPrivacyIcon(data.privacy),
                       );
@@ -154,6 +178,31 @@ class _ViewFriendScreenState extends State<ViewFriendScreen> {
                     itemCount: clickerController.usersPosts.length,
                   ),
                 ),
+
+                // Load-more indicator / end-of-list message
+                Obx(() {
+                  if (clickerController.isUserPostsLoadingMore.value) {
+                    return Padding(
+                      padding: EdgeInsets.symmetric(vertical: 16.h),
+                      child: const Center(child: CircularProgressIndicator()),
+                    );
+                  }
+                  if (clickerController.userPostsCurrentPage.value >=
+                      clickerController.userPostsTotalPages.value &&
+                      clickerController.usersPosts.isNotEmpty) {
+                    return Padding(
+                      padding: EdgeInsets.symmetric(vertical: 16.h),
+                      child: Center(
+                        child: CommonText(
+                          text: 'No more posts',
+                          fontSize: 13.sp,
+                          color: AppColors.secondaryText,
+                        ),
+                      ),
+                    );
+                  }
+                  return const SizedBox.shrink();
+                }),
               ],
             ),
           );
@@ -177,10 +226,10 @@ class _ViewFriendScreenState extends State<ViewFriendScreen> {
             child: CircleAvatar(
               radius: 50,
               backgroundImage:
-                  (user != null && user.image != null && user.image!.isNotEmpty)
+              (user != null && user.image != null && user.image!.isNotEmpty)
                   ? NetworkImage("${ApiEndPoint.imageUrl}${user.image}")
                   : const AssetImage("assets/images/profile.png")
-                        as ImageProvider,
+              as ImageProvider,
             ),
           ),
 
@@ -261,7 +310,7 @@ class _ViewFriendScreenState extends State<ViewFriendScreen> {
                   onTap: loading
                       ? () {}
                       : () =>
-                            friendController.cancelFriendRequest(widget.userId),
+                      friendController.cancelFriendRequest(widget.userId),
                 );
               }
 
@@ -277,7 +326,7 @@ class _ViewFriendScreenState extends State<ViewFriendScreen> {
                 onTap: loading
                     ? () {}
                     : () =>
-                          friendController.onTapAddFriendButton(widget.userId),
+                    friendController.onTapAddFriendButton(widget.userId),
               );
             }),
         ],
@@ -339,9 +388,9 @@ class _ViewFriendScreenState extends State<ViewFriendScreen> {
               onTap: isProcessing
                   ? () {}
                   : () async {
-                      if (requestId.isEmpty) return;
-                      await friendController.acceptFriendRequest(requestId);
-                    },
+                if (requestId.isEmpty) return;
+                await friendController.acceptFriendRequest(requestId);
+              },
               titleText: isProcessing ? '...' : 'Accept',
               buttonRadius: 6.r,
               titleSize: 14.sp,
@@ -357,9 +406,9 @@ class _ViewFriendScreenState extends State<ViewFriendScreen> {
               onTap: isProcessing
                   ? () {}
                   : () async {
-                      if (requestId.isEmpty) return;
-                      await friendController.rejectFriendRequest(requestId);
-                    },
+                if (requestId.isEmpty) return;
+                await friendController.rejectFriendRequest(requestId);
+              },
               titleText: isProcessing ? '...' : 'Reject',
               buttonColor: const Color(0xFFDEE2E3),
               titleColor: AppColors.secondaryText,

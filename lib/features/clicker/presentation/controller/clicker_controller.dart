@@ -61,6 +61,11 @@ class ClickerController extends GetxController {
   List<PostById> _allUserPostsRaw = []; // Store raw posts for re-filtering
   var isUserLoading = false.obs;
 
+  /// ================= User Posts Pagination
+  var userPostsCurrentPage = 1.obs;
+  var userPostsTotalPages = 1.obs;
+  var isUserPostsLoadingMore = false.obs;
+
   /// ================= Friend Status
   var friendStatus = FriendStatus.none.obs;
   var pendingRequestId = ''.obs;
@@ -309,7 +314,7 @@ class ClickerController extends GetxController {
 
       final response = await ApiService.get(url);
 
-        if (response.statusCode == 200) {
+      if (response.statusCode == 200) {
         final AllPostModel responseData = AllPostModel.fromJson(response.data);
         totalPages.value = responseData.pagination.totalPage;
 
@@ -335,15 +340,24 @@ class ClickerController extends GetxController {
     _filterPosts();
   }
 
-  // ================= Get Posts By Specific User ID
-  Future<void> getPostsByUserId(String userId) async {
+  // ================= Get Posts By Specific User ID (with pagination)
+  Future<void> getPostsByUserId(String userId, {bool isLoadMore = false}) async {
     try {
-      debugPrint("🌐 [getPostsByUserId] Starting - userId: $userId");
-      isUserLoading.value = true;
-      usersPosts.clear();
+      if (isLoadMore) {
+        if (userPostsCurrentPage.value >= userPostsTotalPages.value) return;
+        isUserPostsLoadingMore.value = true;
+        userPostsCurrentPage.value += 1;
+      } else {
+        isUserLoading.value = true;
+        userPostsCurrentPage.value = 1;
+        usersPosts.clear();
+        _allUserPostsRaw = [];
+      }
 
-      final url = "${ApiEndPoint.getUserById}$userId";
-      debugPrint("🌐 [getPostsByUserId] URL: $url");
+      final page = userPostsCurrentPage.value;
+      final url = "${ApiEndPoint.getUserById}$userId?page=$page&limit=10";
+
+      debugPrint("🌐 [getPostsByUserId] URL: $url (page $page)");
 
       final response = await ApiService.get(url);
 
@@ -355,15 +369,23 @@ class ClickerController extends GetxController {
           response.data as Map<String, dynamic>,
         );
 
-        debugPrint(
-          "✅ [getPostsByUserId] Parsed ${responseData.data.length} posts",
-        );
+        // Update total pages from pagination info
+        final pagination = response.data['pagination'];
+        if (pagination != null) {
+          userPostsTotalPages.value =
+              pagination['totalPage'] ?? pagination['totalPages'] ?? 1;
+        }
 
-        _allUserPostsRaw = responseData.data;
+        if (isLoadMore) {
+          _allUserPostsRaw.addAll(responseData.data);
+        } else {
+          _allUserPostsRaw = responseData.data;
+        }
+
         _filterUserPosts();
 
         debugPrint(
-          "✅ [getPostsByUserId] usersPosts updated: ${usersPosts.length} posts (Filtered from ${_allUserPostsRaw.length})",
+          "✅ [getPostsByUserId] Page $page | New: ${responseData.data.length} | Total raw: ${_allUserPostsRaw.length}",
         );
       } else {
         debugPrint("❌ [getPostsByUserId] Error status: ${response.statusCode}");
@@ -373,6 +395,7 @@ class ClickerController extends GetxController {
       Utils.errorSnackBar("Error", e.toString());
     } finally {
       isUserLoading.value = false;
+      isUserPostsLoadingMore.value = false;
     }
   }
 

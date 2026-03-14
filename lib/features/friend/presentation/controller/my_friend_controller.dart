@@ -36,6 +36,7 @@ class MyFriendController extends GetxController {
   int _totalUsers = 0;
   RxBool isPaginationLoading = false.obs;
 
+
   bool get hasMoreData => _currentPage < _totalPages;
 
   // ================= Per-User Friend Status

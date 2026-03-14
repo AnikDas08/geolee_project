@@ -9,55 +9,122 @@ import '../../../../services/api/api_service.dart';
 import '../../data/post_model.dart';
 
 class MyPostController extends GetxController {
-  RxBool isLoading = false.obs;
-  Rx<MyPostsModelOne?> myPostsModel = Rx<MyPostsModelOne?>(null);
-  RxList<PostDataOne> posts = <PostDataOne>[].obs;
 
+  RxBool isLoading = false.obs;
+  RxBool isLoadMore = false.obs;
+
+  Rx<MyPostsModelOne?> myPostsModel = Rx<MyPostsModelOne?>(null);
+
+  RxList<PostDataOne> posts = <PostDataOne>[].obs;
   RxList<PostData> myPost = <PostData>[].obs;
+
+  int page = 1;
+  bool hasMore = true;
+  int totalPages = 1;
 
   @override
   void onInit() {
     super.onInit();
-    fetchMyPosts(); // Initial load
+    fetchMyPosts();
   }
 
+  Future<void> fetchMyPosts({bool loadMore = false}) async {
 
-  Future<void> fetchMyPosts() async {
+    if (loadMore && !hasMore) return;
+
     try {
-      isLoading.value = true;
-      update(); // Trigger UI for loading state
 
-      final url = ApiEndPoint.getMyPost;
+      if (loadMore) {
+        isLoadMore.value = true;
+      } else {
+        page = 1;
+        hasMore = true;
+        isLoading.value = true;
+      }
+
+      update();
+
+      final url = "${ApiEndPoint.getMyPost}?page=$page&limit=10";
+
+      debugPrint('📡 Fetching posts URL: $url');
+
       final ApiResponseModel response = await ApiService.get(url);
 
+      debugPrint('📡 Response status: ${response.statusCode}');
+
       if (response.statusCode == 200 || response.statusCode == 201) {
-        final myPostModel = MyPostModel.fromJson(response.data);
-        
-        // ✅ FIXED: Use assignAll or clear the list first to avoid duplication
-        myPost.assignAll(myPostModel.data ?? []);
+
+        // ✅ Use MyPostModel directly — model is correct
+        final MyPostModel myPostModel = MyPostModel.fromJson(
+          response.data as Map<dynamic, dynamic>,
+        );
+
+        // ✅ Read totalPage from parsed pagination
+        totalPages = myPostModel.pagination.totalPage;
+
+        debugPrint('📄 Total: ${myPostModel.pagination.total} | TotalPages: $totalPages | CurrentPage: $page');
+
+        final List<PostData> newPosts = myPostModel.data;
+
+        debugPrint('✅ Fetched ${newPosts.length} posts on page $page');
+
+        if (loadMore) {
+          myPost.addAll(newPosts);
+        } else {
+          myPost.assignAll(newPosts);
+        }
+
+        if (newPosts.isEmpty || page >= totalPages) {
+          hasMore = false;
+          debugPrint('🔚 No more pages');
+        } else {
+          page++;
+          debugPrint('➡️ Next page will be: $page');
+        }
+
+      } else {
+        debugPrint('❌ Unexpected status: ${response.statusCode}');
+        Get.snackbar(
+          'Error',
+          'Server returned ${response.statusCode}',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
       }
-    } catch (e) {
-      debugPrint('Error fetching posts: $e');
+
+    } catch (e, stackTrace) {
+
+      debugPrint('❌ Error fetching posts: $e');
+      debugPrint('❌ StackTrace: $stackTrace');
+
       Get.snackbar(
         'Error',
-        'Failed to load posts',
+        'Failed to load posts: ${e.toString()}',
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );
+
     } finally {
+
       isLoading.value = false;
-      update(); // Trigger UI refresh
+      isLoadMore.value = false;
+
+      update();
     }
   }
 
   Future<void> deletePost(String postId) async {
+
     try {
+
       final ApiResponseModel response = await ApiService.delete(
         "${ApiEndPoint.deletePost}$postId",
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
+
         myPost.removeWhere((post) => post.id == postId);
 
         Get.snackbar(
@@ -71,17 +138,19 @@ class MyPostController extends GetxController {
         if (Get.isRegistered<HomeController>()) {
           Get.find<HomeController>().fetchPosts();
         }
-        
-        // No need to call fetchMyPosts() again since we manually removed it from the list
+
         update();
 
       } else {
+
         Get.snackbar(
           'Error',
           'Failed to delete post',
           snackPosition: SnackPosition.BOTTOM,
         );
+
       }
+
     } catch (e) {
       debugPrint('Error deleting post: $e');
     }

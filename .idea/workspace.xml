@@ -5,16 +5,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1927e093-4256-4d7d-8985-b0a9f6129813" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Dart_Packages.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Dart_Packages.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/features/home/presentation/widgets/filter_main.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/home/presentation/widgets/filter_main.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/features/message/presentation/controller/chat_controller.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/message/presentation/controller/chat_controller.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/features/message/presentation/controller/message_controller.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/message/presentation/controller/message_controller.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/features/message/presentation/widgets/friend_input_area.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/message/presentation/widgets/friend_input_area.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/features/message/presentation/widgets/none_friend_input_panel.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/message/presentation/widgets/none_friend_input_panel.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/services/storage/storage_keys.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/services/storage/storage_keys.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/services/storage/storage_services.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/services/storage/storage_services.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pubspec.lock" beforeDir="false" afterPath="$PROJECT_DIR$/pubspec.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/features/addpost/presentation/screen/my_post_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/addpost/presentation/screen/my_post_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/features/ads/presentation/screen/create_ads_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/ads/presentation/screen/create_ads_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/features/clicker/presentation/controller/clicker_controller.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/clicker/presentation/controller/clicker_controller.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/features/friend/presentation/controller/my_friend_controller.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/friend/presentation/controller/my_friend_controller.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/features/friend/presentation/screen/view_friend_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/friend/presentation/screen/view_friend_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/features/profile/presentation/controller/post_controller.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/profile/presentation/controller/post_controller.dart" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

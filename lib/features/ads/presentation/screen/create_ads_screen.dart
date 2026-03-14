@@ -93,6 +93,9 @@ class _CreateAdsScreenState extends State<CreateAdsScreen> {
                             onTap: controller.pickImage,
                           );
                         }),
+                        SizedBox(height: 4.h,),
+
+                        CommonText(text: 'Recommended dimension: 77777px x 888px',fontSize: 10.sp,),
                         SizedBox(height: 16.h),
 
                         // --- Ads Title ---
@@ -100,7 +103,7 @@ class _CreateAdsScreenState extends State<CreateAdsScreen> {
                         SizedBox(height: 6.h),
                         CommonTextField(
                           controller: controller.titleController,
-                          hintText: 'Delicious Fast Food',
+                          hintText: 'Enter Ads Title',
                         ),
                         SizedBox(height: 14.h),
 
@@ -109,7 +112,7 @@ class _CreateAdsScreenState extends State<CreateAdsScreen> {
                         SizedBox(height: 6.h),
                         CommonTextField(
                           controller: controller.descriptionController,
-                          hintText: 'Enter your post description',
+                          hintText: 'Enter your Ads description',
                           maxLines: 3,
                         ),
                         SizedBox(height: 14.h),
@@ -195,7 +198,7 @@ class _CreateAdsScreenState extends State<CreateAdsScreen> {
     );
   }
 
-  /// ✅ Focus Area — Autocomplete Dropdown সহ
+  // Focus Area — Autocomplete Dropdown ============================
   Widget _buildFocusAreaField() {
     return Obx(() {
       return Column(
@@ -342,7 +345,7 @@ class _CreateAdsScreenState extends State<CreateAdsScreen> {
     });
   }
 
-  // --- Pricing Cards ---
+  // Pricing Cards ===================
   Widget _buildPricingCards(CreateAdsController controller) {
     return Obx(() {
       if (controller.isPlansLoading.value) {

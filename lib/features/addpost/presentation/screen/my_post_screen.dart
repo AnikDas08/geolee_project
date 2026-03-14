@@ -18,14 +18,26 @@ class MyPostScreen extends StatefulWidget {
   State<MyPostScreen> createState() => _MyPostScreenState();
 }
 
-class _MyPostScreenState extends State<MyPostScreen> with WidgetsBindingObserver {
+class _MyPostScreenState extends State<MyPostScreen>
+    with WidgetsBindingObserver {
   final MyPostController controller = Get.put(MyPostController());
+
+  final ScrollController scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
+
     WidgetsBinding.instance.addObserver(this);
+
     controller.fetchMyPosts();
+
+    scrollController.addListener(() {
+      if (scrollController.position.pixels >=
+          scrollController.position.maxScrollExtent - 200) {
+        controller.fetchMyPosts(loadMore: true);
+      }
+    });
   }
 
   @override
@@ -35,6 +47,7 @@ class _MyPostScreenState extends State<MyPostScreen> with WidgetsBindingObserver
 
   @override
   void dispose() {
+    scrollController.dispose();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -55,6 +68,7 @@ class _MyPostScreenState extends State<MyPostScreen> with WidgetsBindingObserver
   String _formatPostTime(DateTime postTime) {
     final now = DateTime.now();
     final difference = now.difference(postTime);
+
     return difference.inDays >= 1
         ? DateFormat('MMM dd, yyyy').format(postTime)
         : DateFormat('hh:mm a').format(postTime);
@@ -64,67 +78,112 @@ class _MyPostScreenState extends State<MyPostScreen> with WidgetsBindingObserver
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
+
       appBar: AppBar(
         elevation: 0,
         backgroundColor: AppColors.background,
+
         leading: IconButton(
           onPressed: () => Get.back(),
-          icon: Icon(Icons.arrow_back_ios_new, size: 18.sp, color: AppColors.black),
+          icon: Icon(
+            Icons.arrow_back_ios_new,
+            size: 18.sp,
+            color: AppColors.black,
+          ),
         ),
+
         centerTitle: true,
-        title: const CommonText(text: 'My Post', fontSize: 18, fontWeight: FontWeight.w600),
+
+        title: const CommonText(
+          text: 'My Post',
+          fontSize: 18,
+          fontWeight: FontWeight.w600,
+        ),
       ),
+
       body: SafeArea(
         child: Obx(() {
           if (controller.isLoading.value && controller.myPost.isEmpty) {
             return const Center(child: CircularProgressIndicator());
           }
+
           if (controller.myPost.isEmpty) {
             return const Center(child: Text("No posts found."));
           }
+
           return RefreshIndicator(
             onRefresh: () => controller.fetchMyPosts(),
+
             child: ListView.separated(
+              controller: scrollController,
+
               padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-              physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
-              itemCount: controller.myPost.length,
+
+              physics: const AlwaysScrollableScrollPhysics(
+                parent: BouncingScrollPhysics(),
+              ),
+
+              itemCount: controller.myPost.length + 1,
+
               separatorBuilder: (_, __) => SizedBox(height: 12.h),
+
               itemBuilder: (context, index) {
+                if (index == controller.myPost.length) {
+                  return controller.isLoadMore.value
+                      ? const Padding(
+                          padding: EdgeInsets.all(16),
+                          child: Center(child: CircularProgressIndicator()),
+                        )
+                      : const SizedBox();
+                }
+
                 final data = controller.myPost[index];
-                // ✅ FIXED: Pass all images instead of just the first one
+
                 final List<String> postImages = data.photos.isNotEmpty
-                    ? data.photos.map((photo) => ApiEndPoint.imageUrl + photo).toList()
+                    ? data.photos
+                          .map((photo) => ApiEndPoint.imageUrl + photo)
+                          .toList()
                     : [];
 
                 return MyPostCard(
                   onTapProfile: () {
                     debugPrint('Profile Tab');
                   },
+
                   isProfile: true,
-                    onTapPhoto: () {
-                      if (postImages.isNotEmpty) {
-                        Get.to(() => FullScreenImageView(
-                          images: postImages,
-                        ));
-                      }
-                    },
+
+                  onTapPhoto: () {
+                    if (postImages.isNotEmpty) {
+                      Get.to(() => FullScreenImageView(images: postImages));
+                    }
+                  },
 
                   clickerType: data.clickerType,
+
                   isMyPost: true,
+
                   userName: data.user.name ?? "Unknown",
+
                   userAvatar: "${ApiEndPoint.imageUrl}${data.user.image}",
-                  timeAgo: _formatPostTime(DateTime.parse(data.createdAt.toString())),
+
+                  timeAgo: _formatPostTime(
+                    DateTime.parse(data.createdAt.toString()),
+                  ),
+
                   location: data.address.isNotEmpty
                       ? _removeNumbersFromLocation(data.address)
                       : "",
 
                   images: postImages,
+
                   description: data.description ?? "No description",
+
                   privacyImage: data.privacy == "public"
                       ? AppIcons.public
                       : data.privacy == "friends"
                       ? AppIcons.friends
                       : AppIcons.onlyMe,
+
                   postId: data.id,
                 );
               },
