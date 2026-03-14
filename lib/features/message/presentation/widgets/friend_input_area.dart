@@ -20,6 +20,8 @@ class FriendInputArea extends StatelessWidget {
   Widget build(BuildContext context) {
     return Obx(() {
       // ── isFriend false হলে দেখাবে না
+
+      //if isFriend false invisible the input area
       if (!controller.isFriend.value) return const SizedBox.shrink();
 
       // ── Actual friend = friendStatus.friends AND friendStatusValue == 'friends'

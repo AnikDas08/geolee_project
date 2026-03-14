@@ -4,7 +4,6 @@ import 'package:get/get.dart';
 
 import '../../../../utils/constants/app_colors.dart';
 import '../controller/message_controller.dart';
-import '../../../../utils/enum/enum.dart';
 import 'package:giolee78/features/message/presentation/controller/chat_controller.dart';
 
 class NonFriendPanel extends StatelessWidget {
