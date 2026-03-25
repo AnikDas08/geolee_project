@@ -48,6 +48,14 @@ class ChatMessage {
     this.isFile = false,
   });
 
+  bool get isEncrypted {
+    if (type != 'text') return false;
+    if (message.isEmpty) return false;
+    if (message.startsWith("U2FsdGVk")) return true;
+    final regex = RegExp(r'^[0-9a-fA-F]+:[0-9a-fA-F]+:[0-9a-fA-F]+$');
+    return regex.hasMatch(message);
+  }
+
   // ─────────────────────────────────────────────
   // Helpers
   // ─────────────────────────────────────────────
