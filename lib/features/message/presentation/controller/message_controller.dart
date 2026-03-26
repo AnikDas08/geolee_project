@@ -933,11 +933,12 @@ class MessageController extends GetxController {
         }
         update();
       } else {
-        Utils.errorSnackBar("Error", response.message);
+        // Utils.errorSnackBar("Error", response.message);
+        debugPrint("Friend request error: $response.message");
       }
     } catch (e) {
       debugPrint("❌ Friend request error: $e");
-      Utils.errorSnackBar("Error", "Something went wrong");
+      // Utils.errorSnackBar("Error", "Something went wrong");
     }
   }
 
