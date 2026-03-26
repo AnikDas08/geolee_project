@@ -240,7 +240,7 @@ class AddMemberController extends GetxController {
         allFriendsList.removeWhere((f) => f.id == friend.id);
         searchResults.removeWhere((f) => f.id == friend.id);
 
-        Utils.successSnackBar("Success", "${friend.name} added to group");
+        // Utils.successSnackBar("Success", "${friend.name} added to group");
         appLog("✅ ${friend.name} added successfully");
       } else {
         Utils.errorSnackBar(

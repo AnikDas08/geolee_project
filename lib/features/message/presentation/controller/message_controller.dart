@@ -296,28 +296,31 @@ class MessageController extends GetxController {
   // ================================================
   void listenMessage() {
     SocketServices.on("message:new", (data) {
-      appLog("📩 New Message received via socket: $data");
-      try {
-        final String incomingChatId = data['chat'] is String
-            ? data['chat']
-            : data['chat']?['_id'] ?? '';
+      final String incomingChatId = data['chat'] is String
+          ? data['chat']
+          : data['chat']?['_id'] ?? '';
 
-        if (chatId.isNotEmpty && incomingChatId == chatId) {
-          final newMessage = ChatMessage.fromJson(data);
-          if (!messages.any((m) => m.id == newMessage.id)) {
-            messages.add(newMessage);
-            update();
-            _scrollToBottom();
-            if (Get.isRegistered<ChatController>()) {
-              Get.find<ChatController>().markChatAsSeen(chatId);
-            }
+      if (chatId.isNotEmpty && incomingChatId == chatId) {
+
+        final newMessage = ChatMessage.fromJson(data);
+
+        // 👉 duplicate prevent
+        if (!messages.any((m) => m.id == newMessage.id)) {
+
+          // ✅ Handle encrypted messages (U2FsdGVk or hex-colon format)
+          if (newMessage.isEncrypted) {
+            loadMessages(showLoading: false);
+            return;
           }
+
+          messages.add(newMessage);
+          update();
+          _scrollToBottom();
         }
-      } catch (e) {
-        appLog("❌ Error parsing incoming socket message: $e");
       }
     });
 
+    // 🔄 chat update listener (keep this)
     SocketServices.on("chat:update", (data) {
       if (chatId.isNotEmpty) {
         loadMessages(showLoading: false);
@@ -549,17 +552,20 @@ class MessageController extends GetxController {
         appLog("Message Loading by chat id${response.message}");
         final data = response.data['data'] as List?;
         if (data != null) {
-          messages = data
-              .map((json) {
-                try {
-                  return ChatMessage.fromJson(json);
-                } catch (_) {
-                  return null;
-                }
-              })
-              .whereType<ChatMessage>()
-              .toList()
-            ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
+          final List<ChatMessage> newMessages = [];
+          
+          for (var json in data) {
+            try {
+              final msg = ChatMessage.fromJson(json);
+              
+              // Skip encrypted messages to avoid showing gibberish
+              if (msg.isEncrypted) continue;
+              
+              newMessages.add(msg);
+            } catch (_) {}
+          }
+
+          messages = newMessages..sort((a, b) => a.createdAt.compareTo(b.createdAt));
 
           if (data.length < _pageLimit) {
             hasMoreMessages.value = false;
@@ -677,29 +683,35 @@ class MessageController extends GetxController {
   Future<void> sendMessage() async => await sendTextAndFile();
 
   Future<void> sendTextAndFile() async {
-    if (messageController.text.trim().isEmpty &&
-        !hasPickedImage &&
-        !hasPickedFile) {
+    final text = messageController.text.trim();
+    if (text.isEmpty && !hasPickedImage && !hasPickedFile) {
       return;
     }
-    if (messageController.text.trim().isNotEmpty) await _sendTextMessage();
+
+    if (text.isNotEmpty) {
+      await _sendTextMessage(text);
+    }
     if (hasPickedImage || hasPickedFile) await _sendPickedFile();
   }
 
-  Future<void> _sendTextMessage() async {
+  Future<void> _sendTextMessage(String text) async {
     isSendingText = true;
     update();
+
     try {
       final response = await ApiService.post(
         ApiEndPoint.createMessage,
         body: {
           "chat": chatId,
           "type": "text",
-          "text": messageController.text.trim(),
+          "text": text,
         },
       );
+
       if (response.statusCode == 200) {
         messageController.clear();
+        // Wait a bit to ensure decryption is complete on server before GET
+        await Future.delayed(const Duration(milliseconds: 500));
         await loadMessages(showLoading: false);
       } else {
         _showErrorSnackBar('Failed to send message');
