@@ -132,7 +132,10 @@ class ChatModel {
         json['unseenCount'] ??
         json['unSeenCount'] ??
         json['unseen_count'] ??
-        json['unreadCount'];
+        json['unreadCount'] ??
+        json['unread_count'] ??
+        json['unseen'] ??
+        json['unread'];
     final int finalUnreadCount = rawUnseen != null
         ? int.tryParse(rawUnseen.toString()) ?? 0
         : 0;

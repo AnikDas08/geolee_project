@@ -60,6 +60,7 @@ class NotificationScreen extends StatelessWidget {
               await controller.getNotifications();
             },
             child: ListView.builder(
+              physics: const AlwaysScrollableScrollPhysics(),
               controller: controller.scrollController,
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               itemCount: controller.notifications.length + (controller.isLoadingMore ? 1 : 0),

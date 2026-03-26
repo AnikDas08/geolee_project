@@ -53,10 +53,19 @@ class ChatController extends GetxController {
   static ChatController get instance => Get.put(ChatController());
 
   int get totalUnreadCount {
+    return singleUnreadCount + groupUnreadCount;
+  }
+
+  int get singleUnreadCount {
     int total = 0;
     for (var chat in singleChats) {
       total += chat.unreadCount;
     }
+    return total;
+  }
+
+  int get groupUnreadCount {
+    int total = 0;
     for (var chat in chats) {
       total += chat.unreadCount;
     }
@@ -364,13 +373,96 @@ class ChatController extends GetxController {
       filteredChats = List.from(chats);
       filteredSingleChats = List.from(singleChats);
 
-
       if (_currentOpenChatId != null) {
         markChatAsSeen(_currentOpenChatId!);
       }
 
       update();
       // _markFriendStatus();
+    });
+
+    // 📩 New message listener for real-time list updates
+    SocketServices.on("message:new", (data) {
+      try {
+        final Map<String, dynamic> messageData = data as Map<String, dynamic>;
+        final String incomingChatId = messageData['chat'] is String
+            ? messageData['chat']
+            : messageData['chat']?['_id'] ?? '';
+
+        debugPrint("📩 New message received for chat: $incomingChatId");
+
+        if (incomingChatId.isEmpty) return;
+
+        // Find the chat in either singleChats or group chats
+        int sIndex = singleChats.indexWhere((c) => c.id == incomingChatId);
+        int gIndex = chats.indexWhere((c) => c.id == incomingChatId);
+
+        if (sIndex != -1 || gIndex != -1) {
+          // Update existing chat
+          ChatModel chat;
+          if (sIndex != -1) {
+            chat = singleChats[sIndex];
+          } else {
+            chat = chats[gIndex];
+          }
+
+          debugPrint("📍 Chat found in local list. Current unread: ${chat.unreadCount}");
+
+          // Update LatestMessage
+          final latestMsg = LatestMessage.fromJson(messageData);
+
+          // Update Unread Count if not open
+          int newUnreadCount = chat.unreadCount;
+          if (_currentOpenChatId != incomingChatId) {
+            final String senderId = messageData['sender'] is Map
+                ? messageData['sender']['_id'] ?? ''
+                : messageData['sender']?.toString() ?? '';
+            
+            // Only increment if message is not from current user
+            if (senderId != LocalStorage.userId) {
+              newUnreadCount++;
+              debugPrint("⬆️ Incrementing unread count to: $newUnreadCount");
+            } else {
+              debugPrint("👤 Message from self, NOT incrementing unread count.");
+            }
+          } else {
+            debugPrint("👀 Chat is currently open, NOT incrementing unread count.");
+          }
+
+          final updatedChat = chat.copyWith(
+            latestMessage: latestMsg,
+            unreadCount: newUnreadCount,
+            updatedAt: DateTime.now(),
+          );
+
+          if (sIndex != -1) {
+            singleChats[sIndex] = updatedChat;
+            final fIndex =
+                filteredSingleChats.indexWhere((c) => c.id == incomingChatId);
+            if (fIndex != -1) filteredSingleChats[fIndex] = updatedChat;
+          } else {
+            chats[gIndex] = updatedChat;
+            final fIndex =
+                filteredChats.indexWhere((c) => c.id == incomingChatId);
+            if (fIndex != -1) filteredChats[fIndex] = updatedChat;
+          }
+
+          _sortChats();
+          filteredChats = List.from(chats);
+          filteredSingleChats = List.from(singleChats);
+          
+          Future.delayed(Duration.zero, () {
+            update();
+          });
+          debugPrint("✅ Chat list updated locally.");
+        } else {
+          debugPrint("❓ Chat $incomingChatId not found in local list. Refreshing from API.");
+          getChatRepos(showLoading: false);
+          getChatRepos(showLoading: false, isGroup: true);
+        }
+      } catch (e) {
+        debugPrint("❌ Error handling message:new in ChatController: $e");
+      }
     });
   }
 
@@ -404,7 +496,9 @@ class ChatController extends GetxController {
     }
 
     if (found) {
-      update();
+      Future.delayed(Duration.zero, () {
+        update();
+      });
       debugPrint(
         "Chat $chatId marked as seen. Total unread: $totalUnreadCount",
       );

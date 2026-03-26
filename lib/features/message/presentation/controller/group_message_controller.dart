@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:giolee78/features/message/data/model/chat_message.dart';
+import 'package:giolee78/features/message/presentation/controller/chat_controller.dart';
 import 'package:giolee78/services/api/api_service.dart';
 import 'package:giolee78/services/socket/socket_service.dart';
 import 'package:giolee78/utils/log/app_log.dart';
@@ -61,6 +62,9 @@ class GroupMessageController extends GetxController {
     chatId = id;
     groupName.value = name;
     memberCount.value = members;
+    if (Get.isRegistered<ChatController>()) {
+      ChatController.instance.setOpenChat(chatId);
+    }
     loadMessages(showLoading: true);
   }
 
@@ -74,14 +78,16 @@ class GroupMessageController extends GetxController {
   }
 
   @override
-  void onClose(){
+  void onClose() {
     if (chatId.isNotEmpty) {
       SocketServices.leaveRoom(chatId);
+      if (Get.isRegistered<ChatController>()) {
+        ChatController.instance.clearOpenChat();
+      }
     }
     messageController.dispose();
     scrollController.dispose();
     super.onClose();
-
   }
 
 
@@ -131,6 +137,12 @@ class GroupMessageController extends GetxController {
         if (chatId.isNotEmpty && incomingChatId == chatId) {
           final newMessage = ChatMessage.fromJson(data);
           if (!messages.any((m) => m.id == newMessage.id)) {
+            // ✅ Handle encrypted messages (U2FsdGVk or hex-colon format)
+            if (newMessage.isEncrypted) {
+              loadMessages(showLoading: false);
+              return;
+            }
+
             messages.add(newMessage);
             update();
             _scrollToBottom();
@@ -159,17 +171,24 @@ class GroupMessageController extends GetxController {
 
     try {
       SocketServices.joinRoom(chatId);
+      if (Get.isRegistered<ChatController>()) {
+        ChatController.instance.markChatAsSeen(chatId);
+      }
       final String url = "${ApiEndPoint.messages}/$chatId";
       final response = await ApiService.get(url);
 
       if (response.statusCode == 200) {
         final data = response.data['data'] as List?;
         if (data != null) {
-          messages.clear();
+          final List<ChatMessage> newMessages = [];
           for (var json in data) {
-            messages.add(ChatMessage.fromJson(json));
+            final msg = ChatMessage.fromJson(json);
+            // Skip encrypted messages to avoid showing gibberish
+            if (msg.isEncrypted) continue;
+            newMessages.add(msg);
           }
-          messages.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+          messages = newMessages
+            ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
         }
       }
     } catch (e) {
@@ -217,7 +236,9 @@ class GroupMessageController extends GetxController {
       );
       if (response.statusCode == 200) {
         messageController.clear();
-        await loadMessages();
+        // Wait a bit to ensure decryption is complete on server before GET
+        await Future.delayed(const Duration(milliseconds: 500));
+        await loadMessages(showLoading: false);
       } else {
         _showError('Failed to send message');
       }
