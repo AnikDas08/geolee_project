@@ -330,6 +330,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
                                               Get.toNamed(
                                                 AppRoutes.message,
                                                 parameters: {
+
                                                   "userId":
                                                       item.participant.sId,
                                                   "chatId": item.id,

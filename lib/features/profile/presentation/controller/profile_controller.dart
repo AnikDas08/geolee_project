@@ -50,7 +50,7 @@ class ProfileController extends GetxController {
   Future<void> _loadAdvertiserStatus() async {
     advertiserToken = await getUserDataForRole();
     isLoadingRole = false;
-    update(); 
+    update();
   }
 
   /// Controllers
@@ -60,10 +60,13 @@ class ProfileController extends GetxController {
   TextEditingController passwordController = TextEditingController();
   TextEditingController aboutController = TextEditingController()
     ..text = LocalStorage.bio;
+
+  // ✅ FIX: toLocal() দিয়ে display করো যাতে date shift না হয়
   TextEditingController dateOfBirthController = TextEditingController()
     ..text = LocalStorage.dateOfBirth.isNotEmpty
-        ? LocalStorage.dateOfBirth.split('T').first
+        ? DateTime.parse(LocalStorage.dateOfBirth).toLocal().toString().split(' ').first
         : "";
+
   TextEditingController genderController = TextEditingController()
     ..text = LocalStorage.gender;
   TextEditingController addressController = TextEditingController();
@@ -157,7 +160,6 @@ class ProfileController extends GetxController {
   /// Pick date of birth
   Future<void> pickDateOfBirth() async {
     final DateTime? pickedDate = await showDatePicker(
-
       context: Get.context!,
       initialDate: DateTime(2000),
       firstDate: DateTime(1950),
@@ -171,13 +173,13 @@ class ProfileController extends GetxController {
     }
   }
 
-  // Select gender==================================
+  // Select gender
   void selectGender(String gender) {
     genderController.text = gender;
     update();
   }
 
-  // Edit profile API================================
+  // Edit profile API
   Future<void> editProfileRepo() async {
     if (!formKey.currentState!.validate()) return;
     if (!LocalStorage.isLogIn) return;
@@ -186,24 +188,29 @@ class ProfileController extends GetxController {
     update();
 
     try {
-
       final Map<String, String> body = {
         "name": nameController.text.trim(),
         "bio": aboutController.text.trim(),
       };
 
-// gender optional
+      // gender optional
       final gender = genderController.text.trim().toLowerCase();
       if (gender.isNotEmpty) {
         body["gender"] = gender;
       }
 
-// dob optional
+      // ✅ FIX: noon UTC দিয়ে পাঠাও — কোনো timezone এ date shift হবে না
       final dobText = dateOfBirthController.text.trim();
       if (dobText.isNotEmpty) {
-        final DateTime? dobDate = DateTime.tryParse(dobText);
-        if (dobDate != null) {
-          body["dob"] = dobDate.toUtc().toIso8601String();
+        final parts = dobText.split('-');
+        if (parts.length == 3) {
+          final year = int.tryParse(parts[0]);
+          final month = int.tryParse(parts[1]);
+          final day = int.tryParse(parts[2]);
+          if (year != null && month != null && day != null) {
+            final isoString = DateTime.utc(year, month, day, 12, 0, 0).toIso8601String();
+            body["dob"] = isoString; // "2000-01-07T12:00:00.000Z"
+          }
         }
       }
 
@@ -212,7 +219,6 @@ class ProfileController extends GetxController {
         method: "PATCH",
         body: body,
         imagePath: selectedImage?.path,
-
       );
 
       if (response.statusCode == 200) {
@@ -235,12 +241,12 @@ class ProfileController extends GetxController {
           Get.find<MyProfileController>().getUserData();
         }
 
-        // Refresh Navigation UI if needed
         if (Get.isRegistered<HomeNavController>()) {
           Get.find<HomeNavController>().update();
         }
+
         Get.back();
-         Utils.successSnackBar("Success","Profile Updated Successfully");
+        Utils.successSnackBar("Success", "Profile Updated Successfully");
 
       } else {
         Utils.errorSnackBar("Error", response.data['message'] ?? "Failed to update profile");
@@ -259,11 +265,12 @@ class ProfileController extends GetxController {
 
   Future<String?> getUserDataForRole() async {
     try {
-      final response = await ApiService.get(ApiEndPoint.profile).timeout(const Duration(seconds: 30));
+      final response = await ApiService.get(ApiEndPoint.profile)
+          .timeout(const Duration(seconds: 30));
       if (response.statusCode == 200) {
         final data = response.data;
         advToken = data['data']?['advertiser']?.toString() ?? "";
-        isVerified = data['data']?['isVerified']??false;
+        isVerified = data['data']?['isVerified'] ?? false;
         userId = data['data']?['_id']?.toString() ?? "";
         return advToken;
       }
@@ -273,13 +280,13 @@ class ProfileController extends GetxController {
     }
   }
 
-
   Future<void> deleteAccount() async {
     if (userId.isEmpty) return;
     isLoading = true;
     update();
     try {
-      final ApiResponseModel response = await ApiService.delete(ApiEndPoint.deleteAccount);
+      final ApiResponseModel response =
+      await ApiService.delete(ApiEndPoint.deleteAccount);
       if (response.statusCode == 200) {
         LocalStorage.removeAllPrefData();
         Get.offAllNamed(AppRoutes.signIn);

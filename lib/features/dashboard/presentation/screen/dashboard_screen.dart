@@ -147,8 +147,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             width: 14.w,
                           ),
                           SizedBox(width: 4.w),
-                          const CommonText(
-                            text: 'Thomridge Cir. Shiloh, Hawaii',
+                          CommonText(
+
+                            text: ctrl.address,
                             textAlign: TextAlign.left,
                             fontSize: 12,
                             color: AppColors.secondaryText,
