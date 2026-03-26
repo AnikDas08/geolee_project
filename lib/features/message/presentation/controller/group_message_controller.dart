@@ -54,6 +54,9 @@ class GroupMessageController extends GetxController {
   /// Scroll Controller
   final ScrollController scrollController = ScrollController();
 
+  int _currentPage = 1;
+  final int _pageLimit = 20;
+
   static GroupMessageController get instance =>
       Get.put(GroupMessageController());
 
@@ -72,13 +75,23 @@ class GroupMessageController extends GetxController {
   Future<void> onInit() async{
     super.onInit();
 
+    scrollController.addListener(_onScroll);
     listenMessage();
      await fetchGroupDetails();
+  }
 
+  void _onScroll() {
+    if (!scrollController.hasClients) return;
+    // Since reverse: true, older messages are at maxScrollExtent
+    if (scrollController.position.pixels >=
+        scrollController.position.maxScrollExtent - 300) {
+      loadMoreMessages();
+    }
   }
 
   @override
   void onClose() {
+    scrollController.removeListener(_onScroll);
     if (chatId.isNotEmpty) {
       SocketServices.leaveRoom(chatId);
       if (Get.isRegistered<ChatController>()) {
@@ -169,12 +182,16 @@ class GroupMessageController extends GetxController {
       update();
     }
 
+    _currentPage = 1;
+    hasMoreMessages.value = true;
+
     try {
       SocketServices.joinRoom(chatId);
       if (Get.isRegistered<ChatController>()) {
         ChatController.instance.markChatAsSeen(chatId);
       }
-      final String url = "${ApiEndPoint.messages}/$chatId";
+      
+      final String url = "${ApiEndPoint.messages}/$chatId?page=1&limit=$_pageLimit";
       final response = await ApiService.get(url);
 
       if (response.statusCode == 200) {
@@ -182,13 +199,18 @@ class GroupMessageController extends GetxController {
         if (data != null) {
           final List<ChatMessage> newMessages = [];
           for (var json in data) {
-            final msg = ChatMessage.fromJson(json);
-            // Skip encrypted messages to avoid showing gibberish
-            if (msg.isEncrypted) continue;
-            newMessages.add(msg);
+            try {
+              final msg = ChatMessage.fromJson(json);
+              if (msg.isEncrypted) continue;
+              newMessages.add(msg);
+            } catch (_) {}
           }
           messages = newMessages
             ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
+
+          if (data.length < _pageLimit) {
+            hasMoreMessages.value = false;
+          }
         }
       }
     } catch (e) {
@@ -197,6 +219,67 @@ class GroupMessageController extends GetxController {
       if (showLoading) isLoading = false;
       update();
       _scrollToBottom();
+    }
+  }
+
+  // ─── Load More Messages (Pagination) ───────────────
+  Future<void> loadMoreMessages() async {
+    if (isLoadingMore.value || !hasMoreMessages.value || chatId.isEmpty) return;
+    
+    isLoadingMore.value = true;
+    // update(); // Obx handles this usually, but update() helps if we use GetBuilder
+
+    try {
+      final int nextPage = _currentPage + 1;
+      final String url = "${ApiEndPoint.messages}/$chatId?page=$nextPage&limit=$_pageLimit";
+      
+      final response = await ApiService.get(url);
+
+      if (response.statusCode == 200) {
+        final data = response.data['data'] as List?;
+        if (data == null || data.isEmpty) {
+          hasMoreMessages.value = false;
+          return;
+        }
+
+        final List<ChatMessage> fetchedMessages = [];
+        for (var json in data) {
+          try {
+            final msg = ChatMessage.fromJson(json);
+            if (msg.isEncrypted) continue;
+            fetchedMessages.add(msg);
+          } catch (_) {}
+        }
+
+        if (fetchedMessages.isEmpty) {
+          hasMoreMessages.value = false;
+          return;
+        }
+
+        // Avoid duplicates
+        final existingIds = messages.map((m) => m.id).toSet();
+        final uniqueNew = fetchedMessages.where((m) => !existingIds.contains(m.id)).toList();
+
+        if (uniqueNew.isEmpty) {
+          hasMoreMessages.value = false;
+          return;
+        }
+
+        messages = [...uniqueNew, ...messages]
+          ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
+        
+        _currentPage = nextPage;
+        
+        if (data.length < _pageLimit) {
+          hasMoreMessages.value = false;
+        }
+        
+        update();
+      }
+    } catch (e) {
+      appLog("❌ Load more group messages error: $e");
+    } finally {
+      isLoadingMore.value = false;
     }
   }
 
@@ -523,7 +606,7 @@ class GroupMessageController extends GetxController {
     Future.delayed(const Duration(milliseconds: 100), () {
       if (scrollController.hasClients) {
         scrollController.animateTo(
-          scrollController.position.maxScrollExtent,
+          0.0,
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeOut,
         );

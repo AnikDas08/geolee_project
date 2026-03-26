@@ -5,17 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1927e093-4256-4d7d-8985-b0a9f6129813" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.fvmrc" beforeDir="false" afterPath="$PROJECT_DIR$/.fvmrc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Dart_SDK.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Dart_SDK.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/features/message/data/model/chat_list_model.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/message/data/model/chat_list_model.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/features/message/presentation/controller/chat_controller.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/message/presentation/controller/chat_controller.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/features/message/presentation/controller/group_message_controller.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/message/presentation/controller/group_message_controller.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/features/message/presentation/controller/message_controller.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/message/presentation/controller/message_controller.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/features/message/presentation/screen/chat_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/message/presentation/screen/chat_screen.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/features/message/presentation/widgets/chat_list_item.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/message/presentation/widgets/chat_list_item.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/features/notifications/presentation/screen/notifications_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/notifications/presentation/screen/notifications_screen.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pubspec.lock" beforeDir="false" afterPath="$PROJECT_DIR$/pubspec.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/services/socket/socket_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/services/socket/socket_service.dart" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

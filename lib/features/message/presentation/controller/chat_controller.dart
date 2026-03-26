@@ -346,48 +346,39 @@ class ChatController extends GetxController {
 
   Future<void> listenChat() async {
     SocketServices.on("chat:update", (data) {
-      //getChatRepos currentOpenChatId check ========================
+      debugPrint("🔄 chat:update received. Refreshing list...");
       getChatRepos(showLoading: false);
       getChatRepos(showLoading: false, isGroup: true);
     });
 
-    final String eventName = "update-chatlist::${LocalStorage.userId}";
-    SocketServices.on(eventName, (data) {
-      page = 1;
-      singlePage = 1;
-      chats.clear();
-      singleChats.clear();
+    // ─── Update-ChatList Listener ───────────────────────────
+    if (LocalStorage.userId.isNotEmpty) {
+      _bindChatListUpdateListener();
+    } else {
+      // Backend for late initialization
+      debugPrint("⏳ LocalStorage.userId not ready for socket binding. Waiting...");
+      Future.delayed(const Duration(seconds: 2), () {
+        if (LocalStorage.userId.isNotEmpty) {
+          _bindChatListUpdateListener();
+        }
+      });
+    }
 
-      for (var item in data) {
-        try {
-          final chat = ChatModel.fromJson(item);
-          if (chat.isGroup) {
-            chats.add(chat);
-          } else {
-            singleChats.add(chat);
-          }
-        } catch (e) {}
-      }
-
-      _sortChats();
-      filteredChats = List.from(chats);
-      filteredSingleChats = List.from(singleChats);
-
-      if (_currentOpenChatId != null) {
-        markChatAsSeen(_currentOpenChatId!);
-      }
-
-      update();
-      // _markFriendStatus();
-    });
-
-    // 📩 New message listener for real-time list updates
+    // ─── New Message Listener ──────────────────────────────
     SocketServices.on("message:new", (data) {
       try {
-        final Map<String, dynamic> messageData = data as Map<String, dynamic>;
+        if (data == null || data is! Map) {
+          debugPrint("🚫 Invalid message:new data format");
+          return;
+        }
+
+        final Map<String, dynamic> messageData = Map<String, dynamic>.from(data);
+        
         final String incomingChatId = messageData['chat'] is String
             ? messageData['chat']
-            : messageData['chat']?['_id'] ?? '';
+            : (messageData['chat'] != null && messageData['chat'] is Map
+                ? (messageData['chat']['_id'] ?? '').toString()
+                : '');
 
         debugPrint("📩 New message received for chat: $incomingChatId");
 
@@ -398,35 +389,27 @@ class ChatController extends GetxController {
         int gIndex = chats.indexWhere((c) => c.id == incomingChatId);
 
         if (sIndex != -1 || gIndex != -1) {
-          // Update existing chat
-          ChatModel chat;
-          if (sIndex != -1) {
-            chat = singleChats[sIndex];
-          } else {
-            chat = chats[gIndex];
-          }
-
+          ChatModel chat = sIndex != -1 ? singleChats[sIndex] : chats[gIndex];
           debugPrint("📍 Chat found in local list. Current unread: ${chat.unreadCount}");
 
-          // Update LatestMessage
           final latestMsg = LatestMessage.fromJson(messageData);
 
-          // Update Unread Count if not open
           int newUnreadCount = chat.unreadCount;
           if (_currentOpenChatId != incomingChatId) {
-            final String senderId = messageData['sender'] is Map
-                ? messageData['sender']['_id'] ?? ''
-                : messageData['sender']?.toString() ?? '';
+            final dynamic senderRaw = messageData['sender'];
+            String senderId = '';
+            if (senderRaw is Map) {
+              senderId = (senderRaw['_id'] ?? '').toString();
+            } else if (senderRaw != null) {
+              senderId = senderRaw.toString();
+            }
             
-            // Only increment if message is not from current user
-            if (senderId != LocalStorage.userId) {
+            if (senderId.isNotEmpty && 
+                LocalStorage.userId.isNotEmpty && 
+                senderId.trim() != LocalStorage.userId.trim()) {
               newUnreadCount++;
               debugPrint("⬆️ Incrementing unread count to: $newUnreadCount");
-            } else {
-              debugPrint("👤 Message from self, NOT incrementing unread count.");
             }
-          } else {
-            debugPrint("👀 Chat is currently open, NOT incrementing unread count.");
           }
 
           final updatedChat = chat.copyWith(
@@ -437,13 +420,11 @@ class ChatController extends GetxController {
 
           if (sIndex != -1) {
             singleChats[sIndex] = updatedChat;
-            final fIndex =
-                filteredSingleChats.indexWhere((c) => c.id == incomingChatId);
+            final fIndex = filteredSingleChats.indexWhere((c) => c.id == incomingChatId);
             if (fIndex != -1) filteredSingleChats[fIndex] = updatedChat;
           } else {
             chats[gIndex] = updatedChat;
-            final fIndex =
-                filteredChats.indexWhere((c) => c.id == incomingChatId);
+            final fIndex = filteredChats.indexWhere((c) => c.id == incomingChatId);
             if (fIndex != -1) filteredChats[fIndex] = updatedChat;
           }
 
@@ -454,15 +435,51 @@ class ChatController extends GetxController {
           Future.delayed(Duration.zero, () {
             update();
           });
-          debugPrint("✅ Chat list updated locally.");
         } else {
-          debugPrint("❓ Chat $incomingChatId not found in local list. Refreshing from API.");
+          debugPrint("❓ Chat $incomingChatId not found locally. Fetching...");
           getChatRepos(showLoading: false);
           getChatRepos(showLoading: false, isGroup: true);
         }
       } catch (e) {
-        debugPrint("❌ Error handling message:new in ChatController: $e");
+        debugPrint("❌ Error handling message:new: $e");
       }
+    });
+  }
+
+  void _bindChatListUpdateListener() {
+    final String eventName = "update-chatlist::${LocalStorage.userId}";
+    debugPrint("🔗 Binding socket listener to: $eventName");
+    SocketServices.on(eventName, (data) {
+      if (data == null || data is! List) return;
+      debugPrint("🔄 update-chatlist received from socket.");
+
+      chats.clear();
+      singleChats.clear();
+
+      for (var item in data) {
+        if (item is Map<String, dynamic>) {
+          try {
+            final chat = ChatModel.fromJson(item);
+            if (chat.isGroup) {
+              chats.add(chat);
+            } else {
+              singleChats.add(chat);
+            }
+          } catch (e) {}
+        }
+      }
+
+      _sortChats();
+      filteredChats = List.from(chats);
+      filteredSingleChats = List.from(singleChats);
+
+      if (_currentOpenChatId != null) {
+        markChatAsSeen(_currentOpenChatId!);
+      }
+
+      Future.delayed(Duration.zero, () {
+        update();
+      });
     });
   }
 
