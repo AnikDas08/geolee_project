@@ -21,20 +21,19 @@ class MyPostScreen extends StatefulWidget {
 class _MyPostScreenState extends State<MyPostScreen>
     with WidgetsBindingObserver {
   final MyPostController controller = Get.put(MyPostController());
-
   final ScrollController scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
-
     WidgetsBinding.instance.addObserver(this);
 
-    controller.fetchMyPosts();
 
     scrollController.addListener(() {
-      if (scrollController.position.pixels >=
-          scrollController.position.maxScrollExtent - 200) {
+      if (!controller.isLoadMore.value &&
+          controller.hasMore &&
+          scrollController.position.pixels >=
+              scrollController.position.maxScrollExtent - 200) {
         controller.fetchMyPosts(loadMore: true);
       }
     });
@@ -52,17 +51,11 @@ class _MyPostScreenState extends State<MyPostScreen>
     super.dispose();
   }
 
+
   String _removeNumbersFromLocation(String address) {
     final String firstPart = address.split(',')[0].trim();
     final String cleaned = firstPart.replaceAll(RegExp(r'[0-9]'), '');
     return cleaned.replaceAll(RegExp(r'\s+'), ' ').trim();
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) {
-      controller.fetchMyPosts();
-    }
   }
 
   String _formatPostTime(DateTime postTime) {
@@ -131,9 +124,9 @@ class _MyPostScreenState extends State<MyPostScreen>
                 if (index == controller.myPost.length) {
                   return controller.isLoadMore.value
                       ? const Padding(
-                          padding: EdgeInsets.all(16),
-                          child: Center(child: CircularProgressIndicator()),
-                        )
+                    padding: EdgeInsets.all(16),
+                    child: Center(child: CircularProgressIndicator()),
+                  )
                       : const SizedBox();
                 }
 
@@ -141,8 +134,8 @@ class _MyPostScreenState extends State<MyPostScreen>
 
                 final List<String> postImages = data.photos.isNotEmpty
                     ? data.photos
-                          .map((photo) => ApiEndPoint.imageUrl + photo)
-                          .toList()
+                    .map((photo) => ApiEndPoint.imageUrl + photo)
+                    .toList()
                     : [];
 
                 return MyPostCard(

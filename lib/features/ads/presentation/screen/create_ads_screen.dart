@@ -95,7 +95,7 @@ class _CreateAdsScreenState extends State<CreateAdsScreen> {
                         }),
                         SizedBox(height: 4.h,),
 
-                        CommonText(text: 'Recommended dimension: 77777px x 888px',fontSize: 10.sp,),
+                        CommonText(text: 'Recommended 15:7 (750 x 350 pixels )',fontSize: 10.sp,),
                         SizedBox(height: 16.h),
 
                         // --- Ads Title ---

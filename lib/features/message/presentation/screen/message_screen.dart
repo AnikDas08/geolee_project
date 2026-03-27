@@ -31,7 +31,7 @@ class MessageScreen extends StatefulWidget {
 class _MessageScreenState extends State<MessageScreen> {
   late MessageController messageController;
 
-  @override
+/*  @override
   void initState() {
     super.initState();
     messageController = Get.find<MessageController>();
@@ -40,6 +40,14 @@ class _MessageScreenState extends State<MessageScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _initScreen();
     });
+  }*/
+
+  @override
+  void initState() {
+    super.initState();
+    messageController = Get.find<MessageController>();
+    messageController.scrollController.addListener(_onScroll);
+
   }
 
   @override
@@ -56,9 +64,9 @@ class _MessageScreenState extends State<MessageScreen> {
     }
   }
 
-  Future<void> _initScreen() async {
-    await messageController.initializeChat(messageController.userId);
-  }
+  // Future<void> _initScreen() async {
+  //   await messageController.initializeChat(messageController.userId);
+  // }
 
   String _getImageUrl(String? path) {
     if (path == null || path.isEmpty) return "";
