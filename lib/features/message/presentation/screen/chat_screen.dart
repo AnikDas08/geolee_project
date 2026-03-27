@@ -301,7 +301,6 @@ class _ChatListScreenState extends State<ChatListScreen> {
                               ),
                             ),
                           )
-                          // ✅ Chat Tab RefreshIndicator
                               : RefreshIndicator(
                             onRefresh: () async {
                               await con.getChatRepos();

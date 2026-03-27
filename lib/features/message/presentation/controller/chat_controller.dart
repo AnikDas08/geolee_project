@@ -233,7 +233,7 @@ class ChatController extends GetxController {
       singleChats.addAll(singles);
       _sortChats();
       filteredSingleChats = List.from(singleChats);
-      // await _markFriendStatusForList(singles);
+      await _markFriendStatusForList(singles);
     } catch (e) {
       singlePage--;
     } finally {
@@ -284,7 +284,7 @@ class ChatController extends GetxController {
         );
         _sortChats();
         filteredSingleChats = List.from(singleChats);
-        // await _markFriendStatus();
+        await _markFriendStatus();
       }
 
       // ===============================================
@@ -305,38 +305,38 @@ class ChatController extends GetxController {
     }
   }
 
-  // Future<void> _markFriendStatus() async {
-  //   await _markFriendStatusForList(singleChats);
-  // }
+  Future<void> _markFriendStatus() async {
+    await _markFriendStatusForList(singleChats);
+  }
 
-  // Future<void> _markFriendStatusForList(List<ChatModel> targetList) async {
-  //   if (targetList.isEmpty) return;
-  //   final List<Future> checks = targetList.map((chat) async {
-  //     if (chat.participant.sId.isEmpty) return;
-  //     try {
-  //       final response = await ApiService.get(
-  //         "${ApiEndPoint.checkFriendStatus}${chat.participant.sId}",
-  //       );
-  //       bool isFriend = false;
-  //       if (response.statusCode == 200) {
-  //         final data = response.data['data'];
-  //         isFriend = data['isAlreadyFriend'] == true;
-  //       }
-  //       final index = singleChats.indexWhere((c) => c.id == chat.id);
-  //       if (index != -1) {
-  //         singleChats[index] = singleChats[index].copyWith(isFriend: isFriend);
-  //         final fIndex = filteredSingleChats.indexWhere((c) => c.id == chat.id);
-  //         if (fIndex != -1) {
-  //           filteredSingleChats[fIndex] = filteredSingleChats[fIndex].copyWith(
-  //             isFriend: isFriend,
-  //           );
-  //         }
-  //       }
-  //     } catch (_) {}
-  //   }).toList();
-  //   await Future.wait(checks);
-  //   update();
-  // }
+  Future<void> _markFriendStatusForList(List<ChatModel> targetList) async {
+    if (targetList.isEmpty) return;
+    final List<Future<void>> checks = targetList.map((chat) async {
+      if (chat.participant.sId.isEmpty) return;
+      try {
+        final response = await ApiService.get(
+          "${ApiEndPoint.checkFriendStatus}${chat.participant.sId}",
+        );
+        bool isFriend = false;
+        if (response.statusCode == 200) {
+          final data = response.data['data'];
+          isFriend = data['isAlreadyFriend'] == true;
+        }
+        final index = singleChats.indexWhere((c) => c.id == chat.id);
+        if (index != -1) {
+          singleChats[index] = singleChats[index].copyWith(isFriend: isFriend);
+          final fIndex = filteredSingleChats.indexWhere((c) => c.id == chat.id);
+          if (fIndex != -1) {
+            filteredSingleChats[fIndex] = filteredSingleChats[fIndex].copyWith(
+              isFriend: isFriend,
+            );
+          }
+        }
+      } catch (_) {}
+    }).toList();
+    await Future.wait(checks);
+    update();
+  }
 
   Status get status {
     if (isGroupLoading && chats.isEmpty) return Status.loading;

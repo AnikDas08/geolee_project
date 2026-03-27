@@ -55,11 +55,7 @@ Widget chatListItem({
   final String distanceText = formatDistance(item.distanceInKm);
   final bool showDistance = !item.isGroup && distanceText.isNotEmpty;
 
-  final Color bgColor = isFriend
-      ? item.isGroup
-            ? Colors.white
-            : const Color(0xFFFEF3E6)
-      : Colors.white;
+  final Color bgColor = isFriend ? Colors.white : const Color(0xFFFEF3E6);
 
   return Container(
     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -68,7 +64,7 @@ Widget chatListItem({
       color: bgColor,
       borderRadius: BorderRadius.circular(12),
       border: Border.all(
-        color: item.isGroup ? Colors.white : const Color(0xFFFCD8B0),
+        color: const Color(0xFFFCD8B0),
       ),
     ),
     child: Row(
