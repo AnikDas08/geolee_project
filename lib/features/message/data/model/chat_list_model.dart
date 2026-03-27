@@ -132,10 +132,21 @@ class ChatModel {
         json['unseenCount'] ??
         json['unSeenCount'] ??
         json['unseen_count'] ??
-        json['unreadCount'];
-    final int finalUnreadCount = rawUnseen != null
-        ? int.tryParse(rawUnseen.toString()) ?? 0
-        : 0;
+        json['unreadCount'] ??
+        json['unread_count'] ??
+        json['unseen'] ??
+        json['unread'];
+    
+    int finalUnreadCount = 0;
+    if (rawUnseen != null) {
+      if (rawUnseen is int) {
+        finalUnreadCount = rawUnseen;
+      } else if (rawUnseen is double) {
+        finalUnreadCount = rawUnseen.toInt();
+      } else {
+        finalUnreadCount = int.tryParse(rawUnseen.toString()) ?? 0;
+      }
+    }
 
     final dynamic friendRaw =
         json['isFriend'] ?? json['isAlreadyFriend'] ?? json['is_friend'];

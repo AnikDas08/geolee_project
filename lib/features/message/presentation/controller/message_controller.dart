@@ -768,6 +768,9 @@ class MessageController extends GetxController {
   Future<void> fetchUserProfile(String targetUserId) async {
     try {
       // ✅ LocalStorage থেকে lat/lng নাও
+
+      otherUserId.value = targetUserId;
+
       final double lat = LocalStorage.lat;
       final double lng = LocalStorage.long;
 
@@ -927,7 +930,6 @@ class MessageController extends GetxController {
         friendStatus.value = FriendStatus.requested;
         friendStatusValue.value = 'pending';
         isFriend.value = true;
-        Utils.successSnackBar("Sent", "Friend request sent successfully");
         if (Get.isRegistered<MyFriendController>()) {
           Get.find<MyFriendController>().fetchFriendRequests();
         }
@@ -959,7 +961,6 @@ class MessageController extends GetxController {
         friendStatusValue.value = 'none';
         friendStatus.value = FriendStatus.none;
         pendingRequestId.value = '';
-        Utils.successSnackBar("Cancelled", "Friend request cancelled");
         update();
       } else {
         Utils.errorSnackBar("Error", response.message);

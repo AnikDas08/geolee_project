@@ -55,11 +55,7 @@ Widget chatListItem({
   final String distanceText = formatDistance(item.distanceInKm);
   final bool showDistance = !item.isGroup && distanceText.isNotEmpty;
 
-  final Color bgColor = isFriend
-      ? item.isGroup
-            ? Colors.white
-            : const Color(0xFFFEF3E6)
-      : Colors.white;
+  final Color bgColor = isFriend ? Colors.white : const Color(0xFFFEF3E6);
 
   return Container(
     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -68,7 +64,7 @@ Widget chatListItem({
       color: bgColor,
       borderRadius: BorderRadius.circular(12),
       border: Border.all(
-        color: item.isGroup ? Colors.white : const Color(0xFFFCD8B0),
+        color: const Color(0xFFFCD8B0),
       ),
     ),
     child: Row(
@@ -190,14 +186,19 @@ Widget chatListItem({
                     Container(
                       constraints: BoxConstraints(minWidth: 20.sp),
                       padding: EdgeInsets.symmetric(
-                        horizontal: item.unreadCount > 99 ? 5.sp : 4.sp,
-                        vertical: 2.sp,
+                        horizontal: item.unreadCount > 99 ? 6.w : 4.w,
+                        vertical: 2.h,
                       ),
                       decoration: BoxDecoration(
-                        color: const Color(
-                          0xFF00A884,
-                        ), // WhatsApp-style green, change as needed
-                        borderRadius: BorderRadius.circular(10.sp),
+                        color: AppColors.primaryColor,
+                        borderRadius: BorderRadius.circular(10.r),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.primaryColor.withOpacity(0.3),
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
                       ),
                       alignment: Alignment.center,
                       child: Text(
@@ -206,7 +207,7 @@ Widget chatListItem({
                             : item.unreadCount.toString(),
                         style: TextStyle(
                           fontSize: 10.sp,
-                          fontWeight: FontWeight.w600,
+                          fontWeight: FontWeight.bold,
                           color: Colors.white,
                           height: 1.2,
                         ),

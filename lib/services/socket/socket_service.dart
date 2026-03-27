@@ -9,6 +9,9 @@ import '../../features/friend/presentation/controller/my_friend_controller.dart'
 import '../notification/notification_service.dart';
 import 'package:get/get.dart';
 
+
+
+
 class SocketServices {
   static final Map<String, io.Socket> _sockets = {};
 
@@ -195,7 +198,12 @@ class SocketServices {
           ? messageData['sender']['_id'] ?? ''
           : messageData['sender']?.toString() ?? '';
 
-      if (senderId == LocalStorage.userId) return;
+      if (senderId.isNotEmpty && 
+          LocalStorage.userId.isNotEmpty && 
+          senderId.trim() == LocalStorage.userId.trim()) {
+        debugPrint("👤 Self-message via socket, skipping notification.");
+        return;
+      }
 
       String currentOpenChatId = '';
       if (Get.isRegistered<MessageController>()) {

@@ -301,7 +301,6 @@ class _ChatListScreenState extends State<ChatListScreen> {
                               ),
                             ),
                           )
-                          // ✅ Chat Tab RefreshIndicator
                               : RefreshIndicator(
                             onRefresh: () async {
                               await con.getChatRepos();
@@ -313,9 +312,8 @@ class _ChatListScreenState extends State<ChatListScreen> {
                             child: ListView.builder(
                               controller:
                               controller.singleScrollController,
-                              // ✅ সবসময় scroll করা যাবে
-                              physics:
-                              const AlwaysScrollableScrollPhysics(),
+
+                              physics: const AlwaysScrollableScrollPhysics(),
                               itemCount: controller
                                   .filteredSingleChats.length +
                                   (controller.isLoadingMoreSingle
