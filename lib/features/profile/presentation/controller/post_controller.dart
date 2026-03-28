@@ -56,7 +56,7 @@ class MyPostController extends GetxController {
 
         // ✅ Use MyPostModel directly — model is correct
         final MyPostModel myPostModel = MyPostModel.fromJson(
-          response.data as Map<dynamic, dynamic>,
+          response.data,
         );
 
         // ✅ Read totalPage from parsed pagination

@@ -5,7 +5,7 @@ import 'package:giolee78/config/api/api_end_point.dart';
 import 'package:giolee78/config/route/app_routes.dart';
 import 'package:giolee78/features/chat_nearby/data/nearby_friends_model.dart';
 import 'package:giolee78/features/chat_nearby/presentation/controller/nearby_chat_controller.dart';
-import 'package:giolee78/features/chat_nearby/presentation/controller/chat_nearby_profile_controller.dart';
+
 import 'package:giolee78/features/chat_nearby/presentation/screen/chat_nearby_profile_screen.dart';
 import 'package:giolee78/features/clicker/presentation/controller/clicker_controller.dart';
 import 'package:giolee78/utils/constants/app_images.dart';
@@ -16,7 +16,7 @@ import '../../../../services/api/api_service.dart';
 import '../../../../services/storage/storage_services.dart';
 import '../../../../services/storage/storage_keys.dart';
 import '../../../../utils/constants/app_colors.dart';
-import '../../../../utils/enum/enum.dart';
+
 import '../../../home/presentation/controller/home_controller.dart';
 
 class ChatNearbyScreen extends StatelessWidget {
@@ -338,35 +338,17 @@ class _NearbyUserCard extends StatelessWidget {
   final NearbyChatController controller;
 
   Future<void> _handleUserTap(BuildContext context) async {
-    try {
-      Get.dialog(
-        const Center(
-          child: CircularProgressIndicator(color: AppColors.primaryColor),
-        ),
-        barrierDismissible: false,
+    // Use the isFriend value already loaded with the nearby list —
+    // no extra network call needed on tap.
+    final isFriend = nearbyChatUser.isFriend;
+
+    if (isFriend) {
+      await clickerController.createOrGetChatAndGo(
+        receiverId: nearbyChatUser.id.toString(),
+        name: nearbyChatUser.name,
+        image: nearbyChatUser.image ?? '',
       );
-
-      final tempController = ChatNearbyProfileController();
-      await tempController.checkFriendship(nearbyChatUser.id.toString());
-
-      final isNowFriend =
-          tempController.friendStatus.value == FriendStatus.friends;
-      nearbyChatUser.setFriend(isNowFriend);
-
-      Get.back();
-
-      if (isNowFriend) {
-        await clickerController.createOrGetChatAndGo(
-          receiverId: nearbyChatUser.id.toString(),
-          name: nearbyChatUser.name,
-          image: nearbyChatUser.image ?? '',
-        );
-      } else {
-        Get.to(() => ChatNearbyProfileScreen(user: nearbyChatUser));
-      }
-    } catch (e) {
-      if (Get.isDialogOpen ?? false) Get.back();
-      debugPrint("Error checking friend status: $e");
+    } else {
       Get.to(() => ChatNearbyProfileScreen(user: nearbyChatUser));
     }
   }

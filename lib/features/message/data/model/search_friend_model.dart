@@ -100,10 +100,23 @@ class SearchFriendUserModel {
     required this.updatedAt,
     this.advertiser,
     this.distance,
-  })  : friendStatus = FriendStatus.none.obs,
-        pendingRequestId = ''.obs;
+    FriendStatus? initialFriendStatus,
+    String? initialRequestId,
+  })  : friendStatus = (initialFriendStatus ?? FriendStatus.none).obs,
+        pendingRequestId = (initialRequestId ?? '').obs;
 
   factory SearchFriendUserModel.fromJson(Map<String, dynamic> json) {
+    // Determine the initial friend status from the API response to avoid extra network calls.
+    final bool isFriend = json['isFriend'] ?? false;
+    final String requestStatus = json['requestStatus']?.toString() ?? 'none';
+    
+    FriendStatus status = FriendStatus.none;
+    if (isFriend) {
+      status = FriendStatus.friends;
+    } else if (requestStatus == 'pending') {
+      status = FriendStatus.requested;
+    }
+
     return SearchFriendUserModel(
       id: json['_id'] ?? '',
       name: json['name'] ?? '',
@@ -127,6 +140,8 @@ class SearchFriendUserModel {
           ? AdvertiserModel.fromJson(json['advertiser'])
           : null,
       distance: (json['distance'] as num?)?.toDouble(),
+      initialFriendStatus: status,
+      initialRequestId: json['friendRequestId']?.toString(), // Ensure we pick up the request ID if provided
     );
   }
 }

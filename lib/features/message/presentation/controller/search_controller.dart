@@ -36,7 +36,11 @@ class SearchFriendController extends GetxController {
 
         searchFriendList.value = fetchedUsers;
 
-        await _checkFriendshipForAll();
+        //====================================
+        // Optimization: Removed redundant _checkFriendshipForAll() call.
+        // The SearchFriendUserModel now parses the friend status directly from
+        // the nearby search response, eliminating the need for extra API calls.
+        //====================================
       }
     } catch (e) {
       debugPrint("Error fetching users: $e");
@@ -45,27 +49,12 @@ class SearchFriendController extends GetxController {
     }
   }
 
-  Future<void> _checkFriendshipForAll() async {
-    for (var user in searchFriendList) {
-      try {
-        final res = await ApiService.get(ApiEndPoint.checkFriendStatus + user.id);
-        if (res.statusCode == 200) {
-          final statusData = res.data['data'];
-          if (statusData['isAlreadyFriend'] == true) {
-            user.friendStatus.value = FriendStatus.friends;
-          } else if (statusData['pendingFriendRequest'] != null) {
-            user.friendStatus.value = FriendStatus.requested;
-            user.pendingRequestId.value = statusData['pendingFriendRequest']['_id'] ?? '';
-          } else {
-            user.friendStatus.value = FriendStatus.none;
-          }
-        }
-      } catch (e) {
-        user.friendStatus.value = FriendStatus.none;
-      }
-    }
-    searchFriendList.refresh();
-  }
+  //====================================
+  // Optimization: Removed _checkFriendshipForAll.
+  // This method used to loop through all search results and make a network call
+  // for each user to check friendship status. This is now handled within the model
+  // constructor using the 'isFriend' field from the primary search response.
+  //====================================
 
   Future<void> addFriend(SearchFriendUserModel user) async {
     try {

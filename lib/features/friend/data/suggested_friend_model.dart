@@ -69,6 +69,7 @@ class SuggestedFriendUserModel {
   final DateTime updatedAt;
   final AdvertiserModel? advertiser;
   final double? distance;
+  final bool isFriend;
 
   SuggestedFriendUserModel({
     required this.id,
@@ -90,7 +91,8 @@ class SuggestedFriendUserModel {
     required this.createdAt,
     required this.updatedAt,
     this.advertiser,
-    this.distance, // ✅ add this
+    this.distance,
+    this.isFriend = false,
   });
 
   factory SuggestedFriendUserModel.fromJson(Map<String, dynamic> json) {
@@ -116,7 +118,8 @@ class SuggestedFriendUserModel {
       advertiser: json['advertiser'] != null
           ? AdvertiserModel.fromJson(json['advertiser'])
           : null,
-      distance: (json['distance'] as num?)?.toDouble(), // ✅ parse
+      distance: (json['distance'] as num?)?.toDouble(),
+      isFriend: json['isFriend'] == true,
     );
   }
 }

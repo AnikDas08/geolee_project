@@ -152,7 +152,7 @@ class GroupMessageController extends GetxController {
           if (!messages.any((m) => m.id == newMessage.id)) {
             // ✅ Handle encrypted messages (U2FsdGVk or hex-colon format)
             if (newMessage.isEncrypted) {
-              loadMessages(showLoading: false);
+              loadMessages();
               return;
             }
 
@@ -321,7 +321,7 @@ class GroupMessageController extends GetxController {
         messageController.clear();
         // Wait a bit to ensure decryption is complete on server before GET
         await Future.delayed(const Duration(milliseconds: 500));
-        await loadMessages(showLoading: false);
+        await loadMessages();
       } else {
         _showError('Failed to send message');
       }
