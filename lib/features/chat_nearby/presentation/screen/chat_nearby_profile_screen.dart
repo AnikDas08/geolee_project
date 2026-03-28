@@ -53,8 +53,12 @@ class _ChatNearbyProfileScreenState extends State<ChatNearbyProfileScreen> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
+        //====================================
+        // Optimization: Removed redundant controller.checkFriendship call.
+        // controller.fetchUserProfile(userId) is sufficient as it already parses 
+        // friendship status from the profile response.
+        //====================================
         controller.fetchUserProfile(widget.user.id.toString());
-        controller.checkFriendship(widget.user.id.toString());
 
         _monitorFriendStatus();
       }

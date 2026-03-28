@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 
 class AttachmentSelectOption extends StatelessWidget {
   final IconData icon;
@@ -19,7 +20,7 @@ class AttachmentSelectOption extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        Navigator.pop(context);
+        Get.back();
         onTap();
       },
       child: Column(

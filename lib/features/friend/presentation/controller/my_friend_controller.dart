@@ -528,11 +528,19 @@ class MyFriendController extends GetxController {
 
         debugPrint("📋 Total in list: ${suggestedFriendList.length}");
 
-        // Parallelize friendship status checks for better performance
-        final List<Future<void>> checks = parsedList
-            .map((user) => checkFriendship(user.id))
-            .toList();
-        await Future.wait(checks);
+        // Populate friendStatusMap directly from the isFriend field returned
+        // by the API — no extra per-user HTTP calls needed.
+        for (final user in parsedList) {
+          // Skip users we already know are confirmed friends (set by getMyAllFriends)
+          if (friendStatusMap[user.id] == FriendStatus.friends) continue;
+          if (user.isFriend) {
+            friendStatusMap[user.id] = FriendStatus.friends;
+          } else {
+            // Only set to none if not already in a pending state from a prior call
+            friendStatusMap[user.id] ??= FriendStatus.none;
+          }
+        }
+        friendStatusMap.refresh();
       } else {
         nearbyChatError.value = response.message ?? "Something went wrong";
         debugPrint("❌ API Error: ${response.message}");
@@ -611,12 +619,16 @@ class MyFriendController extends GetxController {
         suggestedFriendList.value = parsedList;
         debugPrint("📋 Search results: ${parsedList.length}");
 
-        if (parsedList.isNotEmpty) {
-          final List<Future<void>> checks = parsedList
-              .map((u) => checkFriendship(u.id))
-              .toList();
-          await Future.wait(checks);
+        // Populate friendStatusMap from isFriend field — no extra API calls needed.
+        for (final user in parsedList) {
+          if (friendStatusMap[user.id] == FriendStatus.friends) continue;
+          if (user.isFriend) {
+            friendStatusMap[user.id] = FriendStatus.friends;
+          } else {
+            friendStatusMap[user.id] ??= FriendStatus.none;
+          }
         }
+        friendStatusMap.refresh();
       } else {
         nearbyChatError.value = response.message;
         debugPrint("❌ Global Search API Error: ${response.message}");

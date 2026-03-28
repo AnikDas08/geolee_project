@@ -19,10 +19,12 @@ class ChatNearbyProfileController extends GetxController {
   var isProcessingAction = false.obs;
 
   Future<void> initProfile(String userId) async {
-    await Future.wait([
-      fetchUserProfile(userId),
-      checkFriendship(userId),
-    ]);
+    //====================================
+    // Optimization: Removed redundant checkFriendship(userId) call.
+    // The fetchUserProfile method already returns and parses the friendship status
+    // (isAlreadyFriend, pendingFriendRequest) from the single profile endpoint.
+    //====================================
+    await fetchUserProfile(userId);
   }
 
 

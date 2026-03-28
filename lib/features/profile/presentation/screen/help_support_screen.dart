@@ -11,6 +11,7 @@ import 'package:giolee78/utils/constants/app_icons.dart';
 import 'package:giolee78/utils/constants/app_string.dart';
 import 'package:giolee78/utils/extensions/extension.dart';
 import 'package:giolee78/utils/enum/enum.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 class HelpSupportScreen extends StatefulWidget {
   const HelpSupportScreen({super.key});
@@ -23,6 +24,11 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
   @override
   void dispose() {
     super.dispose();
+  }
+
+  Future<String> getAppVersion() async {
+    final info = await PackageInfo.fromPlatform();
+    return "${info.version}+${info.buildNumber}";
   }
 
   @override
@@ -40,7 +46,7 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
     );
   }
 
-  /// Body Section starts here
+  // Body Section starts here
   Widget _bodySection() {
     return SafeArea(
       child: SingleChildScrollView(
@@ -55,13 +61,30 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
             Center(child: _buildAttachFileSection()),
             SizedBox(height: 24.h),
             _buildSubmitButton(),
+            SizedBox(height: 40.h,),
+
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                FutureBuilder<String>(
+                  future: getAppVersion(),
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) return SizedBox();
+                    return CommonText(
+                      text: "Version: ${snapshot.data} (beta)",
+                      fontSize: 14.sp,
+                    );
+                  },
+                ),
+              ],
+            ),
           ],
         ),
       ),
     );
   }
 
-  /// Name field
+  // Name field
   Widget _buildNameField() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -86,7 +109,7 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
     );
   }
 
-  /// Description field
+  // Description field=========================================
   Widget _buildDescriptionField() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -109,7 +132,9 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
     );
   }
 
-  /// Attach file section
+  // Attach file section=====================================
+
+
   Widget _buildAttachFileSection() {
     return GetBuilder<HelpSupportController>(
       builder: (controller) {
@@ -211,7 +236,7 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
     );
   }
 
-  /// Submit button
+  //Submit button===========================================
   Widget _buildSubmitButton() {
     return GetBuilder<HelpSupportController>(
       builder: (controller) {

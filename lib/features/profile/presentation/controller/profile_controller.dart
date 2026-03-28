@@ -208,7 +208,7 @@ class ProfileController extends GetxController {
           final month = int.tryParse(parts[1]);
           final day = int.tryParse(parts[2]);
           if (year != null && month != null && day != null) {
-            final isoString = DateTime.utc(year, month, day, 12, 0, 0).toIso8601String();
+            final isoString = DateTime.utc(year, month, day, 12).toIso8601String();
             body["dob"] = isoString; // "2000-01-07T12:00:00.000Z"
           }
         }

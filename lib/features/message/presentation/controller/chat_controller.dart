@@ -233,7 +233,8 @@ class ChatController extends GetxController {
       singleChats.addAll(singles);
       _sortChats();
       filteredSingleChats = List.from(singleChats);
-      await _markFriendStatusForList(singles);
+      // Removed: redundant _markFriendStatusForList(singles) call.
+      // The ChatModel now correctly populates isFriend from the primary API response.
     } catch (e) {
       singlePage--;
     } finally {
@@ -284,7 +285,8 @@ class ChatController extends GetxController {
         );
         _sortChats();
         filteredSingleChats = List.from(singleChats);
-        await _markFriendStatus();
+        // Removed: redundant _markFriendStatus() call.
+        // We now leverage the 'isFriend' status directly from the chats API.
       }
 
       // ===============================================
@@ -305,38 +307,12 @@ class ChatController extends GetxController {
     }
   }
 
-  Future<void> _markFriendStatus() async {
-    await _markFriendStatusForList(singleChats);
-  }
-
-  Future<void> _markFriendStatusForList(List<ChatModel> targetList) async {
-    if (targetList.isEmpty) return;
-    final List<Future<void>> checks = targetList.map((chat) async {
-      if (chat.participant.sId.isEmpty) return;
-      try {
-        final response = await ApiService.get(
-          "${ApiEndPoint.checkFriendStatus}${chat.participant.sId}",
-        );
-        bool isFriend = false;
-        if (response.statusCode == 200) {
-          final data = response.data['data'];
-          isFriend = data['isAlreadyFriend'] == true;
-        }
-        final index = singleChats.indexWhere((c) => c.id == chat.id);
-        if (index != -1) {
-          singleChats[index] = singleChats[index].copyWith(isFriend: isFriend);
-          final fIndex = filteredSingleChats.indexWhere((c) => c.id == chat.id);
-          if (fIndex != -1) {
-            filteredSingleChats[fIndex] = filteredSingleChats[fIndex].copyWith(
-              isFriend: isFriend,
-            );
-          }
-        }
-      } catch (_) {}
-    }).toList();
-    await Future.wait(checks);
-    update();
-  }
+  //==================================== 
+  // Optimization: Removed _markFriendStatus and _markFriendStatusForList.
+  // These methods used to iterate through all chats and call the checkFriendship API
+  // for every participant. Since the 'my-chats' API already provides 'isFriend',
+  // these extra network calls are no longer necessary, improving app startup speed.
+  //====================================
 
   Status get status {
     if (isGroupLoading && chats.isEmpty) return Status.loading;
@@ -385,11 +361,11 @@ class ChatController extends GetxController {
         if (incomingChatId.isEmpty) return;
 
         // Find the chat in either singleChats or group chats
-        int sIndex = singleChats.indexWhere((c) => c.id == incomingChatId);
-        int gIndex = chats.indexWhere((c) => c.id == incomingChatId);
+        final int sIndex = singleChats.indexWhere((c) => c.id == incomingChatId);
+        final int gIndex = chats.indexWhere((c) => c.id == incomingChatId);
 
         if (sIndex != -1 || gIndex != -1) {
-          ChatModel chat = sIndex != -1 ? singleChats[sIndex] : chats[gIndex];
+          final ChatModel chat = sIndex != -1 ? singleChats[sIndex] : chats[gIndex];
           debugPrint("📍 Chat found in local list. Current unread: ${chat.unreadCount}");
 
           final latestMsg = LatestMessage.fromJson(messageData);
