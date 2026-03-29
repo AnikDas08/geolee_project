@@ -72,7 +72,9 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
                     if (!snapshot.hasData) return SizedBox();
                     return CommonText(
                       text: "Version: ${snapshot.data} (beta)",
-                      fontSize: 14.sp,
+                      fontSize: 15.sp,
+                      color: Colors.green,
+                      fontWeight: FontWeight.w500,
                     );
                   },
                 ),

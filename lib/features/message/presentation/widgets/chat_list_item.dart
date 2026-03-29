@@ -161,8 +161,7 @@ Widget chatListItem({
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               if (showDistance)
-                Text(
-                  'Distance: $distanceText',
+                Text('Distance: $distanceText',
                   style: TextStyle(
                     fontSize: 11.sp,
                     color: const Color(0xFFF48201),
@@ -194,7 +193,7 @@ Widget chatListItem({
                         borderRadius: BorderRadius.circular(10.r),
                         boxShadow: [
                           BoxShadow(
-                            color: AppColors.primaryColor.withOpacity(0.3),
+                            color: AppColors.primaryColor.withValues(alpha: 0.3),
                             blurRadius: 4,
                             offset: const Offset(0, 2),
                           ),

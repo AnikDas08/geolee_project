@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:giolee78/features/message/presentation/widgets/video_player_bubble.dart';
@@ -39,20 +38,20 @@ class BubbleContent extends StatelessWidget {
             loadingBuilder: (_, child, progress) => progress == null
                 ? child
                 : Container(
-              width: 220.w,
-              height: 160.h,
-              color: Colors.grey[100],
-              child: Center(
-                child: CircularProgressIndicator(
-                  value: progress.expectedTotalBytes != null
-                      ? progress.cumulativeBytesLoaded /
-                      progress.expectedTotalBytes!
-                      : null,
-                  color: AppColors.primaryColor,
-                  strokeWidth: 2,
-                ),
-              ),
-            ),
+                    width: 220.w,
+                    height: 160.h,
+                    color: Colors.grey[100],
+                    child: Center(
+                      child: CircularProgressIndicator(
+                        value: progress.expectedTotalBytes != null
+                            ? progress.cumulativeBytesLoaded /
+                                  progress.expectedTotalBytes!
+                            : null,
+                        color: AppColors.primaryColor,
+                        strokeWidth: 2,
+                      ),
+                    ),
+                  ),
             errorBuilder: (_, __, ___) => Container(
               width: 220.w,
               height: 120.h,
@@ -60,12 +59,16 @@ class BubbleContent extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.broken_image_rounded,
-                      color: Colors.grey[400], size: 32.sp),
+                  Icon(
+                    Icons.broken_image_rounded,
+                    color: Colors.grey[400],
+                    size: 32.sp,
+                  ),
                   SizedBox(height: 6.h),
-                  Text('Image unavailable',
-                      style:
-                      TextStyle(fontSize: 11.sp, color: Colors.grey[400])),
+                  Text(
+                    'Image unavailable',
+                    style: TextStyle(fontSize: 11.sp, color: Colors.grey[400]),
+                  ),
                 ],
               ),
             ),
@@ -87,12 +90,16 @@ class BubbleContent extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.videocam_off_rounded,
-                  color: Colors.grey[400], size: 28.sp),
+              Icon(
+                Icons.videocam_off_rounded,
+                color: Colors.grey[400],
+                size: 28.sp,
+              ),
               SizedBox(height: 4.h),
-              Text('Video unavailable',
-                  style:
-                  TextStyle(fontSize: 11.sp, color: Colors.grey[400])),
+              Text(
+                'Video unavailable',
+                style: TextStyle(fontSize: 11.sp, color: Colors.grey[400]),
+              ),
             ],
           ),
         );
@@ -105,8 +112,7 @@ class BubbleContent extends StatelessWidget {
         constraints: BoxConstraints(maxWidth: 240.w, minWidth: 140.w),
         padding: EdgeInsets.all(12.w),
         decoration: BoxDecoration(
-          color:
-          isMe ? AppColors.primaryColor.withOpacity(0.08) : Colors.white,
+          color: isMe ? AppColors.primaryColor.withValues(alpha: 0.08) : Colors.white,
           borderRadius: BorderRadius.only(
             topLeft: Radius.circular(18.r),
             topRight: Radius.circular(18.r),
@@ -115,7 +121,7 @@ class BubbleContent extends StatelessWidget {
           ),
           border: Border.all(
             color: isMe
-                ? AppColors.primaryColor.withOpacity(0.2)
+                ? AppColors.primaryColor.withValues(alpha: 0.2)
                 : Colors.grey.shade200,
           ),
         ),
@@ -125,11 +131,14 @@ class BubbleContent extends StatelessWidget {
             Container(
               padding: EdgeInsets.all(8.w),
               decoration: BoxDecoration(
-                color: AppColors.primaryColor.withOpacity(0.1),
+                color: AppColors.primaryColor.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8.r),
               ),
-              child: Icon(Icons.insert_drive_file_rounded,
-                  color: AppColors.primaryColor, size: 20.sp),
+              child: Icon(
+                Icons.insert_drive_file_rounded,
+                color: AppColors.primaryColor,
+                size: 20.sp,
+              ),
             ),
             SizedBox(width: 10.w),
             Flexible(
@@ -162,15 +171,17 @@ class BubbleContent extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 6,
             offset: const Offset(0, 2),
           ),
         ],
       ),
-      child: Text(
+      child: SelectableText(
         message.message,
+
         style: TextStyle(
+
           fontSize: 14.sp,
           height: 1.45,
           color: Colors.black87,

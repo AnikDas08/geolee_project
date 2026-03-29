@@ -43,25 +43,29 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          CommonImage(imageSrc: AppImages.logo, size: 250).center,
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            CommonImage(imageSrc: AppImages.logo, size: 250).center,
 
-          SizedBox(height: 20.h),
+            SizedBox(height: 50.h),
 
-          FutureBuilder<String>(
-            future: getAppVersion(),
-            builder: (context, snapshot) {
-              if (!snapshot.hasData) return SizedBox();
-              return CommonText(
-                text: "Version: ${snapshot.data} (beta)",
-                fontSize: 14.sp,
-              );
-            },
-          ),
-        ],
+            FutureBuilder<String>(
+              future: getAppVersion(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) return SizedBox();
+                return CommonText(
+                  text: "Version: ${snapshot.data} (beta)",
+                  fontSize: 15.sp,
+                  color: Colors.green,
+                  fontWeight: FontWeight.w500,
+                );
+              },
+            ),
+          ],
+        ),
       ),
     );
   }

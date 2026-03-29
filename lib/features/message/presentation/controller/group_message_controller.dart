@@ -322,6 +322,10 @@ class GroupMessageController extends GetxController {
         // Wait a bit to ensure decryption is complete on server before GET
         await Future.delayed(const Duration(milliseconds: 500));
         await loadMessages();
+
+        if (Get.isRegistered<ChatController>()) {
+          ChatController.instance.getChatRepos(showLoading: false, isGroup: true);
+        }
       } else {
         _showError('Failed to send message');
       }
@@ -371,6 +375,9 @@ class GroupMessageController extends GetxController {
       );
       if (response.statusCode == 200) {
         await loadMessages();
+        if (Get.isRegistered<ChatController>()) {
+          ChatController.instance.getChatRepos(showLoading: false, isGroup: true);
+        }
       } else {
         _showError('Failed to send image');
       }
@@ -392,6 +399,9 @@ class GroupMessageController extends GetxController {
       );
       if (response.statusCode == 200) {
         await loadMessages();
+        if (Get.isRegistered<ChatController>()) {
+          ChatController.instance.getChatRepos(showLoading: false, isGroup: true);
+        }
       } else {
         _showError('Failed to send media');
       }
@@ -413,6 +423,9 @@ class GroupMessageController extends GetxController {
       );
       if (response.statusCode == 200) {
         await loadMessages();
+        if (Get.isRegistered<ChatController>()) {
+          ChatController.instance.getChatRepos(showLoading: false, isGroup: true);
+        }
       } else {
         _showError('Failed to send document');
       }
