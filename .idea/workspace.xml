@@ -5,24 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="7a302422-3ad7-437d-bfa0-ce72bd99fe22" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.name" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/features/chat_nearby/presentation/controller/chat_nearby_profile_controller.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/chat_nearby/presentation/controller/chat_nearby_profile_controller.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/features/chat_nearby/presentation/screen/chat_nearby_profile_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/chat_nearby/presentation/screen/chat_nearby_profile_screen.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/features/chat_nearby/presentation/screen/chat_nearby_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/chat_nearby/presentation/screen/chat_nearby_screen.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/features/friend/data/suggested_friend_model.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/friend/data/suggested_friend_model.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/features/friend/presentation/controller/my_friend_controller.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/friend/presentation/controller/my_friend_controller.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/features/message/data/model/search_friend_model.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/message/data/model/search_friend_model.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/features/message/presentation/controller/chat_controller.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/message/presentation/controller/chat_controller.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/features/message/presentation/controller/group_message_controller.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/message/presentation/controller/group_message_controller.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/features/message/presentation/controller/search_controller.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/message/presentation/controller/search_controller.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/features/message/presentation/widgets/attachment_select_option.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/message/presentation/widgets/attachment_select_option.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/features/profile/presentation/controller/post_controller.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/profile/presentation/controller/post_controller.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/features/profile/presentation/controller/profile_controller.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/profile/presentation/controller/profile_controller.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/features/profile/presentation/screen/help_support_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/profile/presentation/screen/help_support_screen.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/features/splash/splash_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/splash/splash_screen.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pubspec.lock" beforeDir="false" afterPath="$PROJECT_DIR$/pubspec.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pubspec.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/pubspec.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/features/clicker/presentation/screen/clicker_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/clicker/presentation/screen/clicker_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/features/message/presentation/widgets/chat_list_item.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/message/presentation/widgets/chat_list_item.dart" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -56,26 +41,26 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Flutter.main.dart.executor&quot;: &quot;Run&quot;,
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.readMode.enableVisualFormatting&quot;: &quot;true&quot;,
-    &quot;cf.first.check.clang-format&quot;: &quot;false&quot;,
-    &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
-    &quot;dart.analysis.tool.window.visible&quot;: &quot;false&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;ibrahim__dev&quot;,
-    &quot;io.flutter.project.isFirstOpen&quot;: &quot;true&quot;,
-    &quot;io.flutter.reload.alreadyRun&quot;: &quot;true&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;flutter.settings&quot;,
-    &quot;show.migrate.to.gradle.popup&quot;: &quot;false&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Flutter.main.dart.executor": "Run",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.cidr.known.project.marker": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.readMode.enableVisualFormatting": "true",
+    "cf.first.check.clang-format": "false",
+    "cidr.known.project.marker": "true",
+    "dart.analysis.tool.window.visible": "false",
+    "git-widget-placeholder": "ibrahim__dev",
+    "io.flutter.project.isFirstOpen": "true",
+    "io.flutter.reload.alreadyRun": "true",
+    "kotlin-language-version-configured": "true",
+    "settings.editor.selected.configurable": "flutter.settings",
+    "show.migrate.to.gradle.popup": "false"
   }
-}</component>
+}]]></component>
   <component name="RunManager">
     <configuration name="main.dart" type="FlutterRunConfigurationType" factoryName="Flutter">
       <option name="filePath" value="$PROJECT_DIR$/lib/main.dart" />

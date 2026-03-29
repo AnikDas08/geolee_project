@@ -50,7 +50,6 @@ class _ClickerScreenState extends State<ClickerScreen> {
 
   // Trigger load more when within 300px of bottom==================
 
-
   void _onScroll() {
     if (_scrollController.position.pixels >=
         _scrollController.position.maxScrollExtent - 300) {
@@ -165,70 +164,70 @@ class _ClickerScreenState extends State<ClickerScreen> {
                   ),
                 SizedBox(height: 16.h),
 
-                // ── Banner Slider=============================
+                // ── Banner Slider=============================================
+                if (LocalStorage.token.isNotEmpty)
+                  Obx(() {
+                    if (controller.adList.isEmpty)
+                      return const SizedBox.shrink();
 
-                if(LocalStorage.token.isNotEmpty)
-                Obx(() {
-                  if (controller.adList.isEmpty) return const SizedBox.shrink();
-
-                  return Column(
-                    children: [
-                      CarouselSlider(
-                        items: controller.adList.map((ad) {
-                          return GestureDetector(
-                            onTap: () {
-                              controller.clickBanner(ad.id);
-                              if (ad.websiteUrl != null &&
-                                  ad.websiteUrl!.isNotEmpty) {
-                                Get.to(
-                                  () => CommonWebViewScreen(
-                                    url: ad.websiteUrl!,
-                                    title: ad.title,
-                                  ),
-                                );
-                              } else {
-                                Get.to(() => AdDetailScreen(ad: ad));
-                              }
-                            },
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(12.r),
-                              child: CommonImage(
-                                imageSrc: ad.image,
-                                height: 150.h,
-                                width: double.infinity,
-                                fill: BoxFit.cover,
+                    return Column(
+                      children: [
+                        CarouselSlider(
+                          items: controller.adList.map((ad) {
+                            return GestureDetector(
+                              onTap: () {
+                                controller.clickBanner(ad.id);
+                                if (ad.websiteUrl != null &&
+                                    ad.websiteUrl!.isNotEmpty) {
+                                  Get.to(
+                                    () => CommonWebViewScreen(
+                                      url: ad.websiteUrl!,
+                                      title: ad.title,
+                                    ),
+                                  );
+                                } else {
+                                  Get.to(() => AdDetailScreen(ad: ad));
+                                }
+                              },
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(12.r),
+                                child: CommonImage(
+                                  imageSrc: ad.image,
+                                  height: 150.h,
+                                  width: double.infinity,
+                                  fill: BoxFit.cover,
+                                ),
                               ),
-                            ),
-                          );
-                        }).toList(),
-                        options: CarouselOptions(
-                          height: 150.h,
-                          viewportFraction: 0.85,
-                          autoPlay: true,
-                          enlargeCenterPage: true,
-                          onPageChanged: (index, _) =>
-                              controller.changePosition(index),
+                            );
+                          }).toList(),
+                          options: CarouselOptions(
+                            height: 150.h,
+                            viewportFraction: 0.85,
+                            autoPlay: true,
+                            enlargeCenterPage: true,
+                            onPageChanged: (index, _) =>
+                                controller.changePosition(index),
+                          ),
                         ),
-                      ),
-                      SizedBox(height: 8.h),
-                      Center(
-                        child: DotsIndicator(
-                          dotsCount: controller.adList.length,
-                          position: controller.currentPosition,
-                          decorator: DotsDecorator(
-                            activeColor: AppColors.primaryColor,
-                            color: Colors.grey.shade300,
-                            size: const Size.square(8.0),
-                            activeSize: const Size(18.0, 8.0),
-                            activeShape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(5.0),
+                        SizedBox(height: 8.h),
+                        Center(
+                          child: DotsIndicator(
+                            dotsCount: controller.adList.length,
+                            position: controller.currentPosition,
+                            decorator: DotsDecorator(
+                              activeColor: AppColors.primaryColor,
+                              color: Colors.grey.shade300,
+                              size: const Size.square(8.0),
+                              activeSize: const Size(18.0, 8.0),
+                              activeShape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(5.0),
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    ],
-                  );
-                }),
+                      ],
+                    );
+                  }),
 
                 SizedBox(height: 16.h),
 
@@ -248,66 +247,76 @@ class _ClickerScreenState extends State<ClickerScreen> {
                 ),
                 SizedBox(height: 16.h),
 
+
                 // Posts List ========================================
-                controller.filteredPosts.isEmpty
-                    ? _buildEmptyState()
-                    : ListView.separated(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: LocalStorage.token.isEmpty
-                            ? controller.filteredPosts.length.clamp(0, 20)
-                            : controller.filteredPosts.length,
-                        separatorBuilder: (_, __) => SizedBox(height: 16.h),
-                        itemBuilder: (context, index) {
-                          final data = controller.filteredPosts[index];
-                          final List<String> postImages = data.photos.isNotEmpty
-                              ? data.photos.map((p) {
-                                  if (p.startsWith('http')) return p;
-                                  return p.startsWith('/')
-                                      ? "${ApiEndPoint.imageUrl}$p"
-                                      : "${ApiEndPoint.imageUrl}/$p";
-                                }).toList()
-                              : [];
+                Builder(
+                  builder: (context) {
+                    final postsWithImages = controller.filteredPosts
+                        .where((data) => data.photos.isNotEmpty)
+                        .toList();
 
-                          return CommonPostCards(
-                            onTapPhoto: () {
-                              if (postImages.isNotEmpty) {
-                                Get.to(
-                                  () => FullScreenImageView(images: postImages),
-                                );
-                              }
-                            },
-                            onTapProfile: () {
-                              //condition for guest mood========================
+                    return postsWithImages.isEmpty
+                        ? _buildEmptyState()
+                        : ListView.separated(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: LocalStorage.token.isEmpty
+                                ? postsWithImages.length.clamp(0, 20)
+                                : postsWithImages.length,
+                            separatorBuilder: (_, __) => SizedBox(height: 16.h),
+                            itemBuilder: (context, index) {
+                              final data = postsWithImages[index];
+                              final List<String> postImages =
+                                  data.photos.isNotEmpty
+                                  ? data.photos.map((p) {
+                                      if (p.startsWith('http')) return p;
+                                      return p.startsWith('/')
+                                          ? "${ApiEndPoint.imageUrl}$p"
+                                          : "${ApiEndPoint.imageUrl}/$p";
+                                    }).toList()
+                                  : [];
 
-                              if (LocalStorage.token.isNotEmpty) {
-                                Get.to(
-                                  () => ViewFriendScreen(
-                                    userId: data.user.id,
-                                    isFriend: false,
-                                  ),
-                                );
-                              }
+                              return CommonPostCards(
+                                onTapPhoto: () {
+                                  if (postImages.isNotEmpty) {
+                                    Get.to(
+                                      () => FullScreenImageView(
+                                        images: postImages,
+                                      ),
+                                    );
+                                  }
+                                },
+                                onTapProfile: () {
+                                  if (LocalStorage.token.isNotEmpty) {
+                                    Get.to(
+                                      () => ViewFriendScreen(
+                                        userId: data.user.id,
+                                        isFriend: false,
+                                      ),
+                                    );
+                                  }
+                                },
+                                clickerType: data.clickerType,
+                                userName: data.user.name,
+                                userAvatar:
+                                    "${ApiEndPoint.imageUrl}${data.user.image}",
+                                timeAgo: _formatPostTime(data.createdAt),
+                                location: data.address.isNotEmpty
+                                    ? data.address.split(',')[0]
+                                    : "",
+                                images: postImages,
+                                description: data.description,
+                                isFriend: false,
+                                privacyImage: data.privacy == "public"
+                                    ? AppIcons.public
+                                    : data.privacy == "friends"
+                                    ? AppIcons.friends
+                                    : AppIcons.onlyMe,
+                              );
                             },
-                            clickerType: data.clickerType,
-                            userName: data.user.name,
-                            userAvatar:
-                                "${ApiEndPoint.imageUrl}${data.user.image}",
-                            timeAgo: _formatPostTime(data.createdAt),
-                            location: data.address.isNotEmpty
-                                ? data.address.split(',')[0]
-                                : "",
-                            images: postImages,
-                            description: data.description,
-                            isFriend: false,
-                            privacyImage: data.privacy == "public"
-                                ? AppIcons.public
-                                : data.privacy == "friends"
-                                ? AppIcons.friends
-                                : AppIcons.onlyMe,
                           );
-                        },
-                      ),
+                  },
+                ),
 
                 Obx(() {
                   if (controller.isLoadingMore.value) {
@@ -316,7 +325,10 @@ class _ClickerScreenState extends State<ClickerScreen> {
                       child: const Center(child: CircularProgressIndicator()),
                     );
                   }
-                  // Show "end of posts" message only when all pages loaded=============
+
+          // Show "end of posts" message only when all pages loaded=============
+
+
                   if (!controller.isLoading.value &&
                       controller.filteredPosts.isNotEmpty &&
                       controller.currentPage.value >=

@@ -103,7 +103,7 @@ Widget chatListItem({
         ),
         12.width,
 
-        // ─── Name + Message ===========================
+        // Name + Message ======================================================
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
