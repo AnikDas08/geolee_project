@@ -5,78 +5,122 @@ import 'package:giolee78/features/notifications/presentation/screen/notification
 import 'package:giolee78/utils/constants/app_colors.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
-class StripeWebViewPage extends StatelessWidget {
+class StripeWebViewPage extends StatefulWidget {
   final String checkoutUrl;
   const StripeWebViewPage({super.key, required this.checkoutUrl});
 
   @override
-  Widget build(BuildContext context) {
-    final webController = WebViewController()
+  State<StripeWebViewPage> createState() => _StripeWebViewPageState();
+}
+
+class _StripeWebViewPageState extends State<StripeWebViewPage> {
+  late final WebViewController _webController;
+  bool _isLoading = true;
+  bool _hasNavigated = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _webController = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setNavigationDelegate(
         NavigationDelegate(
           onNavigationRequest: (request) {
-            if (request.url.contains("success")) {
-              // ✅ Navigate after build completes
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                Get.offAll(() => HomeNav());
-                Get.snackbar(
-                  "Success",
-                  "Payment successful",
-                  backgroundColor: AppColors.success,
-                  colorText: AppColors.white,
-                  snackPosition: SnackPosition.BOTTOM,
-                  duration: const Duration(seconds: 2),
-                );
-              });
-              return NavigationDecision.prevent;
-            } else if (request.url.contains("cancel")) {
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                Get.offAll(() => const NotificationScreen());
-                Get.snackbar(
-                  "Cancel",
-                  "Payment cancelled",
-                  backgroundColor: AppColors.cancel,
-                  colorText: AppColors.white,
-                  snackPosition: SnackPosition.BOTTOM,
-                  duration: const Duration(seconds: 2),
-                );
-              });
+            debugPrint("NAV REQUEST: ${request.url}");
+            _handleUrl(request.url);
+
+            if (request.url.contains("success") ||
+                request.url.contains("succeeded") ||
+                request.url.contains("cancel") ||
+                request.url.contains("cancelled")) {
               return NavigationDecision.prevent;
             }
             return NavigationDecision.navigate;
           },
-          onPageStarted: (_) {},
+          onPageStarted: (url) {
+            debugPrint("PAGE STARTED: $url");
+            _handleUrl(url);
+            if (mounted) setState(() => _isLoading = true);
+          },
           onPageFinished: (url) {
-            if (url.contains("success")) {
+            debugPrint("PAGE FINISHED: $url");
+            _handleUrl(url);
+            if (mounted) setState(() => _isLoading = false);
+          },
+          onWebResourceError: (error) {
+            debugPrint("WEB ERROR: ${error.description}");
+            if (mounted) setState(() => _isLoading = false);
+            // শুধু fatal error এ snackbar দেখাও
+            if (error.isForMainFrame ?? false) {
               WidgetsBinding.instance.addPostFrameCallback((_) {
-                Get.offAll(() => HomeNav());
-              });
-            } else if (url.contains("cancel")) {
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                Get.offAll(() => const NotificationScreen());
+                Get.snackbar(
+                  "Error",
+                  "Failed to load page",
+                  backgroundColor: AppColors.cancel,
+                  colorText: AppColors.white,
+                  snackPosition: SnackPosition.BOTTOM,
+                );
               });
             }
           },
-          onWebResourceError: (error) {
-            // Optional: show error snackbar
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              Get.snackbar(
-                "Error",
-                "Failed to load page",
-                backgroundColor: AppColors.cancel,
-                colorText: AppColors.white,
-                snackPosition: SnackPosition.BOTTOM,
-              );
-            });
-          },
         ),
       )
-      ..loadRequest(Uri.parse(checkoutUrl));
+      ..loadRequest(Uri.parse(widget.checkoutUrl));
+  }
 
+  void _handleUrl(String url) {
+    if (_hasNavigated) return;
+
+    debugPrint("🔍 Checking URL: $url");
+
+    final isSuccess = url.contains("success") ||           // localhost:3000/payment/success
+        url.contains("succeeded") ||                        // payment_attempt_state=succeeded
+        url.contains("payment_attempt_state=succeeded");   // explicit check
+
+    final isCancel = url.contains("cancel") ||
+        url.contains("cancelled") ||
+        url.contains("canceled");
+
+    if (isSuccess) {
+      _hasNavigated = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Get.offAll(() => HomeNav());
+        Get.snackbar(
+          "Success",
+          "Payment successful",
+          backgroundColor: AppColors.success,
+          colorText: AppColors.white,
+          snackPosition: SnackPosition.BOTTOM,
+          duration: const Duration(seconds: 2),
+        );
+      });
+    } else if (isCancel) {
+      _hasNavigated = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Get.offAll(() => const NotificationScreen());
+        Get.snackbar(
+          "Cancel",
+          "Payment cancelled",
+          backgroundColor: AppColors.cancel,
+          colorText: AppColors.white,
+          snackPosition: SnackPosition.BOTTOM,
+          duration: const Duration(seconds: 2),
+        );
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: WebViewWidget(controller: webController),
+        child: Stack(
+          children: [
+            WebViewWidget(controller: _webController),
+            if (_isLoading)
+              const Center(child: CircularProgressIndicator()),
+          ],
+        ),
       ),
     );
   }

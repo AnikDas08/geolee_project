@@ -165,7 +165,6 @@ class MyFriendScreen extends StatelessWidget {
                     return Padding(
                       padding: EdgeInsets.only(bottom: 10.h),
                       child: _FriendListItem(
-
                         friendshipId: data.id ?? "",
                         userId: friend?.id ?? "",
                         userName: friend?.name ?? "Unknown",
@@ -476,7 +475,6 @@ class _FriendListItem extends StatelessWidget {
                   color: AppColors.primaryColor,
                   onTap: () {
                     controller.createOrGetChatAndGo(
-
                       receiverId: userId,
                       name: userName,
                       image: avatar ?? "",
