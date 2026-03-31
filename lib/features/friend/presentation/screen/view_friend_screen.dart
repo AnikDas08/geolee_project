@@ -253,31 +253,7 @@ class _ViewFriendScreenState extends State<ViewFriendScreen> {
             color: AppColors.secondaryText,
           ),
 
-     /*     /// DIVIDER
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 50),
-            child: Divider(height: 2.h),
-          ),
-*/
           SizedBox(height: 8.h),
-
-/*          /// ADDRESS
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const CommonImage(imageSrc: AppIcons.location, size: 12),
-              SizedBox(width: 8.w),
-              Flexible(
-                child: CommonText(
-                  maxLines: 4,
-                  text: user?.address ?? "Address not available",
-                  fontSize: 13,
-                  color: AppColors.secondaryText,
-                ),
-              ),
-            ],
-          ),*/
 
           SizedBox(height: 16.h),
 
