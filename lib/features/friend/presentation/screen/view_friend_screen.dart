@@ -253,15 +253,15 @@ class _ViewFriendScreenState extends State<ViewFriendScreen> {
             color: AppColors.secondaryText,
           ),
 
-          /// DIVIDER
+     /*     /// DIVIDER
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 50),
             child: Divider(height: 2.h),
           ),
-
+*/
           SizedBox(height: 8.h),
 
-          /// ADDRESS
+/*          /// ADDRESS
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -277,7 +277,7 @@ class _ViewFriendScreenState extends State<ViewFriendScreen> {
                 ),
               ),
             ],
-          ),
+          ),*/
 
           SizedBox(height: 16.h),
 

@@ -25,7 +25,7 @@ class GroupSettingsController extends GetxController {
   String chatId = '';
   final RxString authorId = ''.obs;
 
-  /// LocalStorage থেকে current user ID নিয়ে author কিনা check করে
+  //get user id from local storage and check if it is the author================
   bool get isAuthor {
     final myId = LocalStorage.userId;
     return myId.isNotEmpty && myId == authorId.value;
@@ -75,7 +75,7 @@ class GroupSettingsController extends GetxController {
         accessType.value = data['accessType'] ?? 'open';
         memberCount.value = (data['participants'] as List?)?.length ?? 0;
 
-        // ✅ Author ID সেট করুন
+        // Set Author ID========================================================
         authorId.value = data['author'] ?? '';
 
         if (data['avatarUrl'] != null && data['avatarUrl'].isNotEmpty) {
@@ -90,6 +90,8 @@ class GroupSettingsController extends GetxController {
       update();
     }
   }
+
+  //group access type toggle====================================================
 
   Future<void> toggleAdminApproval(bool value) async {
     try {
@@ -109,6 +111,8 @@ class GroupSettingsController extends GetxController {
     }
   }
 
+
+  //update group profile========================================================
   Future<void> updateGroupProfile({
     String? newName,
     String? newDescription,
@@ -137,25 +141,15 @@ class GroupSettingsController extends GetxController {
         imageCache.clear();
         imageCache.clearLiveImages();
 
-        // await fetchGroupDetails();
-
         Get.find<ChatController>().getChatRepos();
-/*
-        Get.snackbar(
-          'Success',
-          newAccessType != null
-              ? newAccessType == 'restricted'
-              ? 'Admin approval enabled'
-              : 'Admin approval disabled'
-              : 'Group updated successfully!',
-          backgroundColor: AppColors.primaryColor,
-          colorText: Colors.white,
-        );*/
+
       }
     } finally {
       isSaving.value = false;
     }
   }
+
+  //update group name===========================================================
 
   Future<void> onUpdateGroupName(String newName) async {
     if (newName.isEmpty) return;

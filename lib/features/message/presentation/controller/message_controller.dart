@@ -859,7 +859,7 @@ class MessageController extends GetxController {
   // FRIENDSHIP ACTION METHODS
   // ================================================
   Future<void> checkFriendshipStatus(String targetUserId) async {
-    // ℹ️ এই function টা এখন আর _initializeChatData থেকে call হয় না
+    //    এই function টা এখন আর _initializeChatData থেকে call হয় না
     //    fetchUserProfile এই কাজটা করে।
     //    তবে বাইরে থেকে manually call করার প্রয়োজন হলে রাখা হয়েছে।
     if (targetUserId.isEmpty) {
@@ -941,12 +941,11 @@ class MessageController extends GetxController {
         }
         update();
       } else {
-        // Utils.errorSnackBar("Error", response.message);
         debugPrint("Friend request error: $response.message");
       }
     } catch (e) {
       debugPrint("❌ Friend request error: $e");
-      // Utils.errorSnackBar("Error", "Something went wrong");
+
     }
   }
 
@@ -1022,8 +1021,9 @@ class MessageController extends GetxController {
   }
 
   // ================================================
-  // DISTANCE CALCULATION (manual fallback)
+  // DISTANCE CALCULATION
   // ================================================
+
   Future<void> calculateDistanceFromOtherUser(
       double otherLat, double otherLng) async {
     try {
@@ -1046,6 +1046,8 @@ class MessageController extends GetxController {
   // ================================================
   // UPDATE REQUEST STATUS
   // ================================================
+
+
   Future<void> updateRequestStatus(String status) async {
     try {
       final response = await ApiService.patch(
@@ -1070,6 +1072,7 @@ class MessageController extends GetxController {
   // ================================================
   // HELPERS
   // ================================================
+
   void _showErrorSnackBar(String message) {
     Get.snackbar(
       'Error',
