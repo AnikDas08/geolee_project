@@ -101,7 +101,19 @@ class _FilterDialogState extends State<FilterDialog>
             snackPosition: SnackPosition.BOTTOM);
         return;
       }
-      widget.onApply('Custom Range', pickedStartDate!, pickedEndDate!);
+      final DateTime startWithTime = DateTime(
+        pickedStartDate!.year,
+        pickedStartDate!.month,
+        pickedStartDate!.day,
+        0, 0, 0,
+      );
+      final DateTime endWithTime = DateTime(
+        pickedEndDate!.year,
+        pickedEndDate!.month,
+        pickedEndDate!.day,
+        23, 59, 59,
+      );
+      widget.onApply('Custom Range', startWithTime, endWithTime);
     } else {
       controller.applyPeriodFilter(selectedPeriod);
     }
@@ -215,11 +227,12 @@ class _FilterDialogState extends State<FilterDialog>
                       if (!isCustomOption) {
                         pickedStartDate = null;
                         pickedEndDate = null;
-
-                        controller.applyPeriodFilter(selectedPeriod);
-                        Get.back();
                       }
                     });
+                    if (!isCustomOption) {
+                      Get.back(); // close dialog first
+                      controller.applyPeriodFilter(selectedPeriod); // then fetch
+                    }
                   },
                 );
               }).toList(),
