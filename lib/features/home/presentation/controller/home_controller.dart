@@ -40,8 +40,6 @@ class HomeController extends GetxController {
 
   RxSet<Heatmap> heatmaps = <Heatmap>{}.obs;
 
-  // ─── Map refresh — single trigger with debounce
-
   RxInt mapRefreshTrigger = 0.obs;
   Timer? _refreshDebounce;
 
@@ -51,7 +49,7 @@ class HomeController extends GetxController {
   // ─── Markers ───
   RxList<Marker> markerList = <Marker>[].obs;
 
-  // ─── Marker icon cache — OOM fix ───
+  // ─── Marker icon cache ───
   final Map<String, BitmapDescriptor> _markerIconCache = {};
 
   // ─── Current Location ───
@@ -76,28 +74,27 @@ class HomeController extends GetxController {
     try {
       clickerCount.value = "All";
       final DateTime now = DateTime.now();
-      selectedPeriod.value = '24h';
+
+      // ✅ App open হলে default: 24h filter
       startDate.value = now.subtract(const Duration(hours: 24));
       endDate.value = now;
+      selectedPeriod.value = '24h';
       isDateFilterActive.value = true;
 
       if (LocalStorage.token.isNotEmpty) {
         argument = Get.arguments;
-        Get.find<HomeNavController>().refresh();
-        Get.find<MyProfileController>().refresh();
-
-        await getCurrentLocationAndUpdateProfile();
+        // Removed broken calls and non-blocking location
 
         await Future.wait([
           myProfileController.getUserData(),
           getUserData(),
           fetchPostsWithFilter(),
+          getCurrentLocationAndUpdateProfile(),
         ]).catchError((e) {
           debugPrint('Error fetching initial data: $e');
           return <dynamic>[];
         });
-
-
+        update();
       } else {
         clickerCount.value = "All";
         allPosts = [];
@@ -249,11 +246,12 @@ class HomeController extends GetxController {
             double weight = 1.0;
             if (post.clickerType == "Great Vibes") {
               weight = 2.0;
-            } else if (post.clickerType == "Off Vibes")
+            } else if (post.clickerType == "Off Vibes") {
               weight = 1.5;
-            else if (post.clickerType == "Charming Gentleman" ||
-                post.clickerType == "Lovely Lady")
+            } else if (post.clickerType == "Charming Gentleman" ||
+                post.clickerType == "Lovely Lady") {
               weight = 2.5;
+            }
             heatmapPoints.add(
               WeightedLatLng(LatLng(post.lat, post.long), weight: weight),
             );
@@ -278,16 +276,11 @@ class HomeController extends GetxController {
       }
 
       update();
-      // ✅ async markers — শেষে debounce trigger দেবে
       _generateMarkersFromPosts(posts);
     } catch (e) {
       debugPrint('Error in _generateHeatmapFromPosts: $e');
     }
   }
-
-  // ─────────────────────────────────────────
-  //  Marker Generator
-  // ─────────────────────────────────────────
 
   Future<void> _generateMarkersFromPosts(List<Post> posts) async {
     try {
@@ -335,16 +328,12 @@ class HomeController extends GetxController {
       }
 
       markerList.assignAll(newMarkers);
-      _scheduleMapRefresh(); // ✅ debounced — একবারই rebuild
+      _scheduleMapRefresh();
       debugPrint('Markers: ${markerList.length}');
     } catch (e) {
       debugPrint('Error generating markers: $e');
     }
   }
-
-  // ─────────────────────────────────────────
-  //  Map Camera
-  // ─────────────────────────────────────────
 
   Future<void> moveMapToCurrentLocation() async {
     try {
@@ -365,7 +354,7 @@ class HomeController extends GetxController {
   //  Filters
   // ─────────────────────────────────────────
 
-  void applyPeriodFilter(String period) {
+  Future<void> applyPeriodFilter(String period) async {
     try {
       final DateTime now = DateTime.now();
       DateTime calculatedStart;
@@ -393,18 +382,11 @@ class HomeController extends GetxController {
       startDate.value = calculatedStart;
       endDate.value = now;
       isDateFilterActive.value = true;
-
-      fetchPostsWithFilter();
       update();
+
+      await fetchPostsWithFilter();
     } catch (e) {
       debugPrint('Error in applyPeriodFilter: $e');
-      Get.snackbar(
-        'Filter Error',
-        'Failed to apply period filter.',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red.withOpacity(0.7),
-        colorText: Colors.white,
-      );
     }
   }
 
@@ -421,12 +403,17 @@ class HomeController extends GetxController {
     }
   }
 
+  // ✅ Clear করলে:
+  // - date filter: default 24h এ ফিরে যাবে
+  // - clicker filter যা আছে সেটা থাকবে
   void clearDateFilter() {
     try {
-      selectedPeriod.value = '';
-      startDate.value = null;
-      endDate.value = null;
-      isDateFilterActive.value = false;
+      final DateTime now = DateTime.now();
+      startDate.value = now.subtract(const Duration(hours: 24));
+      endDate.value = now;
+      selectedPeriod.value = '24h';
+      isDateFilterActive.value = true;
+
       fetchPostsWithFilter();
       update();
     } catch (e) {
@@ -438,33 +425,46 @@ class HomeController extends GetxController {
     try {
       clearMarkerCache();
       clickerCount.value = clickerType;
+      // ✅ clicker filter করলে বর্তমান date filter maintain করে fetch করবে
       await fetchPostsWithFilter();
     } catch (e) {
       debugPrint('Error in applyClickerFilter: $e');
     }
   }
 
+  // ✅ সব scenario handle করে একটাই method:
+  // - date filter active → date range দিয়ে filter করবে, সেই range এর count দেখাবে
+  // - date filter নেই (clear) → date param ছাড়া, সব post আসবে, সব count দেখাবে
+  // - clicker filter → clicker অনুযায়ী filter + উপরের date logic
+  // - limit: pagination থেকে total নিয়ে সব এক সাথে আনে
   Future<void> fetchPostsWithFilter() async {
     try {
       isLoading = true;
       update();
 
-      String url = "${ApiEndPoint.post}?limit=100";
+      // ─── Build query params ───
+      String baseParams = "";
 
       if (clickerCount.value != null && clickerCount.value != "All") {
-        url += "&clickerType=${Uri.encodeComponent(clickerCount.value!)}";
+        baseParams +=
+            "&clickerType=${Uri.encodeComponent(clickerCount.value!)}";
       }
+
+      // ✅ date filter active থাকলেই শুধু date param যাবে
       if (startDate.value != null && endDate.value != null) {
         final String start = startDate.value!.toUtc().toIso8601String();
         final String end = endDate.value!.toUtc().toIso8601String();
-        url +=
+        baseParams +=
             "&startDate=${Uri.encodeComponent(start)}&endDate=${Uri.encodeComponent(end)}";
       }
 
       if (LocalStorage.token.isEmpty) {
-        url += "&privacy=public";
+        baseParams += "&privacy=public";
       }
 
+      // ─── Fetch posts with a high limit for map display ───
+      // Instead of two calls, we fetch a single batch (large limit)
+      final String url = "${ApiEndPoint.post}?limit=5000$baseParams";
       debugPrint('Fetch URL: $url');
       final response = await ApiService.get(url);
 
@@ -495,7 +495,7 @@ class HomeController extends GetxController {
       isLoading = true;
       update();
 
-      final response = await ApiService.get("${ApiEndPoint.post}?limit=100");
+      final response = await ApiService.get("${ApiEndPoint.post}?limit=9999");
 
       if (response.statusCode == 200) {
         try {
@@ -540,7 +540,10 @@ class HomeController extends GetxController {
         final bool isLocationVisible =
             data['data']?['isLocationVisible'] ?? false;
         isNearbyActive.value = isLocationVisible;
-        LocalStorage.setBool(LocalStorageKeys.isLocationVisible, isLocationVisible);
+        LocalStorage.setBool(
+          LocalStorageKeys.isLocationVisible,
+          isLocationVisible,
+        );
         debugPrint('📍 isLocationVisible from getUserData: $isLocationVisible');
 
         LocalStorage.setBool(LocalStorageKeys.isLogIn, LocalStorage.isLogIn);
@@ -570,7 +573,7 @@ class HomeController extends GetxController {
       if (permission == LocationPermission.deniedForever) return null;
 
       return await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.medium, // ✅ medium saves memory
+        desiredAccuracy: LocationAccuracy.medium,
       );
     } catch (e) {
       debugPrint('Error getting location: $e');
@@ -605,7 +608,6 @@ class HomeController extends GetxController {
       final response = await ApiService.patch(
         ApiEndPoint.updateProfile,
         body: {
-          // "isLocationVisible": false,
           "location": [longitude, latitude],
           "address": address ?? "Location Unavailable",
         },
@@ -639,15 +641,11 @@ class HomeController extends GetxController {
     }
   }
 
-
   Future<void> onMyLocationVisibility() async {
     try {
       final response = await ApiService.patch(
         ApiEndPoint.updateProfile,
-        body: {
-          "isLocationVisible": true,
-
-        },
+        body: {"isLocationVisible": true},
       );
       if (response.statusCode == 200) {
         isNearbyActive.value = true;
@@ -706,7 +704,7 @@ class HomeController extends GetxController {
 
   Future<void> refreshAll() async {
     try {
-      await fetchPosts();
+      await fetchPostsWithFilter();
       await fetchFriendRequests();
     } catch (e) {
       debugPrint('Error refreshing: $e');

@@ -223,12 +223,15 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               right: 16.w,
               child: _buildOverlayButtons(controller),
             ),
-            if (controller.heatmaps.isNotEmpty)
-              Positioned(
-                bottom: 16.h,
-                left: 16.w,
-                child: IgnorePointer(child: _buildHeatmapInfoBadge(controller)),
-              ),
+            Obx(() => controller.heatmaps.isNotEmpty
+                ? Positioned(
+                    bottom: 16.h,
+                    left: 16.w,
+                    child: IgnorePointer(
+                      child: _buildHeatmapInfoBadge(controller),
+                    ),
+                  )
+                : const SizedBox.shrink()),
           ],
         ),
       ),
@@ -310,11 +313,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.9),
+          color: Colors.white.withValues(alpha: 0.9),
           borderRadius: BorderRadius.circular(8.r),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.1),
+              color: Colors.black.withValues(alpha: 0.1),
               blurRadius: 4,
               offset: const Offset(0, 2),
             ),
@@ -343,7 +346,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             Icon(Icons.location_on, size: 16.sp, color: Colors.white),
             SizedBox(width: 4.w),
             Text(
-              '$totalPoints ${totalPoints == 1 ? 'location' : 'Total Post'}',
+              '$totalPoints ${totalPoints == 1 ? 'Post' : 'Total Posts'}',
               style: TextStyle(fontSize: 14.sp, color: Colors.white),
             ),
           ],
