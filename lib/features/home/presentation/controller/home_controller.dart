@@ -75,11 +75,11 @@ class HomeController extends GetxController {
       clickerCount.value = "All";
       final DateTime now = DateTime.now();
 
-      // ✅ App open হলে default 24h filter
-      selectedPeriod.value = '';
-      startDate.value = null;
-      endDate.value = null;
-      isDateFilterActive.value = false;
+      // ✅ App open হলে default: 24h filter
+      startDate.value = now.subtract(const Duration(hours: 24));
+      endDate.value = now;
+      selectedPeriod.value = '24h';
+      isDateFilterActive.value = true;
 
       if (LocalStorage.token.isNotEmpty) {
         argument = Get.arguments;
@@ -404,18 +404,16 @@ class HomeController extends GetxController {
   }
 
   // ✅ Clear করলে:
-  // - date filter সরে যাবে
+  // - date filter: default 24h এ ফিরে যাবে
   // - clicker filter যা আছে সেটা থাকবে
-  // - সব post আসবে (limit ছাড়া)
-  // - badge তে সব post এর count দেখাবে
   void clearDateFilter() {
     try {
-      selectedPeriod.value = '';
-      startDate.value = null;
-      endDate.value = null;
-      isDateFilterActive.value = false;
-      // ✅ fetchPostsWithFilter call করলে startDate/endDate null থাকায়
-      // date param যাবে না → API সব post return করবে
+      final DateTime now = DateTime.now();
+      startDate.value = now.subtract(const Duration(hours: 24));
+      endDate.value = now;
+      selectedPeriod.value = '24h';
+      isDateFilterActive.value = true;
+
       fetchPostsWithFilter();
       update();
     } catch (e) {
@@ -453,7 +451,6 @@ class HomeController extends GetxController {
       }
 
       // ✅ date filter active থাকলেই শুধু date param যাবে
-      // clear করলে startDate/endDate null → date param যাবে না → সব post আসবে
       if (startDate.value != null && endDate.value != null) {
         final String start = startDate.value!.toUtc().toIso8601String();
         final String end = endDate.value!.toUtc().toIso8601String();
@@ -465,21 +462,9 @@ class HomeController extends GetxController {
         baseParams += "&privacy=public";
       }
 
-      // ─── Step 1: total count বের করতে limit=1 দিয়ে call ───
-      int total = 9999;
-      try {
-        final firstResponse = await ApiService.get(
-          "${ApiEndPoint.post}?limit=1$baseParams",
-        );
-        if (firstResponse.statusCode == 200) {
-          total = firstResponse.data['pagination']?['total'] ?? 9999;
-        }
-      } catch (e) {
-        debugPrint('Error fetching total count: $e');
-      }
-
-      // ─── Step 2: actual total দিয়ে সব post আনো ───
-      final String url = "${ApiEndPoint.post}?limit=$total$baseParams";
+      // ─── Fetch posts with a high limit for map display ───
+      // Instead of two calls, we fetch a single batch (large limit)
+      final String url = "${ApiEndPoint.post}?limit=5000$baseParams";
       debugPrint('Fetch URL: $url');
       final response = await ApiService.get(url);
 
