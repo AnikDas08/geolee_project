@@ -695,7 +695,7 @@ class MessageController extends GetxController {
         await Future.delayed(const Duration(milliseconds: 500));
         await loadMessages(showLoading: false);
         if (Get.isRegistered<ChatController>()) {
-          ChatController.instance.getChatRepos(showLoading: false, isGroup: false);
+          ChatController.instance.getChatRepos(showLoading: false);
         }
       } else {
         _showErrorSnackBar('Failed to send message');
@@ -750,7 +750,7 @@ class MessageController extends GetxController {
         clearAllPicks();
         await loadMessages();
         if (Get.isRegistered<ChatController>()) {
-          ChatController.instance.getChatRepos(showLoading: false, isGroup: false);
+          ChatController.instance.getChatRepos(showLoading: false);
         }
       } else {
         _showErrorSnackBar('Failed to send file');

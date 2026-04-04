@@ -69,7 +69,7 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
                 FutureBuilder<String>(
                   future: getAppVersion(),
                   builder: (context, snapshot) {
-                    if (!snapshot.hasData) return SizedBox();
+                    if (!snapshot.hasData) return const SizedBox();
                     return CommonText(
                       text: "Version: ${snapshot.data} (beta)",
                       fontSize: 15.sp,

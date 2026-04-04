@@ -46,16 +46,15 @@ class _SplashScreenState extends State<SplashScreen> {
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            CommonImage(imageSrc: AppImages.logo, size: 250).center,
+            const CommonImage(imageSrc: AppImages.logo, size: 250).center,
 
             SizedBox(height: 50.h),
 
             FutureBuilder<String>(
               future: getAppVersion(),
               builder: (context, snapshot) {
-                if (!snapshot.hasData) return SizedBox();
+                if (!snapshot.hasData) return const SizedBox();
                 return CommonText(
                   text: "Version: ${snapshot.data} (beta)",
                   fontSize: 15.sp,

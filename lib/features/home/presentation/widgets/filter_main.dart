@@ -105,7 +105,6 @@ class _FilterDialogState extends State<FilterDialog>
         pickedStartDate!.year,
         pickedStartDate!.month,
         pickedStartDate!.day,
-        0, 0, 0,
       );
       final DateTime endWithTime = DateTime(
         pickedEndDate!.year,

@@ -167,8 +167,9 @@ class _ClickerScreenState extends State<ClickerScreen> {
                 // ── Banner Slider=============================================
                 if (LocalStorage.token.isNotEmpty)
                   Obx(() {
-                    if (controller.adList.isEmpty)
+                    if (controller.adList.isEmpty) {
                       return const SizedBox.shrink();
+                    }
 
                     return Column(
                       children: [
