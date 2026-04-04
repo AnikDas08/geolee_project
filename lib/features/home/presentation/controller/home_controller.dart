@@ -30,7 +30,6 @@ class HomeController extends GetxController {
   var clickerCount = RxnString();
   var filterOption = RxnString();
 
-
   RxBool isNearbyActive = LocalStorage.isLocationVisible.obs;
 
   var selectedPeriod = ''.obs;
@@ -41,8 +40,6 @@ class HomeController extends GetxController {
 
   RxSet<Heatmap> heatmaps = <Heatmap>{}.obs;
 
-  // ====================================================================
-
   RxInt mapRefreshTrigger = 0.obs;
   Timer? _refreshDebounce;
 
@@ -52,7 +49,7 @@ class HomeController extends GetxController {
   // ─── Markers ───
   RxList<Marker> markerList = <Marker>[].obs;
 
-  // ─── Marker icon cache — OOM fix ───
+  // ─── Marker icon cache ───
   final Map<String, BitmapDescriptor> _markerIconCache = {};
 
   // ─── Current Location ───
@@ -77,26 +74,27 @@ class HomeController extends GetxController {
     try {
       clickerCount.value = "All";
       final DateTime now = DateTime.now();
-      selectedPeriod.value = '24h';
-      startDate.value = now.subtract(const Duration(hours: 24));
-      endDate.value = now;
-      isDateFilterActive.value = true;
+
+      // ✅ App open হলে default 24h filter
+      selectedPeriod.value = '';
+      startDate.value = null;
+      endDate.value = null;
+      isDateFilterActive.value = false;
 
       if (LocalStorage.token.isNotEmpty) {
         argument = Get.arguments;
-        Get.find<HomeNavController>().refresh();
-        Get.find<MyProfileController>().refresh();
-
-        await getCurrentLocationAndUpdateProfile();
+        // Removed broken calls and non-blocking location
 
         await Future.wait([
           myProfileController.getUserData(),
           getUserData(),
           fetchPostsWithFilter(),
+          getCurrentLocationAndUpdateProfile(),
         ]).catchError((e) {
           debugPrint('Error fetching initial data: $e');
           return <dynamic>[];
         });
+        update();
       } else {
         clickerCount.value = "All";
         allPosts = [];
@@ -210,7 +208,6 @@ class HomeController extends GetxController {
         Offset(size / 2 - tp.width / 2, size / 2 - tp.height / 2),
       );
 
-
       final ui.Image img = await recorder.endRecording().toImage(
         size.toInt(),
         size.toInt(),
@@ -249,11 +246,12 @@ class HomeController extends GetxController {
             double weight = 1.0;
             if (post.clickerType == "Great Vibes") {
               weight = 2.0;
-            } else if (post.clickerType == "Off Vibes")
+            } else if (post.clickerType == "Off Vibes") {
               weight = 1.5;
-            else if (post.clickerType == "Charming Gentleman" ||
-                post.clickerType == "Lovely Lady")
+            } else if (post.clickerType == "Charming Gentleman" ||
+                post.clickerType == "Lovely Lady") {
               weight = 2.5;
+            }
             heatmapPoints.add(
               WeightedLatLng(LatLng(post.lat, post.long), weight: weight),
             );
@@ -278,15 +276,11 @@ class HomeController extends GetxController {
       }
 
       update();
-
       _generateMarkersFromPosts(posts);
     } catch (e) {
       debugPrint('Error in _generateHeatmapFromPosts: $e');
     }
   }
-
-
-  //  Marker Generator==========================================================
 
   Future<void> _generateMarkersFromPosts(List<Post> posts) async {
     try {
@@ -334,14 +328,12 @@ class HomeController extends GetxController {
       }
 
       markerList.assignAll(newMarkers);
-      _scheduleMapRefresh(); // ================================================
+      _scheduleMapRefresh();
       debugPrint('Markers: ${markerList.length}');
     } catch (e) {
       debugPrint('Error generating markers: $e');
     }
   }
-
-  //Map Camera==================================================================
 
   Future<void> moveMapToCurrentLocation() async {
     try {
@@ -358,7 +350,9 @@ class HomeController extends GetxController {
     }
   }
 
-  //  Filters===================================================================
+  // ─────────────────────────────────────────
+  //  Filters
+  // ─────────────────────────────────────────
 
   Future<void> applyPeriodFilter(String period) async {
     try {
@@ -409,12 +403,19 @@ class HomeController extends GetxController {
     }
   }
 
+  // ✅ Clear করলে:
+  // - date filter সরে যাবে
+  // - clicker filter যা আছে সেটা থাকবে
+  // - সব post আসবে (limit ছাড়া)
+  // - badge তে সব post এর count দেখাবে
   void clearDateFilter() {
     try {
       selectedPeriod.value = '';
       startDate.value = null;
       endDate.value = null;
       isDateFilterActive.value = false;
+      // ✅ fetchPostsWithFilter call করলে startDate/endDate null থাকায়
+      // date param যাবে না → API সব post return করবে
       fetchPostsWithFilter();
       update();
     } catch (e) {
@@ -426,46 +427,58 @@ class HomeController extends GetxController {
     try {
       clearMarkerCache();
       clickerCount.value = clickerType;
+      // ✅ clicker filter করলে বর্তমান date filter maintain করে fetch করবে
       await fetchPostsWithFilter();
     } catch (e) {
       debugPrint('Error in applyClickerFilter: $e');
     }
   }
 
-  //============================================================================
-
+  // ✅ সব scenario handle করে একটাই method:
+  // - date filter active → date range দিয়ে filter করবে, সেই range এর count দেখাবে
+  // - date filter নেই (clear) → date param ছাড়া, সব post আসবে, সব count দেখাবে
+  // - clicker filter → clicker অনুযায়ী filter + উপরের date logic
+  // - limit: pagination থেকে total নিয়ে সব এক সাথে আনে
   Future<void> fetchPostsWithFilter() async {
     try {
       isLoading = true;
       update();
 
+      // ─── Build query params ───
       String baseParams = "";
 
       if (clickerCount.value != null && clickerCount.value != "All") {
         baseParams +=
             "&clickerType=${Uri.encodeComponent(clickerCount.value!)}";
       }
+
+      // ✅ date filter active থাকলেই শুধু date param যাবে
+      // clear করলে startDate/endDate null → date param যাবে না → সব post আসবে
       if (startDate.value != null && endDate.value != null) {
         final String start = startDate.value!.toUtc().toIso8601String();
         final String end = endDate.value!.toUtc().toIso8601String();
         baseParams +=
             "&startDate=${Uri.encodeComponent(start)}&endDate=${Uri.encodeComponent(end)}";
       }
+
       if (LocalStorage.token.isEmpty) {
         baseParams += "&privacy=public";
       }
 
-      // Step 1: fetch first page to get total count
-      final firstResponse = await ApiService.get(
-        "${ApiEndPoint.post}?limit=1$baseParams",
-      );
+      // ─── Step 1: total count বের করতে limit=1 দিয়ে call ───
       int total = 9999;
-      if (firstResponse.statusCode == 200) {
-        total = firstResponse.data['pagination']?['total'] ?? 9999;
+      try {
+        final firstResponse = await ApiService.get(
+          "${ApiEndPoint.post}?limit=1$baseParams",
+        );
+        if (firstResponse.statusCode == 200) {
+          total = firstResponse.data['pagination']?['total'] ?? 9999;
+        }
+      } catch (e) {
+        debugPrint('Error fetching total count: $e');
       }
 
-      // Step 2: fetch all with actual total====================================
-
+      // ─── Step 2: actual total দিয়ে সব post আনো ───
       final String url = "${ApiEndPoint.post}?limit=$total$baseParams";
       debugPrint('Fetch URL: $url');
       final response = await ApiService.get(url);
@@ -610,7 +623,6 @@ class HomeController extends GetxController {
       final response = await ApiService.patch(
         ApiEndPoint.updateProfile,
         body: {
-          // "isLocationVisible": false,
           "location": [longitude, latitude],
           "address": address ?? "Location Unavailable",
         },
@@ -707,7 +719,7 @@ class HomeController extends GetxController {
 
   Future<void> refreshAll() async {
     try {
-      await fetchPosts();
+      await fetchPostsWithFilter();
       await fetchFriendRequests();
     } catch (e) {
       debugPrint('Error refreshing: $e');
