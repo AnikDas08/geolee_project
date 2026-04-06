@@ -28,6 +28,8 @@
 	<true/>
 	<key>NSCameraUsageDescription</key>
 	<string>We need camera access to take profile pictures</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>This app needs access to location to show nearby banners and posts.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>This app needs access to location to show nearby banners and posts.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
@@ -36,6 +38,16 @@
 	<string>This app needs permission to save images.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>We need gallery access to select profile pictures</string>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+	</dict>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>fetch</string>
+		<string>remote-notification</string>
+	</array>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>

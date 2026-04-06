@@ -13,7 +13,6 @@ class ClickerDialog extends StatefulWidget {
 }
 
 class _ClickerDialogState extends State<ClickerDialog> {
-  // ✅ default "All" selected
   String selectedClicker = "All";
 
   final HomeController controller = Get.find<HomeController>();
@@ -29,8 +28,7 @@ class _ClickerDialogState extends State<ClickerDialog> {
   @override
   void initState() {
     super.initState();
-    // ✅ আগে কোনো clicker select করা থাকলে restore করবে,
-    //    না থাকলে "All" default থাকবে
+
     if (controller.clickerCount.value != null &&
         controller.clickerCount.value!.isNotEmpty) {
       selectedClicker = controller.clickerCount.value!;

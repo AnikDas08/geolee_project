@@ -15,6 +15,7 @@ class MyApp extends StatelessWidget {
       splitScreenMode: true,
       designSize: const Size(428, 926),
       child: GetMaterialApp(
+        title: 'Just Clicker',
         debugShowCheckedModeBanner: false,
         navigatorKey: Get.key,
         defaultTransition: Transition.fadeIn,

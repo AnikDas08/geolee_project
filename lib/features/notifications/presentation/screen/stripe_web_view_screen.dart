@@ -33,6 +33,7 @@ class _StripeWebViewPageState extends State<StripeWebViewPage> {
                 request.url.contains("succeeded") ||
                 request.url.contains("cancel") ||
                 request.url.contains("cancelled")) {
+
               return NavigationDecision.prevent;
             }
             return NavigationDecision.navigate;
@@ -75,10 +76,14 @@ class _StripeWebViewPageState extends State<StripeWebViewPage> {
 
     final isSuccess = url.contains("success") ||           // localhost:3000/payment/success
         url.contains("succeeded") ||                        // payment_attempt_state=succeeded
+        url.contains("checkout-success") ||                 // common stripe pattern
+        url.contains("payment-complete") ||
         url.contains("payment_attempt_state=succeeded");   // explicit check
 
     final isCancel = url.contains("cancel") ||
         url.contains("cancelled") ||
+        url.contains("failure") ||
+        url.contains("failed") ||
         url.contains("canceled");
 
     if (isSuccess) {
@@ -119,6 +124,20 @@ class _StripeWebViewPageState extends State<StripeWebViewPage> {
             WebViewWidget(controller: _webController),
             if (_isLoading)
               const Center(child: CircularProgressIndicator()),
+            // Fallback Done/Close Button
+            Positioned(
+              top: 10,
+              right: 10,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primaryColor,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                ),
+                onPressed: () => Get.offAll(() => HomeNav()),
+                child: const Text("Done / Close"),
+              ),
+            ),
           ],
         ),
       ),

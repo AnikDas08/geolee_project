@@ -103,99 +103,116 @@ class ChatModel {
     return value.toString();
   }
 
-  factory ChatModel.fromJson(Map<String, dynamic> json) {
-    final bool isGroupFromFlag =
-        json['isGroup'] ?? json['isGroupChat'] ?? false;
-    final String? cName = _parseStringOrFirstInList(json['chatName']);
-    final bool isGroup = isGroupFromFlag || (cName != null && cName.isNotEmpty);
+  static ChatModel fromJson(Map<String, dynamic> json) {
+    try {
+      final bool isGroupFromFlag =
+          json['isGroup'] ?? json['isGroupChat'] ?? false;
+      final String? cName = _parseStringOrFirstInList(json['chatName']);
+      final bool isGroup = isGroupFromFlag || (cName != null && cName.isNotEmpty);
 
-    var participantJson = json['anotherParticipant'];
-    if (participantJson == null &&
-        json['participants'] != null &&
-        json['participants'] is List &&
-        (json['participants'] as List).isNotEmpty) {
-      participantJson = (json['participants'] as List).first;
-    }
-
-    List<Participant> allParticipants = [];
-    if (json['participants'] != null && json['participants'] is List) {
-      allParticipants = (json['participants'] as List)
-          .map(
-            (p) => Participant.fromJson(
-              p is Map<String, dynamic> ? p : {"_id": p.toString()},
-            ),
-          )
-          .toList();
-    }
-
-    final dynamic rawUnseen =
-        json['unseenCount'] ??
-        json['unSeenCount'] ??
-        json['unseen_count'] ??
-        json['unreadCount'] ??
-        json['unread_count'] ??
-        json['unseen'] ??
-        json['unread'];
-    
-    int finalUnreadCount = 0;
-    if (rawUnseen != null) {
-      if (rawUnseen is int) {
-        finalUnreadCount = rawUnseen;
-      } else if (rawUnseen is double) {
-        finalUnreadCount = rawUnseen.toInt();
-      } else {
-        finalUnreadCount = int.tryParse(rawUnseen.toString()) ?? 0;
+      var participantJson = json['anotherParticipant'];
+      if (participantJson == null &&
+          json['participants'] != null &&
+          json['participants'] is List &&
+          (json['participants'] as List).isNotEmpty) {
+        participantJson = (json['participants'] as List).first;
       }
+
+      List<Participant> allParticipants = [];
+      if (json['participants'] != null && json['participants'] is List) {
+        allParticipants = (json['participants'] as List)
+            .map(
+              (p) => Participant.fromJson(
+            p is Map<String, dynamic> ? p : {"_id": p.toString()},
+          ),
+        )
+            .toList();
+      }
+
+      final dynamic rawUnseen =
+          json['unseenCount'] ??
+              json['unSeenCount'] ??
+              json['unseen_count'] ??
+              json['unreadCount'] ??
+              json['unread_count'] ??
+              json['unseen'] ??
+              json['unread'];
+
+      int finalUnreadCount = 0;
+      if (rawUnseen != null) {
+        if (rawUnseen is int) {
+          finalUnreadCount = rawUnseen;
+        } else if (rawUnseen is double) {
+          finalUnreadCount = rawUnseen.toInt();
+        } else {
+          finalUnreadCount = int.tryParse(rawUnseen.toString()) ?? 0;
+        }
+      }
+
+      final dynamic friendRaw =
+          json['isFriend'] ?? json['isAlreadyFriend'] ?? json['is_friend'];
+      final bool isFriend = isGroup
+          ? true
+          : (friendRaw != null ? (friendRaw == true || friendRaw == 1) : true);
+
+      final bool amIAParticipant = json['amIAParticipant'] ?? true;
+
+      final dynamic rawDist = json['distanceInKm'];
+      final double? distanceInKm = rawDist != null
+          ? double.tryParse(rawDist.toString())
+          : null;
+
+      String? joinRequestStatus;
+      String? joinRequestId;
+      if (json['joinRequest'] != null && json['joinRequest'] is Map) {
+        joinRequestStatus = json['joinRequest']['status']?.toString();
+        joinRequestId = json['joinRequest']['_id']?.toString();
+      }
+
+      final bool participantIsOnline = participantJson is Map ? (participantJson['isOnline'] ?? false) : false;
+
+      return ChatModel(
+        id: json['_id']?.toString() ?? json['id']?.toString() ?? '',
+        isGroup: isGroup,
+        chatName: cName,
+        chatImage: _parseStringOrFirstInList(json['avatarUrl'] ?? json['image']),
+        participant: Participant.fromJson(participantJson is Map<String, dynamic> ? participantJson : (participantJson as Map?)?.cast<String, dynamic>() ?? {}),
+        participants: allParticipants,
+        latestMessage: LatestMessage.fromJson(json['latestMessage'] is Map<String, dynamic> ? json['latestMessage'] : (json['latestMessage'] as Map?)?.cast<String, dynamic>() ?? {}),
+        unreadCount: finalUnreadCount,
+        isDeleted: json['isDeleted'] ?? false,
+        isOnline: participantIsOnline,
+        createdAt:
+        DateTime.tryParse(json['createdAt']?.toString() ?? '') ??
+            DateTime.now().toLocal(),
+        updatedAt:
+        DateTime.tryParse(json['updatedAt']?.toString() ?? '') ??
+            DateTime.now().toLocal(),
+        memberCount: allParticipants.length,
+        isFriend: isFriend,
+        amIAParticipant: amIAParticipant,
+        distanceInKm: distanceInKm,
+        joinRequestStatus: joinRequestStatus,
+        joinRequestId: joinRequestId,
+        friendRequestStatus: json['requestStatus']?.toString(),
+        description: json['description']?.toString(),
+      );
+    } catch (e) {
+      print("❌ Error parsing ChatModel: $e");
+      // Return a basic placeholder model instead of crashing
+      return ChatModel(
+        id: json['_id']?.toString() ?? '',
+        isGroup: false,
+        participant: Participant(sId: '', fullName: 'Error Loading', image: ''),
+        participants: [],
+        latestMessage: LatestMessage(id: '', sender: '', text: 'Error', createdAt: DateTime.now()),
+        unreadCount: 0,
+        isDeleted: false,
+        isOnline: false,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
     }
-
-    final dynamic friendRaw =
-        json['isFriend'] ?? json['isAlreadyFriend'] ?? json['is_friend'];
-    final bool isFriend = isGroup
-        ? true
-        : (friendRaw != null ? (friendRaw == true || friendRaw == 1) : true);
-
-    final bool amIAParticipant = json['amIAParticipant'] ?? true;
-
-    final dynamic rawDist = json['distanceInKm'];
-    final double? distanceInKm = rawDist != null
-        ? double.tryParse(rawDist.toString())
-        : null;
-
-    String? joinRequestStatus;
-    String? joinRequestId;
-    if (json['joinRequest'] != null && json['joinRequest'] is Map) {
-      joinRequestStatus = json['joinRequest']['status']?.toString();
-      joinRequestId = json['joinRequest']['_id']?.toString();
-    }
-
-    final bool participantIsOnline = participantJson?['isOnline'] ?? false;
-
-    return ChatModel(
-      id: json['_id']?.toString() ?? '',
-      isGroup: isGroup,
-      chatName: cName,
-      chatImage: _parseStringOrFirstInList(json['avatarUrl'] ?? json['image']),
-      participant: Participant.fromJson(participantJson ?? {}),
-      participants: allParticipants,
-      latestMessage: LatestMessage.fromJson(json['latestMessage'] ?? {}),
-      unreadCount: finalUnreadCount,
-      isDeleted: json['isDeleted'] ?? false,
-      isOnline: participantIsOnline,
-      createdAt:
-          DateTime.tryParse(json['createdAt']?.toString() ?? '') ??
-          DateTime.now().toLocal(),
-      updatedAt:
-          DateTime.tryParse(json['updatedAt']?.toString() ?? '') ??
-          DateTime.now().toLocal(),
-      memberCount: allParticipants.length,
-      isFriend: isFriend,
-      amIAParticipant: amIAParticipant,
-      distanceInKm: distanceInKm,
-      joinRequestStatus: joinRequestStatus,
-      joinRequestId: joinRequestId,
-      friendRequestStatus: json['requestStatus']?.toString(),
-      description: json['description']?.toString(),
-    );
   }
 }
 

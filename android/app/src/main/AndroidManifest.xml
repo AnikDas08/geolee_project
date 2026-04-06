@@ -9,6 +9,7 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" android:maxSdkVersion="29" />
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/> <!-- For Android 13+ -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/> <!-- For Android 13+ notifications -->
 
     <queries>
         <!-- Browser intents -->
@@ -28,7 +29,7 @@
 
     <application
         android:usesCleartextTraffic="true"
-        android:label="Clicker"
+        android:label="Just Clicker"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
         android:requestLegacyExternalStorage="true"

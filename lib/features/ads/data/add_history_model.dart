@@ -96,30 +96,45 @@ class Advertisement {
   });
 
   factory Advertisement.fromJson(Map<String, dynamic> json) {
-    return Advertisement(
-      id: json['_id'] ?? '',
-      user: json['user'] ?? '',
-      advertiser: json['advertiser'] ?? '',
-      title: json['title'] ?? '',
-      description: json['description'] ?? '',
-      image: json['image'] ?? '',
-      focusArea: json['focusArea'] ?? '',
-      focusAreaLocation: Location.fromJson(json['focusAreaLocation'] ?? {}),
-      websiteUrl: json['websiteUrl'] ?? '',
-      startAt: DateTime.parse(json['startAt'] ?? DateTime.now().toString()),
-      endAt: DateTime.parse(json['endAt'] ?? DateTime.now().toString()),
-      plan: json['plan'] ?? '',
-      price: json['price'] ?? 0,
-      paymentStatus: json['paymentStatus'] ?? '',
-      paidAt: json['paidAt'],
-      reachCount: json['reachCount'] ?? 0,
-      clickCount: json['clickCount'] ?? 0,
-      status: json['status'] ?? '',
-      approvalStatus: json['approvalStatus'] ?? '',
-      isDeleted: json['isDeleted'] ?? false,
-      createdAt: DateTime.parse(json['createdAt'] ?? DateTime.now().toString()),
-      updatedAt: DateTime.parse(json['updatedAt'] ?? DateTime.now().toString()),
-    );
+    try {
+      return Advertisement(
+        id: json['_id'] ?? '',
+        user: json['user'] ?? '',
+        advertiser: json['advertiser'] ?? '',
+        title: json['title'] ?? '',
+        description: json['description'] ?? '',
+        image: json['image'] ?? '',
+        focusArea: json['focusArea'] ?? '',
+        focusAreaLocation: Location.fromJson(json['focusAreaLocation'] ?? {}),
+        websiteUrl: json['websiteUrl'] ?? '',
+        startAt: DateTime.tryParse(json['startAt']?.toString() ?? '') ?? DateTime.now(),
+        endAt: DateTime.tryParse(json['endAt']?.toString() ?? '') ?? DateTime.now(),
+        plan: json['plan'] ?? '',
+        price: json['price'] ?? 0,
+        paymentStatus: json['paymentStatus'] ?? '',
+        paidAt: json['paidAt'],
+        reachCount: json['reachCount'] ?? 0,
+        clickCount: json['clickCount'] ?? 0,
+        status: json['status'] ?? '',
+        approvalStatus: json['approvalStatus'] ?? '',
+        isDeleted: json['isDeleted'] ?? false,
+        createdAt: DateTime.tryParse(json['createdAt']?.toString() ?? '') ?? DateTime.now(),
+        updatedAt: DateTime.tryParse(json['updatedAt']?.toString() ?? '') ?? DateTime.now(),
+      );
+    } catch (e) {
+      print("❌ Advertisement parsing error: $e");
+      // Return a minimal model to avoid crashing the list
+      return Advertisement(
+        id: json['_id'] ?? '',
+        user: '', advertiser: '', title: 'Error loading ad', description: '',
+        image: '', focusArea: '', 
+        focusAreaLocation: Location(type: '', coordinates: []),
+        websiteUrl: '', startAt: DateTime.now(), endAt: DateTime.now(),
+        plan: '', price: 0, paymentStatus: '', reachCount: 0, clickCount: 0,
+        status: '', approvalStatus: '', isDeleted: false,
+        createdAt: DateTime.now(), updatedAt: DateTime.now(),
+      );
+    }
   }
 }
 

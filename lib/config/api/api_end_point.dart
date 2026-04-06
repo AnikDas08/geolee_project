@@ -79,7 +79,7 @@ class ApiEndPoint {
   static const String getAdvertisementById = "$baseUrl/advertisements/single/";
   static const String updateAdvertisementById = "$baseUrl/advertisements/update/";
   static const String deleteAdvertisementById = "$baseUrl/advertisements/delete/";
-  static const String nearbyActiveAds = "/advertisements/nearby-active";
+  static const String nearbyActiveAds = "$baseUrl/advertisements/nearby-active";
 
   // Plan===============================================
   static const String getPlans = "$baseUrl/plans";
