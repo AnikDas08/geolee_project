@@ -5,20 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="fce7f07b-0c9b-427c-b0e1-0ba2113c940f" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.fvmrc" beforeDir="false" afterPath="$PROJECT_DIR$/.fvmrc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Dart_SDK.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Dart_SDK.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/caches/deviceStreaming.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/caches/deviceStreaming.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Flutter_Plugins.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/android/app/src/main/AndroidManifest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/android/app/src/main/AndroidManifest.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ios/Runner/Info.plist" beforeDir="false" afterPath="$PROJECT_DIR$/ios/Runner/Info.plist" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/app.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/app.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/config/api/api_end_point.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/config/api/api_end_point.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/features/ads/data/add_history_model.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/ads/data/add_history_model.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/features/ads/presentation/screen/stripe_paymet_web_screen.dart" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/features/home/presentation/widgets/clicker_main.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/home/presentation/widgets/clicker_main.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/features/message/data/model/chat_list_model.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/message/data/model/chat_list_model.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/features/notifications/presentation/screen/stripe_web_view_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/notifications/presentation/screen/stripe_web_view_screen.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pubspec.lock" beforeDir="false" afterPath="$PROJECT_DIR$/pubspec.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pubspec.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/pubspec.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ios/Podfile" beforeDir="false" afterPath="$PROJECT_DIR$/ios/Podfile" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -39,8 +29,8 @@
 }</component>
   <component name="GithubPullRequestsUISettings">{
   &quot;selectedUrlAndAccountId&quot;: {
-    &quot;url&quot;: &quot;https://github.com/AnikDas08/geolee_project.git&quot;,
-    &quot;accountId&quot;: &quot;554e9487-abc3-43c7-b16d-1c40c6885981&quot;
+    &quot;url&quot;: &quot;https://github.com/AnikDas08/geolee_project&quot;,
+    &quot;accountId&quot;: &quot;d88013fe-a059-4da0-b588-12c975b81be8&quot;
   }
 }</component>
   <component name="ProjectColorInfo">{
@@ -65,6 +55,7 @@
     "git-widget-placeholder": "ibrahim__dev",
     "io.flutter.project.isFirstOpen": "true",
     "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "D:/Project/geolee_project",
     "settings.editor.selected.configurable": "preferences.pluginManager",
     "show.migrate.to.gradle.popup": "false"
   }
