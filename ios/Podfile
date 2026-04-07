@@ -66,6 +66,10 @@ post_install do |installer|
 
  'PERMISSION_MICROPHONE=1',
 
+ 'PERMISSION_NOTIFICATIONS=1',
+
+ 'PERMISSION_APP_TRACKING_TRANSPARENCY=1',
+
  ]
 
  end
