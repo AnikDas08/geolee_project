@@ -275,18 +275,17 @@ class ChatController extends GetxController {
         _groupTotalPages = response.totalPage;
         final allGroups = response.data.where((item) => item.isGroup).toList();
         chats.addAll(allGroups);
+        hasNoData = allGroups.isEmpty;
         _sortChats();
         filteredChats = List.from(chats);
       } else {
         singleChats.clear();
         _singleTotalPages = response.totalPage;
-        singleChats.addAll(
-          response.data.where((item) => !item.isGroup).toList(),
-        );
+        final allSingles = response.data.where((item) => !item.isGroup).toList();
+        singleChats.addAll(allSingles);
+        hasNoSingleData = allSingles.isEmpty;
         _sortChats();
         filteredSingleChats = List.from(singleChats);
-        // Removed: redundant _markFriendStatus() call.
-        // We now leverage the 'isFriend' status directly from the chats API.
       }
 
       // ===============================================

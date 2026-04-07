@@ -52,8 +52,8 @@ class _HomeDetailsState extends State<HomeDetails> {
       }
 
       final Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-      ).timeout(const Duration(seconds: 10));
+        desiredAccuracy: LocationAccuracy.medium,
+      ).timeout(const Duration(seconds: 15));
 
       final List<Placemark> placemarks = await placemarkFromCoordinates(
         position.latitude,

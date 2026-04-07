@@ -72,6 +72,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
   void initState() {
     super.initState();
     con.getCurrentLocationAndUpdateProfile();
+    con.fetchInitialData();
   }
 
   @override
