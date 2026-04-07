@@ -440,22 +440,22 @@ class GroupMessageController extends GetxController {
     try {
       isPickingImage = true;
       update();
-      final XFile? image = await _picker.pickImage(
-        source: ImageSource.gallery,
-        imageQuality: 80,
-      );
-      if (image != null) {
-        pickedImage = image;
-        pickedImagePath = image.path;
+      final XFile? picked = await _picker.pickMedia();
+      if (picked != null) {
+        final ext = picked.path.toLowerCase().split('.').last;
+        final isVideo =
+        ['mp4', 'mov', 'avi', 'mkv', 'flv', 'wmv', '3gp'].contains(ext);
+        pickedImage = picked;
+        pickedImagePath = picked.path;
         pickedFile = null;
         pickedFilePath = null;
         hasPickedImage = true;
         hasPickedFile = false;
-        pickedFileType = 'image';
+        pickedFileType = isVideo ? 'media' : 'image';
         update();
       }
     } catch (e) {
-      _showError('Failed to pick image: $e');
+      _showError('Failed to pick media: $e');
     } finally {
       isPickingImage = false;
       update();
