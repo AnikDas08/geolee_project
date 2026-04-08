@@ -1,6 +1,8 @@
 // ══════════════════════════════════════════════
 // Video Player Bubble
 // ══════════════════════════════════════════════
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:video_player/video_player.dart';
@@ -10,7 +12,12 @@ import '../../../../utils/constants/app_colors.dart';
 class VideoPlayerBubble extends StatefulWidget {
   final String videoUrl;
   final bool isMe;
-  const VideoPlayerBubble({required this.videoUrl, required this.isMe});
+  final bool isFile;
+  const VideoPlayerBubble({
+    required this.videoUrl,
+    required this.isMe,
+    this.isFile = false,
+  });
 
   @override
   State<VideoPlayerBubble> createState() => _VideoPlayerBubbleState();
@@ -31,9 +38,10 @@ class _VideoPlayerBubbleState extends State<VideoPlayerBubble> {
   Future<void> _initVideo() async {
     try {
       debugPrint('🎬 Loading video URL: \${widget.videoUrl}');
-      final controller = VideoPlayerController.networkUrl(
-        Uri.parse(widget.videoUrl),
-      );
+
+      final controller = widget.isFile
+          ? VideoPlayerController.file(File(widget.videoUrl))
+          : VideoPlayerController.networkUrl(Uri.parse(widget.videoUrl));
       await controller.initialize();
       controller.addListener(() {
         if (mounted) setState(() => _isPlaying = controller.value.isPlaying);
@@ -80,13 +88,22 @@ class _VideoPlayerBubbleState extends State<VideoPlayerBubble> {
       return ClipRRect(
         borderRadius: radius,
         child: Container(
-          width: 240.w, height: 160.h, color: Colors.black87,
+          width: 240.w,
+          height: 160.h,
+          color: Colors.black87,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.videocam_off_rounded, color: Colors.white54, size: 32.sp),
+              Icon(
+                Icons.videocam_off_rounded,
+                color: Colors.white54,
+                size: 32.sp,
+              ),
               SizedBox(height: 6.h),
-              Text('Video unavailable', style: TextStyle(color: Colors.white54, fontSize: 11.sp)),
+              Text(
+                'Video unavailable',
+                style: TextStyle(color: Colors.white54, fontSize: 11.sp),
+              ),
             ],
           ),
         ),
@@ -97,8 +114,12 @@ class _VideoPlayerBubbleState extends State<VideoPlayerBubble> {
       return ClipRRect(
         borderRadius: radius,
         child: Container(
-          width: 240.w, height: 160.h, color: Colors.black87,
-          child: const Center(child: CircularProgressIndicator(color: Colors.white)),
+          width: 240.w,
+          height: 160.h,
+          color: Colors.black87,
+          child: const Center(
+            child: CircularProgressIndicator(color: Colors.white),
+          ),
         ),
       );
     }
@@ -121,14 +142,25 @@ class _VideoPlayerBubbleState extends State<VideoPlayerBubble> {
                       opacity: _isPlaying ? 0.0 : 1.0,
                       duration: const Duration(milliseconds: 200),
                       child: Container(
-                        width: 48.w, height: 48.w,
-                        decoration: const BoxDecoration(color: Colors.black54, shape: BoxShape.circle),
-                        child: Icon(Icons.play_arrow_rounded, color: Colors.white, size: 30.sp),
+                        width: 48.w,
+                        height: 48.w,
+                        decoration: const BoxDecoration(
+                          color: Colors.black54,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.play_arrow_rounded,
+                          color: Colors.white,
+                          size: 30.sp,
+                        ),
                       ),
                     ),
                   ),
                   if (_isPlaying)
-                    GestureDetector(onTap: _togglePlay, child: Container(color: Colors.transparent)),
+                    GestureDetector(
+                      onTap: _togglePlay,
+                      child: Container(color: Colors.transparent),
+                    ),
                 ],
               ),
             ),

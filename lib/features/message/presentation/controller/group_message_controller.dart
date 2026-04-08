@@ -1,14 +1,15 @@
 import 'dart:io';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:file_picker/file_picker.dart';
+import 'package:giolee78/config/api/api_end_point.dart';
 import 'package:giolee78/features/message/data/model/chat_message.dart';
 import 'package:giolee78/features/message/presentation/controller/chat_controller.dart';
 import 'package:giolee78/services/api/api_service.dart';
 import 'package:giolee78/services/socket/socket_service.dart';
 import 'package:giolee78/utils/log/app_log.dart';
-import 'package:giolee78/config/api/api_end_point.dart';
+import 'package:image_picker/image_picker.dart';
 
 class GroupMessageController extends GetxController {
   /// Text Controller
@@ -449,26 +450,18 @@ class GroupMessageController extends GetxController {
     }
   }
 
+  bool get isVideo =>
+      ['mp4', 'mov', 'avi', 'mkv', 'flv', 'wmv', '3gp'].contains(
+        pickedImagePath?.toLowerCase().split('.').last.toLowerCase().trim(),
+      );
+
   // ─── Pickers ──────────────────────────────────────
   Future<void> pickImageFromGallery() async {
     try {
       isPickingImage = true;
       update();
-      final XFile? picked = await _picker.pickImage(
-        source: ImageSource.gallery,
-      );
+      final XFile? picked = await _picker.pickMedia();
       if (picked != null) {
-        final ext = picked.path.toLowerCase().split('.').last.toLowerCase();
-        print("ext $ext");
-        final isVideo = [
-          'mp4',
-          'mov',
-          'avi',
-          'mkv',
-          'flv',
-          'wmv',
-          '3gp',
-        ].contains(ext.trim().toLowerCase());
         pickedImage = picked;
         pickedImagePath = picked.path;
         pickedFile = null;
