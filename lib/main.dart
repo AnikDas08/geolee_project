@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:giolee78/services/location/location_service.dart';
 import 'package:giolee78/services/socket/socket_service.dart';
 import 'package:giolee78/utils/extensions/extension.dart';
 import 'app.dart';
@@ -27,6 +28,7 @@ Future<void> init() async {
 
   await Future.wait([
     NotificationService.initLocalNotification(),
+    LocationService.inti(),
     dotenv.load().catchError((error) {
       debugPrint("Warning: Failed to load .env file - $error");
       return null;

@@ -41,26 +41,42 @@ class LocationService {
   }
 
   static Future<Position?> getCurrentPosition() async {
-    Position? positions;
     try {
-      bool isEnabled = await checkLocationEnabled();
-      if (!isEnabled) {
-        isEnabled = await Geolocator.openLocationSettings();
-      }
-      if (isEnabled) {
-        final bool isPermission = await locationPermission();
-        if (isPermission) {
-          positions = await Geolocator.getCurrentPosition();
-          print(positions);
+      bool isEnabled = await Geolocator.isLocationServiceEnabled();
 
-          return positions;
-        }
+      if (!isEnabled) {
+        await Geolocator.openLocationSettings();
+        isEnabled = await Geolocator.isLocationServiceEnabled();
+        if (!isEnabled) return null;
       }
-      return positions;
+
+      LocationPermission permission = await Geolocator.checkPermission();
+
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) return null;
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        await Geolocator.openAppSettings();
+        return null;
+      }
+
+      try {
+        return await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high,
+        ).timeout(const Duration(seconds: 15));
+      } catch (e) {
+        print("Primary location failed: $e");
+        final lastPosition = await Geolocator.getLastKnownPosition();
+        return lastPosition;
+      }
     } catch (e) {
-      return positions;
+      print("LocationService Error: $e");
+      return null;
     }
   }
+
 
   static Future<List> addressToCoordinate(String address) async {
     try {
@@ -85,8 +101,10 @@ class LocationService {
     }
   }
 
-  static Future<List> coordinateToAddress(
-      {required double lat, required double long}) async {
+  static Future<List> coordinateToAddress({
+    required double lat,
+    required double long,
+  }) async {
     try {
       bool isEnabled = await checkLocationEnabled();
       if (!isEnabled) {

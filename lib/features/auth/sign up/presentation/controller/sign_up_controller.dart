@@ -328,7 +328,7 @@ class SignUpController extends GetxController {
         if (dobIso != null) "dob": dobIso,
         "address": addressController.text.isNotEmpty
             ? addressController.text
-            : "Dhaka",
+            : " ",
         "bio": bioController.text.trim(),
       };
 

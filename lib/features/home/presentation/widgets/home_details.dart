@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:geolocator/geolocator.dart';
@@ -12,6 +14,7 @@ import 'package:giolee78/utils/extensions/extension.dart';
 import '../../../../component/image/common_image.dart';
 import '../../../../component/text/common_text.dart';
 import '../../../../config/api/api_end_point.dart';
+import '../../../../services/location/location_service.dart';
 import '../../../../utils/constants/app_colors.dart';
 import '../../../profile/presentation/controller/my_profile_controller.dart';
 
@@ -36,24 +39,14 @@ class _HomeDetailsState extends State<HomeDetails> {
 
   Future<void> _getCurrentLocationAndAddress() async {
     try {
-      final bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-      if (!serviceEnabled) {
-        _updateLocationText("GPS Disabled");
+      final Position? position = await LocationService.getCurrentPosition();
+
+      print('Longitude: ${position?.longitude}');
+      print('latitude: ${position?.latitude}');
+      if (position == null) {
+        _updateLocationText("Failed to get location");
         return;
       }
-
-      LocationPermission permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
-        if (permission == LocationPermission.denied) {
-          _updateLocationText("Permission Denied");
-          return;
-        }
-      }
-
-      final Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.medium,
-      ).timeout(const Duration(seconds: 15));
 
       final List<Placemark> placemarks = await placemarkFromCoordinates(
         position.latitude,
@@ -64,17 +57,26 @@ class _HomeDetailsState extends State<HomeDetails> {
         final place = placemarks[0];
 
         final parts = [
+          place.name,
           place.thoroughfare,
           place.subLocality,
           place.locality,
           place.administrativeArea,
           place.country,
-        ].where((e) => e != null && e.isNotEmpty).take(3).join(", ");
+        ].where((e) => e != null && e.trim().isNotEmpty).toList();
 
-        _updateLocationText(parts.isEmpty ? "Location Found" : parts);
+        final address = parts.take(3).join(", ");
+
+        _updateLocationText(address.isEmpty ? "Location Found" : address);
       }
     } catch (e) {
-      _updateLocationText("Location Error");
+      print("Location Error: $e");
+
+      if (e is TimeoutException) {
+        _updateLocationText("Location timeout");
+      } else {
+        _updateLocationText("Failed to get location");
+      }
     }
   }
 
@@ -222,4 +224,3 @@ class _HomeDetailsState extends State<HomeDetails> {
     );
   }
 }
-

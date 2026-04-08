@@ -56,8 +56,6 @@
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
 	<string>Main</string>
-	<key>NSUserTrackingUsageDescription</key>
-	<string>This identifier will be used to deliver personalized ads and content to you.</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 	<key>UISupportedInterfaceOrientations</key>
@@ -73,5 +71,6 @@
 	</array>
 	<key>NSAppleMusicUsageDescription</key>
     <string>This app needs access to your media library to enhance user experience.</string>
+
 </dict>
 </plist>
