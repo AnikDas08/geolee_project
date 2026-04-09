@@ -27,12 +27,14 @@ class ClickerScreen extends StatefulWidget {
 }
 
 class _ClickerScreenState extends State<ClickerScreen> {
-  final ClickerController controller = Get.put(ClickerController());
+  final ClickerController controller = Get.put(ClickerController()); 
   final NotificationsController notificationsController = Get.put(
     NotificationsController(),
   );
 
   final ScrollController _scrollController = ScrollController();
+  final debouncer = Debouncer(milliseconds: 400);
+  final isLoadingMore = false;
 
   @override
   void initState() {
@@ -51,14 +53,20 @@ class _ClickerScreenState extends State<ClickerScreen> {
   // Trigger load more when within 300px of bottom==================
 
   void _onScroll() {
+    if(isLoadingMore) return;
+    isLoadingMore = true;
+    debouncer.run(() {
     if (_scrollController.position.pixels >=
         _scrollController.position.maxScrollExtent - 300) {
       if (!controller.isLoadingMore.value &&
           !controller.isLoading.value &&
           controller.currentPage.value < controller.totalPages.value) {
+
         controller.getAllPosts(isLoadMore: true);
       }
     }
+    isLoadingMore = false;
+    });
   }
 
   String _formatPostTime(DateTime postTime) {
