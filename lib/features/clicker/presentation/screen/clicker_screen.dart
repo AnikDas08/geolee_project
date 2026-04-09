@@ -87,7 +87,9 @@ class _ClickerScreenState extends State<ClickerScreen> {
           },
           child: SingleChildScrollView(
             controller: _scrollController,
-            physics: const AlwaysScrollableScrollPhysics(),
+            physics: const AlwaysScrollableScrollPhysics(
+              parent: ClampingScrollPhysics(),
+            ),
             padding: EdgeInsets.symmetric(horizontal: 16.w),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -319,7 +321,7 @@ class _ClickerScreenState extends State<ClickerScreen> {
                   },
                 ),
 
-                Obx(() {
+                Obx(()
                   if (controller.isLoadingMore.value) {
                     return Padding(
                       padding: EdgeInsets.symmetric(vertical: 20.h),
