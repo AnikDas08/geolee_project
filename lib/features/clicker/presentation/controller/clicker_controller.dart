@@ -142,7 +142,7 @@ class ClickerController extends GetxController {
   /// ================= Location Suggestions
   var locationSuggestions = <String>[].obs;
   var isSearchingSuggestions = false.obs;
-  final String _googleApiKey = 'AIzaSyAp3rwzXU0fAqaPCTRfx81ixNMu5flXnPo';
+  final String _googleApiKey = 'AIzaSyA3AOKByhx7cEK1rT7chtfRd6tDU6L8gTY';
 
 // Call this to fetch Google Places suggestions
   Future<void> fetchLocationSuggestions(String input) async {
