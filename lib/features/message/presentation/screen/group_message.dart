@@ -1,17 +1,19 @@
 import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:giolee78/component/text/common_text.dart';
 import 'package:giolee78/config/api/api_end_point.dart';
 import 'package:giolee78/config/route/app_routes.dart';
+import 'package:giolee78/features/message/data/model/chat_message.dart';
 import 'package:giolee78/features/message/presentation/widgets/bubble_content.dart';
 import 'package:giolee78/features/message/presentation/widgets/loading_shimer.dart';
 import 'package:giolee78/features/message/presentation/widgets/upload_progress.dart';
+import 'package:giolee78/features/message/presentation/widgets/video_player_bubble.dart';
 import 'package:giolee78/utils/constants/app_colors.dart';
 import 'package:intl/intl.dart';
 
-import 'package:giolee78/features/message/data/model/chat_message.dart';
 import '../controller/group_message_controller.dart';
 import '../widgets/attachment_select_option.dart';
 import '../widgets/full_screen_image_view.dart';
@@ -24,7 +26,6 @@ class GroupMessageScreen extends StatefulWidget {
 }
 
 class _GroupMessageScreenState extends State<GroupMessageScreen> {
-
   String getImageUrl(String? path) {
     if (path == null || path.isEmpty) return "";
     if (path.startsWith('http')) return path;
@@ -80,7 +81,8 @@ class _GroupMessageScreenState extends State<GroupMessageScreen> {
                   Obx(() {
                     final String path = controller.avatarFilePath.value;
                     if (path.isNotEmpty) {
-                      final bool isLocal = path.startsWith('/data/') ||
+                      final bool isLocal =
+                          path.startsWith('/data/') ||
                           path.startsWith('/storage/') ||
                           path.startsWith('file://');
                       return CircleAvatar(
@@ -94,7 +96,11 @@ class _GroupMessageScreenState extends State<GroupMessageScreen> {
                     return CircleAvatar(
                       radius: 18.r,
                       backgroundColor: AppColors.primaryColor,
-                      child: Icon(Icons.group, color: Colors.white, size: 20.sp),
+                      child: Icon(
+                        Icons.group,
+                        color: Colors.white,
+                        size: 20.sp,
+                      ),
                     );
                   }),
                   SizedBox(width: 12.w),
@@ -102,16 +108,20 @@ class _GroupMessageScreenState extends State<GroupMessageScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Obx(() => CommonText(
-                          text: controller.groupName.value,
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.w600,
-                        )),
-                        Obx(() => CommonText(
-                          text: '${controller.memberCount.value} Members',
-                          fontSize: 12.sp,
-                          color: Colors.grey,
-                        )),
+                        Obx(
+                          () => CommonText(
+                            text: controller.groupName.value,
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        Obx(
+                          () => CommonText(
+                            text: '${controller.memberCount.value} Members',
+                            fontSize: 12.sp,
+                            color: Colors.grey,
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -132,20 +142,20 @@ class _GroupMessageScreenState extends State<GroupMessageScreen> {
             body: controller.isLoading
                 ? const LoadingShimmer()
                 : Column(
-              children: [
-                Expanded(
-                  child: controller.messages.isEmpty
-                      ? _buildEmptyState()
-                      : _buildMessageList(context, controller),
-                ),
-                _buildPickedFilePreview(controller),
-                if (controller.isUploadingImage ||
-                    controller.isUploadingMedia ||
-                    controller.isUploadingDocument)
-                  const UploadProgress(),
-                _buildInputArea(context, controller),
-              ],
-            ),
+                    children: [
+                      Expanded(
+                        child: controller.messages.isEmpty
+                            ? _buildEmptyState()
+                            : _buildMessageList(context, controller),
+                      ),
+                      _buildPickedFilePreview(controller),
+                      if (controller.isUploadingImage ||
+                          controller.isUploadingMedia ||
+                          controller.isUploadingDocument)
+                        const UploadProgress(),
+                      _buildInputArea(context, controller),
+                    ],
+                  ),
           ),
         );
       },
@@ -153,7 +163,10 @@ class _GroupMessageScreenState extends State<GroupMessageScreen> {
   }
 
   //Message List with pagination loader ===============================
-  Widget _buildMessageList(BuildContext context, GroupMessageController controller) {
+  Widget _buildMessageList(
+    BuildContext context,
+    GroupMessageController controller,
+  ) {
     return ListView.builder(
       reverse: true,
       controller: controller.scrollController,
@@ -189,7 +202,10 @@ class _GroupMessageScreenState extends State<GroupMessageScreen> {
                       padding: EdgeInsets.symmetric(horizontal: 10.w),
                       child: Text(
                         'Start',
-                        style: TextStyle(fontSize: 11.sp, color: Colors.grey[400]),
+                        style: TextStyle(
+                          fontSize: 11.sp,
+                          color: Colors.grey[400],
+                        ),
                       ),
                     ),
                     Expanded(child: Divider(color: Colors.grey[300])),
@@ -229,15 +245,15 @@ class _GroupMessageScreenState extends State<GroupMessageScreen> {
                   backgroundColor: AppColors.primaryColor.withOpacity(0.2),
                   child: message.senderImage.isEmpty
                       ? Text(
-                    message.senderName.isNotEmpty
-                        ? message.senderName[0].toUpperCase()
-                        : '?',
-                    style: TextStyle(
-                      color: AppColors.primaryColor,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14.sp,
-                    ),
-                  )
+                          message.senderName.isNotEmpty
+                              ? message.senderName[0].toUpperCase()
+                              : '?',
+                          style: TextStyle(
+                            color: AppColors.primaryColor,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14.sp,
+                          ),
+                        )
                       : null,
                 ),
                 SizedBox(width: 8.w),
@@ -264,7 +280,10 @@ class _GroupMessageScreenState extends State<GroupMessageScreen> {
                       SizedBox(height: 4.h),
                       Text(
                         DateFormat('hh:mm a').format(message.createdAt),
-                        style: TextStyle(fontSize: 10.sp, color: Colors.grey[500]),
+                        style: TextStyle(
+                          fontSize: 10.sp,
+                          color: Colors.grey[500],
+                        ),
                       ),
                     ],
                   ),
@@ -334,14 +353,20 @@ class _GroupMessageScreenState extends State<GroupMessageScreen> {
         padding: EdgeInsets.all(8.w),
         child: Stack(
           children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(12.r),
-              child: Image.file(
-                File(ctrl.pickedImagePath!),
-                height: 120.h,
-                fit: BoxFit.cover,
-              ),
-            ),
+            ctrl.isVideo
+                ? VideoPlayerBubble(
+                    videoUrl: ctrl.pickedImagePath ?? '',
+                    isMe: true,
+                    isFile: true,
+                  )
+                : ClipRRect(
+                    borderRadius: BorderRadius.circular(12.r),
+                    child: Image.file(
+                      File(ctrl.pickedImagePath!),
+                      height: 120.h,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
             Positioned(
               top: 4,
               right: 4,
@@ -398,7 +423,10 @@ class _GroupMessageScreenState extends State<GroupMessageScreen> {
                     ),
                     Text(
                       '${ctrl.getPickedFileType()} • ${ctrl.getPickedFileSize()}',
-                      style: TextStyle(fontSize: 11.sp, color: Colors.grey[600]),
+                      style: TextStyle(
+                        fontSize: 11.sp,
+                        color: Colors.grey[600],
+                      ),
                     ),
                   ],
                 ),
@@ -417,8 +445,12 @@ class _GroupMessageScreenState extends State<GroupMessageScreen> {
   }
 
   // Input Area ============================================================
-  Widget _buildInputArea(BuildContext context, GroupMessageController controller) {
-    final bool isBusy = controller.isSendingText ||
+  Widget _buildInputArea(
+    BuildContext context,
+    GroupMessageController controller,
+  ) {
+    final bool isBusy =
+        controller.isSendingText ||
         controller.isUploadingImage ||
         controller.isUploadingMedia ||
         controller.isUploadingDocument;
@@ -478,7 +510,10 @@ class _GroupMessageScreenState extends State<GroupMessageScreen> {
   }
 
   // Attachment Picker =========================================================
-  void _showAttachmentPicker(BuildContext context, GroupMessageController controller) {
+  void _showAttachmentPicker(
+    BuildContext context,
+    GroupMessageController controller,
+  ) {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -531,9 +566,12 @@ class _GroupMessageScreenState extends State<GroupMessageScreen> {
 
   _FileIconInfo _fileIconInfo(String? typeOrExt) {
     final t = (typeOrExt ?? '').toLowerCase();
-    if (['pdf'].contains(t)) return const _FileIconInfo(Icons.picture_as_pdf, Colors.red);
-    if (['doc', 'docx'].contains(t)) return const _FileIconInfo(Icons.description, Colors.blue);
-    if (['mp4', 'mov', 'video', 'media'].contains(t)) return const _FileIconInfo(Icons.videocam, Colors.purple);
+    if (['pdf'].contains(t))
+      return const _FileIconInfo(Icons.picture_as_pdf, Colors.red);
+    if (['doc', 'docx'].contains(t))
+      return const _FileIconInfo(Icons.description, Colors.blue);
+    if (['mp4', 'mov', 'video', 'media'].contains(t))
+      return const _FileIconInfo(Icons.videocam, Colors.purple);
     return const _FileIconInfo(Icons.insert_drive_file, Colors.blueGrey);
   }
 }
