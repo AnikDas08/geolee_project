@@ -566,12 +566,15 @@ class _GroupMessageScreenState extends State<GroupMessageScreen> {
 
   _FileIconInfo _fileIconInfo(String? typeOrExt) {
     final t = (typeOrExt ?? '').toLowerCase();
-    if (['pdf'].contains(t))
+    if (['pdf'].contains(t)) {
       return const _FileIconInfo(Icons.picture_as_pdf, Colors.red);
-    if (['doc', 'docx'].contains(t))
+    }
+    if (['doc', 'docx'].contains(t)) {
       return const _FileIconInfo(Icons.description, Colors.blue);
-    if (['mp4', 'mov', 'video', 'media'].contains(t))
+    }
+    if (['mp4', 'mov', 'video', 'media'].contains(t)) {
       return const _FileIconInfo(Icons.videocam, Colors.purple);
+    }
     return const _FileIconInfo(Icons.insert_drive_file, Colors.blueGrey);
   }
 }
