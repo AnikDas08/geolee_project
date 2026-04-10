@@ -329,7 +329,7 @@ class _ClickerScreenState extends State<ClickerScreen> {
                   },
                 ),
 
-                Obx(()
+                Obx(() {
                   if (controller.isLoadingMore.value) {
                     return Padding(
                       padding: EdgeInsets.symmetric(vertical: 20.h),

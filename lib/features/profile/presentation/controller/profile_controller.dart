@@ -298,4 +298,16 @@ class ProfileController extends GetxController {
       update();
     }
   }
+
+  @override
+  void onClose() {
+    nameController.dispose();
+    numberController.dispose();
+    passwordController.dispose();
+    aboutController.dispose();
+    dateOfBirthController.dispose();
+    genderController.dispose();
+    addressController.dispose();
+    super.onClose();
+  }
 }

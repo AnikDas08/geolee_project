@@ -110,6 +110,7 @@ class ClickerController extends GetxController {
   @override
   void onClose() {
     searchController.removeListener(_onSearchChanged);
+    searchController.dispose();
     super.onClose();
   }
 

@@ -21,6 +21,12 @@ class SearchFriendController extends GetxController {
     getSearchFriend();
   }
 
+  @override
+  void onClose() {
+    searchController.dispose();
+    super.onClose();
+  }
+
   Future<void> getSearchFriend() async {
     try {
       isLoading.value = true;
