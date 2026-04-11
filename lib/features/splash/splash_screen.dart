@@ -10,6 +10,9 @@ import 'package:get/get.dart';
 import '../../../../utils/constants/app_images.dart';
 import '../../component/image/common_image.dart';
 
+
+import 'package:giolee78/services/api/user_api_service.dart';
+
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -18,47 +21,58 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
+
   @override
   void initState() {
-    _fetchFCMToken();
     super.initState();
+    _initApp();
   }
 
-  Future<void> _fetchFCMToken() async {
-    // Import logic done locally or via standard imports
+  Future<void> _initApp() async {
+    await _initFCM();
+    await Future.delayed(const Duration(seconds: 3));
+    _handleNavigation();
+  }
+
+  /// 🔥 Firebase + Token Setup
+  Future<void> _initFCM() async {
     try {
-      final token = await _getFCMToken();
+      final firebaseService = FirebaseNotificationService();
+
+      // Init notification
+      await firebaseService.initNotifications();
+
+      // Get token
+      final token = await firebaseService.getFCMToken();
+
       if (token != null) {
-        debugPrint("Splash Screen: Fetched FCM Token: $token");
-        // Save to local storage or API based on requirements later
+        debugPrint("✅ FCM Token: $token");
+
+        // 👉 Backend এ পাঠানো
+        if (LocalStorage.userId.isNotEmpty) {
+          await UserApiService.sendTokenToServer(
+            userId: LocalStorage.userId,
+            token: token,
+          );
+        }
       }
     } catch (e) {
-      debugPrint("FCM token fetch error in Splash: $e");
-    }
-
-    Future.delayed(const Duration(seconds: 3), () {
-      if (LocalStorage.isLogIn) {
-        debugPrint(
-          "My Role Is :===========================💕💕💕💕💕💕 ${LocalStorage.role.toString()}",
-        );
-        Get.offAllNamed(AppRoutes.homeNav);
-      } else {
-        debugPrint(
-          "My Role Is :===========================💕💕💕💕💕💕 ${LocalStorage.role.toString()}",
-        );
-        Get.offAllNamed(AppRoutes.onboarding);
-      }
-    });
-  }
-
-  Future<String?> _getFCMToken() async {
-    try {
-      return await FirebaseNotificationService().getFCMToken();
-    } catch (_) {
-      return null;
+      debugPrint("❌ FCM Init Error: $e");
     }
   }
 
+  /// 🚀 Navigation Logic
+  void _handleNavigation() {
+    if (LocalStorage.isLogIn) {
+      debugPrint("➡️ Go to Home");
+      Get.offAllNamed(AppRoutes.homeNav);
+    } else {
+      debugPrint("➡️ Go to Onboarding");
+      Get.offAllNamed(AppRoutes.onboarding);
+    }
+  }
+
+  /// 📦 App Version
   Future<String> getAppVersion() async {
     final info = await PackageInfo.fromPlatform();
     return "${info.version}+${info.buildNumber}";
@@ -71,7 +85,10 @@ class _SplashScreenState extends State<SplashScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const CommonImage(imageSrc: AppImages.logo, size: 250).center,
+            const CommonImage(
+              imageSrc: AppImages.logo,
+              size: 250,
+            ).center,
 
             SizedBox(height: 50.h),
 
@@ -79,6 +96,7 @@ class _SplashScreenState extends State<SplashScreen> {
               future: getAppVersion(),
               builder: (context, snapshot) {
                 if (!snapshot.hasData) return const SizedBox();
+
                 return CommonText(
                   text: "Version: ${snapshot.data} (beta)",
                   fontSize: 15.sp,

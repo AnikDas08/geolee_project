@@ -58,141 +58,145 @@ class _MyPostCardState extends State<MyPostCard> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(14.r),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.06),
-            blurRadius: 10.r,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          /// Header
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Row(
-                    children: [
-                      InkWell(
-                        onTap: widget.isProfile
-                            ? widget.onTapProfile
-                            : () => debugPrint('Already Profile'),
-                        child: CircleAvatar(
-                          radius: 18.r,
-                          backgroundColor: Colors.transparent,
-                          child: ClipOval(
-                            child: CommonImage(
-                              imageSrc: widget.userAvatar,
-                              size: 36.r,
-                              fill: BoxFit.cover,
+    return RepaintBoundary(
+      child: Container(
+        decoration: BoxDecoration(
+          color: AppColors.white,
+          borderRadius: BorderRadius.circular(14.r),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.06),
+              blurRadius: 10.r,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            /// Header
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Row(
+                      children: [
+                        InkWell(
+                          onTap: widget.isProfile
+                              ? widget.onTapProfile
+                              : () => debugPrint('Already Profile'),
+                          child: CircleAvatar(
+                            radius: 18.r,
+                            backgroundColor: Colors.transparent,
+                            child: ClipOval(
+                              child: CommonImage(
+                                imageSrc: widget.userAvatar,
+                                size: 36.r,
+                                fill: BoxFit.cover,
+                                memCacheHeight: (36 * 2.5).toInt(),
+                                memCacheWidth: (36 * 2.5).toInt(),
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                      SizedBox(width: 10.w),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            CommonText(
-                              text: widget.userName,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                            ),
-                            SizedBox(height: 4.h),
-                            Row(
-                              children: [
-                                Icon(Icons.access_time,
-                                    size: 12.sp,
-                                    color: AppColors.secondaryText),
-                                SizedBox(width: 4.w),
-                                CommonText(
-                                  text: widget.timeAgo,
-                                  fontSize: 11,
-                                  color: AppColors.secondaryText,
-                                ),
-                                SizedBox(width: 6.w),
-                                Container(
-                                  width: 3.r,
-                                  height: 3.r,
-                                  decoration: const BoxDecoration(
+                        SizedBox(width: 10.w),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              CommonText(
+                                text: widget.userName,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                              ),
+                              SizedBox(height: 4.h),
+                              Row(
+                                children: [
+                                  Icon(Icons.access_time,
+                                      size: 12.sp,
+                                      color: AppColors.secondaryText),
+                                  SizedBox(width: 4.w),
+                                  CommonText(
+                                    text: widget.timeAgo,
+                                    fontSize: 11,
                                     color: AppColors.secondaryText,
-                                    shape: BoxShape.circle,
                                   ),
-                                ),
-                                SizedBox(width: 6.w),
-                                Icon(Icons.location_on_outlined,
-                                    size: 12.sp,
-                                    color: AppColors.secondaryText),
-                                SizedBox(width: 4.w),
-                                Expanded(
-                                  child: Row(
-                                    children: [
-                                      CommonText(
-                                        text: widget.location,
-                                        fontSize: 11,
-                                        color: AppColors.secondaryText,
-                                      ),
-                                      SizedBox(width: 15.w),
-                                      CommonImage(
-                                        size: 12,
-                                        imageSrc: widget.privacyImage,
-                                      ),
-                                    ],
+                                  SizedBox(width: 6.w),
+                                  Container(
+                                    width: 3.r,
+                                    height: 3.r,
+                                    decoration: const BoxDecoration(
+                                      color: AppColors.secondaryText,
+                                      shape: BoxShape.circle,
+                                    ),
                                   ),
-                                ),
-                              ],
-                            ),
-                          ],
+                                  SizedBox(width: 6.w),
+                                  Icon(Icons.location_on_outlined,
+                                      size: 12.sp,
+                                      color: AppColors.secondaryText),
+                                  SizedBox(width: 4.w),
+                                  Expanded(
+                                    child: Row(
+                                      children: [
+                                        CommonText(
+                                          text: widget.location,
+                                          fontSize: 11,
+                                          color: AppColors.secondaryText,
+                                        ),
+                                        SizedBox(width: 15.w),
+                                        CommonImage(
+                                          size: 12,
+                                          imageSrc: widget.privacyImage,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
+                  if (widget.isMyPost) _buildPopupMenuButton(context),
+                ],
+              ),
+            ),
+
+            //=============================Image slider only if images exist
+            if (widget.images != null && widget.images!.isNotEmpty)
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 12.w),
+                child: _PostImageSlider(
+                  images: widget.images!,
+                  onTapPhoto: widget.onTapPhoto,
+                  currentIndex: currentIndex,
+                  onPageChanged: (index) =>
+                      setState(() => currentIndex = index),
                 ),
-                if (widget.isMyPost) _buildPopupMenuButton(context),
-              ],
-            ),
-          ),
-
-          //=============================Image slider only if images exist
-          if (widget.images != null && widget.images!.isNotEmpty)
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 12.w),
-              child: _PostImageSlider(
-                images: widget.images!,
-                onTapPhoto: widget.onTapPhoto,
-                currentIndex: currentIndex,
-                onPageChanged: (index) =>
-                    setState(() => currentIndex = index),
               ),
-            ),
 
-          /// Clicker type
-          Padding(
-            padding: EdgeInsets.fromLTRB(12.w, 12.h, 12.w, 4.h),
-            child: CommonText(text: widget.clickerType, fontSize: 12),
-          ),
-
-          //================================ Description only if not null or empty
-          if (widget.description != null && widget.description!.isNotEmpty)
+            /// Clicker type
             Padding(
-              padding: EdgeInsets.fromLTRB(12.w, 6.h, 12.w, 12.h),
-              child: CommonText(
-                text: widget.description!,
-                fontSize: 12,
-                maxLines: 6,
-              ),
+              padding: EdgeInsets.fromLTRB(12.w, 12.h, 12.w, 4.h),
+              child: CommonText(text: widget.clickerType, fontSize: 12),
             ),
-        ],
+
+            //================================ Description only if not null or empty
+            if (widget.description != null && widget.description!.isNotEmpty)
+              Padding(
+                padding: EdgeInsets.fromLTRB(12.w, 6.h, 12.w, 12.h),
+                child: CommonText(
+                  text: widget.description!,
+                  fontSize: 12,
+                  maxLines: 6,
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }
@@ -268,11 +272,14 @@ class _PostImageSlider extends StatelessWidget {
               onPageChanged: onPageChanged,
               itemBuilder: (context, index) => InkWell(
                 onTap: onTapPhoto,
-                child: CommonImage(
-                  imageSrc: images[index],
-                  width: double.infinity,
-                  height: 190.h,
-                  fill: BoxFit.cover,
+                child: RepaintBoundary(
+                  child: CommonImage(
+                    imageSrc: images[index],
+                    width: double.infinity,
+                    height: 190.h,
+                    fill: BoxFit.cover,
+                    memCacheHeight: (190 * 2.5).toInt(),
+                  ),
                 ),
               ),
             ),
@@ -296,7 +303,7 @@ class _PostImageSlider extends StatelessWidget {
                     borderRadius: BorderRadius.circular(20.r),
                     color: isActive
                         ? AppColors.primaryColor
-                        : AppColors.secondaryText.withOpacity(0.25),
+                        : AppColors.secondaryText.withValues(alpha: 0.25),
                   ),
                 );
               }),
