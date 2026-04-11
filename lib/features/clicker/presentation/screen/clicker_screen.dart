@@ -27,7 +27,7 @@ class ClickerScreen extends StatefulWidget {
 }
 
 class _ClickerScreenState extends State<ClickerScreen> {
-  final ClickerController controller = Get.put(ClickerController()); 
+  final ClickerController controller = Get.put(ClickerController());
   final NotificationsController notificationsController = Get.put(
     NotificationsController(),
   );
