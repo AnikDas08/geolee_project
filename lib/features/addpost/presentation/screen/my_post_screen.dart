@@ -9,6 +9,7 @@ import 'package:giolee78/utils/constants/app_colors.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../utils/constants/app_icons.dart';
+import '../../../../utils/debouncer.dart';
 import '../widgets/full_screen_view_image.dart';
 
 class MyPostScreen extends StatefulWidget {
@@ -29,17 +30,22 @@ class _MyPostScreenState extends State<MyPostScreen>
     WidgetsBinding.instance.addObserver(this);
 
 
+    final debouncer = Debouncer(milliseconds: 500);
+
     scrollController.addListener(() {
+      if (!scrollController.hasClients) return;
+
       if (!controller.isLoadMore.value &&
           controller.hasMore &&
           scrollController.position.pixels >=
               scrollController.position.maxScrollExtent - 200) {
-        controller.fetchMyPosts(loadMore: true);
+        debouncer.run(() {
+          controller.fetchMyPosts(loadMore: true);
+        });
       }
     });
   }
 
-  @override
   void didPopNext() {
     controller.fetchMyPosts();
   }
@@ -106,80 +112,74 @@ class _MyPostScreenState extends State<MyPostScreen>
 
           return RefreshIndicator(
             onRefresh: () => controller.fetchMyPosts(),
-
-            child: ListView.separated(
+            child: CustomScrollView(
               controller: scrollController,
-
-              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-
               physics: const AlwaysScrollableScrollPhysics(
                 parent: BouncingScrollPhysics(),
               ),
+              slivers: [
+                SliverPadding(
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+                  sliver: SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) {
+                        final data = controller.myPost[index];
 
-              itemCount: controller.myPost.length + 1,
+                        final List<String> postImages = data.photos.isNotEmpty
+                            ? data.photos
+                                .map((photo) => ApiEndPoint.imageUrl + photo)
+                                .toList()
+                            : [];
 
-              separatorBuilder: (_, __) => SizedBox(height: 12.h),
-
-              itemBuilder: (context, index) {
-                if (index == controller.myPost.length) {
-                  return controller.isLoadMore.value
-                      ? const Padding(
-                    padding: EdgeInsets.all(16),
-                    child: Center(child: CircularProgressIndicator()),
-                  )
-                      : const SizedBox();
-                }
-
-                final data = controller.myPost[index];
-
-                final List<String> postImages = data.photos.isNotEmpty
-                    ? data.photos
-                    .map((photo) => ApiEndPoint.imageUrl + photo)
-                    .toList()
-                    : [];
-
-                return MyPostCard(
-                  onTapProfile: () {
-                    debugPrint('Profile Tab');
-                  },
-
-                  isProfile: true,
-
-                  onTapPhoto: () {
-                    if (postImages.isNotEmpty) {
-                      Get.to(() => FullScreenImageView(images: postImages));
-                    }
-                  },
-
-                  clickerType: data.clickerType,
-
-                  isMyPost: true,
-
-                  userName: data.user.name ?? "Unknown",
-
-                  userAvatar: "${ApiEndPoint.imageUrl}${data.user.image}",
-
-                  timeAgo: _formatPostTime(
-                    DateTime.parse(data.createdAt.toString()),
+                        return Padding(
+                          padding: EdgeInsets.only(bottom: 12.h),
+                          child: MyPostCard(
+                            onTapProfile: () {
+                              debugPrint('Profile Tab');
+                            },
+                            isProfile: true,
+                            onTapPhoto: () {
+                              if (postImages.isNotEmpty) {
+                                Get.to(() =>
+                                    FullScreenImageView(images: postImages));
+                              }
+                            },
+                            clickerType: data.clickerType,
+                            isMyPost: true,
+                            userName: data.user.name,
+                            userAvatar:
+                                "${ApiEndPoint.imageUrl}${data.user.image}",
+                            timeAgo: _formatPostTime(
+                              DateTime.parse(data.createdAt.toString()),
+                            ),
+                            location: data.address.isNotEmpty
+                                ? _removeNumbersFromLocation(data.address)
+                                : "",
+                            images: postImages,
+                            description: data.description,
+                            privacyImage: data.privacy == "public"
+                                ? AppIcons.public
+                                : data.privacy == "friends"
+                                    ? AppIcons.friends
+                                    : AppIcons.onlyMe,
+                            postId: data.id,
+                          ),
+                        );
+                      },
+                      childCount: controller.myPost.length,
+                    ),
                   ),
-
-                  location: data.address.isNotEmpty
-                      ? _removeNumbersFromLocation(data.address)
-                      : "",
-
-                  images: postImages,
-
-                  description: data.description ?? "No description",
-
-                  privacyImage: data.privacy == "public"
-                      ? AppIcons.public
-                      : data.privacy == "friends"
-                      ? AppIcons.friends
-                      : AppIcons.onlyMe,
-
-                  postId: data.id,
-                );
-              },
+                ),
+                if (controller.isLoadMore.value)
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(vertical: 20.h),
+                      child: const Center(child: CircularProgressIndicator()),
+                    ),
+                  ),
+                SliverToBoxAdapter(child: SizedBox(height: 20.h)),
+              ],
             ),
           );
         }),

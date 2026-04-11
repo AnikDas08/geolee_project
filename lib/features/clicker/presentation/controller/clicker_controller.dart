@@ -110,6 +110,7 @@ class ClickerController extends GetxController {
   @override
   void onClose() {
     searchController.removeListener(_onSearchChanged);
+    searchController.dispose();
     super.onClose();
   }
 
@@ -301,7 +302,7 @@ class ClickerController extends GetxController {
       final List<String> queryParams = [];
 
       queryParams.add("page=${currentPage.value}");
-      queryParams.add("limit=50");
+      queryParams.add("limit=30");
 
       final String filter = clickerType ?? selectedFilter;
       if (filter != 'All') queryParams.add("clickerType=$filter");
@@ -497,8 +498,6 @@ class ClickerController extends GetxController {
       final p = post.privacy.toLowerCase().trim();
       final isPublic = p == 'public';
 
-      // LOG EVERY POST'S PRIVACY
-      debugPrint("📦 Post ${post.id} | Privacy: [${post.privacy}] | Render: $isPublic");
 
       return isPublic;
     }).toList();

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "627654989285",
+    "project_id": "just-clicker-count",
+    "storage_bucket": "just-clicker-count.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:627654989285:android:0bfd890d4bf15b82570b0c",
+        "android_client_info": {
+          "package_name": "com.example.giolee78"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA__bw6gjpQq_eHPoO66CpawG5txciXO34"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -157,4 +157,10 @@ class HelpSupportController extends GetxController {
     );
   }
 
+  @override
+  void onClose() {
+    titleController.dispose();
+    messageController.dispose();
+    super.onClose();
+  }
 }

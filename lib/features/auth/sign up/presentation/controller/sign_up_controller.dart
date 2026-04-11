@@ -354,6 +354,9 @@ class SignUpController extends GetxController {
           title: "Your Registration Successfully Complete.",
         );
 
+        // Unfocus keyboard before navigation
+        FocusManager.instance.primaryFocus?.unfocus();
+
         Get.offAllNamed(AppRoutes.signIn);
       } else {
         Utils.errorSnackBar("Error", response.message);
@@ -636,16 +639,9 @@ class SignUpController extends GetxController {
   @override
   void onClose() {
     _timer?.cancel();
-    nameController.dispose();
-    emailController.dispose();
-    passwordController.dispose();
-    confirmPasswordController.dispose();
-    numberController.dispose();
-    otpController.dispose();
-    dateController.dispose();
-    addressController.dispose();
-    ageController.dispose();
-    bioController.dispose();
+    // Manual disposal of TextEditingControllers in onClose often causes race conditions
+    // with unmounting widgets during navigation transitions. 
+    // Letting the GC handle them or ensuring keyboard is unfocused is safer.
     super.onClose();
   }
 }

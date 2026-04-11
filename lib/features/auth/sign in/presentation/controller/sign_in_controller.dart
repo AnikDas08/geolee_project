@@ -9,6 +9,8 @@ import '../../../../../config/api/api_end_point.dart';
 import '../../../../../services/storage/storage_keys.dart';
 import '../../../../../services/storage/storage_services.dart';
 import '../../../../../services/socket/socket_service.dart';
+import '../../../../../services/notification/firebase_notification_service.dart';
+import '../../../../../services/api/user_api_service.dart';
 
 class SignInController extends GetxController {
   bool isLoading = false;
@@ -23,15 +25,18 @@ class SignInController extends GetxController {
   void onTapSkipButton() {}
 
   Future<void> signInUser(GlobalKey<FormState> formKey) async {
+    if (isLoading) return;
     if (!formKey.currentState!.validate()) return;
-    // return;
+    
+    // Unfocus keyboard before starting navigation/loading
+    FocusManager.instance.primaryFocus?.unfocus();
 
     isLoading = true;
     update();
     try {
       final Map<String, String> body = {
-        "email": emailController.text,
-        "password": passwordController.text,
+        "email": emailController.text.trim(),
+        "password": passwordController.text.trim(),
       };
 
       final response = await ApiService.post(
@@ -51,17 +56,28 @@ class SignInController extends GetxController {
         LocalStorage.isLogIn = true;
         LocalStorage.getAllPrefData();
         await getUserData();
+
+        // Sync FCM Token
+        try {
+          final fcmToken = await FirebaseNotificationService().getFCMToken();
+          if (fcmToken != null && LocalStorage.userId.isNotEmpty) {
+            await UserApiService.sendTokenToServer(
+              userId: LocalStorage.userId,
+              token: fcmToken,
+            );
+          }
+        } catch (e) {
+          debugPrint("Error syncing FCM token after login: $e");
+        }
+
         SocketServices.connectToSocket();
 
         debugPrint(
           "My Token Is :===============💕💕💕 ${LocalStorage.token.toString()}",
         );
-        // Get.snackbar(barBlur: 0.5, "Welcome Back", "Logged In Successfully");
-
-        Get.toNamed(AppRoutes.homeNav);
-
-        emailController.clear();
-        passwordController.clear();
+        
+        // Use offAllNamed for successful login to clear auth stack
+        Get.offAllNamed(AppRoutes.homeNav);
       } else {
         Get.snackbar(
           colorText: AppColors.white,
@@ -114,6 +130,8 @@ class SignInController extends GetxController {
 
   @override
   void onClose() {
+    // Note: Manual disposal of controllers linked to UI can cause "used after disposed" 
+    // errors during transition animations. GetX handles cleanup, but we can clear them.
     // emailController.dispose();
     // passwordController.dispose();
     super.onClose();

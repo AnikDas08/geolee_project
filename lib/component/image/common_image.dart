@@ -14,8 +14,9 @@ class CommonImage extends StatelessWidget {
   final double? width;
   final double borderRadius;
   final double? size;
-
   final BoxFit fill;
+  final int? memCacheHeight;
+  final int? memCacheWidth;
 
   const CommonImage({
     required this.imageSrc,
@@ -26,10 +27,10 @@ class CommonImage extends StatelessWidget {
     this.size,
     this.fill = BoxFit.contain,
     this.defaultImage = AppImages.profile,
+    this.memCacheHeight,
+    this.memCacheWidth,
     super.key,
   });
-
-  void checkImageType() {}
 
   @override
   Widget build(BuildContext context) {
@@ -40,8 +41,10 @@ class CommonImage extends StatelessWidget {
       return _buildSvgImage();
     } else if (imageSrc.contains("assets/images")) {
       return _buildPngImage();
-    } else if (File(imageSrc).existsSync() || imageSrc.startsWith('file://')) {
-      // Local file path
+    } else if (imageSrc.startsWith('file://') ||
+        imageSrc.startsWith('/data/') ||
+        imageSrc.startsWith('/storage/')) {
+      // ✅ Fixed: existsSync() হটানো হয়েছে (UI thread block করত)
       return _buildFileImage();
     } else {
       return _buildNetworkImage();
@@ -49,37 +52,48 @@ class CommonImage extends StatelessWidget {
   }
 
   Widget _buildErrorWidget() {
-    return Image.asset(defaultImage);
+    // ✅ Fixed: cache size দেওয়া হয়েছে
+    return Image.asset(
+      defaultImage,
+      cacheWidth: memCacheWidth ?? 200,
+      cacheHeight: memCacheHeight ?? 200,
+    );
   }
 
   Widget _buildNetworkImage() {
     final String imageUrl = imageSrc.startsWith('http')
         ? imageSrc
         : imageSrc.isEmpty
-            ? ""
-            : imageSrc.startsWith('/')
-                ? "${ApiEndPoint.imageUrl}$imageSrc"
-                : "${ApiEndPoint.imageUrl}/$imageSrc";
+        ? ""
+        : imageSrc.startsWith('/')
+        ? "${ApiEndPoint.imageUrl}$imageSrc"
+        : "${ApiEndPoint.imageUrl}/$imageSrc";
 
     return CachedNetworkImage(
       height: size ?? height,
       width: size ?? width,
       imageUrl: imageUrl,
       fit: fill,
-      imageBuilder: (context, imageProvider) => Container(
+      memCacheHeight: memCacheHeight,
+      memCacheWidth: memCacheWidth,
+      // ✅ Fixed: borderRadius 0 হলে extra Container avoid করা হচ্ছে
+      imageBuilder: borderRadius > 0
+          ? (context, imageProvider) => Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(borderRadius),
           image: DecorationImage(image: imageProvider, fit: fill),
         ),
-      ),
+      )
+          : null,
       progressIndicatorBuilder: (context, url, downloadProgress) => Center(
         child: SizedBox(
           width: 40,
           height: 40,
           child: CircularProgressIndicator(
-              strokeWidth: 2,
-              color: Colors.blue,
-              value: downloadProgress.progress),
+            strokeWidth: 2,
+            color: Colors.blue,
+            value: downloadProgress.progress,
+          ),
         ),
       ),
       errorWidget: (context, url, error) => _buildErrorWidget(),
@@ -89,6 +103,7 @@ class CommonImage extends StatelessWidget {
   Widget _buildSvgImage() {
     return SvgPicture.asset(
       imageSrc,
+      // ignore: deprecated_member_use
       color: imageColor,
       height: size ?? height,
       width: size ?? width,
@@ -104,6 +119,8 @@ class CommonImage extends StatelessWidget {
         color: imageColor,
         height: size ?? height,
         width: size ?? width,
+        cacheHeight: memCacheHeight,
+        cacheWidth: memCacheWidth,
         fit: fill,
         errorBuilder: (context, error, stackTrace) {
           errorLog(error, source: "Common Image");
@@ -120,6 +137,8 @@ class CommonImage extends StatelessWidget {
         File(imageSrc),
         height: size ?? height,
         width: size ?? width,
+        cacheHeight: memCacheHeight,
+        cacheWidth: memCacheWidth,
         fit: fill,
         errorBuilder: (context, error, stackTrace) {
           errorLog(error, source: "Common Image - File");

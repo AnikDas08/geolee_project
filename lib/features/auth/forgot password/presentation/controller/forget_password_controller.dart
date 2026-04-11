@@ -46,13 +46,13 @@ class ForgetPasswordController extends GetxController {
   static ForgetPasswordController get instance => Get.find<ForgetPasswordController>();
 
   @override
-  void dispose() {
+  void onClose() {
     _timer?.cancel();
     emailController.dispose();
     otpController.dispose();
     passwordController.dispose();
     confirmPasswordController.dispose();
-    super.dispose();
+    super.onClose();
   }
 
   /// start Time for check Resend OTP Time

@@ -18,6 +18,7 @@ import '../../../addpost/presentation/widgets/full_screen_view_image.dart';
 import '../../../friend/presentation/screen/view_friend_screen.dart';
 import '../widget/webview_screen.dart';
 import '../screen/ad_detail_screen.dart';
+import 'package:giolee78/utils/debouncer.dart';
 
 class ClickerScreen extends StatefulWidget {
   const ClickerScreen({super.key});
@@ -34,12 +35,12 @@ class _ClickerScreenState extends State<ClickerScreen> {
 
   final ScrollController _scrollController = ScrollController();
   final debouncer = Debouncer(milliseconds: 400);
-  final isLoadingMore = false;
+  bool isLoadingMore = false;
 
   @override
   void initState() {
     super.initState();
-    controller.getAllPosts();
+    // controller.getAllPosts();
     _scrollController.addListener(_onScroll);
   }
 
@@ -53,19 +54,24 @@ class _ClickerScreenState extends State<ClickerScreen> {
   // Trigger load more when within 300px of bottom==================
 
   void _onScroll() {
-    if(isLoadingMore) return;
-    isLoadingMore = true;
-    debouncer.run(() {
-    if (_scrollController.position.pixels >=
-        _scrollController.position.maxScrollExtent - 300) {
-      if (!controller.isLoadingMore.value &&
-          !controller.isLoading.value &&
-          controller.currentPage.value < controller.totalPages.value) {
+    if (!_scrollController.hasClients) return;
 
-        controller.getAllPosts(isLoadMore: true);
+    if (isLoadingMore) return;
+
+    debouncer.run(() {
+      if (!_scrollController.hasClients) return;
+
+      if (_scrollController.position.pixels >=
+          _scrollController.position.maxScrollExtent - 300) {
+        if (!controller.isLoadingMore.value &&
+            !controller.isLoading.value &&
+            controller.currentPage.value < controller.totalPages.value) {
+          isLoadingMore = true;
+          controller.getAllPosts(isLoadMore: true).then((_) {
+            isLoadingMore = false;
+          });
+        }
       }
-    }
-    isLoadingMore = false;
     });
   }
 
@@ -93,252 +99,270 @@ class _ClickerScreenState extends State<ClickerScreen> {
             await controller.getBanners();
             await controller.getAllPosts();
           },
-          child: SingleChildScrollView(
+          child: CustomScrollView(
             controller: _scrollController,
             physics: const AlwaysScrollableScrollPhysics(
               parent: ClampingScrollPhysics(),
             ),
-            padding: EdgeInsets.symmetric(horizontal: 16.w),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(height: 16.h),
+            slivers: [
 
-                if (LocalStorage.token.isNotEmpty)
-                  Column(
-                    children: [
-                      CommonTextField(
-                        controller: controller.searchController,
-                        prefixIcon: const Icon(Icons.search),
-                        hintText: "Search Location",
-                        borderRadius: 20.r,
-                        suffixIcon: controller.searchText.value.isNotEmpty
-                            ? IconButton(
-                                icon: const Icon(Icons.clear),
-                                onPressed: () {
-                                  controller.searchController.clear();
-                                  controller.searchText.value = '';
-                                  controller.locationSuggestions.clear();
-                                  controller.getAllPosts(); // fresh load
-                                  FocusScope.of(context).unfocus();
-                                },
-                              )
-                            : const SizedBox.shrink(),
-                      ),
-                      // 👇 Suggestions dropdown
-                      Obx(() {
-                        if (controller.locationSuggestions.isEmpty) {
-                          return const SizedBox.shrink();
-                        }
-                        return Container(
-                          margin: EdgeInsets.only(top: 4.h),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(12.r),
-                            boxShadow: const [
-                              BoxShadow(
-                                color: Colors.black12,
-                                blurRadius: 6,
-                                offset: Offset(0, 3),
-                              ),
-                            ],
-                          ),
-                          child: ListView.separated(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemCount: controller.locationSuggestions.length,
-                            separatorBuilder: (_, __) =>
-                                const Divider(height: 1),
-                            itemBuilder: (context, index) {
-                              final suggestion =
-                                  controller.locationSuggestions[index];
-                              return ListTile(
-                                leading: const Icon(
-                                  Icons.location_on_outlined,
-                                  size: 18,
-                                ),
-                                title: Text(
-                                  suggestion,
-                                  style: TextStyle(fontSize: 14.sp),
-                                ),
-                                onTap: () {
-                                  controller.onLocationSelected(suggestion);
-                                  FocusScope.of(context).unfocus();
-                                },
-                              );
-                            },
-                          ),
-                        );
-                      }),
-                    ],
-                  ),
-                SizedBox(height: 16.h),
+              // Search & Suggestions
 
-                // ── Banner Slider=============================================
-                if (LocalStorage.token.isNotEmpty)
-                  Obx(() {
-                    if (controller.adList.isEmpty) {
-                      return const SizedBox.shrink();
-                    }
 
-                    return Column(
+              if (LocalStorage.token.isNotEmpty)
+                SliverPadding(
+                  padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 0),
+                  sliver: SliverToBoxAdapter(
+                    child: Column(
                       children: [
-                        CarouselSlider(
-                          items: controller.adList.map((ad) {
-                            return GestureDetector(
-                              onTap: () {
-                                controller.clickBanner(ad.id);
-                                if (ad.websiteUrl != null &&
-                                    ad.websiteUrl!.isNotEmpty) {
-                                  Get.to(
-                                    () => CommonWebViewScreen(
-                                      url: ad.websiteUrl!,
-                                      title: ad.title,
-                                    ),
-                                  );
-                                } else {
-                                  Get.to(() => AdDetailScreen(ad: ad));
-                                }
-                              },
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(12.r),
-                                child: CommonImage(
-                                  imageSrc: ad.image,
-                                  height: 150.h,
-                                  width: double.infinity,
-                                  fill: BoxFit.cover,
-                                ),
-                              ),
-                            );
-                          }).toList(),
-                          options: CarouselOptions(
-                            height: 150.h,
-                            viewportFraction: 0.85,
-                            autoPlay: true,
-                            enlargeCenterPage: true,
-                            onPageChanged: (index, _) =>
-                                controller.changePosition(index),
-                          ),
+                        CommonTextField(
+                          controller: controller.searchController,
+                          prefixIcon: const Icon(Icons.search),
+                          hintText: "Search Location",
+                          borderRadius: 20.r,
+                          suffixIcon: controller.searchText.value.isNotEmpty
+                              ? IconButton(
+                                  icon: const Icon(Icons.clear),
+                                  onPressed: () {
+                                    controller.searchController.clear();
+                                    controller.searchText.value = '';
+                                    controller.locationSuggestions.clear();
+                                    controller.getAllPosts(); // fresh load
+                                    FocusScope.of(context).unfocus();
+                                  },
+                                )
+                              : const SizedBox.shrink(),
                         ),
-                        SizedBox(height: 8.h),
-                        Center(
-                          child: DotsIndicator(
-                            dotsCount: controller.adList.length,
-                            position: controller.currentPosition,
-                            decorator: DotsDecorator(
-                              activeColor: AppColors.primaryColor,
-                              color: Colors.grey.shade300,
-                              size: const Size.square(8.0),
-                              activeSize: const Size(18.0, 8.0),
-                              activeShape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(5.0),
+                        // 👇 Suggestions dropdown
+                        Obx(() {
+                          if (controller.locationSuggestions.isEmpty) {
+                            return const SizedBox.shrink();
+                          }
+                          return Container(
+                            margin: EdgeInsets.only(top: 4.h),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(12.r),
+                              boxShadow: const [
+                                BoxShadow(
+                                  color: Colors.black12,
+                                  blurRadius: 6,
+                                  offset: Offset(0, 3),
+                                ),
+                              ],
+                            ),
+                            child: ListView.separated(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              itemCount: controller.locationSuggestions.length,
+                              separatorBuilder: (_, __) =>
+                                  const Divider(height: 1),
+                              itemBuilder: (context, index) {
+                                final suggestion =
+                                    controller.locationSuggestions[index];
+                                return ListTile(
+                                  leading: const Icon(
+                                    Icons.location_on_outlined,
+                                    size: 18,
+                                  ),
+                                  title: Text(
+                                    suggestion,
+                                    style: TextStyle(fontSize: 14.sp),
+                                  ),
+                                  onTap: () {
+                                    controller.onLocationSelected(suggestion);
+                                    FocusScope.of(context).unfocus();
+                                  },
+                                );
+                              },
+                            ),
+                          );
+                        }),
+                      ],
+                    ),
+                  ),
+                ),
+
+              // ── Banner Slider ─────────────────────────────────────────────
+              if (LocalStorage.token.isNotEmpty)
+                SliverPadding(
+                  padding: EdgeInsets.only(top: 16.h),
+                  sliver: SliverToBoxAdapter(
+                    child: Obx(() {
+                      if (controller.adList.isEmpty) {
+                        return const SizedBox.shrink();
+                      }
+
+                      return Column(
+                        children: [
+                          CarouselSlider(
+                            items: controller.adList.map((ad) {
+                              return GestureDetector(
+                                onTap: () {
+                                  controller.clickBanner(ad.id);
+                                  if (ad.websiteUrl != null &&
+                                      ad.websiteUrl!.isNotEmpty) {
+                                    Get.to(
+                                      () => CommonWebViewScreen(
+                                        url: ad.websiteUrl!,
+                                        title: ad.title,
+                                      ),
+                                    );
+                                  } else {
+                                    Get.to(() => AdDetailScreen(ad: ad));
+                                  }
+                                },
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(12.r),
+                                  child: CommonImage(
+                                    imageSrc: ad.image,
+                                    height: 150.h,
+                                    width: double.infinity,
+                                    fill: BoxFit.cover,
+                                    memCacheWidth: 1000,
+                                  ),
+                                ),
+                              );
+                            }).toList(),
+                            options: CarouselOptions(
+                              height: 150.h,
+                              viewportFraction: 0.85,
+                              autoPlay: true,
+                              enlargeCenterPage: true,
+                              onPageChanged: (index, _) =>
+                                  controller.changePosition(index),
+                            ),
+                          ),
+                          SizedBox(height: 8.h),
+                          Center(
+                            child: DotsIndicator(
+                              dotsCount: controller.adList.length,
+                              position: controller.currentPosition,
+                              decorator: DotsDecorator(
+                                activeColor: AppColors.primaryColor,
+                                color: Colors.grey.shade300,
+                                size: const Size.square(8.0),
+                                activeSize: const Size(18.0, 8.0),
+                                activeShape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(5.0),
+                                ),
                               ),
                             ),
                           ),
+                        ],
+                      );
+                    }),
+                  ),
+                ),
+
+              // ── Header & Filter
+
+              SliverPadding(
+                padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 16.h),
+                sliver: SliverToBoxAdapter(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'All Posts',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w600,
                         ),
-                      ],
-                    );
-                  }),
+                      ),
+                      _buildFilterButton(context),
+                    ],
+                  ),
+                ),
+              ),
 
-                SizedBox(height: 16.h),
+              // ── Posts List ────────────────────────────────────────────────
+              Builder(
+                builder: (context) {
+                  final postsWithImages = controller.filteredPosts
+                      .where((data) => data.photos.isNotEmpty)
+                      .toList();
 
-                //Header & Filter===================================
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      'All Posts',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w600,
+                  if (postsWithImages.isEmpty) {
+                    return SliverToBoxAdapter(child: _buildEmptyState());
+                  }
+
+                  final int itemCount = LocalStorage.token.isEmpty
+                      ? postsWithImages.length.clamp(0, 20)
+                      : postsWithImages.length;
+
+                  return SliverPadding(
+                    padding: EdgeInsets.symmetric(horizontal: 16.w),
+                    sliver: SliverList(
+                      delegate: SliverChildBuilderDelegate(
+                        (context, index) {
+                          final data = postsWithImages[index];
+                          final List<String> postImages = data.photos.isNotEmpty
+                              ? data.photos.map((p) {
+                                  if (p.startsWith('http')) return p;
+                                  return p.startsWith('/')
+                                      ? "${ApiEndPoint.imageUrl}$p"
+                                      : "${ApiEndPoint.imageUrl}/$p";
+                                }).toList()
+                              : [];
+
+                          return Padding(
+                            padding: EdgeInsets.only(bottom: 16.h),
+                            child: CommonPostCards(
+                              onTapPhoto: () {
+                                if (postImages.isNotEmpty) {
+                                  Get.to(
+                                    () => FullScreenImageView(
+                                      images: postImages,
+                                    ),
+                                  );
+                                }
+                              },
+                              onTapProfile: () {
+                                if (LocalStorage.token.isNotEmpty) {
+                                  Get.to(
+                                    () => ViewFriendScreen(
+                                      userId: data.user.id,
+                                      isFriend: false,
+                                    ),
+                                  );
+                                }
+                              },
+                              clickerType: data.clickerType,
+                              userName: data.user.name,
+                              userAvatar:
+                                  "${ApiEndPoint.imageUrl}${data.user.image}",
+                              timeAgo: _formatPostTime(data.createdAt),
+                              location: data.address.isNotEmpty
+                                  ? data.address.split(',')[0]
+                                  : "",
+                              images: postImages,
+                              description: data.description,
+                              isFriend: false,
+                              privacyImage: data.privacy == "public"
+                                  ? AppIcons.public
+                                  : data.privacy == "friends"
+                                      ? AppIcons.friends
+                                      : AppIcons.onlyMe,
+                            ),
+                          );
+                        },
+                        childCount: itemCount,
                       ),
                     ),
-                    _buildFilterButton(context),
-                  ],
-                ),
-                SizedBox(height: 16.h),
+                  );
+                },
+              ),
 
-
-                // Posts List ========================================
-                Builder(
-                  builder: (context) {
-                    final postsWithImages = controller.filteredPosts
-                        .where((data) => data.photos.isNotEmpty)
-                        .toList();
-
-                    return postsWithImages.isEmpty
-                        ? _buildEmptyState()
-                        : ListView.separated(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemCount: LocalStorage.token.isEmpty
-                                ? postsWithImages.length.clamp(0, 20)
-                                : postsWithImages.length,
-                            separatorBuilder: (_, __) => SizedBox(height: 16.h),
-                            itemBuilder: (context, index) {
-                              final data = postsWithImages[index];
-                              final List<String> postImages =
-                                  data.photos.isNotEmpty
-                                  ? data.photos.map((p) {
-                                      if (p.startsWith('http')) return p;
-                                      return p.startsWith('/')
-                                          ? "${ApiEndPoint.imageUrl}$p"
-                                          : "${ApiEndPoint.imageUrl}/$p";
-                                    }).toList()
-                                  : [];
-
-                              return CommonPostCards(
-                                onTapPhoto: () {
-                                  if (postImages.isNotEmpty) {
-                                    Get.to(
-                                      () => FullScreenImageView(
-                                        images: postImages,
-                                      ),
-                                    );
-                                  }
-                                },
-                                onTapProfile: () {
-                                  if (LocalStorage.token.isNotEmpty) {
-                                    Get.to(
-                                      () => ViewFriendScreen(
-                                        userId: data.user.id,
-                                        isFriend: false,
-                                      ),
-                                    );
-                                  }
-                                },
-                                clickerType: data.clickerType,
-                                userName: data.user.name,
-                                userAvatar:
-                                    "${ApiEndPoint.imageUrl}${data.user.image}",
-                                timeAgo: _formatPostTime(data.createdAt),
-                                location: data.address.isNotEmpty
-                                    ? data.address.split(',')[0]
-                                    : "",
-                                images: postImages,
-                                description: data.description,
-                                isFriend: false,
-                                privacyImage: data.privacy == "public"
-                                    ? AppIcons.public
-                                    : data.privacy == "friends"
-                                    ? AppIcons.friends
-                                    : AppIcons.onlyMe,
-                              );
-                            },
-                          );
-                  },
-                ),
-
-                Obx(()
+              // ── Footer Indicators ─────────────────────────────────────────
+              SliverToBoxAdapter(
+                child: Obx(() {
                   if (controller.isLoadingMore.value) {
                     return Padding(
                       padding: EdgeInsets.symmetric(vertical: 20.h),
                       child: const Center(child: CircularProgressIndicator()),
                     );
                   }
-
-          // Show "end of posts" message only when all pages loaded=============
-
 
                   if (!controller.isLoading.value &&
                       controller.filteredPosts.isNotEmpty &&
@@ -356,10 +380,10 @@ class _ClickerScreenState extends State<ClickerScreen> {
                   }
                   return const SizedBox.shrink();
                 }),
+              ),
 
-                SizedBox(height: 20.h),
-              ],
-            ),
+              SliverToBoxAdapter(child: SizedBox(height: 20.h)),
+            ],
           ),
         );
       }),
