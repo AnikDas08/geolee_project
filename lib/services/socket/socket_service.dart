@@ -132,7 +132,9 @@ class SocketServices {
         ">>>>>>>>>>>> 🔔 New UNIQUE Notification via socket [$namespace] ($event): $data <<<<<<<<<<<<",
       );
       
-      NotificationService.showNotification(data);
+      // Removed: NotificationService.showNotification(data);
+      // We now use Firebase as the sole source for notification banners.
+      
       _handleNewNotification(data);
     } catch (e) {
       debugPrint("Error in _onNotificationReceived: $e");
@@ -150,6 +152,19 @@ class SocketServices {
       final newNotification = NotificationModel.fromJson(
         data as Map<String, dynamic>,
       );
+
+      // Avoid adding chat messages to the general notification list
+      final String lowerTitle = newNotification.title.toLowerCase();
+      final String lowerMessage = newNotification.message.toLowerCase();
+      
+      if (lowerTitle.contains('message') || 
+          lowerTitle.contains('chat') || 
+          lowerMessage.contains('sent a message') || 
+          lowerMessage.contains('sent an image') || 
+          lowerMessage.contains('sent a file')) {
+        debugPrint("💬 Ignoring chat message in general notification list: ID=${newNotification.id}");
+        return;
+      }
 
       // Secondary check: avoid adding if ID already exists in the list
       if (controller.notifications.any((n) => n.id == newNotification.id)) {
@@ -225,20 +240,15 @@ class SocketServices {
           ? '📄 Sent a document'
           : '📎 Sent a file';
 
-      NotificationService.showNotification({
-        'title': senderName,
-        'message': body,
-      });
+      // Removed: NotificationService.showNotification({...});
+      // We now use Firebase as the sole source for notification banners.
 
       // ==========================================
 
-      if (Get.isRegistered<NotificationsController>()) {
-        final controller = Get.find<NotificationsController>();
-        controller.unreadCount.value++;
-        controller.update();
-      }
+      // Removed: NotificationsController badge increment.
+      // Chat messages should only update their own UI/badge, not general notifications.
 
-      debugPrint("✅ Message notification shown from: $senderName");
+      debugPrint("✅ Message processed for: $senderName (General notification badge ignored)");
 
     } catch (e) {
 

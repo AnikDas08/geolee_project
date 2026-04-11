@@ -63,8 +63,8 @@ class CommonPostCards extends StatelessWidget {
                       height: 36.r,
                       borderRadius: 18.r,
                       fill: BoxFit.cover,
-                      memCacheHeight: (36 * 2.5).toInt(),
-                      memCacheWidth: (36 * 2.5).toInt(),
+                      memCacheHeight: (36 * 3.5).toInt(),
+                      memCacheWidth: (36 * 3.5).toInt(),
                       defaultImage: "assets/images/profilePlaceholder.jpg",
                     ),
                   ),
@@ -217,9 +217,8 @@ class _PostImageSliderState extends State<_PostImageSlider> {
                       width: double.infinity,
                       height: 190.h,
                       fill: BoxFit.cover,
-                      // ✅ Fixed: memCacheWidth add করা হয়েছে — এটাই 1GB এর কারণ ছিল
-                      memCacheHeight: (190 * 2.5).toInt(),
-                      memCacheWidth: 800,
+                      // ✅ Quality Fix: Height limit সরিয়ে শুধু Width limit রাখা হয়েছে যাতে Aspect Ratio ঠিক থাকে
+                      memCacheWidth: 1000,
                     ),
                   ),
                 );

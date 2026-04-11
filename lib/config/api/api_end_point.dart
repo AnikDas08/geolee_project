@@ -4,6 +4,11 @@ class ApiEndPoint {
   static const String imageUrl = "https://clicker-api.just-metaverse.com";
   static const String socketUrl = "https://clicker-api.just-metaverse.com";
 
+  // //Local
+  // static const String baseUrl = "http://10.10.7.7:5006/api/v1";
+  // static const String imageUrl = "http://10.10.7.7:5006";
+  // static const String socketUrl = "http://10.10.7.7:5006";
+
 
 
 
@@ -22,6 +27,7 @@ class ApiEndPoint {
 
   // User ===========================================
   static const String updateProfile = "$baseUrl/users/profile";
+  static const String fcmTokenUpdate = "$baseUrl/users/profile";
   static const String getProfile = "$baseUrl/users/profile";
   static const String getUserSingleProfileById = "$baseUrl/users/single/";
   static const String nearByUsers = "$baseUrl/users";

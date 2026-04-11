@@ -1,5 +1,6 @@
-import 'dart:convert';
-import 'package:http/http.dart' as http;
+import 'package:flutter/material.dart';
+import '../../config/api/api_end_point.dart';
+import 'api_service.dart';
 
 class UserApiService {
   static Future<void> sendTokenToServer({
@@ -7,24 +8,19 @@ class UserApiService {
     required String token,
   }) async {
     try {
-      final response = await http.post(
-        Uri.parse("https://yourapi.com/save-fcm-token"),
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: jsonEncode({
-          "user_id": userId,
-          "fcm_token": token,
-        }),
+      final response = await ApiService.multipartUpdate(
+        ApiEndPoint.fcmTokenUpdate,
+        body: {"fcmToken": token},
+        method: "PATCH",
       );
 
-      if (response.statusCode == 200) {
-        print("✅ Token sent successfully");
+      if (response.isSuccess) {
+        debugPrint("✅ FCM Token updated successfully");
       } else {
-        print("❌ Failed to send token: ${response.body}");
+        debugPrint("❌ Failed to update FCM Token: ${response.message}");
       }
     } catch (e) {
-      print("❌ Error sending token: $e");
+      debugPrint("❌ Error updating token: $e");
     }
   }
 }

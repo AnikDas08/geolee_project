@@ -105,7 +105,10 @@ class _ClickerScreenState extends State<ClickerScreen> {
               parent: ClampingScrollPhysics(),
             ),
             slivers: [
-              // ── Search & Suggestions ──────────────────────────────────────
+
+              // Search & Suggestions
+
+
               if (LocalStorage.token.isNotEmpty)
                 SliverPadding(
                   padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 0),
@@ -216,8 +219,7 @@ class _ClickerScreenState extends State<ClickerScreen> {
                                     height: 150.h,
                                     width: double.infinity,
                                     fill: BoxFit.cover,
-                                    memCacheWidth: 800,
-                                    memCacheHeight: (150 * 2.5).toInt(),
+                                    memCacheWidth: 1000,
                                   ),
                                 ),
                               );
@@ -253,7 +255,8 @@ class _ClickerScreenState extends State<ClickerScreen> {
                   ),
                 ),
 
-              // ── Header & Filter ───────────────────────────────────────────
+              // ── Header & Filter
+
               SliverPadding(
                 padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 16.h),
                 sliver: SliverToBoxAdapter(

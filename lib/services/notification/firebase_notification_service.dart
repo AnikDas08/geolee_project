@@ -1,42 +1,30 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
+import 'package:giolee78/firebase_options.dart';
 import 'package:giolee78/services/notification/notification_service.dart';
+import 'package:giolee78/services/storage/storage_services.dart';
+import 'package:giolee78/services/api/user_api_service.dart';
 
 /// Top-level function for background and terminated notifications.
-/// Must not be an anonymous function or a class method.
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  // Ensure Firebase is initialized for background processes
-  await Firebase.initializeApp();
+  // Background isolates need their own initialization
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await NotificationService.initLocalNotification();
+  
   debugPrint("Handling a background/terminated message: ${message.messageId}");
 
-
-
-
-  //foreground message===============================================
-/*
-  FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-    debugPrint('Got a message whilst in the foreground!');
-    debugPrint('Message data: ${message.data}');
-
-    if (message.notification != null) {
-      NotificationService.showNotification({
-        'title': message.notification!.title,
-        'message': message.notification!.body,
-        'data': message.data,
-      });
-    }
-  });
-*/
-
-
-
-  if (message.notification != null) {
-    debugPrint('Message Title: ${message.notification?.title}');
-    debugPrint('Message Body: ${message.notification?.body}');
+  // Only show manual notification if the payload DOES NOT have a notification object.
+  // If message.notification exists, the Android OS shows it automatically in background/terminated mode.
+  if (message.notification == null && message.data.isNotEmpty) {
+     await NotificationService.showNotification(message.data);
   }
 }
+
+
+
+
 
 class FirebaseNotificationService {
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
@@ -61,15 +49,27 @@ class FirebaseNotificationService {
       debugPrint('Got a message whilst in the foreground!');
       debugPrint('Message data: ${message.data}');
 
+      // Filter: Silence message banners in foreground as Socket handles the badge/UI.
+      final String type = message.data['type']?.toString().toLowerCase() ?? '';
+      final bool isMessage = type == 'message' || 
+                             type == 'chat' || 
+                             message.data.containsKey('chat') || 
+                             message.data.containsKey('text') || 
+                             message.data.containsKey('content');
+
+      if (isMessage) {
+        debugPrint("💬 Foreground message detected. Skipping banner (badge updated via Socket).");
+        return; 
+      }
+
       if (message.notification != null) {
-        debugPrint(
-            'Message also contained a notification: ${message.notification}');
-        // Provide the message mapping to existing NotificationService
-        // NotificationService.showNotification({
-        //  'title': message.notification!.title,
-        //  'message': message.notification!.body,
-        //  'data': message.data,
-        // });
+        NotificationService.showNotification({
+          'title': message.notification!.title,
+          'message': message.notification!.body,
+          'data': message.data,
+        });
+      } else if (message.data.isNotEmpty) {
+        NotificationService.showNotification(message.data);
       }
     });
 
@@ -109,7 +109,12 @@ class FirebaseNotificationService {
   void listenToTokenRefresh() {
     _firebaseMessaging.onTokenRefresh.listen((newToken) {
       debugPrint("FCM Token refreshed: $newToken");
-      // TODO: Send new token to backend
+      if (LocalStorage.userId.isNotEmpty) {
+        UserApiService.sendTokenToServer(
+          userId: LocalStorage.userId,
+          token: newToken,
+        );
+      }
     });
   }
 }
