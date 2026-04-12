@@ -11,10 +11,17 @@ import 'package:giolee78/services/api/user_api_service.dart';
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   // Background isolates need their own initialization
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  await NotificationService.initLocalNotification();
-  
   debugPrint("Handling a background/terminated message: ${message.messageId}");
 
+  // Ensure local storage is loaded to check login status
+  await LocalStorage.getAllPrefData();
+  if (!LocalStorage.isLogIn) {
+    debugPrint("User is not logged in. Skipping notification banner.");
+    return;
+  }
+
+  await NotificationService.initLocalNotification();
+  
   // Only show manual notification if the payload DOES NOT have a notification object.
   // If message.notification exists, the Android OS shows it automatically in background/terminated mode.
   if (message.notification == null && message.data.isNotEmpty) {
@@ -38,7 +45,15 @@ class FirebaseNotificationService {
     //  Set the background message handler============================
     FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
 
-    // 3. Optional: Listen to foreground messages and show local notifications using the existing NotificationService if they are in foreground.
+    // Set foreground presentation options for iOS to show banners
+    await _firebaseMessaging.setForegroundNotificationPresentationOptions(
+      alert: true,
+      badge: false, // Don't show badge by default in foreground
+      sound: true,
+    );
+
+    // 3. Optional: Listen to foreground messages and show local notifications
+    // using the existing NotificationService if they are in foreground.
     // The user explicitly requested "only background and terminated", 
     // but if the app is foreground, Firebase by default DOES NOT show a banner,
     // so we can suppress or just show a custom flutter_local_notification.
@@ -49,7 +64,7 @@ class FirebaseNotificationService {
       debugPrint('Got a message whilst in the foreground!');
       debugPrint('Message data: ${message.data}');
 
-      // Filter: Silence message banners in foreground as Socket handles the badge/UI.
+      // Filter: Silence message banners in foreground as Socket handles the UI/badge.
       final String type = message.data['type']?.toString().toLowerCase() ?? '';
       final bool isMessage = type == 'message' || 
                              type == 'chat' || 
@@ -58,7 +73,7 @@ class FirebaseNotificationService {
                              message.data.containsKey('content');
 
       if (isMessage) {
-        debugPrint("💬 Foreground message detected. Skipping banner (badge updated via Socket).");
+        debugPrint("💬 Foreground message detected. Skipping banner as requested.");
         return; 
       }
 

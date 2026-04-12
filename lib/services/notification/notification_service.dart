@@ -9,10 +9,9 @@ class NotificationService {
       FlutterLocalNotificationsPlugin();
 
   static Future<void> initLocalNotification() async {
-    flutterLocalNotificationsPlugin
-        .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>()
-        ?.requestNotificationsPermission();
+    // Note: requestNotificationsPermission is called in UI isolate elsewhere.
+    // Calling it here causes crashes in background isolates.
+    
     final androidInitializationSettings =
         const AndroidInitializationSettings("@mipmap/ic_launcher");
     final iosInitializationSettings = const DarwinInitializationSettings();
@@ -26,7 +25,7 @@ class NotificationService {
       // Get.toNamed(AppRoute.notification);
     });
 
-    // Create the high importance channel
+    // Create the high importance channel for general notifications
     const AndroidNotificationChannel channel = AndroidNotificationChannel(
       "high_importance_channel", 
       "High Importance Notifications",
@@ -35,9 +34,21 @@ class NotificationService {
       playSound: true,
     );
 
-    await flutterLocalNotificationsPlugin
-        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
-        ?.createNotificationChannel(channel);
+    // Create a dedicated channel for messages that doesn't show a badge
+    const AndroidNotificationChannel messageChannel = AndroidNotificationChannel(
+      "message_channel", 
+      "Chat Messages",
+      importance: Importance.max,
+      description: "This channel is used for chat message banners without badges.",
+      playSound: true,
+      showBadge: false, // Suppress icon badge for messages
+    );
+
+    final androidPlugin = flutterLocalNotificationsPlugin
+        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
+        
+    await androidPlugin?.createNotificationChannel(channel);
+    await androidPlugin?.createNotificationChannel(messageChannel);
   }
 
   static Future<void> showNotification(dynamic message) async {
@@ -49,16 +60,26 @@ class NotificationService {
     final String title = data['title'] ?? message['title'] ?? data['message'] ?? message['message'] ?? "New Notification";
     final String body = data['body'] ?? message['body'] ?? data['message'] ?? message['message'] ?? "";
 
+    // Detect if this is a chat message
+    final String type = (data['type'] ?? '').toString().toLowerCase();
+    final bool isMessage = type == 'chat' || 
+                           type == 'message' || 
+                           title.toLowerCase().contains('message') || 
+                           body.toLowerCase().contains('message');
+
     // Determine if we should show a snackbar (foreground) or a system notification (background)
     bool isResumed = false;
     try {
       isResumed = WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed;
     } catch (_) {
-      // In background isolates, WidgetsBinding might not be fully initialized or accessible
+      // In background isolates, WidgetsBinding might not be fully initialized
     }
 
     if (isResumed) {
       // Show premium in-app notification (Snackbar)
+      // Note: We skip this for messages if handled by Socket.
+      // But if showNotification is called, it means we want to show it.
+      
       Get.snackbar(
         "", // Empty title as we are using titleText
         "", // Empty message as we are using messageText
@@ -123,25 +144,27 @@ class NotificationService {
         ),
       );
     } else {
-      // When in background or from background isolate, show system Tray notification
-      const AndroidNotificationChannel channel = AndroidNotificationChannel(
-        "high_importance_channel",
-        "High Importance Notifications",
-        importance: Importance.max,
-        description: "This channel is used for important notifications.",
-        playSound: true,
-      );
+      // System Tray notification logic
+      final String channelId = isMessage ? "message_channel" : "high_importance_channel";
+      final String channelName = isMessage ? "Chat Messages" : "High Importance Notifications";
 
       final AndroidNotificationDetails androidNotificationDetails =
-          AndroidNotificationDetails(channel.id, channel.name,
-              channelDescription: channel.description,
-              importance: Importance.high,
-              priority: Priority.high,
-              ticker: "ticker");
+          AndroidNotificationDetails(
+        channelId, 
+        channelName,
+        importance: Importance.high,
+        priority: Priority.high,
+        ticker: "ticker",
+        timeoutAfter: isMessage ? 5000 : null, // Auto-remove from list after 5s for messages
+      );
 
       final DarwinNotificationDetails darwinNotificationDetails =
-          const DarwinNotificationDetails(
-              presentAlert: true, presentBadge: true, presentSound: true);
+          DarwinNotificationDetails(
+        presentAlert: true,
+        presentBadge: isMessage ? false : true,
+        presentSound: true,
+        presentList: isMessage ? false : true,
+      );
 
       final NotificationDetails notificationDetails = NotificationDetails(
           android: androidNotificationDetails, iOS: darwinNotificationDetails);
