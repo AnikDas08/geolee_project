@@ -2,6 +2,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
+import 'package:giolee78/services/storage/storage_services.dart';
 import 'package:giolee78/utils/constants/app_colors.dart';
 
 class NotificationService {
@@ -52,6 +53,23 @@ class NotificationService {
   }
 
   static Future<void> showNotification(dynamic message) async {
+    // Global Guard: Only show notifications if the user is logged in.
+    // In background isolates (like firebaseMessagingBackgroundHandler), 
+    // static variables might lose their state, so we check/reload if needed.
+    if (!LocalStorage.isLogIn) {
+      // Small optimization: If we are in background, try to reload once just to be sure.
+      try {
+        if (WidgetsBinding.instance.lifecycleState != AppLifecycleState.resumed) {
+          await LocalStorage.getAllPrefData();
+        }
+      } catch (_) {}
+      
+      if (!LocalStorage.isLogIn) {
+        debugPrint("Skipping notification: User is not logged in.");
+        return;
+      }
+    }
+
     // Handle nested 'data' if it exists
     final Map<String, dynamic> data = (message is Map && message.containsKey('data') && message['data'] is Map)
         ? message['data'] as Map<String, dynamic>

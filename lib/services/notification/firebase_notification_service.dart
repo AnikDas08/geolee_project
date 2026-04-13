@@ -64,6 +64,11 @@ class FirebaseNotificationService {
       debugPrint('Got a message whilst in the foreground!');
       debugPrint('Message data: ${message.data}');
 
+      if (!LocalStorage.isLogIn) {
+        debugPrint("User is not logged in. Skipping foreground notification.");
+        return;
+      }
+
       // Filter: Silence message banners in foreground as Socket handles the UI/badge.
       final String type = message.data['type']?.toString().toLowerCase() ?? '';
       final bool isMessage = type == 'message' || 
@@ -120,7 +125,7 @@ class FirebaseNotificationService {
     }
   }
 
-  // Listen for Token refreshes============================================
+  // Listen for Token refreshes===================================
   void listenToTokenRefresh() {
     _firebaseMessaging.onTokenRefresh.listen((newToken) {
       debugPrint("FCM Token refreshed: $newToken");
