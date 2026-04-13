@@ -58,6 +58,8 @@ class SignInController extends GetxController {
         await getUserData();
 
         // Sync FCM Token
+
+
         try {
           final fcmToken = await FirebaseNotificationService().getFCMToken();
           if (fcmToken != null && LocalStorage.userId.isNotEmpty) {
@@ -65,6 +67,10 @@ class SignInController extends GetxController {
               userId: LocalStorage.userId,
               token: fcmToken,
             );
+
+            await LocalStorage.setString(LocalStorageKeys.fcmToken, fcmToken);
+
+
           }
         } catch (e) {
           debugPrint("Error syncing FCM token after login: $e");

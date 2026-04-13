@@ -6,8 +6,9 @@
   <component name="ChangeListManager">
     <list default="true" id="4595b9b7-2a22-4f3b-822a-c8d9019a0e37" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/services/notification/firebase_notification_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/services/notification/firebase_notification_service.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/services/notification/notification_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/services/notification/notification_service.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/config/secret_key/secret_key.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/config/secret_key/secret_key.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/config/theme/light_theme.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/config/theme/light_theme.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/features/clicker/presentation/screen/clicker_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/clicker/presentation/screen/clicker_screen.dart" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -63,5 +64,16 @@
       <updated>1775894292895</updated>
     </task>
     <servers />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
 </project>

@@ -51,7 +51,7 @@ class _ClickerScreenState extends State<ClickerScreen> {
     super.dispose();
   }
 
-  // Trigger load more when within 300px of bottom==================
+  // Trigger load more when within 300px of bottom==============================
 
   void _onScroll() {
     if (!_scrollController.hasClients) return;
@@ -130,7 +130,7 @@ class _ClickerScreenState extends State<ClickerScreen> {
                                 )
                               : const SizedBox.shrink(),
                         ),
-                        // 👇 Suggestions dropdown
+                        // Suggestions dropdown=================================
                         Obx(() {
                           if (controller.locationSuggestions.isEmpty) {
                             return const SizedBox.shrink();
@@ -180,7 +180,7 @@ class _ClickerScreenState extends State<ClickerScreen> {
                   ),
                 ),
 
-              // ── Banner Slider ─────────────────────────────────────────────
+              // ── Banner Slider ==============================================
               if (LocalStorage.token.isNotEmpty)
                 SliverPadding(
                   padding: EdgeInsets.only(top: 16.h),
@@ -253,7 +253,7 @@ class _ClickerScreenState extends State<ClickerScreen> {
                   ),
                 ),
 
-              // ── Header & Filter
+              // ── Header & Filter=============================================
               SliverPadding(
                 padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 16.h),
                 sliver: SliverToBoxAdapter(
@@ -273,7 +273,7 @@ class _ClickerScreenState extends State<ClickerScreen> {
                 ),
               ),
 
-              // ── Posts List ────────────────────────────────────────────────
+              // ── Posts List==================================================
               Builder(
                 builder: (context) {
                   final postsWithImages = controller.filteredPosts
@@ -346,7 +346,7 @@ class _ClickerScreenState extends State<ClickerScreen> {
                 },
               ),
 
-              // ── Footer Indicators ===================================================
+              // ── Footer Indicators ==========================================
               SliverToBoxAdapter(
                 child: Obx(() {
                   if (controller.isLoadingMore.value) {
@@ -382,6 +382,7 @@ class _ClickerScreenState extends State<ClickerScreen> {
     );
   }
 
+
   Widget _buildEmptyState() {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 60.h),
@@ -401,7 +402,6 @@ class _ClickerScreenState extends State<ClickerScreen> {
       ),
     );
   }
-
   Widget _buildFilterButton(BuildContext context) {
     return GestureDetector(
       onTap: () => _showFilterBottomSheet(context),
@@ -424,7 +424,6 @@ class _ClickerScreenState extends State<ClickerScreen> {
       ),
     );
   }
-
   void _showFilterBottomSheet(BuildContext context) {
     Get.bottomSheet(
       Container(
@@ -467,4 +466,5 @@ class _ClickerScreenState extends State<ClickerScreen> {
       ),
     );
   }
+
 }

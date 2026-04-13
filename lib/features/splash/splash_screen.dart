@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:giolee78/component/text/common_text.dart';
+import 'package:giolee78/services/storage/storage_keys.dart';
 import 'package:giolee78/services/storage/storage_services.dart';
 import 'package:giolee78/utils/extensions/extension.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -55,6 +56,13 @@ class _SplashScreenState extends State<SplashScreen> {
             token: token,
           );
         }
+
+
+        LocalStorage.setString(LocalStorageKeys.fcmToken, token);
+
+        print("FCM TOKEN IS:${token}");
+
+
       }
     } catch (e) {
       debugPrint("❌ FCM Init Error: $e");

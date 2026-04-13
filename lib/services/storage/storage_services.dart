@@ -1,8 +1,13 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
+import 'package:giolee78/services/api/api_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../config/api/api_end_point.dart';
 import '../../config/route/app_routes.dart';
 import '../../features/message/presentation/controller/chat_controller.dart';
 import '../../utils/log/app_log.dart';
+import '../notification/firebase_notification_service.dart';
 import 'storage_keys.dart';
 
 class LocalStorage {
@@ -37,6 +42,7 @@ class LocalStorage {
   static String createdAt = "";
   static String updatedAt = "";
   static bool isLocationVisible = false;
+  static String fcmToken = '';
 
   static SharedPreferences? preferences;
 
@@ -66,19 +72,19 @@ class LocalStorage {
     bio = localStorage.getString(LocalStorageKeys.bio) ?? "";
     lat = localStorage.getDouble(LocalStorageKeys.lat) ?? 0.0;
     long = localStorage.getDouble(LocalStorageKeys.long) ?? 0.0;
-    accountInfoStatus = localStorage.getBool(LocalStorageKeys.accountInfoStatus) ?? false;
+    accountInfoStatus =
+        localStorage.getBool(LocalStorageKeys.accountInfoStatus) ?? false;
     createdAt = localStorage.getString(LocalStorageKeys.createdAt) ?? "";
     updatedAt = localStorage.getString(LocalStorageKeys.updatedAt) ?? "";
-    isLocationVisible = localStorage.getBool(LocalStorageKeys.isLocationVisible) ?? false;
+    isLocationVisible =
+        localStorage.getBool(LocalStorageKeys.isLocationVisible) ?? false;
     radius = localStorage.getString(LocalStorageKeys.radius) ?? "5";
     appLog(token, source: "Local Storage Data Loaded");
   }
 
-
   static Future<void> setString(String key, String value) async {
     final localStorage = await _getStorage();
     await localStorage.setString(key, value);
-
 
     if (key == LocalStorageKeys.role) role = value;
     if (key == LocalStorageKeys.myRole) myRole = value;
@@ -108,22 +114,43 @@ class LocalStorage {
   ///============================================
 
   static Future<void> removeAllPrefData() async {
+    try {
+      final prefs = await _getStorage();
 
+      final token = prefs.getString(LocalStorageKeys.fcmToken);
+      final userId = prefs.getString(LocalStorageKeys.userId) ?? "";
 
-    // ১. Clear SharedPreferences
-    final localStorage = await _getStorage();
-    await localStorage.clear();
+      // 1. REMOVE TOKEN FROM SERVER
 
-    _resetLocalStorageData();
+      if (token != null && token.isNotEmpty && userId.isNotEmpty) {
+        final response = await ApiService.delete(
+          ApiEndPoint.deleteFcmToken,
+          body: {"token": token},
+        );
 
+        if (response.statusCode == 200) {
+          debugPrint("FCM Token deleted successfully");
+        } else {
+          debugPrint("FCM delete response: ${response.statusCode}");
+        }
+      }
 
+      await FirebaseMessaging.instance.deleteToken();
 
-    if (Get.isRegistered<ChatController>()) {
-      Get.delete<ChatController>(force: true);
+      await prefs.clear();
+
+      _resetLocalStorageData();
+
+      // 5. CLEAR CONTROLLERS
+      if (Get.isRegistered<ChatController>()) {
+        Get.delete<ChatController>(force: true);
+      }
+
+      // 6. NAVIGATE
+      Get.offAllNamed(AppRoutes.signIn);
+    } catch (e) {
+      debugPrint("❌ Logout error: $e");
     }
-
-
-    Get.offAllNamed(AppRoutes.signIn);
   }
 
   static void _resetLocalStorageData() {
