@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:giolee78/features/home/presentation/controller/home_nav_controller.dart';
 import 'package:giolee78/features/message/presentation/controller/chat_controller.dart';
+import 'package:giolee78/services/notification/notification_service.dart';
 
 import '../../../../component/button/common_button.dart';
 import '../../../../component/image/common_image.dart';
@@ -26,6 +27,27 @@ class HomeNav extends StatefulWidget {
 
 class _HomeNavState extends State<HomeNav> {
   final HomeNavController controller = Get.put(HomeNavController());
+
+  @override
+  void initState() {
+    super.initState();
+    // After first frame, handle any pending notification from a terminated launch
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkPendingNotification();
+    });
+  }
+
+  /// If the app was launched by tapping a notification (terminated state),
+  /// the data was stored in [NotificationService.pendingNotificationData].
+  /// We navigate here — after HomeNav is fully mounted — so nothing overrides us.
+  void _checkPendingNotification() {
+    final data = NotificationService.pendingNotificationData;
+    if (data != null && data.isNotEmpty) {
+      debugPrint('🔔 HomeNav: consuming pending notification → $data');
+      NotificationService.pendingNotificationData = null; // consume once
+      NotificationService.handleNotificationTap(data);
+    }
+  }
 
   bool get isGuest => LocalStorage.token.isEmpty;
 

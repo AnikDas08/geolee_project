@@ -102,7 +102,7 @@ class _StripeWebViewPageState extends State<StripeWebViewPage> {
     } else if (isCancel) {
       _hasNavigated = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        Get.offAll(() => const NotificationScreen());
+        Get.offAll(() => HomeNav());
         Get.snackbar(
           "Cancel",
           "Payment cancelled",

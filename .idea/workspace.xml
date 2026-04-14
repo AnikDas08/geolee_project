@@ -4,14 +4,13 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="93fa4530-e8e3-4d70-9a14-4b8c94c737c0" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Flutter_Plugins.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ios/Podfile.lock" beforeDir="false" afterPath="$PROJECT_DIR$/ios/Podfile.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/features/clicker/presentation/widget/common_post_card.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/clicker/presentation/widget/common_post_card.dart" afterDir="false" />
+    <list default="true" id="4595b9b7-2a22-4f3b-822a-c8d9019a0e37" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/config/route/app_routes.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/config/route/app_routes.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/features/home/presentation/screen/home_nav_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/home/presentation/screen/home_nav_screen.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/services/api/user_api_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/services/api/user_api_service.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/services/notification/firebase_notification_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/services/notification/firebase_notification_service.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/services/notification/notification_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/services/notification/notification_service.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/services/socket/socket_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/services/socket/socket_service.dart" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -24,34 +23,34 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
-  "lastFilter": {
-    "state": "OPEN",
-    "assignee": "naimulhassan2001"
-  }
-}]]></component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/AnikDas08/geolee_project.git",
-    "accountId": "554e9487-abc3-43c7-b16d-1c40c6885981"
-  }
-}]]></component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 1
-}]]></component>
-  <component name="ProjectId" id="3CHy4vMfPswmUtvtXAjlSrfUdQr" />
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 1
+}</component>
+  <component name="ProjectId" id="3CCf5sHJqhziFysSQCUvF623rgr" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "dart.analysis.tool.window.visible": "false",
-    "git-widget-placeholder": "main",
-    "settings.editor.selected.configurable": "AndroidSdkUpdater"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Flutter.main.dart.executor&quot;: &quot;Run&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.readMode.enableVisualFormatting&quot;: &quot;true&quot;,
+    &quot;cf.first.check.clang-format&quot;: &quot;false&quot;,
+    &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;dart.analysis.tool.window.visible&quot;: &quot;false&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;ibrahim__dev&quot;,
+    &quot;io.flutter.project.isFirstOpen&quot;: &quot;true&quot;,
+    &quot;io.flutter.reload.alreadyRun&quot;: &quot;true&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;AndroidSdkUpdater&quot;,
+    &quot;show.migrate.to.gradle.popup&quot;: &quot;false&quot;
   }
-}]]></component>
+}</component>
   <component name="RunManager">
     <configuration name="main.dart" type="FlutterRunConfigurationType" factoryName="Flutter">
       <option name="filePath" value="$PROJECT_DIR$/lib/main.dart" />
@@ -60,12 +59,23 @@
   </component>
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
-      <changelist id="93fa4530-e8e3-4d70-9a14-4b8c94c737c0" name="Changes" comment="" />
-      <created>1776056601856</created>
+      <changelist id="4595b9b7-2a22-4f3b-822a-c8d9019a0e37" name="Changes" comment="" />
+      <created>1775894292895</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
-      <updated>1776056601856</updated>
+      <updated>1775894292895</updated>
     </task>
     <servers />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
 </project>

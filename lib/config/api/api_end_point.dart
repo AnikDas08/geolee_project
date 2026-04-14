@@ -98,6 +98,7 @@ class ApiEndPoint {
   static const String getsMyAdsByStatus = "$baseUrl/advertisements/me";
   static const String advertiserUpdate = "$baseUrl/advertisers/update/me";
   static const String noneFriendChatUpdate= "$baseUrl/chats/update/";
+  static const String deleteFcmToken= "$baseUrl/users/remove-fcm-token";
 
   // Support ========================================
   static const String support = "$baseUrl/supports/create";

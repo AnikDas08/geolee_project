@@ -71,6 +71,17 @@
 	</array>
 	<key>NSAppleMusicUsageDescription</key>
     <string>This app needs access to your media library to enhance user experience.</string>
-
+	<key>NSUserTrackingUsageDescription</key>
+	<string>This identifier will be used to deliver personalized ads and content to you, and to improve our services.</string>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>sms</string>
+		<string>tel</string>
+		<string>mailto</string>
+		<string>https</string>
+		<string>http</string>
+		<string>googlechrome</string>
+		<string>comgooglemaps</string>
+	</array>
 </dict>
 </plist>

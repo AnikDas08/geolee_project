@@ -51,7 +51,7 @@ class _ClickerScreenState extends State<ClickerScreen> {
     super.dispose();
   }
 
-  // Trigger load more when within 300px of bottom==================
+  // Trigger load more when within 300px of bottom==============================
 
   void _onScroll() {
     if (!_scrollController.hasClients) return;
@@ -105,10 +105,7 @@ class _ClickerScreenState extends State<ClickerScreen> {
               parent: ClampingScrollPhysics(),
             ),
             slivers: [
-
               // Search & Suggestions
-
-
               if (LocalStorage.token.isNotEmpty)
                 SliverPadding(
                   padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 0),
@@ -133,7 +130,7 @@ class _ClickerScreenState extends State<ClickerScreen> {
                                 )
                               : const SizedBox.shrink(),
                         ),
-                        // 👇 Suggestions dropdown
+                        // Suggestions dropdown=================================
                         Obx(() {
                           if (controller.locationSuggestions.isEmpty) {
                             return const SizedBox.shrink();
@@ -183,7 +180,7 @@ class _ClickerScreenState extends State<ClickerScreen> {
                   ),
                 ),
 
-              // ── Banner Slider ─────────────────────────────────────────────
+              // ── Banner Slider ==============================================
               if (LocalStorage.token.isNotEmpty)
                 SliverPadding(
                   padding: EdgeInsets.only(top: 16.h),
@@ -219,7 +216,8 @@ class _ClickerScreenState extends State<ClickerScreen> {
                                     height: 150.h,
                                     width: double.infinity,
                                     fill: BoxFit.cover,
-                                    memCacheWidth: 1000,
+                                    memCacheWidth: 800,
+                                    memCacheHeight: (150 * 2.5).toInt(),
                                   ),
                                 ),
                               );
@@ -255,8 +253,7 @@ class _ClickerScreenState extends State<ClickerScreen> {
                   ),
                 ),
 
-              // ── Header & Filter
-
+              // ── Header & Filter=============================================
               SliverPadding(
                 padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 16.h),
                 sliver: SliverToBoxAdapter(
@@ -276,7 +273,7 @@ class _ClickerScreenState extends State<ClickerScreen> {
                 ),
               ),
 
-              // ── Posts List ────────────────────────────────────────────────
+              // ── Posts List==================================================
               Builder(
                 builder: (context) {
                   final postsWithImages = controller.filteredPosts
@@ -294,67 +291,62 @@ class _ClickerScreenState extends State<ClickerScreen> {
                   return SliverPadding(
                     padding: EdgeInsets.symmetric(horizontal: 16.w),
                     sliver: SliverList(
-                      delegate: SliverChildBuilderDelegate(
-                        (context, index) {
-                          final data = postsWithImages[index];
-                          final List<String> postImages = data.photos.isNotEmpty
-                              ? data.photos.map((p) {
-                                  if (p.startsWith('http')) return p;
-                                  return p.startsWith('/')
-                                      ? "${ApiEndPoint.imageUrl}$p"
-                                      : "${ApiEndPoint.imageUrl}/$p";
-                                }).toList()
-                              : [];
+                      delegate: SliverChildBuilderDelegate((context, index) {
+                        final data = postsWithImages[index];
+                        final List<String> postImages = data.photos.isNotEmpty
+                            ? data.photos.map((p) {
+                                if (p.startsWith('http')) return p;
+                                return p.startsWith('/')
+                                    ? "${ApiEndPoint.imageUrl}$p"
+                                    : "${ApiEndPoint.imageUrl}/$p";
+                              }).toList()
+                            : [];
 
-                          return Padding(
-                            padding: EdgeInsets.only(bottom: 16.h),
-                            child: CommonPostCards(
-                              onTapPhoto: () {
-                                if (postImages.isNotEmpty) {
-                                  Get.to(
-                                    () => FullScreenImageView(
-                                      images: postImages,
-                                    ),
-                                  );
-                                }
-                              },
-                              onTapProfile: () {
-                                if (LocalStorage.token.isNotEmpty) {
-                                  Get.to(
-                                    () => ViewFriendScreen(
-                                      userId: data.user.id,
-                                      isFriend: false,
-                                    ),
-                                  );
-                                }
-                              },
-                              clickerType: data.clickerType,
-                              userName: data.user.name,
-                              userAvatar:
-                                  "${ApiEndPoint.imageUrl}${data.user.image}",
-                              timeAgo: _formatPostTime(data.createdAt),
-                              location: data.address.isNotEmpty
-                                  ? data.address.split(',')[0]
-                                  : "",
-                              images: postImages,
-                              description: data.description,
-                              isFriend: false,
-                              privacyImage: data.privacy == "public"
-                                  ? AppIcons.public
-                                  : data.privacy == "friends"
-                                      ? AppIcons.friends
-                                      : AppIcons.onlyMe,
-                            ),
-                          );
-                        },
-                        childCount: itemCount,
-                      ),
+                        return Padding(
+                          padding: EdgeInsets.only(bottom: 16.h),
+                          child: CommonPostCards(
+                            onTapPhoto: () {
+                              if (postImages.isNotEmpty) {
+                                Get.to(
+                                  () => FullScreenImageView(images: postImages),
+                                );
+                              }
+                            },
+                            onTapProfile: () {
+                              if (LocalStorage.token.isNotEmpty) {
+                                Get.to(
+                                  () => ViewFriendScreen(
+                                    userId: data.user.id,
+                                    isFriend: false,
+                                  ),
+                                );
+                              }
+                            },
+                            clickerType: data.clickerType,
+                            userName: data.user.name,
+                            userAvatar:
+                                "${ApiEndPoint.imageUrl}${data.user.image}",
+                            timeAgo: _formatPostTime(data.createdAt),
+                            location: data.address.isNotEmpty
+                                ? data.address.split(',')[0]
+                                : "",
+                            images: postImages,
+                            description: data.description,
+                            isFriend: false,
+                            privacyImage: data.privacy == "public"
+                                ? AppIcons.public
+                                : data.privacy == "friends"
+                                ? AppIcons.friends
+                                : AppIcons.onlyMe,
+                          ),
+                        );
+                      }, childCount: itemCount),
                     ),
                   );
                 },
               ),
 
-              // ── Footer Indicators ─────────────────────────────────────────
+              // ── Footer Indicators ==========================================
               SliverToBoxAdapter(
                 child: Obx(() {
                   if (controller.isLoadingMore.value) {
@@ -390,6 +382,7 @@ class _ClickerScreenState extends State<ClickerScreen> {
     );
   }
 
+
   Widget _buildEmptyState() {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 60.h),
@@ -409,7 +402,6 @@ class _ClickerScreenState extends State<ClickerScreen> {
       ),
     );
   }
-
   Widget _buildFilterButton(BuildContext context) {
     return GestureDetector(
       onTap: () => _showFilterBottomSheet(context),
@@ -432,7 +424,6 @@ class _ClickerScreenState extends State<ClickerScreen> {
       ),
     );
   }
-
   void _showFilterBottomSheet(BuildContext context) {
     Get.bottomSheet(
       Container(
@@ -475,4 +466,5 @@ class _ClickerScreenState extends State<ClickerScreen> {
       ),
     );
   }
+
 }
