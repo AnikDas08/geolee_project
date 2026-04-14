@@ -32,7 +32,6 @@ class NotificationService {
       "High Importance Notifications",
       importance: Importance.max,
       description: "This channel is used for important notifications.",
-      playSound: true,
     );
 
     await flutterLocalNotificationsPlugin
@@ -129,7 +128,6 @@ class NotificationService {
         "High Importance Notifications",
         importance: Importance.max,
         description: "This channel is used for important notifications.",
-        playSound: true,
       );
 
       final AndroidNotificationDetails androidNotificationDetails =

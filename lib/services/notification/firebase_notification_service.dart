@@ -80,14 +80,8 @@ class FirebaseNotificationService {
   // Request User Permission for push notifications=========================
 
   Future<void> requestPermission() async {
-    NotificationSettings settings = await _firebaseMessaging.requestPermission(
-      alert: true,
-      announcement: false,
-      badge: true,
-      carPlay: false,
-      criticalAlert: false,
-      provisional: false,
-      sound: true,
+    final NotificationSettings settings = await _firebaseMessaging.requestPermission(
+      
     );
 
     debugPrint('User granted permission: ${settings.authorizationStatus}');
@@ -96,7 +90,7 @@ class FirebaseNotificationService {
   //Get the FCM Device Token===============================================
   Future<String?> getFCMToken() async {
     try {
-      String? token = await _firebaseMessaging.getToken();
+      final String? token = await _firebaseMessaging.getToken();
       debugPrint("Firebase Messaging Token (FCM): $token");
       return token;
     } catch (e) {

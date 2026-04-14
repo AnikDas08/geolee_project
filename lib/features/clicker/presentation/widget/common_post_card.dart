@@ -205,8 +205,6 @@ class _PostImageSliderState extends State<_PostImageSlider> {
             height: 190.h,
             child: PageView.builder(
               itemCount: widget.images.length,
-              // ✅ Fixed: adjacent page preload বন্ধ — memory কমবে
-              allowImplicitScrolling: false,
               onPageChanged: (index) => _currentIndex.value = index,
               itemBuilder: (context, index) {
                 return InkWell(

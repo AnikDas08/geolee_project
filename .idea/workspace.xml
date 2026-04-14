@@ -3,9 +3,69 @@
   <component name="AutoImportSettings">
     <option name="autoReloadType" value="NONE" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;settings.editor.selected.configurable&quot;: &quot;AndroidSdkUpdater&quot;
+  <component name="ChangeListManager">
+    <list default="true" id="93fa4530-e8e3-4d70-9a14-4b8c94c737c0" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Flutter_Plugins.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ios/Podfile.lock" beforeDir="false" afterPath="$PROJECT_DIR$/ios/Podfile.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/features/clicker/presentation/widget/common_post_card.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/clicker/presentation/widget/common_post_card.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/services/api/user_api_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/services/api/user_api_service.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/services/notification/firebase_notification_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/services/notification/firebase_notification_service.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/services/notification/notification_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/services/notification/notification_service.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/services/socket/socket_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/services/socket/socket_service.dart" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ClangdSettings">
+    <option name="formatViaClangd" value="false" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
+  "lastFilter": {
+    "state": "OPEN",
+    "assignee": "naimulhassan2001"
   }
-}</component>
+}]]></component>
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/AnikDas08/geolee_project.git",
+    "accountId": "554e9487-abc3-43c7-b16d-1c40c6885981"
+  }
+}]]></component>
+  <component name="ProjectColorInfo"><![CDATA[{
+  "associatedIndex": 1
+}]]></component>
+  <component name="ProjectId" id="3CHy4vMfPswmUtvtXAjlSrfUdQr" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "dart.analysis.tool.window.visible": "false",
+    "git-widget-placeholder": "main",
+    "settings.editor.selected.configurable": "AndroidSdkUpdater"
+  }
+}]]></component>
+  <component name="RunManager">
+    <configuration name="main.dart" type="FlutterRunConfigurationType" factoryName="Flutter">
+      <option name="filePath" value="$PROJECT_DIR$/lib/main.dart" />
+      <method v="2" />
+    </configuration>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="93fa4530-e8e3-4d70-9a14-4b8c94c737c0" name="Changes" comment="" />
+      <created>1776056601856</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1776056601856</updated>
+    </task>
+    <servers />
+  </component>
 </project>

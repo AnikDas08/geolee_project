@@ -6,7 +6,6 @@ import '../../features/notifications/data/model/notification_model.dart';
 import '../../features/notifications/presentation/controller/notifications_controller.dart';
 import '../../features/message/presentation/controller/message_controller.dart';
 import '../../features/friend/presentation/controller/my_friend_controller.dart';
-import '../notification/notification_service.dart';
 import 'package:get/get.dart';
 
 
