@@ -6,14 +6,23 @@ import 'package:giolee78/services/notification/notification_service.dart';
 import 'package:giolee78/services/storage/storage_services.dart';
 import 'package:giolee78/services/api/user_api_service.dart';
 
-/// Top-level function for background and terminated notifications.
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  // Background isolates need their own initialization
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  debugPrint("Handling a background/terminated message: ${message.messageId}");
 
-  // Ensure local storage is loaded to check login status
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  // ═══════════════════════════════════════════════════════
+  // 📦 PAYLOAD DEBUG — server ki pathaitase dekhun
+  // ═══════════════════════════════════════════════════════
+  debugPrint('📦 ===== FCM BACKGROUND PAYLOAD =====');
+  debugPrint('📦 notification.title : ${message.notification?.title}');
+  debugPrint('📦 notification.body  : ${message.notification?.body}');
+  debugPrint('📦 data keys total    : ${message.data.length}');
+  message.data.forEach((key, value) {
+    debugPrint('📦   [$key] = $value');
+  });
+  debugPrint('📦 =====================================');
+
   await LocalStorage.getAllPrefData();
   if (!LocalStorage.isLogIn) {
     debugPrint("User is not logged in. Skipping notification banner.");
@@ -21,9 +30,7 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   }
 
   await NotificationService.initLocalNotification();
-  
-  // Only show manual notification if the payload DOES NOT have a notification object.
-  // If message.notification exists, the Android OS shows it automatically in background/terminated mode.
+
   if (message.notification == null && message.data.isNotEmpty) {
      await NotificationService.showNotification(message.data);
   }
@@ -45,21 +52,35 @@ class FirebaseNotificationService {
     //  Set the background message handler============================
     FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
 
-    // Set foreground presentation options for iOS to show banners
     await _firebaseMessaging.setForegroundNotificationPresentationOptions(
       alert: true,
       badge: false, // Don't show badge by default in foreground
       sound: true,
     );
 
-    // 3. Optional: Listen to foreground messages and show local notifications
-    // using the existing NotificationService if they are in foreground.
-    // The user explicitly requested "only background and terminated", 
-    // but if the app is foreground, Firebase by default DOES NOT show a banner,
-    // so we can suppress or just show a custom flutter_local_notification.
 
 
 
+    // ── Terminated app: user tapped notification that launched the app ──────
+    // STORE here — splash's Get.offAllNamed(homeNav) would override immediate nav.
+    // HomeNav.initState() consumes this after mounting.
+    FirebaseMessaging.instance.getInitialMessage().then((RemoteMessage? message) {
+      if (message != null) {
+        final merged = _buildRoutingData(message);
+        debugPrint("📬 Terminated launch — merged data: $merged");
+        NotificationService.pendingNotificationData = merged;
+      }
+    });
+
+    // ── Background app: user tapped notification banner ───────────────────
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      final merged = _buildRoutingData(message);
+      debugPrint("📬 onMessageOpenedApp — merged data: $merged");
+      NotificationService.handleNotificationTap(merged);
+    });
+
+
+    // ── Foreground message ─────────────────────────────────────────────────
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       debugPrint('Got a message whilst in the foreground!');
       debugPrint('Message data: ${message.data}');
@@ -69,17 +90,16 @@ class FirebaseNotificationService {
         return;
       }
 
-      // Filter: Silence message banners in foreground as Socket handles the UI/badge.
       final String type = message.data['type']?.toString().toLowerCase() ?? '';
-      final bool isMessage = type == 'message' || 
-                             type == 'chat' || 
-                             message.data.containsKey('chat') || 
-                             message.data.containsKey('text') || 
+      final bool isMessage = type == 'message' ||
+                             type == 'chat' ||
+                             message.data.containsKey('chat') ||
+                             message.data.containsKey('text') ||
                              message.data.containsKey('content');
 
       if (isMessage) {
         debugPrint("💬 Foreground message detected. Skipping banner as requested.");
-        return; 
+        return;
       }
 
       if (message.notification != null) {
@@ -136,5 +156,31 @@ class FirebaseNotificationService {
         );
       }
     });
+  }
+
+  /// Merges [message.notification] fields + [message.data] into one flat map.
+  /// This ensures routing works whether the server sends a notification block,
+  /// a data block, or both.
+  static Map<String, dynamic> _buildRoutingData(RemoteMessage message) {
+    final Map<String, dynamic> merged = {};
+
+    // Start with the data payload (custom key-value pairs from backend)
+    merged.addAll(message.data);
+
+    // Add notification fields only if NOT already in data (data takes priority)
+    if (message.notification != null) {
+      merged.putIfAbsent('title', () => message.notification!.title ?? '');
+      merged.putIfAbsent('body', () => message.notification!.body ?? '');
+    }
+
+    // Log every field so we can see exactly what the server sends
+    debugPrint('🔔 ===== FCM RemoteMessage fields =====');
+    debugPrint('   notification.title : ${message.notification?.title}');
+    debugPrint('   notification.body  : ${message.notification?.body}');
+    debugPrint('   data keys          : ${message.data.keys.toList()}');
+    message.data.forEach((k, v) => debugPrint('   data.$k : $v'));
+    debugPrint('🔔 ======================================');
+
+    return merged;
   }
 }

@@ -21,6 +21,7 @@ import '../../features/auth/sign up/presentation/screen/sign_up_screen.dart';
 import '../../features/auth/sign up/presentation/screen/complete_profile.dart';
 import '../../features/auth/sign up/presentation/screen/verify_user.dart';
 import '../../features/auth/sign up/presentation/screen/add_location.dart';
+import '../../features/friend/presentation/screen/friend_request_screen.dart';
 import '../../features/message/presentation/screen/chat_screen.dart';
 import '../../features/message/presentation/screen/group_message.dart';
 import '../../features/message/presentation/screen/message_screen.dart';
@@ -73,6 +74,7 @@ class AppRoutes {
   static const String addMemberScreen = "/addMemberScreen";
   static const String friendPendingScreenHere = "/friendPendingScreenHere";
   static const String groupMessageScreen = "/GroupMessageScreen";
+  static const String friendRequestScreen = "/FriendRequestScreen";
 
   static List<GetPage> routes = [
     GetPage(name: splash, page: () => const SplashScreen()),
@@ -105,5 +107,6 @@ class AppRoutes {
     GetPage(name: addMemberScreen, page: () => const AddMemberScreen()),
     GetPage(name: friendPendingScreenHere, page: () => const GroupUserPendingRequestScreen()),
     GetPage(name: groupMessageScreen, page: () => const GroupMessageScreen()),
+    GetPage(name: friendRequestScreen, page: () =>  FriendRequestScreen()),
   ];
 }
