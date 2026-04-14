@@ -11,7 +11,6 @@ class UserApiService {
       final response = await ApiService.multipartUpdate(
         ApiEndPoint.fcmTokenUpdate,
         body: {"fcmToken": token},
-        method: "PATCH",
       );
 
       if (response.isSuccess) {

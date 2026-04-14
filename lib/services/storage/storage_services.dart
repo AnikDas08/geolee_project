@@ -7,7 +7,6 @@ import '../../config/api/api_end_point.dart';
 import '../../config/route/app_routes.dart';
 import '../../features/message/presentation/controller/chat_controller.dart';
 import '../../utils/log/app_log.dart';
-import '../notification/firebase_notification_service.dart';
 import 'storage_keys.dart';
 
 class LocalStorage {

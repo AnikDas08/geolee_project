@@ -51,7 +51,6 @@ class NotificationService {
       "High Importance Notifications",
       importance: Importance.max,
       description: "This channel is used for important notifications.",
-      playSound: true,
     );
 
     // Create a dedicated channel for messages that doesn't show a badge
@@ -60,7 +59,6 @@ class NotificationService {
       "Chat Messages",
       importance: Importance.max,
       description: "This channel is used for chat message banners without badges.",
-      playSound: true,
       showBadge: false, // Suppress icon badge for messages
     );
 
@@ -231,45 +229,45 @@ class NotificationService {
     data.forEach((key, value) => debugPrint('   [$key] = $value'));
     debugPrint('🔔 =================================');
 
-    //Normalize type to lowercase==============================
+    //Normalize type to lowercase===============================================
     final String type = (data['type'] ?? '').toString().toLowerCase().trim();
 
-    //isGroupChat comes as String "true"/"false" from backend==============================
+    //isGroupChat comes as String "true"/"false" from backend===================
     final dynamic rawIsGroup = data['isGroupChat'] ?? data['is_group_chat'];
     final bool isGroupChat = rawIsGroup != null && 
         (rawIsGroup.toString().toLowerCase() == 'true' || rawIsGroup == true);
 
     debugPrint('🔔 type="$type" | isGroupChat=$isGroupChat | rawWas=$rawIsGroup');
 
-    //FRIEND_REQUEST → Friend Pending Screen==============================
+    //FRIEND_REQUEST → Friend Pending Screen====================================
     if (type == 'friend_request') {
       debugPrint('🔔 → FriendPendingScreen');
       Get.toNamed(AppRoutes.friendRequestScreen, arguments: data);
       return;
     }
 
-    //Group message → Group Message Screen==============================
+    //Group message → Group Message Screen======================================
     if (type == 'text' && isGroupChat == true) {
       debugPrint('🔔 → GroupMessageScreen');
       Get.toNamed(AppRoutes.chat, arguments: data);
       return;
     }
 
-    //Direct message → Chat List Screen==============================
+    //Direct message → Chat List Screen=========================================
     if (type == 'text' && isGroupChat == false) {
       debugPrint('🔔 → ChatListScreen');
       Get.toNamed(AppRoutes.chat, arguments: data);
       return;
     }
 
-    //Direct message without isGroupChat fallback==============================
+    //Direct message without isGroupChat fallback===============================
     if (type == 'text' && data.containsKey('chat')) {
       debugPrint('🔔 → ChatListScreen (no isGroupChat fallback)');
       Get.toNamed(AppRoutes.chat, arguments: data);
       return;
     }
 
-    //FRIEND_REQUEST_ACCEPTED / AD_ACTIVATED / AD_DEACTIVATED → Notifications==============================
+    //FRIEND_REQUEST_ACCEPTED / AD_ACTIVATED / AD_DEACTIVATED → Notifications===
     debugPrint('🔔 → NotificationsScreen (type="$type")');
     Get.toNamed(AppRoutes.notifications);
   }
