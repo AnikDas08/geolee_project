@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:giolee78/features/home/presentation/screen/home_nav_screen.dart';
-import 'package:giolee78/features/notifications/presentation/screen/notifications_screen.dart';
 import 'package:giolee78/utils/constants/app_colors.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 

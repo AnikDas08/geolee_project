@@ -51,7 +51,6 @@ class NotificationService {
       "High Importance Notifications",
       importance: Importance.max,
       description: "This channel is used for important notifications.",
-      playSound: true,
     );
 
     // Create a dedicated channel for messages that doesn't show a badge
@@ -60,7 +59,6 @@ class NotificationService {
       "Chat Messages",
       importance: Importance.max,
       description: "This channel is used for chat message banners without badges.",
-      playSound: true,
       showBadge: false, // Suppress icon badge for messages
     );
 
