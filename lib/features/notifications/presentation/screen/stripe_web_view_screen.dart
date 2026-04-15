@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:giolee78/features/ads/presentation/screen/create_ads_screen.dart';
 import 'package:giolee78/features/home/presentation/screen/home_nav_screen.dart';
 import 'package:giolee78/utils/constants/app_colors.dart';
 import 'package:webview_flutter/webview_flutter.dart';
@@ -50,7 +51,7 @@ class _StripeWebViewPageState extends State<StripeWebViewPage> {
           onWebResourceError: (error) {
             debugPrint("WEB ERROR: ${error.description}");
             if (mounted) setState(() => _isLoading = false);
-            // শুধু fatal error এ snackbar দেখাও
+            //====================================================
             if (error.isForMainFrame ?? false) {
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 Get.snackbar(
@@ -101,7 +102,7 @@ class _StripeWebViewPageState extends State<StripeWebViewPage> {
     } else if (isCancel) {
       _hasNavigated = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        Get.offAll(() => HomeNav());
+        Get.back(); // Go back to the existing CreateAdsScreen instead of creating a new one and clearing stack
         Get.snackbar(
           "Cancel",
           "Payment cancelled",
@@ -117,6 +118,13 @@ class _StripeWebViewPageState extends State<StripeWebViewPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text("Payment"),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Get.back(),
+        ),
+      ),
       body: SafeArea(
         child: Stack(
           children: [
@@ -133,7 +141,7 @@ class _StripeWebViewPageState extends State<StripeWebViewPage> {
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                 ),
-                onPressed: () => Get.offAll(() => HomeNav()),
+                onPressed: () => Get.back(),
                 child: const Text("Done / Close"),
               ),
             ),
