@@ -6,15 +6,6 @@
   <component name="ChangeListManager">
     <list default="true" id="4595b9b7-2a22-4f3b-822a-c8d9019a0e37" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/features/clicker/presentation/widget/common_post_card.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/clicker/presentation/widget/common_post_card.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/features/message/presentation/screen/group_message.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/message/presentation/screen/group_message.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/features/notifications/presentation/screen/stripe_web_view_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/notifications/presentation/screen/stripe_web_view_screen.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/services/api/user_api_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/services/api/user_api_service.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/services/notification/firebase_notification_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/services/notification/firebase_notification_service.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/services/notification/notification_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/services/notification/notification_service.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/services/socket/socket_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/services/socket/socket_service.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/services/storage/storage_services.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/services/storage/storage_services.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pubspec.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/pubspec.yaml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
