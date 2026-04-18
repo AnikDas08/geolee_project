@@ -125,8 +125,8 @@ class SignUpController extends GetxController {
       if (userCredential != null && userCredential.user != null) {
         // You can add your logic here, e.g., send data to your backend if needed
         // or navigate to home if they are already registered
-        debugPrint("✅ Google Sign-In Successful: ${userCredential.user!.email}");
-        Utils.successSnackBar("Success", "Signed in with Google");
+        debugPrint("✅ Google Sign-UP Successful: ${userCredential.user!.email}");
+        Utils.successSnackBar("Success", "Signed Up with Google Please Login again");
 
         // Navigate based on your app flow
         Get.offAllNamed(AppRoutes.signIn);
