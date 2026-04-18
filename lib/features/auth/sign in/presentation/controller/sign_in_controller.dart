@@ -171,12 +171,12 @@ class SignInController extends GetxController {
         /// Fetch profile + save + navigate
         await getUserData();
 
-        Get.snackbar(
-          "Success",
-          "$provider Sign-In successful",
-          backgroundColor: AppColors.primaryColor,
-          colorText: Colors.white,
-        );
+        // Get.snackbar(
+        //   "Success",
+        //   "$provider Sign-In successful",
+        //   backgroundColor: AppColors.primaryColor,
+        //   colorText: Colors.white,
+        // );
 
         Get.offAllNamed(AppRoutes.homeNav);
       } else {
