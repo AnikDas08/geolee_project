@@ -1,9 +1,11 @@
 import 'dart:async';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
+import 'package:giolee78/services/auth/auth_service.dart';
 import 'package:giolee78/services/socket/socket_service.dart';
 import 'package:giolee78/services/storage/storage_keys.dart';
 import 'package:giolee78/services/storage/storage_services.dart';
@@ -110,6 +112,51 @@ class SignUpController extends GetxController {
   Future<void> openGallery() async {
     image = await OtherHelper.openGallery();
     update();
+  }
+
+  //============================================Social Login
+  Future<void> signInWithGoogle() async {
+    try {
+      isLoading = true;
+      update();
+
+      UserCredential? userCredential = await AuthService.signInWithGoogle();
+
+      if (userCredential != null && userCredential.user != null) {
+        // You can add your logic here, e.g., send data to your backend if needed
+        // or navigate to home if they are already registered
+        debugPrint("✅ Google Sign-In Successful: ${userCredential.user!.email}");
+        Utils.successSnackBar("Success", "Signed in with Google");
+
+        // Navigate based on your app flow
+        Get.offAllNamed(AppRoutes.completeProfile);
+      }
+    } catch (e) {
+      debugPrint("❌ Google Sign-In Error in Controller: $e");
+    } finally {
+      isLoading = false;
+      update();
+    }
+  }
+
+  Future<void> signInWithApple() async {
+    try {
+      isLoading = true;
+      update();
+
+      UserCredential? userCredential = await AuthService.signInWithApple();
+
+      if (userCredential != null && userCredential.user != null) {
+        debugPrint("✅ Apple Sign-In Successful: ${userCredential.user!.email}");
+        Utils.successSnackBar("Success", "Signed in with Apple");
+        Get.offAllNamed(AppRoutes.completeProfile);
+      }
+    } catch (e) {
+      debugPrint("❌ Apple Sign-In Error in Controller: $e");
+    } finally {
+      isLoading = false;
+      update();
+    }
   }
 
   //============================================Sign Up
