@@ -158,7 +158,11 @@ class SignInScreen extends StatelessWidget {
                       SizedBox(width: 12.h),
                       Expanded(
                         child: GestureDetector(
-                          onTap: () => controller.socialLogin(provider: "apple"),
+                          onTap: () {
+
+                           // controller.socialLogin(provider: "apple")
+
+                          },
                           child: Container(
                             height: 48.h,
                             width: double.infinity,
