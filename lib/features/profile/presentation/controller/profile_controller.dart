@@ -18,6 +18,8 @@ import '../../../home/presentation/controller/home_nav_controller.dart';
 
 class ProfileController extends GetxController {
 
+
+
   /// Language List here
   List<String> languages = ["English", "French", "Arabic"];
 
@@ -280,6 +282,22 @@ class ProfileController extends GetxController {
     }
   }
 
+  Future<void> logout() async {
+    if (isLoading) return;
+
+    isLoading = true;
+    update();
+
+    try {
+      await LocalStorage.removeAllPrefData();
+    } catch (e) {
+      debugPrint("Logout error: $e");
+    } finally {
+      isLoading = false;
+      update();
+    }
+  }
+
   Future<void> deleteAccount() async {
     if (userId.isEmpty) return;
     isLoading = true;
@@ -301,13 +319,13 @@ class ProfileController extends GetxController {
 
   @override
   void onClose() {
-    nameController.dispose();
-    numberController.dispose();
-    passwordController.dispose();
-    aboutController.dispose();
-    dateOfBirthController.dispose();
-    genderController.dispose();
-    addressController.dispose();
+    // nameController.dispose();
+    // numberController.dispose();
+    // passwordController.dispose();
+    // aboutController.dispose();
+    // dateOfBirthController.dispose();
+    // genderController.dispose();
+    // addressController.dispose();
     super.onClose();
   }
 }

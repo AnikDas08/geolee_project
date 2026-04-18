@@ -62,79 +62,87 @@ class SignUpScreen extends StatelessWidget {
                   Row(
                     children: [
                       Expanded(
-                        child: Container(
-                          height: 48.h,
-                          width: double.infinity,
-                          decoration: ShapeDecoration(
-                            shape: RoundedRectangleBorder(
-                              side: const BorderSide(
-                                color: Color(
-                                  0xFFD1D5D6,
-                                ) /* Disable-Color */,
-                              ),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              // Apple Icon
-                              SvgPicture.asset(
-                                'assets/icons/googleicon.svg',
-                                height: 24.h,
-                                width: 24.w,
-                              ),
-                              SizedBox(width: 10.w),
-
-                              // Apple Text
-                              Text(
-                                'Google',
-                                style: TextStyle(
-                                  color: AppColors.textColorFirst,
-                                  fontSize: 16.sp,
-                                  fontWeight: FontWeight.w400,
+                        child: InkWell(
+                          onTap: () => controller.signInWithGoogle(),
+                          child: Container(
+                            height: 48.h,
+                            width: double.infinity,
+                            decoration: ShapeDecoration(
+                              shape: RoundedRectangleBorder(
+                                side: const BorderSide(
+                                  color: Color(
+                                    0xFFD1D5D6,
+                                  ) /* Disable-Color */,
                                 ),
+                                borderRadius: BorderRadius.circular(8),
                               ),
-                            ],
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                // Apple Icon
+                                SvgPicture.asset(
+                                  'assets/icons/googleicon.svg',
+                                  height: 24.h,
+                                  width: 24.w,
+                                ),
+                                SizedBox(width: 10.w),
+
+                                // Apple Text
+                                Text(
+                                  'Google',
+                                  style: TextStyle(
+                                    color: AppColors.textColorFirst,
+                                    fontSize: 16.sp,
+                                    fontWeight: FontWeight.w400,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ),
                       SizedBox(width: 12.h),
                       Expanded(
-                        child: Container(
-                          height: 48.h,
-                          width: double.infinity,
-                          decoration: ShapeDecoration(
-                            shape: RoundedRectangleBorder(
-                              side: const BorderSide(
-                                color: Color(
-                                  0xFFD1D5D6,
-                                ) /* Disable-Color */,
-                              ),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              // Apple Icon
-                              SvgPicture.asset(
-                                'assets/icons/apple_fons.svg',
-                                height: 24.h,
-                                width: 24.w,
-                              ),
-                              SizedBox(width: 10.w),
-
-                              // Apple Text
-                              Text(
-                                'Apple',
-                                style: TextStyle(
-                                  color: AppColors.textColorFirst,
-                                  fontSize: 16.sp,
-                                  fontWeight: FontWeight.w400,
+                        child: InkWell(
+                          onTap: () {
+                            // controller.signInWithApple();
+                          },
+                          child: Container(
+                            height: 48.h,
+                            width: double.infinity,
+                            decoration: ShapeDecoration(
+                              shape: RoundedRectangleBorder(
+                                side: const BorderSide(
+                                  color: Color(
+                                    0xFFD1D5D6,
+                                  ) /* Disable-Color */,
                                 ),
+                                borderRadius: BorderRadius.circular(8),
                               ),
-                            ],
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                // Apple Icon
+                                SvgPicture.asset(
+                                  'assets/icons/apple_fons.svg',
+                                  height: 24.h,
+                                  width: 24.w,
+                                ),
+                                SizedBox(width: 10.w),
+
+                                // Apple Text
+                                Text(
+                                  'Apple',
+                                  style: TextStyle(
+                                    color: AppColors.textColorFirst,
+                                    fontSize: 16.sp,
+                                    fontWeight: FontWeight.w400,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ),

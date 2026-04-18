@@ -18,6 +18,7 @@ class ApiEndPoint {
 
   static const String signUp = "$baseUrl/users/create-user";
   static const String signIn = "$baseUrl/auth/login";
+  static const String socialLogin = "$baseUrl/auth/social-login";
   static const String verifyEmail = "$baseUrl/auth/verify-email";
   static const String forgotPassword = "$baseUrl/auth/request-otp";
   static const String verifyOtp = "$baseUrl/auth/verify-email";

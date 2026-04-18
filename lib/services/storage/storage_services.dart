@@ -7,6 +7,7 @@ import '../../config/api/api_end_point.dart';
 import '../../config/route/app_routes.dart';
 import '../../features/message/presentation/controller/chat_controller.dart';
 import '../../utils/log/app_log.dart';
+import 'package:giolee78/services/auth/auth_service.dart';
 import 'storage_keys.dart';
 
 class LocalStorage {
@@ -81,6 +82,38 @@ class LocalStorage {
     appLog(token, source: "Local Storage Data Loaded");
   }
 
+  static Future<void> saveUserData({
+    required String token,
+    required String userId,
+    String? name,
+    String? email,
+    String? image,
+    String? userRole,
+  }) async {
+    final localStorage = await _getStorage();
+
+    LocalStorage.token = token;
+    LocalStorage.userId = userId;
+    LocalStorage.isLogIn = true;
+
+    await Future.wait([
+      localStorage.setString(LocalStorageKeys.token, token),
+      localStorage.setString(LocalStorageKeys.userId, userId),
+      localStorage.setBool(LocalStorageKeys.isLogIn, true),
+      if (name != null) localStorage.setString(LocalStorageKeys.myName, name),
+      if (email != null) localStorage.setString(LocalStorageKeys.myEmail, email),
+      if (image != null) localStorage.setString(LocalStorageKeys.myImage, image),
+      if (userRole != null) localStorage.setString(LocalStorageKeys.role, userRole),
+    ]);
+
+    if (name != null) LocalStorage.myName = name;
+    if (email != null) LocalStorage.myEmail = email;
+    if (image != null) LocalStorage.myImage = image;
+    if (userRole != null) LocalStorage.role = userRole;
+
+    debugPrint("✅ User data saved to LocalStorage");
+  }
+
   static Future<void> setString(String key, String value) async {
     final localStorage = await _getStorage();
     await localStorage.setString(key, value);
@@ -137,6 +170,13 @@ class LocalStorage {
       await FirebaseMessaging.instance.deleteToken();
 
       await prefs.clear();
+
+      // 4. SIGN OUT FROM FIREBASE/GOOGLE/APPLE
+      try {
+        await AuthService.signOut();
+      } catch (e) {
+        debugPrint("Error during social sign out: $e");
+      }
 
       _resetLocalStorageData();
 

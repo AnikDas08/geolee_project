@@ -235,50 +235,60 @@ class _ProfileScreenState extends State<ProfileScreen> {
 }
 
 void _showLogoutDialog() {
+  final controller = Get.find<ProfileController>();
+
   Get.dialog(
-    AlertDialog(
-      backgroundColor: AppColors.white,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
-      title: const CommonText(
-        text: 'Log Out',
-        fontSize: 20,
-        fontWeight: FontWeight.w600,
-      ),
-      content: const CommonText(
-        text: 'Are you sure you want to log out?',
-        fontSize: 20,
-        maxLines: 2,
-      ),
-      actions: [
-        Row(
-          children: [
-            Expanded(
-              child: CommonButton(
-                titleText: 'No',
-                buttonColor: AppColors.borderColor,
-                titleColor: AppColors.black,
-                borderColor: AppColors.borderColor,
-                onTap: () => Get.back(),
-              ),
-            ),
-            SizedBox(width: 16.w),
-            Expanded(
-              child: CommonButton(
-                titleText: 'Yes',
-                buttonColor: AppColors.red,
-                borderColor: AppColors.red,
-                onTap: () {
-                  LocalStorage.removeAllPrefData();
-                },
-              ),
+    GetBuilder<ProfileController>(
+      builder: (_) {
+        return AlertDialog(
+          backgroundColor: AppColors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16.r),
+          ),
+          title: const CommonText(
+            text: 'Log Out',
+            fontSize: 20,
+            fontWeight: FontWeight.w600,
+          ),
+          content: const CommonText(
+            text: 'Are you sure you want to log out?',
+            fontSize: 20,
+            maxLines: 2,
+          ),
+          actions: [
+            Row(
+              children: [
+                Expanded(
+                  child: CommonButton(
+                    titleText: 'No',
+                    buttonColor: AppColors.borderColor,
+                    titleColor: AppColors.black,
+                    borderColor: AppColors.borderColor,
+                    onTap: controller.isLoading ? null : () => Get.back(),
+                  ),
+                ),
+                SizedBox(width: 16.w),
+
+                Expanded(
+                  child: CommonButton(
+                    titleText: controller.isLoading ? "Logging out..." : "Yes",
+                    buttonColor: AppColors.red,
+                    borderColor: AppColors.red,
+                    onTap: controller.isLoading
+                        ? null
+                        : () async {
+                      await controller.logout();
+                    },
+                  ),
+                ),
+              ],
             ),
           ],
-        ),
-      ],
+        );
+      },
     ),
   );
 }
-
 // Profile Item Model
 class ProfileItemData {
   final String imageSrc;

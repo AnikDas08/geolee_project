@@ -342,7 +342,7 @@ class CreateAdsController extends GetxController {
     }
   }
 
-  //DATE PICKER ================================
+  //DATE PICKER ============================
   Future<void> selectDate(
       BuildContext context,
       TextEditingController controller,

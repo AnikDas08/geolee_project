@@ -1,9 +1,11 @@
 import 'dart:async';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
+import 'package:giolee78/services/auth/auth_service.dart';
 import 'package:giolee78/services/socket/socket_service.dart';
 import 'package:giolee78/services/storage/storage_keys.dart';
 import 'package:giolee78/services/storage/storage_services.dart';
@@ -18,6 +20,8 @@ import 'package:giolee78/utils/helpers/other_helper.dart';
 import '../../../../../config/route/app_routes.dart';
 import '../../../../../services/api/api_service.dart';
 import '../../../../../config/api/api_end_point.dart';
+import '../../../../../services/api/user_api_service.dart';
+import '../../../../../services/notification/firebase_notification_service.dart';
 import '../../../../../utils/app_utils.dart';
 
 class SignUpController extends GetxController {
@@ -108,6 +112,51 @@ class SignUpController extends GetxController {
   Future<void> openGallery() async {
     image = await OtherHelper.openGallery();
     update();
+  }
+
+  //============================================Social Login
+  Future<void> signInWithGoogle() async {
+    try {
+      isLoading = true;
+      update();
+
+      UserCredential? userCredential = await AuthService.signInWithGoogle();
+
+      if (userCredential != null && userCredential.user != null) {
+        // You can add your logic here, e.g., send data to your backend if needed
+        // or navigate to home if they are already registered
+        debugPrint("✅ Google Sign-UP Successful: ${userCredential.user!.email}");
+        Utils.successSnackBar("Success", "Signed Up with Google Please Login again");
+
+        // Navigate based on your app flow
+        Get.offAllNamed(AppRoutes.signIn);
+      }
+    } catch (e) {
+      debugPrint("❌ Google Sign-In Error in Controller: $e");
+    } finally {
+      isLoading = false;
+      update();
+    }
+  }
+
+  Future<void> signInWithApple() async {
+    try {
+      isLoading = true;
+      update();
+
+      UserCredential? userCredential = await AuthService.signInWithApple();
+
+      if (userCredential != null && userCredential.user != null) {
+        debugPrint("✅ Apple Sign-In Successful: ${userCredential.user!.email}");
+        Utils.successSnackBar("Success", "Signed in with Apple");
+        Get.offAllNamed(AppRoutes.completeProfile);
+      }
+    } catch (e) {
+      debugPrint("❌ Apple Sign-In Error in Controller: $e");
+    } finally {
+      isLoading = false;
+      update();
+    }
   }
 
   //============================================Sign Up
@@ -218,9 +267,30 @@ class SignUpController extends GetxController {
           // Stop timer
           _timer?.cancel();
 
-          final String bearerToken = data['data']['accessToken'];
-          LocalStorage.token = bearerToken;
-          LocalStorage.setString(LocalStorageKeys.token, bearerToken);
+          final dataMap = data['data'];
+          final String bearerToken = dataMap['accessToken'];
+          final userData = dataMap['user'] ?? dataMap;
+
+          await LocalStorage.saveUserData(
+            token: bearerToken,
+            userId: userData['_id'] ?? '',
+            name: userData['name'],
+            email: userData['email'],
+          );
+
+          // Sync FCM Token
+          try {
+            final fcmToken = await FirebaseNotificationService().getFCMToken();
+            if (fcmToken != null && LocalStorage.userId.isNotEmpty) {
+              await UserApiService.sendTokenToServer(
+                userId: LocalStorage.userId,
+                token: fcmToken,
+              );
+              await LocalStorage.setString(LocalStorageKeys.fcmToken, fcmToken);
+            }
+          } catch (e) {
+            debugPrint("Error syncing FCM token after signup: $e");
+          }
 
           // Connect Socket immediately after verification
           SocketServices.connectToSocket();
