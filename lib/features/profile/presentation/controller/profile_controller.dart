@@ -319,13 +319,13 @@ class ProfileController extends GetxController {
 
   @override
   void onClose() {
-    nameController.dispose();
-    numberController.dispose();
-    passwordController.dispose();
-    aboutController.dispose();
-    dateOfBirthController.dispose();
-    genderController.dispose();
-    addressController.dispose();
+    // nameController.dispose();
+    // numberController.dispose();
+    // passwordController.dispose();
+    // aboutController.dispose();
+    // dateOfBirthController.dispose();
+    // genderController.dispose();
+    // addressController.dispose();
     super.onClose();
   }
 }

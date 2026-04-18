@@ -11,6 +11,11 @@ class AuthService {
   /// Google Sign In Flow
   static Future<UserCredential?> signInWithGoogle() async {
     try {
+      // Force user to select account every time (Prevents sticking to one account if failed)
+      if (await _googleSignIn.isSignedIn()) {
+        await _googleSignIn.disconnect();
+      }
+
       // Trigger the authentication flow
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
       if (googleUser == null) return null; // User canceled
@@ -41,9 +46,22 @@ class AuthService {
           AppleIDAuthorizationScopes.email,
           AppleIDAuthorizationScopes.fullName,
         ],
+
+
+        webAuthenticationOptions: WebAuthenticationOptions(
+          //ToDo==============================
+          //here need apple service id
+          clientId: "YOUR_APPLE_SERVICE_ID",
+          redirectUri: Uri.parse(
+            //ToDo==============================
+            //here need redirect url
+            "https://YOUR_DOMAIN/callbacks/sign_in_with_apple",
+          ),
+        ),
       );
 
-      final OAuthCredential credential = OAuthProvider("apple.com").credential(
+      final OAuthCredential credential =
+      OAuthProvider("apple.com").credential(
         idToken: appleCredential.identityToken,
         accessToken: appleCredential.authorizationCode,
       );
@@ -54,7 +72,6 @@ class AuthService {
       return null;
     }
   }
-
   /// Sign Out
   static Future<void> signOut() async {
     await _googleSignIn.signOut();
