@@ -509,9 +509,9 @@ class MyFriendController extends GetxController {
             // Filter out current user
             if (user.id != currentUserId) {
               parsedList.add(user);
-              debugPrint(
-                "✅ Parsed [$i]: ${user.name} | Distance: ${user.distance}",
-              );
+              // debugPrint(
+              //   "✅ Parsed [$i]: ${user.name} | Distance: ${user.distance}",
+              // );
             }
           } catch (e) {
             debugPrint("❌ Failed to parse user [$i]: $e | Raw: ${data[i]}");

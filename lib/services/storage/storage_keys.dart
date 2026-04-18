@@ -31,5 +31,5 @@ class LocalStorageKeys {
   static const String forgotPasswordToken="forgotPasswordToken";
   static const String isLocationVisible = "isLocationVisible";
   static const String radius = "radius";
-  static const String fcmToken = "";
+  static const String fcmToken = "fcmToken";
 }

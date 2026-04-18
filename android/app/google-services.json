@@ -12,7 +12,20 @@
           "package_name": "com.example.giolee78"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "627654989285-sq78m6iknd7avo3gc2a735q9d6duiub5.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.giolee78",
+            "certificate_hash": "e1d4012bd81080c6718d49aa63ba8e04cf1d0a44"
+          }
+        },
+        {
+          "client_id": "627654989285-fk18du3ja82fpcfi7gj1ef5ebnbp9p2m.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyA__bw6gjpQq_eHPoO66CpawG5txciXO34"
@@ -20,7 +33,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "627654989285-fk18du3ja82fpcfi7gj1ef5ebnbp9p2m.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "627654989285-ocdet8a9q7ovmkg72rgudp9mtvbvkdn0.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.giolee78"
+              }
+            }
+          ]
         }
       }
     }

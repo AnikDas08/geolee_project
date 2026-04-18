@@ -141,13 +141,19 @@ class AddPostScreen extends StatelessWidget {
                   ),
                   SizedBox(height: 32.h),
 
-                  // Post Button
+                  // Post Button================
                   Obx(() {
-                    return CommonButton(
-                      titleText: controller.isLoading.value
-                          ? "Posting..."
-                          : "CLICKER COUNT",
-                      onTap: () => controller.createPost(),
+                    final loading = controller.isLoading.value;
+
+                    return Opacity(
+                      opacity: loading ? 0.6 : 1,
+                      child: IgnorePointer(
+                        ignoring: loading,
+                        child: CommonButton(
+                          titleText: loading ? "Posting..." : "CLICKER COUNT",
+                          onTap: () => controller.createPost(),
+                        ),
+                      ),
                     );
                   }),
                   SizedBox(height: 40.h),

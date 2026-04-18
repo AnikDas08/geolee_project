@@ -18,6 +18,8 @@ import 'package:giolee78/utils/helpers/other_helper.dart';
 import '../../../../../config/route/app_routes.dart';
 import '../../../../../services/api/api_service.dart';
 import '../../../../../config/api/api_end_point.dart';
+import '../../../../../services/api/user_api_service.dart';
+import '../../../../../services/notification/firebase_notification_service.dart';
 import '../../../../../utils/app_utils.dart';
 
 class SignUpController extends GetxController {
@@ -218,9 +220,30 @@ class SignUpController extends GetxController {
           // Stop timer
           _timer?.cancel();
 
-          final String bearerToken = data['data']['accessToken'];
-          LocalStorage.token = bearerToken;
-          LocalStorage.setString(LocalStorageKeys.token, bearerToken);
+          final dataMap = data['data'];
+          final String bearerToken = dataMap['accessToken'];
+          final userData = dataMap['user'] ?? dataMap;
+
+          await LocalStorage.saveUserData(
+            token: bearerToken,
+            userId: userData['_id'] ?? '',
+            name: userData['name'],
+            email: userData['email'],
+          );
+
+          // Sync FCM Token
+          try {
+            final fcmToken = await FirebaseNotificationService().getFCMToken();
+            if (fcmToken != null && LocalStorage.userId.isNotEmpty) {
+              await UserApiService.sendTokenToServer(
+                userId: LocalStorage.userId,
+                token: fcmToken,
+              );
+              await LocalStorage.setString(LocalStorageKeys.fcmToken, fcmToken);
+            }
+          } catch (e) {
+            debugPrint("Error syncing FCM token after signup: $e");
+          }
 
           // Connect Socket immediately after verification
           SocketServices.connectToSocket();

@@ -18,6 +18,8 @@ import '../../../home/presentation/controller/home_nav_controller.dart';
 
 class ProfileController extends GetxController {
 
+
+
   /// Language List here
   List<String> languages = ["English", "French", "Arabic"];
 
@@ -277,6 +279,22 @@ class ProfileController extends GetxController {
       return null;
     } catch (e) {
       return null;
+    }
+  }
+
+  Future<void> logout() async {
+    if (isLoading) return;
+
+    isLoading = true;
+    update();
+
+    try {
+      await LocalStorage.removeAllPrefData();
+    } catch (e) {
+      debugPrint("Logout error: $e");
+    } finally {
+      isLoading = false;
+      update();
     }
   }
 
