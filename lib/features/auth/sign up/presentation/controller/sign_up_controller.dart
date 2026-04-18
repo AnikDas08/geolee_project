@@ -129,7 +129,7 @@ class SignUpController extends GetxController {
         Utils.successSnackBar("Success", "Signed in with Google");
 
         // Navigate based on your app flow
-        Get.offAllNamed(AppRoutes.completeProfile);
+        Get.offAllNamed(AppRoutes.signIn);
       }
     } catch (e) {
       debugPrint("❌ Google Sign-In Error in Controller: $e");
