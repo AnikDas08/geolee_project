@@ -120,7 +120,7 @@ class SignUpController extends GetxController {
       isLoading = true;
       update();
 
-      UserCredential? userCredential = await AuthService.signInWithGoogle();
+      final UserCredential? userCredential = await AuthService.signInWithGoogle();
 
       if (userCredential != null && userCredential.user != null) {
         // You can add your logic here, e.g., send data to your backend if needed
@@ -144,7 +144,7 @@ class SignUpController extends GetxController {
       isLoading = true;
       update();
 
-      UserCredential? userCredential = await AuthService.signInWithApple();
+      final UserCredential? userCredential = await AuthService.signInWithApple();
 
       if (userCredential != null && userCredential.user != null) {
         debugPrint("✅ Apple Sign-In Successful: ${userCredential.user!.email}");
