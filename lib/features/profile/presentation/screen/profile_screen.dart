@@ -76,7 +76,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             ProfileItemData(
               imageSrc: AppIcons.terms,
-              title: 'Terms of Services',
+              title: 'Important Updates',
               onTap: () {
                 Get.to(() => const TermsOfServicesScreen());
               },

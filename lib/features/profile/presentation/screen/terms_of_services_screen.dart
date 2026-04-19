@@ -28,7 +28,7 @@ class _TermsOfServicesScreenState extends State<TermsOfServicesScreen> {
         elevation: 0,
         centerTitle: true,
         title: const CommonText(
-          text: 'Terms & Condition',
+          text: 'Important Updates',
           fontSize: 18,
           fontWeight: FontWeight.w600,
         ),
