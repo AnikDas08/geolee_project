@@ -67,7 +67,7 @@ class DashBoardProfile extends StatelessWidget {
               ),
             ProfileItemData(
               imageSrc: AppIcons.privacy,
-              title: 'Privacy Policy',
+              title: 'Privacy Policy/TOS',
               onTap: () {
                 Get.to(() => const PrivacyPolicyScreen());
               },

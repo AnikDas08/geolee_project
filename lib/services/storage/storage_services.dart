@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
@@ -149,43 +150,77 @@ class LocalStorage {
     try {
       final prefs = await _getStorage();
 
-      final token = prefs.getString(LocalStorageKeys.fcmToken);
-      final userId = prefs.getString(LocalStorageKeys.userId) ?? "";
+      final storedFcmToken =
+      prefs.getString(LocalStorageKeys.fcmToken);
+      final storedUserId =
+          prefs.getString(LocalStorageKeys.userId) ?? "";
 
-      // 1. REMOVE TOKEN FROM SERVER
+      /// 1. REMOVE TOKEN FROM SERVER
+      if (storedFcmToken != null &&
+          storedFcmToken.isNotEmpty &&
+          storedUserId.isNotEmpty) {
+        try {
+          final response = await ApiService.delete(
+            ApiEndPoint.deleteFcmToken,
+            body: {"token": storedFcmToken},
+          );
 
-      if (token != null && token.isNotEmpty && userId.isNotEmpty) {
-        final response = await ApiService.delete(
-          ApiEndPoint.deleteFcmToken,
-          body: {"token": token},
-        );
-
-        if (response.statusCode == 200) {
-          debugPrint("FCM Token deleted successfully");
-        } else {
-          debugPrint("FCM delete response: ${response.statusCode}");
+          if (response.statusCode == 200) {
+            debugPrint("✅ FCM token deleted from server");
+          } else {
+            debugPrint(
+                "⚠️ Server delete response: ${response.statusCode}");
+          }
+        } catch (e) {
+          debugPrint("❌ Server token delete error: $e");
         }
       }
 
-      await FirebaseMessaging.instance.deleteToken();
+      /// 2. DELETE LOCAL FIREBASE TOKEN (SAFE FOR iOS)
+      try {
+        if (Platform.isIOS) {
+          final apnsToken =
+          await FirebaseMessaging.instance.getAPNSToken();
 
+          debugPrint("APNS Token on logout: $apnsToken");
+
+          if (apnsToken != null) {
+            await FirebaseMessaging.instance.deleteToken();
+            debugPrint("✅ Local FCM token deleted");
+          } else {
+            debugPrint(
+                "⚠️ APNS token not ready, skipping deleteToken()");
+          }
+        } else {
+          await FirebaseMessaging.instance.deleteToken();
+          debugPrint("✅ Local FCM token deleted");
+        }
+      } catch (e) {
+        debugPrint("❌ Firebase token delete error: $e");
+      }
+
+      /// 3. CLEAR SHARED PREFERENCES
       await prefs.clear();
+      debugPrint("✅ SharedPreferences cleared");
 
-      // 4. SIGN OUT FROM FIREBASE/GOOGLE/APPLE
+      /// 4. SIGN OUT FROM SOCIAL LOGIN
       try {
         await AuthService.signOut();
+        debugPrint("✅ Social sign out success");
       } catch (e) {
-        debugPrint("Error during social sign out: $e");
+        debugPrint("❌ Social sign out error: $e");
       }
 
+      /// 5. RESET STATIC VARIABLES
       _resetLocalStorageData();
 
-      // 5. CLEAR CONTROLLERS
+      /// 6. CLEAR GETX CONTROLLERS
       if (Get.isRegistered<ChatController>()) {
         Get.delete<ChatController>(force: true);
+        debugPrint("✅ ChatController deleted");
       }
 
-      // 6. NAVIGATE
+      /// 7. NAVIGATE TO LOGIN
       Get.offAllNamed(AppRoutes.signIn);
     } catch (e) {
       debugPrint("❌ Logout error: $e");

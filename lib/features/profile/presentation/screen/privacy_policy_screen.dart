@@ -36,7 +36,7 @@ class _PrivacyPolicyScreenState extends State<PrivacyPolicyScreen> {
         elevation: 0,
         centerTitle: true,
         title: const CommonText(
-          text: 'Privacy Policy',
+          text: 'Privacy Policy/TOS',
           fontSize: 18,
           fontWeight: FontWeight.w600,
         ),

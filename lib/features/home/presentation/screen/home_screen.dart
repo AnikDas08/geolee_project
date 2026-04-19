@@ -93,9 +93,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   SizedBox(height: 20.h),
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: 20.w),
-                    child: controller.isLoading
-                        ? _buildLoadingMap()
-                        : _buildMapSection(controller),
+                    child: _buildMapSection(controller),
                   ),
                   SizedBox(height: 20.h),
                   Expanded(
@@ -171,15 +169,17 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         child: Stack(
           children: [
             Obx(() {
-              controller.heatmaps.length;
-              controller.markerList.length;
+              // Trigger rebuild when refresh trigger changes
+              controller.mapRefreshTrigger.value;
+              final markers = Set<Marker>.from(controller.markerList);
+              final heatmaps = Set<Heatmap>.from(controller.heatmaps);
 
               return GoogleMap(
                 mapType: MapType.satellite,
                 initialCameraPosition: _initialPosition,
                 myLocationEnabled: true,
-                heatmaps: controller.heatmaps,
-                markers: Set<Marker>.from(controller.markerList),
+                heatmaps: heatmaps,
+                markers: markers,
                 onMapCreated: (GoogleMapController mapController) async {
                   try {
                     if (!_mapController.isCompleted) {
@@ -232,6 +232,17 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                     ),
                   )
                 : const SizedBox.shrink()),
+            // Loading overlay instead of replacing the whole map
+            if (controller.isLoading)
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(10.r),
+                ),
+                child: const Center(
+                  child: CircularProgressIndicator(color: AppColors.primaryColor),
+                ),
+              ),
           ],
         ),
       ),

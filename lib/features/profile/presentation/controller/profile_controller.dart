@@ -281,7 +281,6 @@ class ProfileController extends GetxController {
       return null;
     }
   }
-
   Future<void> logout() async {
     if (isLoading) return;
 

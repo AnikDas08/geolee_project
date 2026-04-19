@@ -51,7 +51,7 @@ dependencies:
   geolocator: ^14.0.2
   permission_handler: ^11.3.1
   dotted_border: ^2.0.0
-  geocoding: ^3.0.0
+  geocoding: ^2.2.0
   dart_either: ^2.0.0
   webview_flutter: ^4.13.0
   carousel_slider: ^5.1.1
@@ -69,6 +69,7 @@ dependencies:
   path: ^1.9.0
   video_player: ^2.8.3
   package_info_plus: ^9.0.0
+
 
 
 dev_dependencies:
