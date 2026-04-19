@@ -54,6 +54,7 @@ class FirebaseNotificationService {
 
     await _firebaseMessaging.setForegroundNotificationPresentationOptions(
       alert: true,
+      badge: true,
       sound: true,
     );
 
@@ -129,11 +130,28 @@ class FirebaseNotificationService {
   //Get the FCM Device Token===============================================
   Future<String?> getFCMToken() async {
     try {
+      if (defaultTargetPlatform == TargetPlatform.iOS) {
+        // রিয়েল ডিভাইসে APNs টোকেন ছাড়া FCM টোকেন কাজ করবে না
+        String? apnsToken = await _firebaseMessaging.getAPNSToken();
+        
+        if (apnsToken == null) {
+          debugPrint("⌛ APNs token is null, waiting and retrying...");
+          await Future.delayed(const Duration(seconds: 3));
+          apnsToken = await _firebaseMessaging.getAPNSToken();
+        }
+        
+        debugPrint("🍎 APNs Token: $apnsToken");
+        
+        if (apnsToken == null) {
+          debugPrint("❌ Failed to get APNs token. Check Xcode capabilities.");
+        }
+      }
+
       final String? token = await _firebaseMessaging.getToken();
-      debugPrint("Firebase Messaging Token (FCM): $token");
+      debugPrint("🚀 Firebase Messaging Token (FCM): $token");
       return token;
     } catch (e) {
-      debugPrint("Error fetching FCM Token: $e");
+      debugPrint("❌ Error fetching FCM Token: $e");
       return null;
     }
   }

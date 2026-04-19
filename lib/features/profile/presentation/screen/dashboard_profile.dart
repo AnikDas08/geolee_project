@@ -74,7 +74,7 @@ class DashBoardProfile extends StatelessWidget {
             ),
             ProfileItemData(
               imageSrc: AppIcons.terms,
-              title: 'Terms of Services',
+              title: 'Important Updates',
               onTap: () {
                 Get.to(() => const TermsOfServicesScreen());
               },
