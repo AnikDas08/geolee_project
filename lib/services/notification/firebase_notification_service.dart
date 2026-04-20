@@ -119,11 +119,18 @@ class FirebaseNotificationService {
   // Request User Permission for push notifications=========================
 
   Future<void> requestPermission() async {
-    final NotificationSettings settings = await _firebaseMessaging.requestPermission(
-      
-    );
-
+    final NotificationSettings settings = await _firebaseMessaging.requestPermission();
     debugPrint('User granted permission: ${settings.authorizationStatus}');
+
+    // Print APNs Token for debugging on iOS
+    if (defaultTargetPlatform == TargetPlatform.iOS) {
+      final apnsToken = await _firebaseMessaging.getAPNSToken();
+      if (apnsToken != null) {
+        debugPrint("✅ APNs Token found: $apnsToken");
+      } else {
+        debugPrint("❌ APNs Token is null. Ensure Push Notifications capability is added in Xcode and you are on a real device.");
+      }
+    }
   }
 
   //Get the FCM Device Token===============================================

@@ -46,18 +46,6 @@ class AuthService {
           AppleIDAuthorizationScopes.email,
           AppleIDAuthorizationScopes.fullName,
         ],
-
-
-        webAuthenticationOptions: WebAuthenticationOptions(
-          //ToDo==============================
-          //here need apple service id
-          clientId: "YOUR_APPLE_SERVICE_ID",
-          redirectUri: Uri.parse(
-            //ToDo==============================
-            //here need redirect url
-            "https://YOUR_DOMAIN/callbacks/sign_in_with_apple",
-          ),
-        ),
       );
 
       final OAuthCredential credential =
