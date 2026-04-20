@@ -5,14 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="4595b9b7-2a22-4f3b-822a-c8d9019a0e37" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/ios/Runner/RunnerRelease.entitlements" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Dart_SDK.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Dart_SDK.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Flutter_Plugins.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ios/Runner.xcodeproj/project.pbxproj" beforeDir="false" afterPath="$PROJECT_DIR$/ios/Runner.xcodeproj/project.pbxproj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ios/Runner/Info.plist" beforeDir="false" afterPath="$PROJECT_DIR$/ios/Runner/Info.plist" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/features/profile/presentation/screen/dashboard_profile.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/profile/presentation/screen/dashboard_profile.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ios/Runner/RunnerRelease.entitlements" beforeDir="false" afterPath="$PROJECT_DIR$/ios/Runner/RunnerRelease.entitlements" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/services/notification/firebase_notification_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/services/notification/firebase_notification_service.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pubspec.lock" beforeDir="false" afterPath="$PROJECT_DIR$/pubspec.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pubspec.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/pubspec.yaml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -62,7 +59,7 @@
     "io.flutter.reload.alreadyRun": "true",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "D:/Project/giolee/geolee_project/ios/Runner",
-    "settings.editor.selected.configurable": "dart.settings",
+    "settings.editor.selected.configurable": "preferences.pluginManager",
     "show.migrate.to.gradle.popup": "false"
   }
 }]]></component>
@@ -95,9 +92,25 @@
     <option featureType="com.intellij.fileTypeFactory" implementationName="*.plist" />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
+    <option name="OPEN_GENERIC_TABS">
+      <map>
+        <entry key="6d5d17e4-c218-49eb-a9f7-ca0880f0e347" value="TOOL_WINDOW" />
+        <entry key="ebfcdc55-381e-4bea-a931-f78661b149b5" value="TOOL_WINDOW" />
+      </map>
+    </option>
     <option name="TAB_STATES">
       <map>
+        <entry key="6d5d17e4-c218-49eb-a9f7-ca0880f0e347">
+          <value>
+            <State />
+          </value>
+        </entry>
         <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+        <entry key="ebfcdc55-381e-4bea-a931-f78661b149b5">
           <value>
             <State />
           </value>
