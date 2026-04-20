@@ -106,7 +106,7 @@ class SignUpScreen extends StatelessWidget {
                       Expanded(
                         child: InkWell(
                           onTap: () {
-                            // controller.signInWithApple();
+                            controller.signInWithApple();
                           },
                           child: Container(
                             height: 48.h,
