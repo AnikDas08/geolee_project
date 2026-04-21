@@ -1,4 +1,4 @@
-package com.example.giolee78
+package com.justmetaverse.justclicker
 
 import io.flutter.embedding.android.FlutterActivity
 

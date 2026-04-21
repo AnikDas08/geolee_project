@@ -126,7 +126,7 @@ class SignUpController extends GetxController {
         // You can add your logic here, e.g., send data to your backend if needed
         // or navigate to home if they are already registered
         debugPrint("✅ Google Sign-UP Successful: ${userCredential.user!.email}");
-        Utils.successSnackBar("Success", "Signed Up with Google Please Login again");
+        Utils.successSnackBar("Success", "Signed Up with ${userCredential.user!.email} Please Login again");
 
         // Navigate based on your app flow
         Get.offAllNamed(AppRoutes.signIn);
@@ -148,8 +148,8 @@ class SignUpController extends GetxController {
 
       if (userCredential != null && userCredential.user != null) {
         debugPrint("✅ Apple Sign-In Successful: ${userCredential.user!.email}");
-        Utils.successSnackBar("Success", "Signed in with Apple");
-        Get.offAllNamed(AppRoutes.completeProfile);
+        Utils.successSnackBar("Success", "Signed in with ${userCredential.user!.email} Please Login again");
+        Get.offAllNamed(AppRoutes.signIn);
       }
     } catch (e) {
       debugPrint("❌ Apple Sign-In Error in Controller: $e");

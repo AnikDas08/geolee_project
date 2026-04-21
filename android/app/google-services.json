@@ -7,17 +7,17 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:627654989285:android:0bfd890d4bf15b82570b0c",
+        "mobilesdk_app_id": "1:627654989285:android:22ef48ae63970498570b0c",
         "android_client_info": {
-          "package_name": "com.example.giolee78"
+          "package_name": "com.justmetaverse.justclicker"
         }
       },
       "oauth_client": [
         {
-          "client_id": "627654989285-sq78m6iknd7avo3gc2a735q9d6duiub5.apps.googleusercontent.com",
+          "client_id": "627654989285-vldm7urfo29hv7f7ban9mqae6qk61r2s.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.example.giolee78",
+            "package_name": "com.justmetaverse.justclicker",
             "certificate_hash": "e1d4012bd81080c6718d49aa63ba8e04cf1d0a44"
           }
         },
@@ -39,10 +39,10 @@
               "client_type": 3
             },
             {
-              "client_id": "627654989285-ocdet8a9q7ovmkg72rgudp9mtvbvkdn0.apps.googleusercontent.com",
+              "client_id": "627654989285-o5acd767eh7j3n6ln0fe1tc3fp2vrpnd.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.example.giolee78"
+                "bundle_id": "com.justmetaverse.justclicker"
               }
             }
           ]
