@@ -11,6 +11,7 @@ import 'services/storage/storage_services.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'services/notification/firebase_notification_service.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -19,8 +20,12 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  
+  // Initialize Analytics
+  FirebaseAnalytics analytics = FirebaseAnalytics.instance;
+  
   await FirebaseNotificationService().initNotifications();
-  runApp(const MyApp());
+  runApp(MyApp(analytics: analytics));
 }
 
 Future<void> init() async {
