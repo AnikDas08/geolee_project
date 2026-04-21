@@ -40,7 +40,6 @@ class HomeController extends GetxController {
   RxSet<Heatmap> heatmaps = <Heatmap>{}.obs;
 
   RxInt mapRefreshTrigger = 0.obs;
-  Timer? _refreshDebounce;
 
   // ─── Google Map Controller ───
   Completer<GoogleMapController> mapController = Completer();
@@ -74,7 +73,7 @@ class HomeController extends GetxController {
       clickerCount.value = "All";
       final DateTime now = DateTime.now();
 
-      // ✅ App open হলে default: 24h filter
+      // ====================================when app open default 24 hours
       startDate.value = now.subtract(const Duration(hours: 24));
       endDate.value = now;
       selectedPeriod.value = '24h';
@@ -82,7 +81,12 @@ class HomeController extends GetxController {
 
       if (LocalStorage.token.isNotEmpty) {
         argument = Get.arguments;
-        // Removed broken calls and non-blocking location
+        
+        // ========================================map auto refresh
+
+        debounce(mapRefreshTrigger, (_) {
+          update(['map_section']);
+        }, time: const Duration(seconds: 1));
 
         await Future.wait([
           myProfileController.getUserData(),
@@ -108,11 +112,8 @@ class HomeController extends GetxController {
     }
   }
 
-  void _scheduleMapRefresh() {
-    _refreshDebounce?.cancel();
-    _refreshDebounce = Timer(const Duration(milliseconds: 300), () {
-      mapRefreshTrigger.value++;
-    });
+  void _triggerMapUpdate() {
+    mapRefreshTrigger.value++;
   }
 
   HeatmapGradient _getHeatmapGradient() {
@@ -228,7 +229,7 @@ class HomeController extends GetxController {
       if (posts.isEmpty) {
         heatmaps.clear();
         markerList.clear();
-        _scheduleMapRefresh();
+        _triggerMapUpdate();
         update();
         return;
       }
@@ -327,7 +328,7 @@ class HomeController extends GetxController {
       }
 
       markerList.assignAll(newMarkers);
-      _scheduleMapRefresh();
+      _triggerMapUpdate();
       debugPrint('Markers: ${markerList.length}');
     } catch (e) {
       debugPrint('Error generating markers: $e');
@@ -349,9 +350,7 @@ class HomeController extends GetxController {
     }
   }
 
-  // ─────────────────────────────────────────
-  //  Filters
-  // ─────────────────────────────────────────
+
 
   Future<void> applyPeriodFilter(String period) async {
     try {
@@ -713,13 +712,12 @@ class HomeController extends GetxController {
   void clearHeatmap() {
     heatmaps.clear();
     markerList.clear();
-    _scheduleMapRefresh();
+    _triggerMapUpdate();
     update();
   }
 
   @override
   void onClose() {
-    _refreshDebounce?.cancel();
     clearMarkerCache();
     super.onClose();
   }
