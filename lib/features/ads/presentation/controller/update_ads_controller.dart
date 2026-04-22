@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:giolee78/features/ads/presentation/controller/view_ads_screen_controller.dart';
 import 'package:giolee78/services/storage/storage_services.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -9,8 +10,10 @@ import 'package:giolee78/config/api/api_end_point.dart';
 import 'package:giolee78/services/api/api_response_model.dart';
 import 'package:giolee78/services/api/api_service.dart';
 import '../../../../component/pop_up/common_pop_menu.dart';
+import '../../../dashboard/presentation/controller/dash_board_screen_controller.dart';
 import '../../data/plan_model.dart';
 import '../../data/single_ads_model.dart';
+import 'history_ads_controller.dart';
 
 class UpdateAdsController extends GetxController {
   /// ---------------- OBSERVABLES ----------------
@@ -190,10 +193,6 @@ class UpdateAdsController extends GetxController {
       Get.snackbar("Error", "Please enter focus area");
       return false;
     }
-    if (websiteLinkController.text.trim().isEmpty) {
-      Get.snackbar("Error", "Please enter website link");
-      return false;
-    }
     if (adStartDateController.text.trim().isEmpty) {
       Get.snackbar("Error", "Please select ad start date");
       return false;
@@ -320,16 +319,21 @@ class UpdateAdsController extends GetxController {
 
       final bool isLocalImage = File(coverImagePath.value).existsSync();
 
+      final Map<String, String> body = {
+        "title": titleController.text.trim(),
+        "description": descriptionController.text.trim(),
+        "focusArea": focusAreaController.text.trim(),
+        "latitude": LocalStorage.lat.toString(),
+        "longitude": LocalStorage.long.toString(),
+      };
+
+      if (websiteLinkController.text.trim().isNotEmpty) {
+        body["websiteUrl"] = websiteLinkController.text.trim();
+      }
+
       final ApiResponseModel response = await ApiService.multipartUpdate(
         ApiEndPoint.updateAdvertisementById + adsId,
-        body: {
-          "title": titleController.text.trim(),
-          "description": descriptionController.text.trim(),
-          "focusArea": focusAreaController.text.trim(),
-          "latitude": LocalStorage.lat.toString(),
-          "longitude": LocalStorage.long.toString(),
-          "websiteUrl": websiteLinkController.text.trim(),
-        },
+        body: body,
         imagePath: isLocalImage ? coverImagePath.value : null,
       );
 
@@ -375,7 +379,22 @@ class UpdateAdsController extends GetxController {
       message: 'Your Ad updated successfully. Please wait for admin approval.',
       buttonTitle: 'Done',
       onTap: () {
-        Get.back();
+        Get.back(); // Close Dialog
+        Get.back(); // Close UpdateAdsScreen and return to ViewAdsScreen
+        
+        // Refresh the ViewAdsScreen data if it's open
+        if (Get.isRegistered<ViewAdsScreenController>()) {
+          Get.find<ViewAdsScreenController>().fetchAdById();
+        }
+        
+        // Also refresh history/dashboard lists
+        if (Get.isRegistered<HistoryAdsController>()) {
+          Get.find<HistoryAdsController>().fetchAds();
+        }
+        if (Get.isRegistered<DashBoardScreenController>()) {
+          Get.find<DashBoardScreenController>().fetchMyActiveAds();
+          Get.find<DashBoardScreenController>().fetchAdvertisementOverview();
+        }
       },
     );
   }

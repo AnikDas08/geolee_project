@@ -4,6 +4,8 @@ import 'package:giolee78/config/api/api_end_point.dart';
 import 'package:giolee78/services/api/api_response_model.dart';
 import 'package:giolee78/services/api/api_service.dart';
 
+import '../../../../utils/app_utils.dart';
+import '../../../dashboard/presentation/controller/dash_board_screen_controller.dart';
 import '../../data/single_ads_model.dart';
 import 'history_ads_controller.dart';
 
@@ -54,23 +56,29 @@ class ViewAdsScreenController extends GetxController {
       Get.back();
 
       if (response.statusCode == 200) {
-        Get.snackbar(
-          "Success",
-          "Ad deleted successfully",
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.green,
-          colorText: Colors.white,
-          duration: const Duration(seconds: 2),
-        );
-
-        // ✅ Refresh history list if controller exists
+        // Instant update: Remove from local list first
         if (Get.isRegistered<HistoryAdsController>()) {
-          await Get.find<HistoryAdsController>().fetchAds();
-          Get.find<HistoryAdsController>().update();
+          final historyController = Get.find<HistoryAdsController>();
+          historyController.allAds.removeWhere((element) => element.id == adsId);
+          historyController.activeAds.removeWhere((element) => element.id == adsId);
+          historyController.update();
+          historyController.fetchAds();
+        }
+        
+        // Update Dashboard list as well
+        if (Get.isRegistered<DashBoardScreenController>()) {
+          final dashboardController = Get.find<DashBoardScreenController>();
+          dashboardController.activeAds.removeWhere((element) => element.id == adsId);
+          dashboardController.update();
+          dashboardController.fetchAdvertisementOverview(); // Refresh stats too
         }
 
-        // ✅ Navigate back with result
-        Get.back(result: true);
+        Get.back(); // Close ViewAdsScreen
+        
+        Utils.successSnackBar(
+          "Success",
+          "Ad deleted successfully",
+        );
       } else {
         Get.snackbar(
           "Error",

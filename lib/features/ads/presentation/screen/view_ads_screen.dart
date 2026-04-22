@@ -250,7 +250,7 @@ class ViewAdsScreen extends StatelessWidget {
             ),
             child: const Center(
               child: CommonText(
-                text: 'Delete Post',
+                text: 'Delete Ad',
                 fontWeight: FontWeight.w600,
                 color: AppColors.red,
               ),
@@ -272,7 +272,7 @@ class ViewAdsScreen extends StatelessWidget {
             ),
             child: const Center(
               child: CommonText(
-                text: 'Update Post',
+                text: 'Update Ad',
                 color: AppColors.white,
                 fontWeight: FontWeight.w600,
               ),
