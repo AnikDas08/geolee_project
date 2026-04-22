@@ -120,11 +120,14 @@ class SignUpController extends GetxController {
       isLoading = true;
       update();
 
-      final UserCredential? userCredential = await AuthService.signInWithGoogle();
+      final Map<String, dynamic>? authData = await AuthService.signInWithGoogle();
 
-      if (userCredential != null && userCredential.user != null) {
-        // You can add your logic here, e.g., send data to your backend if needed
-        // or navigate to home if they are already registered
+      if (authData != null && authData["userCredential"] != null) {
+        final UserCredential userCredential = authData["userCredential"];
+        final String idToken = authData["idToken"];
+        
+        debugPrint("✅ Google Sign-UP Token: $idToken");
+        
         debugPrint("✅ Google Sign-UP Successful: ${userCredential.user!.email}");
         Utils.successSnackBar("Success", "Signed Up with ${userCredential.user!.email} Please Login again");
 
@@ -144,9 +147,14 @@ class SignUpController extends GetxController {
       isLoading = true;
       update();
 
-      final UserCredential? userCredential = await AuthService.signInWithApple();
+      final Map<String, dynamic>? authData = await AuthService.signInWithApple();
 
-      if (userCredential != null && userCredential.user != null) {
+      if (authData != null && authData["userCredential"] != null) {
+        final UserCredential userCredential = authData["userCredential"];
+        final String idToken = authData["idToken"];
+
+        debugPrint("✅ Apple Sign-UP Token: $idToken");
+
         debugPrint("✅ Apple Sign-In Successful: ${userCredential.user!.email}");
         Utils.successSnackBar("Success", "Signed in with ${userCredential.user!.email} Please Login again");
         Get.offAllNamed(AppRoutes.signIn);

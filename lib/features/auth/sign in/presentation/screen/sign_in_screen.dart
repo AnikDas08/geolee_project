@@ -13,11 +13,11 @@ import '../../../../../component/text/common_text.dart';
 import '../../../../../component/text_field/common_text_field.dart';
 import '../../../../../services/storage/storage_services.dart';
 import '../controller/sign_in_controller.dart';
-
 import '../../../../../../../utils/constants/app_colors.dart';
 import '../../../../../../../utils/constants/app_string.dart';
 import '../../../../../../../utils/helpers/other_helper.dart';
 import '../widgets/do_not_account.dart';
+
 
 class SignInScreen extends StatelessWidget {
   const SignInScreen({super.key});
@@ -115,7 +115,7 @@ class SignInScreen extends StatelessWidget {
                     children: [
                       Expanded(
                         child: GestureDetector(
-                          onTap: () => controller.socialLogin(provider: "google"),
+                          onTap: () => controller.socialLogin(provider:"google"),
                           child: Container(
                             height: 48.h,
                             width: double.infinity,

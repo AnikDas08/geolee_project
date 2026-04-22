@@ -52,7 +52,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyA__bw6gjpQq_eHPoO66CpawG5txciXO34',
-    appId: '1:627654989285:android:0bfd890d4bf15b82570b0c',
+    appId: '1:627654989285:android:22ef48ae63970498570b0c',
     messagingSenderId: '627654989285',
     projectId: 'just-clicker-count',
     storageBucket: 'just-clicker-count.firebasestorage.app',
@@ -64,7 +64,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '627654989285',
     projectId: 'just-clicker-count',
     storageBucket: 'just-clicker-count.firebasestorage.app',
-    iosBundleId: 'com.clickercount.users.ios',
+    iosBundleId: 'com.justmetaverse.justclicker',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
@@ -73,7 +73,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '627654989285',
     projectId: 'just-clicker-count',
     storageBucket: 'just-clicker-count.firebasestorage.app',
-    iosBundleId: 'com.example.giolee78',
+    iosBundleId: 'com.justmetaverse.justclicker',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(

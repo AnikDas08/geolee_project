@@ -126,28 +126,30 @@ class SignInController extends GetxController {
     update();
 
     try {
-      UserCredential? userCredential;
+      Map<String, dynamic>? authData;
 
       /// Detect provider
       if (provider == "google") {
-        userCredential = await AuthService.signInWithGoogle();
+        authData = await AuthService.signInWithGoogle();
       } else if (provider == "apple") {
-        userCredential = await AuthService.signInWithApple();
+        authData = await AuthService.signInWithApple();
       } else {
         throw Exception("Unsupported provider");
       }
 
-      if (userCredential == null) {
+      if (authData == null) {
         isLoading = false;
         update();
         return;
       }
 
+      final UserCredential userCredential = authData["userCredential"];
+      final String idToken = authData["idToken"];
       final user = userCredential.user;
 
       final body = {
         "provider": provider,
-        "providerUserId": user?.uid ?? "",
+        "providerUserId": idToken,
         "name": user?.displayName ?? "",
         "email": user?.email ?? "",
       };

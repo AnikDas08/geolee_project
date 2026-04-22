@@ -9,28 +9,29 @@ class AuthService {
   static final GoogleSignIn _googleSignIn = GoogleSignIn();
 
   /// Google Sign In Flow
-  static Future<UserCredential?> signInWithGoogle() async {
+  static Future<Map<String, dynamic>?> signInWithGoogle() async {
     try {
-      // Force user to select account every time (Prevents sticking to one account if failed)
       if (await _googleSignIn.isSignedIn()) {
         await _googleSignIn.disconnect();
       }
 
-      // Trigger the authentication flow
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
-      if (googleUser == null) return null; // User canceled
+      if (googleUser == null) return null;
 
-      // Obtain the auth details from the request
       final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
 
-      // Create a new credential
       final OAuthCredential credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
 
-      // Once signed in, return the UserCredential
-      return await _auth.signInWithCredential(credential);
+      final userCredential = await _auth.signInWithCredential(credential);
+
+
+      return {
+        "userCredential": userCredential,
+        "idToken": googleAuth.idToken, // Original Google ID Token
+      };
     } catch (e) {
       Get.snackbar("Error", "Google Sign-In failed: $e");
       debugPrint("❌ Google Sign-In Error: $e");
@@ -39,7 +40,7 @@ class AuthService {
   }
 
   /// Apple Sign In Flow
-  static Future<UserCredential?> signInWithApple() async {
+  static Future<Map<String, dynamic>?> signInWithApple() async {
     try {
       final appleCredential = await SignInWithApple.getAppleIDCredential(
         scopes: [
@@ -49,13 +50,9 @@ class AuthService {
 
 
         webAuthenticationOptions: WebAuthenticationOptions(
-          //ToDo==============================
-          //here need apple service id
-          clientId: "YOUR_APPLE_SERVICE_ID",
+          clientId: "com.justmetaverse.justclicker.signin",
           redirectUri: Uri.parse(
-            //ToDo==============================
-            //here need redirect url
-            "https://YOUR_DOMAIN/callbacks/sign_in_with_apple",
+            "https://just-clicker-count.firebaseapp.com/__/auth/handler",
           ),
         ),
       );
@@ -66,7 +63,13 @@ class AuthService {
         accessToken: appleCredential.authorizationCode,
       );
 
-      return await _auth.signInWithCredential(credential);
+      final userCredential = await _auth.signInWithCredential(credential);
+
+      return {
+        "userCredential": userCredential,
+        "idToken": appleCredential.identityToken,
+      };
+
     } catch (e) {
       debugPrint("❌ Apple Sign-In Error: $e");
       return null;
