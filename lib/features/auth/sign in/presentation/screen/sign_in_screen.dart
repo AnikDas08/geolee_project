@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:geolocator/geolocator.dart';
@@ -155,54 +156,54 @@ class SignInScreen extends StatelessWidget {
                           ),
                         ),
                       ),
-                      SizedBox(width: 12.h),
-                      Expanded(
-                        child: GestureDetector(
-                          onTap: () {
-
-                           controller.socialLogin(provider: "apple");
-
-                          },
-                          child: Container(
-                            height: 48.h,
-                            width: double.infinity,
-                            decoration: BoxDecoration(
-                              color: Colors.transparent,
-                              borderRadius: BorderRadius.circular(12.r),
-                              border: Border.all(color: Colors.grey, width: 2),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.grey.withValues(alpha: 0.1),
-                                  blurRadius: 8,
-                                  spreadRadius: 2,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ],
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                // Apple Icon
-                                SvgPicture.asset(
-                                  'assets/icons/apple_fons.svg',
-                                  height: 24.h,
-                                  width: 24.w,
-                                ),
-                                SizedBox(width: 10.w),
-                                // Apple Text
-                                Text(
-                                  'Apple',
-                                  style: TextStyle(
-                                    color: AppColors.textColorFirst,
-                                    fontSize: 16.sp,
-                                    fontWeight: FontWeight.w400,
+                      if (Platform.isIOS) ...[
+                        SizedBox(width: 12.h),
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: () {
+                              controller.socialLogin(provider: "apple");
+                            },
+                            child: Container(
+                              height: 48.h,
+                              width: double.infinity,
+                              decoration: BoxDecoration(
+                                color: Colors.transparent,
+                                borderRadius: BorderRadius.circular(12.r),
+                                border: Border.all(color: Colors.grey, width: 2),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.grey.withValues(alpha: 0.1),
+                                    blurRadius: 8,
+                                    spreadRadius: 2,
+                                    offset: const Offset(0, 2),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  // Apple Icon
+                                  SvgPicture.asset(
+                                    'assets/icons/apple_fons.svg',
+                                    height: 24.h,
+                                    width: 24.w,
+                                  ),
+                                  SizedBox(width: 10.w),
+                                  // Apple Text
+                                  Text(
+                                    'Apple',
+                                    style: TextStyle(
+                                      color: AppColors.textColorFirst,
+                                      fontSize: 16.sp,
+                                      fontWeight: FontWeight.w400,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ),
-                      ),
+                      ],
                     ],
                   ),
                 ],

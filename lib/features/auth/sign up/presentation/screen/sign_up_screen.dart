@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:giolee78/utils/constants/app_colors.dart';
@@ -102,50 +103,52 @@ class SignUpScreen extends StatelessWidget {
                           ),
                         ),
                       ),
-                      SizedBox(width: 12.h),
-                      Expanded(
-                        child: InkWell(
-                          onTap: () {
-                            controller.signInWithApple();
-                          },
-                          child: Container(
-                            height: 48.h,
-                            width: double.infinity,
-                            decoration: ShapeDecoration(
-                              shape: RoundedRectangleBorder(
-                                side: const BorderSide(
-                                  color: Color(
-                                    0xFFD1D5D6,
-                                  ) /* Disable-Color */,
-                                ),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                // Apple Icon
-                                SvgPicture.asset(
-                                  'assets/icons/apple_fons.svg',
-                                  height: 24.h,
-                                  width: 24.w,
-                                ),
-                                SizedBox(width: 10.w),
-
-                                // Apple Text
-                                Text(
-                                  'Apple',
-                                  style: TextStyle(
-                                    color: AppColors.textColorFirst,
-                                    fontSize: 16.sp,
-                                    fontWeight: FontWeight.w400,
+                      if (Platform.isIOS) ...[
+                        SizedBox(width: 12.h),
+                        Expanded(
+                          child: InkWell(
+                            onTap: () {
+                              controller.signInWithApple();
+                            },
+                            child: Container(
+                              height: 48.h,
+                              width: double.infinity,
+                              decoration: ShapeDecoration(
+                                shape: RoundedRectangleBorder(
+                                  side: const BorderSide(
+                                    color: Color(
+                                      0xFFD1D5D6,
+                                    ) /* Disable-Color */,
                                   ),
+                                  borderRadius: BorderRadius.circular(8),
                                 ),
-                              ],
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  // Apple Icon
+                                  SvgPicture.asset(
+                                    'assets/icons/apple_fons.svg',
+                                    height: 24.h,
+                                    width: 24.w,
+                                  ),
+                                  SizedBox(width: 10.w),
+
+                                  // Apple Text
+                                  Text(
+                                    'Apple',
+                                    style: TextStyle(
+                                      color: AppColors.textColorFirst,
+                                      fontSize: 16.sp,
+                                      fontWeight: FontWeight.w400,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ),
-                      ),
+                      ],
                     ],
                   ),
                   const SizedBox(height: 1),
