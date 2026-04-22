@@ -22,7 +22,8 @@ Future<void> main() async {
   );
   
   // Initialize Analytics
-  FirebaseAnalytics analytics = FirebaseAnalytics.instance;
+  final FirebaseAnalytics analytics = FirebaseAnalytics.instance;
+  await analytics.logAppOpen();
   
   await FirebaseNotificationService().initNotifications();
   runApp(MyApp(analytics: analytics));

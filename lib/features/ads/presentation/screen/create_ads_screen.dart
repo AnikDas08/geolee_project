@@ -129,7 +129,7 @@ class _CreateAdsScreenState extends State<CreateAdsScreen> {
                         CommonTextField(
                           validator: OtherHelper.urlValidator,
                           controller: controller.websiteLinkController,
-                          hintText: ' e.g https//:www.website.com',
+                          hintText: ' e.g https://www.website.com',
                         ),
                         SizedBox(height: 20.h),
 
