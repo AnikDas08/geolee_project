@@ -2,6 +2,9 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+<key>NSUserTrackingUsageDescription</key>
+<string>This identifier will be used to deliver personalized ads and content to you, and to improve our services.</string>
+
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>
@@ -30,10 +33,6 @@
 				<string>com.googleusercontent.apps.627654989285-pavjm68ctraaf1t6se3hm6beuakdb2v1</string>
 			</array>
 		</dict>
-	</array>
-	<key>NSUserActivityTypes</key>
-	<array>
-		<string>INSendMessageIntent</string>
 	</array>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
@@ -70,12 +69,14 @@
 	<string>This app needs access to location to show nearby banners and posts.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>We need your location to find the best vibes around you.</string>
-	<key>NSMicrophoneUsageDescription</key>
-	<string>This app needs access to the microphone for video recording.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>This app needs permission to save images and videos.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>We need gallery access to select profile pictures and media to share in chat.</string>
+	<key>NSUserActivityTypes</key>
+	<array>
+		<string>INSendMessageIntent</string>
+	</array>
 	<key>NSUserTrackingUsageDescription</key>
 	<string>This identifier will be used to deliver personalized ads and content to you, and to improve our services.</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
