@@ -71,7 +71,7 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
                   builder: (context, snapshot) {
                     if (!snapshot.hasData) return const SizedBox();
                     return CommonText(
-                      text: "Version: ${snapshot.data} (beta)",
+                      text: "Version: ${snapshot.data}",
                       fontSize: 15.sp,
                       color: Colors.green,
                       fontWeight: FontWeight.w500,

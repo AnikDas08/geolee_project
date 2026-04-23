@@ -106,7 +106,7 @@ class _SplashScreenState extends State<SplashScreen> {
                 if (!snapshot.hasData) return const SizedBox();
 
                 return CommonText(
-                  text: "Version: ${snapshot.data} (beta)",
+                  text: "Version: ${snapshot.data}",
                   fontSize: 15.sp,
                   color: Colors.green,
                   fontWeight: FontWeight.w500,

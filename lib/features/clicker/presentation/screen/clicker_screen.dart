@@ -14,6 +14,7 @@ import 'package:giolee78/features/clicker/presentation/widget/common_post_card.d
 import 'package:giolee78/features/notifications/presentation/controller/notifications_controller.dart';
 import 'package:giolee78/utils/constants/app_colors.dart';
 import 'package:giolee78/utils/constants/app_icons.dart';
+import '../../../addpost/my_post_model.dart';
 import '../../../addpost/presentation/widgets/full_screen_view_image.dart';
 import '../../../friend/presentation/screen/view_friend_screen.dart';
 import '../widget/webview_screen.dart';
@@ -277,7 +278,7 @@ class _ClickerScreenState extends State<ClickerScreen> {
               Builder(
                 builder: (context) {
                   final postsWithImages = controller.filteredPosts
-                      .where((data) => data.photos.isNotEmpty)
+                      .where((data) => (data.photos as List).isNotEmpty)
                       .toList();
 
                   if (postsWithImages.isEmpty) {
@@ -292,19 +293,23 @@ class _ClickerScreenState extends State<ClickerScreen> {
                     padding: EdgeInsets.symmetric(horizontal: 16.w),
                     sliver: SliverList(
                       delegate: SliverChildBuilderDelegate((context, index) {
-                        final data = postsWithImages[index];
-                        final List<String> postImages = data.photos.isNotEmpty
-                            ? data.photos.map((p) {
-                                if (p.startsWith('http')) return p;
-                                return p.startsWith('/')
-                                    ? "${ApiEndPoint.imageUrl}$p"
-                                    : "${ApiEndPoint.imageUrl}/$p";
+                        final dynamic data = postsWithImages[index];
+                        final List<String> postImages =
+                            (data.photos as List).isNotEmpty
+                            ? (data.photos as List).map((p) {
+                                final String photo = p.toString();
+                                if (photo.startsWith('http')) return photo;
+                                return photo.startsWith('/')
+                                    ? "${ApiEndPoint.imageUrl}$photo"
+                                    : "${ApiEndPoint.imageUrl}/$photo";
                               }).toList()
                             : [];
 
                         return Padding(
                           padding: EdgeInsets.only(bottom: 16.h),
                           child: CommonPostCards(
+                            postId: data.id.toString(),
+                            // Pass the post ID safely
                             onTapPhoto: () {
                               if (postImages.isNotEmpty) {
                                 Get.to(
@@ -382,7 +387,6 @@ class _ClickerScreenState extends State<ClickerScreen> {
     );
   }
 
-
   Widget _buildEmptyState() {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 60.h),
@@ -402,6 +406,7 @@ class _ClickerScreenState extends State<ClickerScreen> {
       ),
     );
   }
+
   Widget _buildFilterButton(BuildContext context) {
     return GestureDetector(
       onTap: () => _showFilterBottomSheet(context),
@@ -424,6 +429,7 @@ class _ClickerScreenState extends State<ClickerScreen> {
       ),
     );
   }
+
   void _showFilterBottomSheet(BuildContext context) {
     Get.bottomSheet(
       Container(
@@ -466,5 +472,4 @@ class _ClickerScreenState extends State<ClickerScreen> {
       ),
     );
   }
-
 }

@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 import 'package:giolee78/component/image/common_image.dart';
 import 'package:giolee78/component/text/common_text.dart';
+import 'package:giolee78/component/pop_up/common_pop_menu.dart';
+import 'package:giolee78/component/button/common_button.dart';
+import 'package:giolee78/services/api/api_service.dart';
+import 'package:giolee78/utils/app_utils.dart';
 import 'package:giolee78/utils/constants/app_colors.dart';
 
 class CommonPostCards extends StatelessWidget {
@@ -18,6 +23,7 @@ class CommonPostCards extends StatelessWidget {
     required this.clickerType,
     required this.onTapProfile,
     required this.onTapPhoto,
+    this.postId, // Added this
   });
 
   final String userName;
@@ -31,6 +37,7 @@ class CommonPostCards extends StatelessWidget {
   final String clickerType;
   final VoidCallback onTapProfile;
   final VoidCallback onTapPhoto;
+  final String? postId; // Added this
 
   @override
   Widget build(BuildContext context) {
@@ -73,10 +80,24 @@ class CommonPostCards extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        CommonText(
-                          text: userName,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            CommonText(
+                              text: userName,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                            ),
+                            if (postId != null)
+                              GestureDetector(
+                                onTap: () => _showReportBottomSheet(context, postId!),
+                                child: Icon(
+                                  Icons.more_vert,
+                                  size: 20.sp,
+                                  color: AppColors.secondaryText,
+                                ),
+                              ),
+                          ],
                         ),
                         SizedBox(height: 4.h),
                         Row(
@@ -168,6 +189,167 @@ class CommonPostCards extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  /// ── Report Bottom Sheet ──────────────────────────────────
+  void _showReportBottomSheet(BuildContext context, String postId) {
+    final List<String> reportReasons = [
+      'Sexual Content',
+      'Harassment / Bullying',
+      'Hate Speech',
+      'Violence',
+      'Gambling',
+      'Spam',
+      'Fake Profile',
+      'Scam / Fraud',
+      'Other',
+    ];
+
+    String? selectedReason;
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      isScrollControlled: true,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+      ),
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return Padding(
+              padding: EdgeInsets.fromLTRB(20.w, 20.h, 20.w, 40.h),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 40.w,
+                    height: 4.h,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(10.r),
+                    ),
+                  ),
+                  SizedBox(height: 20.h),
+                  CommonText(
+                    text: "Report Post",
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  SizedBox(height: 10.h),
+                  CommonText(
+                    text: "Why are you reporting this post?",
+                    fontSize: 14,
+                    color: AppColors.secondaryText,
+                  ),
+                  SizedBox(height: 15.h),
+                  ConstrainedBox(
+                    constraints: BoxConstraints(maxHeight: 400.h),
+                    child: ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: reportReasons.length,
+                      itemBuilder: (context, index) {
+                        final reason = reportReasons[index];
+                        final isSelected = selectedReason == reason;
+                        return InkWell(
+                          onTap: () {
+                            setState(() {
+                              selectedReason = reason;
+                            });
+                          },
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(vertical: 8.h),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: CommonText(
+                                    text: reason,
+                                    fontSize: 14,
+                                    textAlign: TextAlign.left,
+                                  ),
+                                ),
+                                Container(
+                                  height: 20.r,
+                                  width: 20.r,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: isSelected
+                                          ? AppColors.primaryColor
+                                          : Colors.grey,
+                                      width: 2,
+                                    ),
+                                  ),
+                                  child: isSelected
+                                      ? Center(
+                                          child: Container(
+                                            height: 10.r,
+                                            width: 10.r,
+                                            decoration: const BoxDecoration(
+                                              shape: BoxShape.circle,
+                                              color: AppColors.primaryColor,
+                                            ),
+                                          ),
+                                        )
+                                      : null,
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  SizedBox(height: 25.h),
+                  CommonButton(
+                    titleText: "Submit Report",
+                    onTap: () {
+                      if (selectedReason == null) {
+                        Utils.errorSnackBar(
+                          "Reason Required",
+                          "Please select a reason for reporting.",
+                        );
+                        return;
+                      }
+                      Navigator.pop(context);
+                      _submitReport(postId, selectedReason!);
+                    },
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  /// ── Submit Report API Call ────────────────────────────────
+  Future<void> _submitReport(String postId, String reason) async {
+    try {
+      debugPrint("🚩 Reporting post: $postId for reason: $reason");
+      
+      final response = await ApiService.post(
+        "https://clicker-api.just-metaverse.com/api/v1/reports/create",
+        body: {
+          "post": postId, // Changed from "postId" to "post" to match common backend naming, adjust if needed
+          "reason": reason,
+        },
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        successPopUps(
+          message: "Thank you for reporting. We will review this post shortly.",
+          buttonTitle: "Done",
+          onTap: () => Get.back(),
+        );
+      } else {
+        Utils.errorSnackBar("Error", response.data['message'] ?? "Failed to submit report");
+      }
+    } catch (e) {
+      debugPrint("❌ Report Error: $e");
+      Utils.errorSnackBar("Error", "Something went wrong while reporting");
+    }
   }
 }
 

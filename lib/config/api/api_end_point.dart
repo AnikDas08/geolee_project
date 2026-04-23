@@ -103,6 +103,7 @@ class ApiEndPoint {
 
   // Support ========================================
   static const String support = "$baseUrl/supports/create";
+  static const String createReport = "$baseUrl/reports/create";
 
   // Misc ===========================================
   static const String user = "$baseUrl/users";

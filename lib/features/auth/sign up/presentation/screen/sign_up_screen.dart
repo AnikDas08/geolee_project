@@ -1,5 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:giolee78/utils/app_utils.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:giolee78/utils/constants/app_colors.dart';
 import '../../../../../../../utils/extensions/extension.dart';
@@ -43,13 +45,65 @@ class SignUpScreen extends StatelessWidget {
                   /// All Text Filed here
                   SignUpAllField(controller: controller),
 
-                  16.height,
+                  10.height,
+
+                  Row(
+                    children: [
+                      SizedBox(
+                        height: 24,
+                        width: 24,
+                        child: Checkbox(
+                          value: controller.isAgreed,
+                          activeColor: AppColors.primaryColor,
+                          onChanged: (value) => controller.toggleAgreement(value),
+                        ),
+                      ),
+                      10.width,
+                      Expanded(
+                        child: Text.rich(
+                          TextSpan(
+                            text: "I agree with ",
+                            style: TextStyle(fontSize: 14.sp, color: Colors.black),
+                            children: [
+                              WidgetSpan(
+                                child: InkWell(
+                                  onTap: () async {
+                                    final url = Uri.parse("https://clicker1380.just-metaverse.com/public/privacy-policy");
+                                    if (await canLaunchUrl(url)) {
+                                      await launchUrl(url);
+                                    }
+                                  },
+                                  child: Text(
+                                    "Terms & Conditions",
+                                    style: TextStyle(
+                                      fontSize: 14.sp,
+                                      color: AppColors.primaryColor,
+                                      fontWeight: FontWeight.bold,
+                                      decoration: TextDecoration.underline,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  20.height,
 
                   /// Submit Button Here
                   CommonButton(
                     titleText: AppString.signUp,
                     isLoading: controller.isLoading,
-                    onTap: () => controller.signUpUser(signUpFormKey),
+                    onTap: () {
+                      if (!controller.isAgreed) {
+                        Utils.errorSnackBar("Agreement Required", "Please agree to the Terms & Conditions");
+                        return;
+                      }
+                      controller.signUpUser(signUpFormKey);
+                    },
                   ),
                   const SizedBox(height: 20),
 

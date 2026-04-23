@@ -39,7 +39,7 @@ class _CreateAdsScreenState extends State<CreateAdsScreen> {
         Get.offAllNamed(AppRoutes.homeNav);
       },
       child: GestureDetector(
-        // Suggestions বন্ধ করতে outside tap detect করা
+
         onTap: () => controller.clearSuggestions(),
         child: Scaffold(
           backgroundColor: AppColors.background,

@@ -50,6 +50,12 @@ class SignUpController extends GetxController {
   String? image;
 
   String signUpToken = '';
+  bool isAgreed = false; // New observable for terms and conditions
+
+  void toggleAgreement(bool? value) {
+    isAgreed = value ?? false;
+    update();
+  }
 
   static SignUpController get instance => Get.find();
 
