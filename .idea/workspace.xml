@@ -5,11 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="627a12bc-9b67-477e-b0b1-a39d58a3aff3" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Dart_Packages.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Dart_Packages.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/features/ads/presentation/controller/update_ads_controller.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/ads/presentation/controller/update_ads_controller.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/features/ads/presentation/controller/view_ads_screen_controller.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/ads/presentation/controller/view_ads_screen_controller.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/features/ads/presentation/screen/edit_ads_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/ads/presentation/screen/edit_ads_screen.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/features/ads/presentation/screen/view_ads_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/ads/presentation/screen/view_ads_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/features/ads/presentation/controller/create_add_controller.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/ads/presentation/controller/create_add_controller.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/features/ads/presentation/screen/create_ads_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/features/ads/presentation/screen/create_ads_screen.dart" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

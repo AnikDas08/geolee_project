@@ -275,7 +275,7 @@ class CreateAdsController extends GetxController {
             .map((e) => PlanModel.fromJson(e))
             .toList();
 
-        debugPrint("✅ Plans loaded: ${plans.length} items");
+        debugPrint(" Plans loaded: ${plans.length} items");
 
         if (plans.isNotEmpty) {
           selectedPricingPlan.value = plans.first.name;
