@@ -3,7 +3,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:giolee78/services/storage/storage_keys.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 import 'package:giolee78/component/button/common_button.dart';
 import 'package:giolee78/component/image/common_image.dart';
@@ -38,14 +37,12 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     super.dispose();
   }
 
-  //check permission every time screen is visible==============================
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     _initializeLocation();
   }
 
-  //app foreground e ele abar check + save==============================
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
@@ -53,16 +50,13 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     }
   }
 
-  //initialize: check status + save if enabled==============================
   Future<void> _initializeLocation() async {
     await _checkLocationStatus();
-
     if (isLocationEnabled) {
       await _saveCurrentLocation();
     }
   }
 
-  //service + permission check==============================
   Future<void> _checkLocationStatus() async {
     try {
       final bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
@@ -75,134 +69,83 @@ class _OnboardingScreenState extends State<OnboardingScreen>
             (permission == LocationPermission.always ||
                 permission == LocationPermission.whileInUse);
       });
-
-      debugPrint(
-          "🔍 Location Status: Service=$serviceEnabled, Permission=$permission, Enabled=$isLocationEnabled");
     } catch (e) {
-      debugPrint("❌ Location check error: $e");
       if (mounted) {
         setState(() => isLocationEnabled = false);
       }
     }
   }
 
-  //switch toggle - always shows permission dialog==============================
   Future<void> _toggleLocation(bool value) async {
     if (isLoading) return;
 
-    setState(() => isLoading = true);
-
-    try {
-      if (value) {
-        await _enableLocation();
-      } else {
-        await _disableLocation();
-      }
-    } finally {
-      if (mounted) {
-        setState(() => isLoading = false);
-      }
+    if (value) {
+      setState(() => isLoading = true);
+      await _enableLocation();
+      if (mounted) setState(() => isLoading = false);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('To revoke location access, please change it from App Settings.'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+      await _checkLocationStatus();
     }
   }
 
-  //enable location - shows permission dialog==============================
   Future<void> _enableLocation() async {
-    //step 1: check if service is enabled==============================
-    final bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-
+    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
-      final bool? open = await _showLocationServiceDialog();
-      if (open == true) {
-        await Geolocator.openLocationSettings();
-        await Future.delayed(const Duration(milliseconds: 500));
-      }
-      await _initializeLocation();
-      return;
-    }
-
-    //step 2: check current permission==============================
-    LocationPermission permission = await Geolocator.checkPermission();
-
-    //step 3: request permission if denied==============================
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-
-      if (permission == LocationPermission.denied) {
-        await _checkLocationStatus();
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Location permission denied'),
-              backgroundColor: Colors.orange,
-            ),
-          );
-        }
-        return;
-      }
-    }
-
-    //step 4: if permanently denied, show settings dialog==============================
-    if (permission == LocationPermission.deniedForever) {
-      await _showPermissionDeniedDialog();
-      return;
-    }
-
-    //step 5: if permission granted, save location immediately==============================
-    if (permission == LocationPermission.whileInUse ||
-        permission == LocationPermission.always) {
-      await _checkLocationStatus();
-
-      final bool saved = await _saveCurrentLocation();
-
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(saved
-                ? '✅ Location enabled & saved successfully'
-                : '⚠️ Location enabled but failed to get coordinates'),
-            backgroundColor: saved ? Colors.green : Colors.orange,
-            duration: const Duration(seconds: 2),
-          ),
+          const SnackBar(content: Text('Please enable location services (GPS) on your device.')),
         );
       }
+      return;
+    }
+
+    LocationPermission permission = await Geolocator.checkPermission();
+
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      // যদি পারমিশন পার্মানেন্টলি ডিনাইড থাকে, তাহলে ইউজার চাইলে ম্যানুয়ালি সেটিংস থেকে অন করতে পারবে
+      if (mounted) {
+        _showManualPermissionDialog();
+      }
+    }
+
+    await _checkLocationStatus();
+    if (isLocationEnabled) {
+      await _saveCurrentLocation();
     }
   }
 
-  //disable location (manual only)==============================
-  Future<void> _disableLocation() async {
-    final bool? goToSettings = await showDialog<bool>(
+  void _showManualPermissionDialog() {
+    showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Disable Location'),
-        content: const Text(
-          'To disable location, please turn it off manually from device settings.',
-        ),
+        title: const Text("Location Access"),
+        content: const Text("Location permission is permanently denied. Would you like to enable it in settings?"),
         actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text("Cancel")),
           TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Open Settings'),
+            onPressed: () {
+              Navigator.pop(context);
+              Geolocator.openAppSettings();
+            },
+            child: const Text("Settings"),
           ),
         ],
       ),
     );
-
-    if (goToSettings == true) {
-      await Geolocator.openLocationSettings();
-      await Future.delayed(const Duration(milliseconds: 500));
-    }
-
-    await _initializeLocation();
   }
 
-  //get & save location - returns true if successful==============================
-  Future<bool> _saveCurrentLocation() async {
+  Future<void> _saveCurrentLocation() async {
     try {
-      debugPrint("📍 Fetching current location...");
-
       final Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
         timeLimit: const Duration(seconds: 10),
@@ -210,118 +153,12 @@ class _OnboardingScreenState extends State<OnboardingScreen>
 
       await LocalStorage.setDouble(LocalStorageKeys.lat, position.latitude);
       await LocalStorage.setDouble(LocalStorageKeys.long, position.longitude);
-
-      debugPrint(
-          "✅ Location saved → Lat: ${position.latitude}, Long: ${position.longitude}");
-
-      return true;
     } catch (e) {
-      debugPrint("❌ Location save failed: $e");
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to get location: ${e.toString()}'),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 3),
-          ),
-        );
-      }
-
-      return false;
+      // Fail silently for onboarding
     }
   }
 
-  //location service disabled dialog==============================
-  Future<bool?> _showLocationServiceDialog() {
-    return showDialog<bool>(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        title: const Text('Location Service Disabled'),
-        content: const Text(
-          'Location services are turned off. Please enable them to continue.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Open Settings'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  //permission permanently denied dialog==============================
-  Future<void> _showPermissionDeniedDialog() async {
-    final bool? openSettings = await showDialog<bool>(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        title: const Text('Permission Denied'),
-        content: const Text(
-          'Location permission is permanently denied. Please enable it from app settings to use this feature.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Open Settings'),
-          ),
-        ],
-      ),
-    );
-
-    if (openSettings == true) {
-      await openAppSettings();
-      await Future.delayed(const Duration(milliseconds: 500));
-      await _initializeLocation();
-    }
-  }
-
-  //get started button tap handler - apple fix: cannot skip permission==============================
   Future<void> _onGetStartedTap() async {
-    //check current permission status==============================
-    final LocationPermission permission = await Geolocator.checkPermission();
-    final bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-
-    final bool alreadyGranted = serviceEnabled &&
-        (permission == LocationPermission.always ||
-            permission == LocationPermission.whileInUse);
-
-    if (!alreadyGranted) {
-      //permission not granted, request it first - user cannot skip==============================
-      await _enableLocation();
-
-      //re-check after request==============================
-      final LocationPermission newPermission =
-      await Geolocator.checkPermission();
-      final bool newServiceEnabled =
-      await Geolocator.isLocationServiceEnabled();
-
-      final bool nowGranted = newServiceEnabled &&
-          (newPermission == LocationPermission.always ||
-              newPermission == LocationPermission.whileInUse);
-
-      if (!nowGranted) {
-        //still not granted, block navigation==============================
-        return;
-      }
-    }
-
-    //permission granted, proceed to next screen==============================
-    final String lat = LocalStorage.lat.toString();
-    final String log = LocalStorage.long.toString();
-
-    debugPrint("🚀 Navigation - Location -> Lat: $lat, Long: $log");
-
     Get.toNamed(AppRoutes.signIn);
   }
 
@@ -356,7 +193,6 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                 buttonHeight: 50.h,
                 buttonRadius: 10.r,
                 titleSize: 18.sp,
-                //apple fix: get started now requests permission, cannot skip==============================
                 onTap: _onGetStartedTap,
               ),
             ],
@@ -387,7 +223,6 @@ class _OnboardingScreenState extends State<OnboardingScreen>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                //apple fix: changed from "Enable Location" to "Location Access"==============================
                 Text(
                   'Location Access',
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),

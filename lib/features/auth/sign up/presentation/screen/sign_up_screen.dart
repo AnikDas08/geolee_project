@@ -74,7 +74,7 @@ class SignUpScreen extends StatelessWidget {
                                     }
                                   },
                                   child: Text(
-                                    "Terms & Conditions",
+                                    "Terms & Conditions and EULA",
                                     style: TextStyle(
                                       fontSize: 14.sp,
                                       color: AppColors.primaryColor,
@@ -99,7 +99,7 @@ class SignUpScreen extends StatelessWidget {
                     isLoading: controller.isLoading,
                     onTap: () {
                       if (!controller.isAgreed) {
-                        Utils.errorSnackBar("Agreement Required", "Please agree to the Terms & Conditions");
+                        Utils.errorSnackBar("Agreement Required", "Please agree to the Terms, Conditions and EULA");
                         return;
                       }
                       controller.signUpUser(signUpFormKey);

@@ -5,6 +5,8 @@ import 'package:giolee78/component/image/common_image.dart';
 import 'package:giolee78/component/text/common_text.dart';
 import 'package:giolee78/component/pop_up/common_pop_menu.dart';
 import 'package:giolee78/component/button/common_button.dart';
+import 'package:giolee78/config/api/api_end_point.dart';
+import 'package:giolee78/features/clicker/presentation/controller/clicker_controller.dart';
 import 'package:giolee78/services/api/api_service.dart';
 import 'package:giolee78/utils/app_utils.dart';
 import 'package:giolee78/utils/constants/app_colors.dart';
@@ -89,13 +91,26 @@ class CommonPostCards extends StatelessWidget {
                               fontWeight: FontWeight.w600,
                             ),
                             if (postId != null)
-                              GestureDetector(
-                                onTap: () => _showReportBottomSheet(context, postId!),
-                                child: Icon(
-                                  Icons.more_vert,
-                                  size: 20.sp,
-                                  color: AppColors.secondaryText,
-                                ),
+                              Row(
+                                children: [
+                                  GestureDetector(
+                                    onTap: () => _showReportBottomSheet(context, postId!),
+                                    child: Icon(
+                                      Icons.report_gmailerrorred_outlined,
+                                      size: 20.sp,
+                                      color: Colors.red.withOpacity(0.7),
+                                    ),
+                                  ),
+                                  SizedBox(width: 12.w),
+                                  GestureDetector(
+                                    onTap: () => _showBlockConfirmationDialog(context, postId!),
+                                    child: Icon(
+                                      Icons.block_flipped,
+                                      size: 18.sp,
+                                      color: AppColors.secondaryText,
+                                    ),
+                                  ),
+                                ],
                               ),
                           ],
                         ),
@@ -191,7 +206,54 @@ class CommonPostCards extends StatelessWidget {
     );
   }
 
+  void _showBlockConfirmationDialog(BuildContext context, String postId) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Block User?"),
+        content: const Text("Are you sure you want to block this user? You won't see their posts anymore."),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text("Cancel")),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              _submitBlock(postId);
+            },
+            child: const Text("Block", style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _submitBlock(String postId) async {
+    try {
+      final response = await ApiService.post(
+        ApiEndPoint.createBlock,
+        body: {"post": postId},
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        // Locally remove the post from UI
+        if (Get.isRegistered<ClickerController>()) {
+          Get.find<ClickerController>().removeBlockedContent(postId);
+        }
+
+        successPopUps(
+          message: "User blocked successfully. You will no longer see their content.",
+          buttonTitle: "Done",
+          onTap: () => Get.back(),
+        );
+      } else {
+        Utils.errorSnackBar("Error", "Failed to block user");
+      }
+    } catch (e) {
+      Utils.errorSnackBar("Error", "Something went wrong");
+    }
+  }
+
   /// ── Report Bottom Sheet ──────────────────────────────────
+
   void _showReportBottomSheet(BuildContext context, String postId) {
     final List<String> reportReasons = [
       'Sexual Content',
@@ -330,14 +392,19 @@ class CommonPostCards extends StatelessWidget {
       debugPrint("🚩 Reporting post: $postId for reason: $reason");
       
       final response = await ApiService.post(
-        "https://clicker-api.just-metaverse.com/api/v1/reports/create",
+        ApiEndPoint.createReport,
         body: {
-          "post": postId, // Changed from "postId" to "post" to match common backend naming, adjust if needed
+          "post": postId,
           "reason": reason,
         },
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
+        // Locally remove the post from UI after report
+        if (Get.isRegistered<ClickerController>()) {
+          Get.find<ClickerController>().removeBlockedContent(postId);
+        }
+
         successPopUps(
           message: "Thank you for reporting. We will review this post shortly.",
           buttonTitle: "Done",

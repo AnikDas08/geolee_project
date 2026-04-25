@@ -34,93 +34,126 @@ class ChatNearbyScreen extends StatelessWidget {
         child: _ChatNearbyAppBar(),
       ),
       body: Obx(() {
-        if (controller.isNearbyChatLoading.value) {
-          return const Center(
-            child: CircularProgressIndicator(color: Colors.blue),
-          );
-        }
+        final isVisible = LocalStorage.isLocationVisible;
 
-        if (controller.nearbyChatError.value.isNotEmpty) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.error_outline, size: 48.r, color: Colors.red),
-                SizedBox(height: 16.h),
-                Text(
-                  controller.nearbyChatError.value,
-                  style: TextStyle(color: Colors.red, fontSize: 14.sp),
-                  textAlign: TextAlign.center,
+        return Column(
+          children: [
+            if (!isVisible)
+              Container(
+                width: double.infinity,
+                padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 16.w),
+                color: Colors.orange.withOpacity(0.1),
+                child: Row(
+                  children: [
+                    Icon(Icons.visibility_off, size: 16.sp, color: Colors.orange),
+                    SizedBox(width: 8.w),
+                    Expanded(
+                      child: CommonText(
+                        text: "You are invisible. Others can't see you nearby.",
+                        fontSize: 12.sp,
+                        color: Colors.orange,
+                        textAlign: TextAlign.start,
+                      ),
+                    ),
+                  ],
                 ),
-                SizedBox(height: 16.h),
-                ElevatedButton(
-                  onPressed: () => controller.getNearbyChat(),
-                  child: const Text('Retry'),
-                ),
-              ],
+              ),
+            Expanded(
+              child: _buildMainContent(controller, clickerController),
             ),
-          );
-        }
-
-        if (controller.nearbyChatList.isEmpty) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.people_outline, size: 48.r, color: Colors.grey),
-                SizedBox(height: 16.h),
-                Text(
-                  'No nearby users found',
-                  style: TextStyle(fontSize: 16.sp, color: Colors.grey),
-                ),
-              ],
-            ),
-          );
-        }
-
-        return RefreshIndicator(
-          onRefresh: () => controller.getNearbyChat(),
-          child: NotificationListener<ScrollNotification>(
-            onNotification: (ScrollNotification scrollInfo) {
-              if (scrollInfo.metrics.pixels ==
-                  scrollInfo.metrics.maxScrollExtent) {
-                controller.loadMore();
-              }
-              return false;
-            },
-            child: ListView.separated(
-              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
-              itemCount: controller.nearbyChatList.length + 1,
-              separatorBuilder: (context, index) => SizedBox(height: 12.h),
-              itemBuilder: (context, index) {
-                if (index == controller.nearbyChatList.length) {
-                  return Obx(
-                    () => controller.isPaginationLoading.value
-                        ? Center(
-                            child: Padding(
-                              padding: EdgeInsets.all(16.h),
-                              child: const CircularProgressIndicator(
-                                color: AppColors.primaryColor,
-                              ),
-                            ),
-                          )
-                        : const SizedBox.shrink(),
-                  );
-                }
-
-                final user = controller.nearbyChatList[index];
-                return _NearbyUserCard(
-                  nearbyChatUser: user,
-                  clickerController: clickerController,
-                  controller: controller,
-                );
-              },
-            ),
-          ),
+          ],
         );
       }),
     );
   }
+
+  Widget _buildMainContent(NearbyChatController controller, ClickerController clickerController) {
+    if (controller.isNearbyChatLoading.value) {
+      return const Center(
+        child: CircularProgressIndicator(color: Colors.blue),
+      );
+    }
+
+    if (controller.nearbyChatError.value.isNotEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.error_outline, size: 48.r, color: Colors.red),
+            SizedBox(height: 16.h),
+            Text(
+              controller.nearbyChatError.value,
+              style: TextStyle(color: Colors.red, fontSize: 14.sp),
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: 16.h),
+            ElevatedButton(
+              onPressed: () => controller.getNearbyChat(),
+              child: const Text('Retry'),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (controller.nearbyChatList.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.people_outline, size: 48.r, color: Colors.grey),
+            SizedBox(height: 16.h),
+            Text(
+              'No nearby users found',
+              style: TextStyle(fontSize: 16.sp, color: Colors.grey),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return RefreshIndicator(
+      onRefresh: () => controller.getNearbyChat(),
+      child: NotificationListener<ScrollNotification>(
+        onNotification: (ScrollNotification scrollInfo) {
+          if (scrollInfo.metrics.pixels ==
+              scrollInfo.metrics.maxScrollExtent) {
+            controller.loadMore();
+          }
+          return false;
+        },
+        child: ListView.separated(
+          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
+          itemCount: controller.nearbyChatList.length + 1,
+          separatorBuilder: (context, index) => SizedBox(height: 12.h),
+          itemBuilder: (context, index) {
+            if (index == controller.nearbyChatList.length) {
+              return Obx(
+                () => controller.isPaginationLoading.value
+                    ? Center(
+                        child: Padding(
+                          padding: EdgeInsets.all(16.h),
+                          child: const CircularProgressIndicator(
+                            color: AppColors.primaryColor,
+                          ),
+                        ),
+                      )
+                    : const SizedBox.shrink(),
+              );
+            }
+
+            final user = controller.nearbyChatList[index];
+            return _NearbyUserCard(
+              nearbyChatUser: user,
+              clickerController: clickerController,
+              controller: controller,
+            );
+          },
+        ),
+      ),
+    );
+  }
+
 }
 
 class _ChatNearbyAppBar extends StatelessWidget {

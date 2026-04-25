@@ -10,6 +10,7 @@ import 'package:intl/intl.dart';
 
 class MyProfileController extends GetxController {
   bool isLoading = false;
+  bool isLocationVisible = true; // Added state
   UserProfileModel? profileModel;
 
   String _dateOfBirth = "";
@@ -65,6 +66,8 @@ class MyProfileController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    // Initialize from local storage first for better UX
+    isLocationVisible = LocalStorage.isLocationVisible;
     getUserData();
   }
 
@@ -120,6 +123,11 @@ class MyProfileController extends GetxController {
         LocalStorage.updatedAt = data.updatedAt.toIso8601String() ?? "";
         LocalStorage.verified = data.isVerified;
 
+        // Update local visibility state from API if available
+        // Note: The model doesn't have isLocationVisible yet based on your JSON, 
+        // but we'll use LocalStorage as source of truth for now or assume it's true.
+        // If the backend adds it, we can map it here.
+
         // ---------- SAVE TO SHARED PREF ----------
         await Future.wait([
           LocalStorage.setBool(LocalStorageKeys.isLogIn, LocalStorage.isLogIn),
@@ -168,18 +176,42 @@ class MyProfileController extends GetxController {
           ),
         ]);
 
-      } else {
-        // Get.snackbar(
-        //   response.statusCode.toString(),
-        //   response.message ?? "Something went wrong",
-        // );
       }
     } catch (e) {
-      debugPrint("Faile To Load Profile${e.toString()}");
-      // Get.snackbar("Error", "Failed to load profile");
+      debugPrint("Failed To Load Profile: ${e.toString()}");
     }
 
     isLoading = false;
     update();
   }
+
+  // ================= TOGGLE PRIVACY =================
+  Future<void> toggleLocationVisibility(bool value) async {
+    isLocationVisible = value;
+    update();
+
+    try {
+      final response = await ApiService.patch(
+        ApiEndPoint.updateProfile,
+        body: {"isLocationVisible": value},
+      );
+
+      if (response.statusCode == 200) {
+        await LocalStorage.setBool(LocalStorageKeys.isLocationVisible, value);
+        debugPrint("Privacy mode updated: $value");
+      } else {
+        // Rollback on failure
+        isLocationVisible = !value;
+        update();
+        debugPrint("Failed to update privacy mode");
+      }
+    } catch (e) {
+      isLocationVisible = !value;
+      update();
+      debugPrint("Error updating privacy mode: $e");
+    }
+  }
+
+
+
 }

@@ -5,11 +5,12 @@ import 'package:giolee78/config/api/api_end_point.dart';
 import 'package:giolee78/features/chat_nearby/data/nearby_friends_model.dart';
 import 'package:giolee78/features/chat_nearby/presentation/controller/chat_nearby_profile_controller.dart';
 import 'package:giolee78/features/clicker/presentation/controller/clicker_controller.dart';
-
+import 'package:giolee78/utils/app_utils.dart';
 import '../../../../component/button/common_button.dart';
 import '../../../../component/image/common_image.dart';
 import '../../../../component/text/common_text.dart';
 import '../../../../component/text_field/common_text_field.dart';
+import '../../../../services/api/api_service.dart';
 import '../../../../utils/constants/app_colors.dart';
 import '../../../../utils/constants/app_icons.dart';
 import '../../../../utils/constants/app_images.dart';
@@ -45,7 +46,6 @@ class _ChatNearbyProfileScreenState extends State<ChatNearbyProfileScreen> {
     greetingsController = TextEditingController();
     clickerController = Get.put(ClickerController());
 
-    // ✅ Get or create controller with tag
     controller = Get.put(
       ChatNearbyProfileController(),
       tag: widget.user.id.toString(),
@@ -53,13 +53,7 @@ class _ChatNearbyProfileScreenState extends State<ChatNearbyProfileScreen> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
-        //====================================
-        // Optimization: Removed redundant controller.checkFriendship call.
-        // controller.fetchUserProfile(userId) is sufficient as it already parses 
-        // friendship status from the profile response.
-        //====================================
         controller.fetchUserProfile(widget.user.id.toString());
-
         _monitorFriendStatus();
       }
     });
@@ -69,8 +63,6 @@ class _ChatNearbyProfileScreenState extends State<ChatNearbyProfileScreen> {
     ever<FriendStatus>(controller.friendStatus, (status) {
       if (!_navigationHandled && mounted && status == FriendStatus.friends) {
         _navigationHandled = true;
-        debugPrint("User is already a friend - Creating chat and navigating");
-
         clickerController.createOrGetChatAndGo(
           receiverId: widget.user.id.toString(),
           name: widget.user.name,
@@ -96,12 +88,8 @@ class _ChatNearbyProfileScreenState extends State<ChatNearbyProfileScreen> {
           () => _ChatNearbyProfileAppBar(
             status: controller.friendStatus.value,
             isProcessing: controller.isProcessingAction.value,
-            onTapAdd: () {
-              controller.addFriend(widget.user.id.toString());
-            },
-            onTapCancel: () {
-              controller.cancelRequest(widget.user.id.toString());
-            },
+            onTapAdd: () => controller.addFriend(widget.user.id.toString()),
+            onTapCancel: () => controller.cancelRequest(widget.user.id.toString()),
             onTapMessage: () {
               clickerController.createOrGetChatAndGo(
                 receiverId: widget.user.id.toString(),
@@ -109,6 +97,7 @@ class _ChatNearbyProfileScreenState extends State<ChatNearbyProfileScreen> {
                 image: widget.user.image ?? '',
               );
             },
+            userId: widget.user.id.toString(),
           ),
         ),
       ),
@@ -120,7 +109,6 @@ class _ChatNearbyProfileScreenState extends State<ChatNearbyProfileScreen> {
             );
           }
 
-          // Show error state
           if (controller.error.value.isNotEmpty) {
             return Center(
               child: Column(
@@ -182,6 +170,7 @@ class _ChatNearbyProfileAppBar extends StatelessWidget {
     required this.onTapAdd,
     required this.onTapCancel,
     required this.onTapMessage,
+    required this.userId,
   });
 
   final FriendStatus status;
@@ -189,6 +178,64 @@ class _ChatNearbyProfileAppBar extends StatelessWidget {
   final VoidCallback onTapAdd;
   final VoidCallback onTapCancel;
   final VoidCallback onTapMessage;
+  final String userId;
+
+  void _showBlockConfirmation(BuildContext context) {
+    Utils.showConfirmationDialog(
+      context,
+      title: "Block User",
+      message: "Are you sure you want to block this user? You will no longer see each other's content.",
+      onConfirm: () async {
+        final response = await ApiService.post(
+          ApiEndPoint.createBlock,
+          body: {"blockedUser": userId},
+        );
+        if (response.isSuccess) {
+          Get.back(); // Close dialog
+          Get.back(); // Go back to nearby list
+          Utils.successSnackBar("Blocked", "User has been blocked.");
+          if(Get.isRegistered<ClickerController>()){
+             Get.find<ClickerController>().getAllPosts();
+          }
+        }
+      },
+    );
+  }
+
+  void _showReportDialog(BuildContext context) {
+    final reportController = TextEditingController();
+    Get.dialog(
+      AlertDialog(
+        title: const Text("Report User"),
+        content: CommonTextField(
+          controller: reportController,
+          hintText: "Reason for reporting...",
+          maxLines: 3,
+        ),
+        actions: [
+          TextButton(onPressed: () => Get.back(), child: const Text("Cancel")),
+          TextButton(
+            onPressed: () async {
+              if (reportController.text.isEmpty) return;
+              final response = await ApiService.post(
+                ApiEndPoint.createReport,
+                body: {
+                  "reportedUser": userId,
+                  "reason": reportController.text,
+                },
+              );
+              if (response.isSuccess) {
+                Get.back();
+                Get.back();
+                Utils.successSnackBar("Reported", "Thank you for your report.");
+              }
+            },
+            child: const Text("Submit"),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -203,11 +250,7 @@ class _ChatNearbyProfileAppBar extends StatelessWidget {
             children: [
               IconButton(
                 onPressed: () => Get.back(),
-                icon: Icon(
-                  Icons.arrow_back,
-                  size: 24.sp,
-                  color: AppColors.black,
-                ),
+                icon: Icon(Icons.arrow_back, size: 24.sp, color: AppColors.black),
               ),
               Expanded(
                 child: Center(
@@ -219,53 +262,35 @@ class _ChatNearbyProfileAppBar extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(
-                width: 40,
-              ), // Balanced spacing for title center alignment if needed, or adjust based on suffix icons
-              // Logic for the action icon
               if (status == FriendStatus.none)
                 IconButton(
                   onPressed: isProcessing ? () {} : onTapAdd,
                   icon: isProcessing
-                      ? SizedBox(
-                          width: 22.sp,
-                          height: 22.sp,
-                          child: const CircularProgressIndicator(strokeWidth: 2),
-                        )
+                      ? SizedBox(width: 22.sp, height: 22.sp, child: const CircularProgressIndicator(strokeWidth: 2))
                       : CommonImage(imageSrc: AppIcons.addFriend, size: 22.sp),
                 )
               else if (status == FriendStatus.requested)
                 IconButton(
                   onPressed: isProcessing ? () {} : onTapCancel,
                   icon: isProcessing
-                      ? SizedBox(
-                          width: 22.sp,
-                          height: 22.sp,
-                          child: const CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.red,
-                          ),
-                        )
-                      : Icon(
-                          Icons.person_remove_alt_1,
-                          color: Colors.red,
-                          size: 22.sp,
-                        ),
+                      ? SizedBox(width: 22.sp, height: 22.sp, child: const CircularProgressIndicator(strokeWidth: 2, color: Colors.red))
+                      : Icon(Icons.person_remove_alt_1, color: Colors.red, size: 22.sp),
                 )
               else if (status == FriendStatus.friends)
-                // ✅ Show message icon when already friends
                 IconButton(
                   onPressed: isProcessing ? null : onTapMessage,
-                  icon: Icon(
-                    Icons.chat_bubble_outline,
-                    color: AppColors.primaryColor,
-                    size: 22.sp,
-                  ),
-                )
-              else
-                const SizedBox(
-                  width: 48,
-                ), // Placeholder to keep title centered if no icon
+                  icon: Icon(Icons.chat_bubble_outline, color: AppColors.primaryColor, size: 22.sp),
+                ),
+              PopupMenuButton<String>(
+                onSelected: (value) {
+                  if (value == 'report') _showReportDialog(context);
+                  if (value == 'block') _showBlockConfirmation(context);
+                },
+                itemBuilder: (context) => [
+                  const PopupMenuItem(value: 'report', child: Text("Report User")),
+                  const PopupMenuItem(value: 'block', child: Text("Block User", style: TextStyle(color: Colors.red))),
+                ],
+              ),
             ],
           ),
         ),
@@ -276,7 +301,6 @@ class _ChatNearbyProfileAppBar extends StatelessWidget {
 
 class _ProfileHeader extends StatelessWidget {
   final dynamic userProfile;
-
   const _ProfileHeader({this.userProfile});
 
   @override
@@ -295,31 +319,15 @@ class _ProfileHeader extends StatelessWidget {
             height: 100.h,
             width: 100.w,
             child: imageUrl.isNotEmpty
-                ? CommonImage(
-                    imageSrc: ApiEndPoint.imageUrl + imageUrl,
-                    defaultImage: AppImages.placeHolderImage,
-                  )
+                ? CommonImage(imageSrc: ApiEndPoint.imageUrl + imageUrl, defaultImage: AppImages.placeHolderImage)
                 : Image.asset(AppImages.placeHolderImage, fit: BoxFit.cover),
           ),
         ),
         CommonText(text: name, fontWeight: FontWeight.w600, top: 16),
-        CommonText(
-          text: bio,
-          fontSize: 13,
-          color: AppColors.secondaryText,
-          maxLines: 2,
-          left: 40,
-          right: 40,
-          top: 4,
-        ),
+        CommonText(text: bio, fontSize: 13, color: AppColors.secondaryText, maxLines: 2, left: 40, right: 40, top: 4),
         SizedBox(height: 8.h),
         if (distance != null)
-          CommonText(
-            text: 'Within $distance KM',
-            fontSize: 12,
-            fontWeight: FontWeight.w500,
-            color: AppColors.primaryColor2,
-          ),
+          CommonText(text: 'Within $distance KM', fontSize: 12, fontWeight: FontWeight.w500, color: AppColors.primaryColor2),
         SizedBox(height: 8.h),
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
@@ -328,11 +336,7 @@ class _ProfileHeader extends StatelessWidget {
             children: [
               CommonImage(imageSrc: AppIcons.location, size: 12.r),
               SizedBox(width: 8.w),
-              CommonText(
-                text: location,
-                fontSize: 13,
-                color: AppColors.secondaryText,
-              ),
+              CommonText(text: location, fontSize: 13, color: AppColors.secondaryText),
             ],
           ),
         ),
@@ -341,92 +345,8 @@ class _ProfileHeader extends StatelessWidget {
   }
 }
 
-class FriendActionButton extends StatelessWidget {
-  final ChatNearbyProfileController controller;
-  final String userId;
-
-  const FriendActionButton({
-    super.key,
-    required this.controller,
-    required this.userId,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Obx(() {
-      switch (controller.friendStatus.value) {
-        case FriendStatus.none:
-          return CommonButton(
-            titleText: "Add Friend",
-            onTap: () => controller.addFriend(userId),
-          );
-
-        case FriendStatus.requested:
-          return CommonButton(
-            titleText: "Requested (Cancel)",
-            buttonColor: Colors.orange,
-            onTap: () => controller.cancelRequest(userId),
-          );
-
-        case FriendStatus.friends:
-          return CommonButton(
-            titleText: "Friends",
-            buttonColor: Colors.grey,
-            onTap: () {},
-          );
-        case FriendStatus.received:
-          // TODO: Handle this case.
-          throw UnimplementedError();
-      }
-    });
-  }
-}
-
-class ProfileAvatar extends StatelessWidget {
-  final Map<String, dynamic>? profile;
-
-  const ProfileAvatar({super.key, this.profile});
-
-  @override
-  Widget build(BuildContext context) {
-    final imageUrl = profile?['image'] ?? '';
-    final isPublic = profile?['privacy'] == "public";
-
-    return Stack(
-      alignment: Alignment.center,
-      children: [
-        ClipOval(
-          child: SizedBox(
-            height: 100.h,
-            width: 100.w,
-            child: imageUrl.isNotEmpty
-                ? CommonImage(
-                    imageSrc: ApiEndPoint.imageUrl + imageUrl,
-                    defaultImage: AppImages.profileImage,
-                  )
-                : Image.asset(AppImages.profileImage, fit: BoxFit.cover),
-          ),
-        ),
-
-        /// 🔒 show when not public
-        if (!isPublic)
-          Container(
-            height: 100.h,
-            width: 100.w,
-            decoration: BoxDecoration(
-              color: Colors.black.withOpacity(.5),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(Icons.lock, color: Colors.white, size: 28.sp),
-          ),
-      ],
-    );
-  }
-}
-
 class _GreetingsInput extends StatelessWidget {
   const _GreetingsInput({this.controller});
-
   final TextEditingController? controller;
 
   @override
@@ -434,20 +354,9 @@ class _GreetingsInput extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const CommonText(
-          text: 'Type Your Greetings:',
-          fontSize: 14,
-          fontWeight: FontWeight.w500,
-          color: AppColors.textColorFirst,
-          textAlign: TextAlign.start,
-        ),
+        const CommonText(text: 'Type Your Greetings:', fontSize: 14, fontWeight: FontWeight.w500, color: AppColors.textColorFirst, textAlign: TextAlign.start),
         SizedBox(height: 8.h),
-        CommonTextField(
-          controller: controller,
-          maxLines: 6,
-          paddingHorizontal: 12,
-          paddingVertical: 12,
-        ),
+        CommonTextField(controller: controller, maxLines: 6, paddingHorizontal: 12, paddingVertical: 12),
       ],
     );
   }

@@ -6,6 +6,7 @@ import 'package:giolee78/component/image/common_image.dart';
 import 'package:giolee78/component/text/common_text.dart';
 import 'package:giolee78/config/api/api_end_point.dart';
 import 'package:giolee78/features/profile/presentation/controller/my_profile_controller.dart';
+import 'package:giolee78/utils/app_utils.dart';
 import 'package:giolee78/utils/constants/app_colors.dart';
 import 'package:giolee78/utils/constants/app_images.dart';
 import 'package:giolee78/utils/extensions/extension.dart';
@@ -76,6 +77,11 @@ class MyProfileScreen extends StatelessWidget {
 
                     /// Profile Details
                     _buildProfileDetails(controller),
+
+                    24.height,
+
+                    /// Location Visibility Toggle
+                    _buildVisibilityToggle(controller),
 
                     32.height,
 
@@ -211,6 +217,55 @@ class MyProfileScreen extends StatelessWidget {
       buttonHeight: 56.h,
       buttonRadius: 8.r,
       titleSize: 16.sp,
+    );
+  }
+
+  /// Location Visibility Toggle Widget
+  Widget _buildVisibilityToggle(MyProfileController controller) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(12.r),
+        border: Border.all(color: AppColors.primaryColor.withOpacity(0.1)),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              Icon(
+                controller.isLocationVisible ? Icons.location_on : Icons.location_off,
+                color: controller.isLocationVisible ? AppColors.primaryColor : Colors.grey,
+                size: 20.sp,
+              ),
+              12.width,
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  CommonText(
+                    text: 'Visible on Map',
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  CommonText(
+                    text: controller.isLocationVisible ? 'Others can see you' : 'You are invisible',
+                    fontSize: 12.sp,
+                    color: AppColors.secondaryText,
+                  ),
+                ],
+              ),
+            ],
+          ),
+          Switch.adaptive(
+            value: controller.isLocationVisible,
+            activeColor: AppColors.primaryColor,
+            onChanged: (value) {
+              controller.toggleLocationVisibility(value);
+            },
+          ),
+        ],
+      ),
     );
   }
 }

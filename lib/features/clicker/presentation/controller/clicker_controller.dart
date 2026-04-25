@@ -606,6 +606,22 @@ class ClickerController extends GetxController {
   }
 
   // ================= Private Helper: Filter User Posts
+  void removeBlockedContent(String postId) {
+    // 1. Remove from main posts list
+    posts.removeWhere((post) => post.id == postId);
+    
+    // 2. Remove from filtered posts list
+    filteredPosts.removeWhere((post) => post.id == postId);
+    
+    // 3. Optional: Remove all posts from the same user if needed
+    // However, usually removing the specific post or refreshing is enough.
+    // To be safe for Apple, we refresh the UI.
+    posts.refresh();
+    filteredPosts.refresh();
+    
+    debugPrint("🚫 Post $postId removed from UI locally");
+  }
+
   void _filterUserPosts() {
     if (_allUserPostsRaw.isEmpty) {
       usersPosts.clear();
