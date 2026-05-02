@@ -359,6 +359,143 @@ class CreateAdsController extends GetxController {
     }
   }
 
+  // ===========================================================================
+  // IN-APP PURCHASE (IAP) IMPLEMENTATION - COMMENTED FOR FUTURE USE
+  // ===========================================================================
+  /*
+  // IMPORTANT: Add these imports at the top of your file when you uncomment:
+  // import 'dart:async';
+  // import 'dart:io';
+  // import 'package:in_app_purchase/in_app_purchase.dart';
+
+  final InAppPurchase _iap = InAppPurchase.instance;
+  late StreamSubscription<List<PurchaseDetails>> _subscription;
+
+  var isStoreAvailable = false.obs;
+  var storeProducts = <ProductDetails>[].obs;
+
+  @override
+  void onInit() {
+    super.onInit();
+    // 1. Initialize Purchase Stream Listener as early as possible
+    final purchaseUpdated = _iap.purchaseStream;
+    _subscription = purchaseUpdated.listen((purchaseDetailsList) {
+      _listenToPurchases(purchaseDetailsList);
+    }, onDone: () {
+      _subscription.cancel();
+    }, onError: (error) {
+      debugPrint("Purchase stream error: $error");
+    });
+  }
+
+  // 2. Call this instead of createAds() when you are ready to use IAP
+  Future<void> processIapPayment() async {
+    if (!_validate()) return;
+    
+    // The dynamically fetched plan IDs from API
+    Set<String> apiProductIds = plans.map((plan) => plan.id).toSet(); // Ensure 'id' matches the store product id
+
+    isLoading.value = true;
+    final available = await _iap.isAvailable();
+    isStoreAvailable.value = available;
+
+    if (!available) {
+      Get.snackbar('Store Error', 'In-app purchases not available');
+      isLoading.value = false;
+      return;
+    }
+
+    final response = await _iap.queryProductDetails(apiProductIds);
+    if (response.error != null || response.productDetails.isEmpty) {
+       Get.snackbar('Error', 'No products found in store matching API IDs');
+       isLoading.value = false;
+       return;
+    }
+    
+    storeProducts.assignAll(response.productDetails);
+    
+    // Find the specific product the user selected to buy
+    final selectedProduct = storeProducts.firstWhere(
+      (prod) => prod.id == planId, 
+      orElse: () => storeProducts.first,
+    );
+
+    isLoading.value = false;
+    _buyProduct(selectedProduct);
+  }
+
+  void _buyProduct(ProductDetails product) {
+    final param = PurchaseParam(productDetails: product);
+    _iap.buyConsumable(purchaseParam: param, autoConsume: true);
+  }
+
+  void _listenToPurchases(List<PurchaseDetails> purchaseDetailsList) {
+    purchaseDetailsList.forEach((PurchaseDetails purchaseDetails) async {
+      if (purchaseDetails.status == PurchaseStatus.pending) {
+        isLoading.value = true;
+      } else {
+        if (purchaseDetails.status == PurchaseStatus.error) {
+          Get.snackbar('Error', 'Purchase failed: ${purchaseDetails.error?.message}');
+          isLoading.value = false;
+        } else if (purchaseDetails.status == PurchaseStatus.purchased ||
+                   purchaseDetails.status == PurchaseStatus.restored) {
+                   
+          // 3. Complete the purchase in store
+          if (purchaseDetails.pendingCompletePurchase) {
+            await _iap.completePurchase(purchaseDetails);
+          }
+
+          // 4. Verify purchase with backend and create ad
+          await _verifyPurchaseAndCreateAd(purchaseDetails);
+        }
+      }
+    });
+  }
+
+  Future<void> _verifyPurchaseAndCreateAd(PurchaseDetails purchaseDetails) async {
+    try {
+      final Map<String, String> body = {
+        "title": titleController.text.trim(),
+        "description": descriptionController.text.trim(),
+        "focusArea": focusAreaController.text.trim(),
+        "latitude": selectedLatitude.value,
+        "longitude": selectedLongitude.value,
+        "startAt": getIsoStartDate(),
+        "plan": planId,
+        // --- IAP Verification Data ---
+        "product_id": purchaseDetails.productID,
+        "purchase_token": purchaseDetails.purchaseID ?? '',
+        "transaction_date": purchaseDetails.transactionDate ?? '',
+        "source": purchaseDetails.verificationData.source,
+        "serverVerificationData": purchaseDetails.verificationData.serverVerificationData,
+      };
+
+      if (websiteLinkController.text.trim().isNotEmpty) {
+        body["websiteUrl"] = websiteLinkController.text.trim();
+      }
+
+      final ApiResponseModel response = await ApiService.multipartUpdate(
+        ApiEndPoint.createAds, // Adjust if you have a different endpoint for IAP validation
+        method: "POST",
+        body: body,
+        imagePath: coverImagePath.value,
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        _showSuccessPopup();
+      } else {
+        Get.snackbar('Error', 'Failed to create Ad after payment');
+      }
+    } catch (e) {
+      Get.snackbar('Error', 'Verification error: $e');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+  
+  // NOTE: Remember to add _subscription.cancel(); inside the onClose() method!
+  */
+
   //SUCCESS================================
   void _showSuccessPopup() {
     successPopUps(
