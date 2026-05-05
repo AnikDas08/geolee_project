@@ -62,6 +62,9 @@ class CreateAdsController extends GetxController {
   final adStartDateController = TextEditingController();
 
   final ImagePicker _picker = ImagePicker();
+  
+  // Cache for Ad ID during two-step creation process
+  String _cachedAdId = "";
 
   // Debounce timer
   DateTime? _lastSearchTime;
@@ -364,8 +367,59 @@ class CreateAdsController extends GetxController {
       orElse: () => storeProducts.first,
     );
 
+    // STEP 1: CREATE AD (Pending)
+    isLoading.value = true;
+    bool success = await _createPendingAd();
+    if (!success) {
+      isLoading.value = false;
+      return;
+    }
+
     isLoading.value = false;
     _buyProduct(selectedProduct);
+  }
+
+  Future<bool> _createPendingAd() async {
+    try {
+      final Map<String, String> body = {
+        "title": titleController.text.trim(),
+        "description": descriptionController.text.trim(),
+        "focusArea": focusAreaController.text.trim(),
+        "latitude": selectedLatitude.value,
+        "longitude": selectedLongitude.value,
+        "startAt": getIsoStartDate(),
+        "plan": planId,
+      };
+
+      if (websiteLinkController.text.trim().isNotEmpty) {
+        body["websiteUrl"] = websiteLinkController.text.trim();
+      }
+
+      final ApiResponseModel response = await ApiService.multipartUpdate(
+        ApiEndPoint.createAds,
+        method: "POST",
+        body: body,
+        imagePath: coverImagePath.value,
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final resData = response.data as Map<String, dynamic>;
+        final adData = resData['data'] ?? {};
+        _cachedAdId = adData['_id'] ?? adData['id'] ?? "";
+        
+        if (_cachedAdId.isEmpty) {
+          Get.snackbar('Error', 'Failed to get Ad ID from server');
+          return false;
+        }
+        return true;
+      } else {
+        Get.snackbar('Error', 'Failed to create pending Ad: ${response.message}');
+        return false;
+      }
+    } catch (e) {
+      Get.snackbar('Error', 'Error: $e');
+      return false;
+    }
   }
 
   void _buyProduct(ProductDetails product) {
@@ -389,46 +443,35 @@ class CreateAdsController extends GetxController {
             await _iap.completePurchase(purchaseDetails);
           }
 
-          // 4. Verify purchase with backend and create ad
-          await _verifyPurchaseAndCreateAd(purchaseDetails);
+          // 4. Verify purchase with backend and activate ad
+          await _verifyPurchase(purchaseDetails);
         }
       }
     }
   }
 
-  Future<void> _verifyPurchaseAndCreateAd(PurchaseDetails purchaseDetails) async {
+  Future<void> _verifyPurchase(PurchaseDetails purchaseDetails) async {
     try {
-      final Map<String, String> body = {
-        "title": titleController.text.trim(),
-        "description": descriptionController.text.trim(),
-        "focusArea": focusAreaController.text.trim(),
-        "latitude": selectedLatitude.value,
-        "longitude": selectedLongitude.value,
-        "startAt": getIsoStartDate(),
-        "plan": planId,
-        // --- IAP Verification Data ---
-        "product_id": purchaseDetails.productID,
-        "purchase_token": purchaseDetails.purchaseID ?? '',
-        "transaction_date": purchaseDetails.transactionDate ?? '',
-        "source": purchaseDetails.verificationData.source,
-        "serverVerificationData": purchaseDetails.verificationData.serverVerificationData,
+      final Map<String, dynamic> body = {
+        "advertisement": _cachedAdId,
+        "platform": Platform.isAndroid ? "google" : "apple",
       };
-
-      if (websiteLinkController.text.trim().isNotEmpty) {
-        body["websiteUrl"] = websiteLinkController.text.trim();
+      
+      if (Platform.isAndroid) {
+        body["purchaseToken"] = purchaseDetails.verificationData.serverVerificationData;
+      } else if (Platform.isIOS) {
+        body["transactionReceipt"] = purchaseDetails.verificationData.serverVerificationData;
       }
 
-      final ApiResponseModel response = await ApiService.multipartUpdate(
-        ApiEndPoint.createAds, // Adjust if you have a different endpoint for IAP validation
-        method: "POST",
+      final ApiResponseModel response = await ApiService.post(
+        ApiEndPoint.verifyPurchase,
         body: body,
-        imagePath: coverImagePath.value,
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         _showSuccessPopup();
       } else {
-        Get.snackbar('Error', 'Failed to create Ad after payment');
+        Get.snackbar('Error', 'Payment verification failed: ${response.message}');
       }
     } catch (e) {
       Get.snackbar('Error', 'Verification error: $e');

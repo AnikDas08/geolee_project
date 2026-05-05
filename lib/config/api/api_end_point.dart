@@ -1,13 +1,13 @@
 class ApiEndPoint {
 
-  // static const String baseUrl = "https://clicker-api.just-metaverse.com/api/v1";
-  // static const String imageUrl = "https://clicker-api.just-metaverse.com";
-  // static const String socketUrl = "https://clicker-api.just-metaverse.com";
+  static const String baseUrl = "https://clicker-api.just-metaverse.com/api/v1";
+  static const String imageUrl = "https://clicker-api.just-metaverse.com";
+  static const String socketUrl = "https://clicker-api.just-metaverse.com";
 
 
-  static const String baseUrl = "http://10.10.7.7:5006/api/v1";
-  static const String imageUrl = "http://10.10.7.7:5006";
-  static const String socketUrl = "http://10.10.7.7:5006";
+  // static const String baseUrl = "http://10.10.7.7:5000/api/v1";
+  // static const String imageUrl = "http://10.10.7.7:5000";
+  // static const String socketUrl = "http://10.10.7.7:5000";
 
 
 
@@ -87,6 +87,7 @@ class ApiEndPoint {
   static const String updateAdvertisementById = "$baseUrl/advertisements/update/";
   static const String deleteAdvertisementById = "$baseUrl/advertisements/delete/";
   static const String nearbyActiveAds = "$baseUrl/advertisements/nearby-active";
+  static const String verifyPurchase = "$baseUrl/advertisements/verify-purchase";
 
   // Plan=============================================
   static const String getPlans = "$baseUrl/plans";
