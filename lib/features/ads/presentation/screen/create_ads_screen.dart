@@ -418,13 +418,24 @@ class _CreateAdsScreenState extends State<CreateAdsScreen> {
                               style: TextStyle(fontSize: 14, color: Colors.black54),
                             ),
                             const SizedBox(height: 4),
-                            Text(
-                              '\$${plan.price.toStringAsFixed(2)}/${plan.name}',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 24.sp,
-                                color: Colors.blue,
-                              ),
+                            Builder(
+                              builder: (context) {
+                                String displayPrice = '\$${plan.price.toStringAsFixed(2)}';
+                                String storeId = Platform.isAndroid ? plan.googleProductId : plan.appleProductId;
+                                try {
+                                  final product = controller.storeProducts.firstWhere((p) => p.id == storeId);
+                                  displayPrice = product.price;
+                                } catch (_) {}
+                                
+                                return Text(
+                                  '$displayPrice/${plan.name}',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 24.sp,
+                                    color: Colors.blue,
+                                  ),
+                                );
+                              }
                             ),
                           ],
                         ),

@@ -1,8 +1,11 @@
+import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
+import 'package:in_app_purchase/in_app_purchase.dart';
 
 import 'package:giolee78/config/api/api_end_point.dart';
 import 'package:giolee78/services/api/api_response_model.dart';
@@ -10,7 +13,6 @@ import 'package:giolee78/services/api/api_service.dart';
 
 import '../../../../component/pop_up/common_pop_menu.dart';
 import '../../../../config/route/app_routes.dart';
-import '../../../notifications/presentation/screen/stripe_web_view_screen.dart';
 import '../../data/plan_model.dart';
 
 class CreateAdsController extends GetxController {
@@ -24,6 +26,24 @@ class CreateAdsController extends GetxController {
 
   var plans = <PlanModel>[].obs;
   var isPlansLoading = false.obs;
+
+  final InAppPurchase _iap = InAppPurchase.instance;
+  late StreamSubscription<List<PurchaseDetails>> _subscription;
+  var isStoreAvailable = false.obs;
+  var storeProducts = <ProductDetails>[].obs;
+
+  @override
+  void onInit() {
+    super.onInit();
+    final purchaseUpdated = _iap.purchaseStream;
+    _subscription = purchaseUpdated.listen((purchaseDetailsList) {
+      _listenToPurchases(purchaseDetailsList);
+    }, onDone: () {
+      _subscription.cancel();
+    }, onError: (error) {
+      debugPrint("Purchase stream error: $error");
+    });
+  }
 
   // --- Places Autocomplete ---
   var placeSuggestions = <Map<String, dynamic>>[].obs;
@@ -262,12 +282,7 @@ class CreateAdsController extends GetxController {
       isPlansLoading.value = true;
       debugPrint("🔍 Fetching plans from: ${ApiEndPoint.getPlans}");
 
-      final ApiResponseModel response = await ApiService.get(
-        ApiEndPoint.getPlans,
-      );
-
-      debugPrint("📊 Response Status: ${response.statusCode}");
-      debugPrint("📦 Response Data: ${response.data}");
+      final ApiResponseModel response = await ApiService.get(ApiEndPoint.getPlans);
 
       if (response.statusCode == 200) {
         final res = response.data as Map<String, dynamic>;
@@ -279,6 +294,30 @@ class CreateAdsController extends GetxController {
 
         if (plans.isNotEmpty) {
           selectedPricingPlan.value = plans.first.name;
+        }
+
+        // Fetch products from store
+        final available = await _iap.isAvailable();
+        isStoreAvailable.value = available;
+        if (available) {
+          Set<String> apiProductIds = plans.map((plan) {
+            return Platform.isAndroid ? plan.googleProductId : plan.appleProductId;
+          }).where((id) => id.isNotEmpty).toSet();
+          
+          if (apiProductIds.isNotEmpty) {
+            debugPrint("🛒 Querying store for IDs: $apiProductIds");
+            final productResponse = await _iap.queryProductDetails(apiProductIds);
+            
+            if (productResponse.error != null) {
+              debugPrint("❌ Store Query Error: ${productResponse.error!.message}");
+            }
+            if (productResponse.notFoundIDs.isNotEmpty) {
+              debugPrint("⚠️ Store Not Found IDs: ${productResponse.notFoundIDs}");
+            }
+            
+            debugPrint("✅ Store Found Products: ${productResponse.productDetails.map((p) => p.id).toList()}");
+            storeProducts.assignAll(productResponse.productDetails);
+          }
         }
       } else {
         Get.snackbar("Error", response.message ?? "Failed to load plans");
@@ -295,128 +334,33 @@ class CreateAdsController extends GetxController {
 
   Future<void> createAds() async {
     if (!_validate()) return;
-
-    try {
-      isLoading.value = true;
-
-      final Map<String, String> body = {
-        "title": titleController.text.trim(),
-        "description": descriptionController.text.trim(),
-        "focusArea": focusAreaController.text.trim(),
-        "latitude": selectedLatitude.value,
-        "longitude": selectedLongitude.value,
-        "startAt": getIsoStartDate(),
-        "plan": planId,
-      };
-
-      if (websiteLinkController.text.trim().isNotEmpty) {
-        body["websiteUrl"] = websiteLinkController.text.trim();
-      }
-
-      final ApiResponseModel response = await ApiService.multipartUpdate(
-        ApiEndPoint.createAds,
-        method: "POST",
-        body: body,
-        imagePath: coverImagePath.value,
-      );
-
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        isLoading.value = false;
-        final res = response.data;
-
-        if (res['data'] != null && res['data']['url'] != null) {
-          final paymentUrl = res['data']['url'];
-          Get.to(() => StripeWebViewPage(checkoutUrl: paymentUrl));
-        } else {
-          _showSuccessPopup();
-        }
-      } else {
-        isLoading.value = false;
-        debugPrint("Create ads error: ${response.message}");
-      }
-    } catch (e) {
-      isLoading.value = false;
-      debugPrint("Create ads error: $e");
-    } finally {
-      isLoading.value = false;
-    }
-  }
-
-  //DATE PICKER ============================
-  Future<void> selectDate(
-      BuildContext context,
-      TextEditingController controller,
-      ) async {
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime.now(),
-      lastDate: DateTime(2101),
-    );
-    if (picked != null) {
-      controller.text =
-      "${picked.day.toString().padLeft(2, '0')} ${_month(picked.month)} ${picked.year}";
-    }
-  }
-
-  // ===========================================================================
-  // IN-APP PURCHASE (IAP) IMPLEMENTATION - COMMENTED FOR FUTURE USE
-  // ===========================================================================
-  /*
-  // IMPORTANT: Add these imports at the top of your file when you uncomment:
-  // import 'dart:async';
-  // import 'dart:io';
-  // import 'package:in_app_purchase/in_app_purchase.dart';
-
-  final InAppPurchase _iap = InAppPurchase.instance;
-  late StreamSubscription<List<PurchaseDetails>> _subscription;
-
-  var isStoreAvailable = false.obs;
-  var storeProducts = <ProductDetails>[].obs;
-
-  @override
-  void onInit() {
-    super.onInit();
-    // 1. Initialize Purchase Stream Listener as early as possible
-    final purchaseUpdated = _iap.purchaseStream;
-    _subscription = purchaseUpdated.listen((purchaseDetailsList) {
-      _listenToPurchases(purchaseDetailsList);
-    }, onDone: () {
-      _subscription.cancel();
-    }, onError: (error) {
-      debugPrint("Purchase stream error: $error");
-    });
-  }
-
-  // 2. Call this instead of createAds() when you are ready to use IAP
-  Future<void> processIapPayment() async {
-    if (!_validate()) return;
     
-    // The dynamically fetched plan IDs from API
-    Set<String> apiProductIds = plans.map((plan) => plan.id).toSet(); // Ensure 'id' matches the store product id
+    // Find matching PlanModel
+    final plan = plans.firstWhere(
+      (p) => p.name.toLowerCase() == selectedPricingPlan.value.toLowerCase(),
+      orElse: () => plans.first,
+    );
+
+    String storeProductId = Platform.isAndroid ? plan.googleProductId : plan.appleProductId;
 
     isLoading.value = true;
     final available = await _iap.isAvailable();
-    isStoreAvailable.value = available;
-
     if (!available) {
       Get.snackbar('Store Error', 'In-app purchases not available');
       isLoading.value = false;
       return;
     }
 
-    final response = await _iap.queryProductDetails(apiProductIds);
-    if (response.error != null || response.productDetails.isEmpty) {
-       Get.snackbar('Error', 'No products found in store matching API IDs');
-       isLoading.value = false;
-       return;
+    if (storeProducts.isEmpty) {
+      Get.snackbar('Error', 'No products found in store matching API IDs. Please check Play Console setup.');
+      debugPrint("❌ No products found in store matching API IDs");
+      isLoading.value = false;
+      return;
     }
-    
-    storeProducts.assignAll(response.productDetails);
     
     // Find the specific product the user selected to buy
     final selectedProduct = storeProducts.firstWhere(
-      (prod) => prod.id == planId, 
+      (prod) => prod.id == storeProductId, 
       orElse: () => storeProducts.first,
     );
 
@@ -429,8 +373,8 @@ class CreateAdsController extends GetxController {
     _iap.buyConsumable(purchaseParam: param, autoConsume: true);
   }
 
-  void _listenToPurchases(List<PurchaseDetails> purchaseDetailsList) {
-    purchaseDetailsList.forEach((PurchaseDetails purchaseDetails) async {
+  void _listenToPurchases(List<PurchaseDetails> purchaseDetailsList) async {
+    for (var purchaseDetails in purchaseDetailsList) {
       if (purchaseDetails.status == PurchaseStatus.pending) {
         isLoading.value = true;
       } else {
@@ -449,7 +393,7 @@ class CreateAdsController extends GetxController {
           await _verifyPurchaseAndCreateAd(purchaseDetails);
         }
       }
-    });
+    }
   }
 
   Future<void> _verifyPurchaseAndCreateAd(PurchaseDetails purchaseDetails) async {
@@ -492,9 +436,23 @@ class CreateAdsController extends GetxController {
       isLoading.value = false;
     }
   }
-  
-  // NOTE: Remember to add _subscription.cancel(); inside the onClose() method!
-  */
+
+  //DATE PICKER ============================
+  Future<void> selectDate(
+      BuildContext context,
+      TextEditingController controller,
+      ) async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime.now(),
+      lastDate: DateTime(2101),
+    );
+    if (picked != null) {
+      controller.text =
+      "${picked.day.toString().padLeft(2, '0')} ${_month(picked.month)} ${picked.year}";
+    }
+  }
 
   //SUCCESS================================
   void _showSuccessPopup() {
@@ -509,6 +467,7 @@ class CreateAdsController extends GetxController {
   //DISPOSE ================================
   @override
   void onClose() {
+    _subscription.cancel();
     titleController.dispose();
     descriptionController.dispose();
     focusAreaController.dispose();
