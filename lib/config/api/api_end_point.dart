@@ -5,16 +5,15 @@ class ApiEndPoint {
   static const String socketUrl = "https://clicker-api.just-metaverse.com";
 
 
-  // static const String baseUrl = "http://10.10.7.7:5000/api/v1";
-  // static const String imageUrl = "http://10.10.7.7:5000";
-  // static const String socketUrl = "http://10.10.7.7:5000";
+  // static const String baseUrl = "http://10.10.7.7:5006/api/v1";
+  // static const String imageUrl = "http://10.10.7.7:5006";
+  // static const String socketUrl = "http://10.10.7.7:5006";
 
 
 
 
 
   // Auth ===========================================
-
 
   static const String signUp = "$baseUrl/users/create-user";
   static const String signIn = "$baseUrl/auth/login";
@@ -43,7 +42,7 @@ class ApiEndPoint {
   static const String getPendingRequest = "$baseUrl/join-requests/chat/";
   static const String createOneToOneChat = "$baseUrl/chats/create-1-to-1";
 
-  // Post ===========================================
+  // Post ============================================
   static const String createPost = "$baseUrl/posts/create";
   static const String updatePost = "$baseUrl/posts/update/";
   static const String getSinglePost = "$baseUrl/posts/single/";
@@ -65,12 +64,15 @@ class ApiEndPoint {
   static const String deleteFriend = "$baseUrl/friendships/";
 
   // Chat ===========================================
+
   // static const String createOneToOneChat = "$baseUrl/chats/create-1-to-1";
+
+
 
   static const String createChatGroup = "$baseUrl/chats/create-group";
   static String deleteChatById(String id) => "$baseUrl/chats/$id";
-
   static String leaveChat(String id) => "$baseUrl/chats/leave/$id";
+
 
   static String joinChat(String id) => "$baseUrl/chats/join/$id";
   static const String addMember = "$baseUrl/chats/add-member/";
@@ -90,6 +92,7 @@ class ApiEndPoint {
   static const String verifyPurchase = "$baseUrl/advertisements/verify-purchase";
 
   // Plan=============================================
+
   static const String getPlans = "$baseUrl/plans";
 
   //Advertiser========================================
@@ -102,12 +105,16 @@ class ApiEndPoint {
   static const String noneFriendChatUpdate= "$baseUrl/chats/update/";
   static const String deleteFcmToken= "$baseUrl/users/remove-fcm-token";
 
-  // Support ========================================
+  // Support ===================================================================
   static const String support = "$baseUrl/supports/create";
   static const String createReport = "$baseUrl/reports/create";
-  static const String createBlock = "$baseUrl/blocks/create"; ///TODO==========================================================================
+  static const String createBlock = "$baseUrl/blocks/create";
 
-  // Misc ===========================================
+
+  //TODO========================================================================
+
+
+   // Misc ===========================================
   static const String user = "$baseUrl/users";
   static const String post = "$baseUrl/posts";
   static const String customOffer = "$baseUrl/custom/offer";

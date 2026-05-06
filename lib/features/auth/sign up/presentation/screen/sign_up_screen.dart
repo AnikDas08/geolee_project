@@ -116,6 +116,7 @@ class SignUpScreen extends StatelessWidget {
 
                   Row(
                     children: [
+                      if (Platform.isAndroid)
                       Expanded(
                         child: InkWell(
                           onTap: () => controller.signInWithGoogle(),

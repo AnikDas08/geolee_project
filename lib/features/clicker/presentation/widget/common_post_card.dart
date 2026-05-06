@@ -98,7 +98,7 @@ class CommonPostCards extends StatelessWidget {
                                     child: Icon(
                                       Icons.report_gmailerrorred_outlined,
                                       size: 20.sp,
-                                      color: Colors.red.withOpacity(0.7),
+                                      color: Colors.red.withValues(alpha: 0.7),
                                     ),
                                   ),
                                   SizedBox(width: 12.w),
@@ -256,7 +256,7 @@ class CommonPostCards extends StatelessWidget {
 
   void _showReportBottomSheet(BuildContext context, String postId) {
     final List<String> reportReasons = [
-      'Sexual Content',
+      'Se/xual Content',
       'Harassment / Bullying',
       'Hate Speech',
       'Violence',
@@ -435,7 +435,7 @@ class _PostImageSlider extends StatefulWidget {
 }
 
 class _PostImageSliderState extends State<_PostImageSlider> {
-  // ✅ Fixed: ValueNotifier দিয়ে শুধু dots rebuild হবে, পুরো Column না
+
   final ValueNotifier<int> _currentIndex = ValueNotifier<int>(0);
 
   @override

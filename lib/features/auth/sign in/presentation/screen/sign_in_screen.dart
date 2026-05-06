@@ -113,6 +113,7 @@ class SignInScreen extends StatelessWidget {
 
                   Row(
                     children: [
+                      if (Platform.isAndroid)
                       Expanded(
                         child: GestureDetector(
                           onTap: () => controller.socialLogin(provider:"google"),

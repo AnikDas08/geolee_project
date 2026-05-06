@@ -8,6 +8,7 @@ class AuthService {
   static final FirebaseAuth _auth = FirebaseAuth.instance;
   static final GoogleSignIn _googleSignIn = GoogleSignIn();
 
+
   /// Google Sign In Flow
   static Future<Map<String, dynamic>?> signInWithGoogle() async {
     try {
