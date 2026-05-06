@@ -15,6 +15,10 @@ import 'package:giolee78/utils/enum/enum.dart';
 import 'package:intl/intl.dart';
 import '../../../addpost/presentation/widgets/full_screen_view_image.dart';
 import '../../../clicker/presentation/widget/common_post_card.dart';
+import 'package:giolee78/services/api/api_service.dart';
+import 'package:giolee78/utils/app_utils.dart';
+import 'package:giolee78/component/other_widgets/common_loader.dart';
+import 'package:giolee78/component/pop_up/common_pop_menu.dart';
 
 class ViewFriendScreen extends StatefulWidget {
   final bool isFriend;
@@ -102,6 +106,28 @@ class _ViewFriendScreenState extends State<ViewFriendScreen> {
           icon: Icon(Icons.arrow_back, size: 26.sp, color: AppColors.black),
         ),
         centerTitle: true,
+        actions: [
+          PopupMenuButton<String>(
+            onSelected: (value) {
+              if (value == 'block') {
+                _showBlockConfirmationDialog(context, widget.userId);
+              }
+            },
+            itemBuilder: (context) => [
+              const PopupMenuItem(
+                value: 'block',
+                child: Row(
+                  children: [
+                    Icon(Icons.block, color: Colors.red, size: 20),
+                    SizedBox(width: 8),
+                    Text('Block User', style: TextStyle(color: Colors.red)),
+                  ],
+                ),
+              ),
+            ],
+            icon: Icon(Icons.more_vert, color: AppColors.black),
+          ),
+        ],
       ),
       body: SafeArea(
         child: Obx(() {
@@ -405,5 +431,70 @@ class _ViewFriendScreenState extends State<ViewFriendScreen> {
     if (p == 'public') return AppIcons.public;
     if (p == 'friend' || p == 'friends') return AppIcons.friends;
     return AppIcons.onlyMe;
+  }
+
+  void _showBlockConfirmationDialog(BuildContext context, String userId) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Block User?"),
+        content: const Text(
+          "Are you sure you want to block this user? You won't see their posts anymore.",
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Cancel"),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              _submitBlock(userId);
+            },
+            child: const Text("Block", style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _submitBlock(String userId) async {
+    try {
+      // Show Loading
+      showDialog(
+        context: Get.context!,
+        barrierDismissible: false,
+        builder: (context) => const CommonLoader(),
+      );
+
+      final response = await ApiService.post(
+        "${ApiEndPoint.createBlock}/$userId",
+      );
+
+      // Hide Loading
+      Get.back();
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        // Locally remove all posts from this user from UI
+        if (Get.isRegistered<ClickerController>()) {
+          Get.find<ClickerController>().removePostsByUserId(userId);
+        }
+
+        successPopUps(
+          message:
+              "User blocked successfully. You will no longer see their content.",
+          buttonTitle: "Done",
+          onTap: () {
+            Get.back(); // close popup
+            Get.back(); // go back from profile screen
+          },
+        );
+      } else {
+        Utils.errorSnackBar("Error", "Failed to block user");
+      }
+    } catch (e) {
+      Get.back(); // Hide loading
+      Utils.errorSnackBar("Error", "Something went wrong");
+    }
   }
 }

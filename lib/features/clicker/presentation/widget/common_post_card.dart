@@ -107,18 +107,6 @@ class CommonPostCards extends StatelessWidget {
                                       color: Colors.red.withValues(alpha: 0.7),
                                     ),
                                   ),
-                                  SizedBox(width: 12.w),
-                                  GestureDetector(
-                                    onTap: () => _showBlockConfirmationDialog(
-                                      context,
-                                      userid!,
-                                    ),
-                                    child: Icon(
-                                      Icons.block_flipped,
-                                      size: 18.sp,
-                                      color: AppColors.secondaryText,
-                                    ),
-                                  ),
                                 ],
                               ),
                           ],
@@ -214,70 +202,6 @@ class CommonPostCards extends StatelessWidget {
       ),
     );
   }
-
-  void _showBlockConfirmationDialog(BuildContext context, String userId) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text("Block User?"),
-        content: const Text(
-          "Are you sure you want to block this user? You won't see their posts anymore.",
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text("Cancel"),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              _submitBlock(userId);
-            },
-            child: const Text("Block", style: TextStyle(color: Colors.red)),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Future<void> _submitBlock(String userId) async {
-    try {
-      // Show Loading
-      showDialog(
-        context: Get.context!,
-        barrierDismissible: false,
-        builder: (context) => const CommonLoader(),
-      );
-
-      final response = await ApiService.post(
-        "${ApiEndPoint.createBlock}/$userId",
-      );
-
-      // Hide Loading
-      Get.back();
-
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        // Locally remove all posts from this user from UI
-        if (Get.isRegistered<ClickerController>()) {
-          Get.find<ClickerController>().removePostsByUserId(userId);
-        }
-
-        successPopUps(
-          message:
-              "User blocked successfully. You will no longer see their content.",
-          buttonTitle: "Done",
-          onTap: () => Get.back(),
-        );
-      } else {
-        Utils.errorSnackBar("Error", "Failed to block user");
-      }
-    } catch (e) {
-      Get.back(); // Hide loading
-      Utils.errorSnackBar("Error", "Something went wrong");
-    }
-  }
-
-  /// ── Report Bottom Sheet ──────────────────────────────────
 
   void _showReportBottomSheet(BuildContext context, String postId) {
     final List<String> reportReasons = [
