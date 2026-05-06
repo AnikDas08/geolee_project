@@ -11,8 +11,6 @@ class ApiEndPoint {
 
 
 
-
-
   // Auth ===========================================
 
   static const String signUp = "$baseUrl/users/create-user";
@@ -91,11 +89,11 @@ class ApiEndPoint {
   static const String nearbyActiveAds = "$baseUrl/advertisements/nearby-active";
   static const String verifyPurchase = "$baseUrl/advertisements/verify-purchase";
 
-  // Plan=============================================
+  // Plan============================================
 
   static const String getPlans = "$baseUrl/plans";
 
-  //Advertiser========================================
+  //Advertiser=======================================
   static const String advertiserCompleteProfile = "$baseUrl/advertisers/create";
   static const String advertiserVerify = "$baseUrl/advertisers/verify";
   static const String resendOtp = "$baseUrl/auth/request-otp";
@@ -108,7 +106,7 @@ class ApiEndPoint {
   // Support ===================================================================
   static const String support = "$baseUrl/supports/create";
   static const String createReport = "$baseUrl/reports/create";
-  static const String createBlock = "$baseUrl/blocks/create";
+  static const String createBlock = "$baseUrl/blocks/block-user";
 
 
   //TODO========================================================================

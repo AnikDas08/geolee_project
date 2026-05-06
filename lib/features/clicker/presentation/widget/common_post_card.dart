@@ -10,6 +10,7 @@ import 'package:giolee78/features/clicker/presentation/controller/clicker_contro
 import 'package:giolee78/services/api/api_service.dart';
 import 'package:giolee78/utils/app_utils.dart';
 import 'package:giolee78/utils/constants/app_colors.dart';
+import 'package:giolee78/component/other_widgets/common_loader.dart';
 
 class CommonPostCards extends StatelessWidget {
   const CommonPostCards({
@@ -25,7 +26,8 @@ class CommonPostCards extends StatelessWidget {
     required this.clickerType,
     required this.onTapProfile,
     required this.onTapPhoto,
-    this.postId, // Added this
+    this.postId,
+    this.userid, // Added this
   });
 
   final String userName;
@@ -39,7 +41,8 @@ class CommonPostCards extends StatelessWidget {
   final String clickerType;
   final VoidCallback onTapProfile;
   final VoidCallback onTapPhoto;
-  final String? postId; // Added this
+  final String? postId;
+  final String? userid; // Added this
 
   @override
   Widget build(BuildContext context) {
@@ -94,7 +97,10 @@ class CommonPostCards extends StatelessWidget {
                               Row(
                                 children: [
                                   GestureDetector(
-                                    onTap: () => _showReportBottomSheet(context, postId!),
+                                    onTap: () => _showReportBottomSheet(
+                                      context,
+                                      postId!,
+                                    ),
                                     child: Icon(
                                       Icons.report_gmailerrorred_outlined,
                                       size: 20.sp,
@@ -103,7 +109,10 @@ class CommonPostCards extends StatelessWidget {
                                   ),
                                   SizedBox(width: 12.w),
                                   GestureDetector(
-                                    onTap: () => _showBlockConfirmationDialog(context, postId!),
+                                    onTap: () => _showBlockConfirmationDialog(
+                                      context,
+                                      userid!,
+                                    ),
                                     child: Icon(
                                       Icons.block_flipped,
                                       size: 18.sp,
@@ -147,16 +156,16 @@ class CommonPostCards extends StatelessWidget {
                             Expanded(
                               child: Row(
                                 children: [
-                                  CommonText(
-                                    text: location,
-                                    fontSize: 11,
-                                    color: AppColors.secondaryText,
+                                  Flexible(
+                                    child: CommonText(
+                                      text: location,
+                                      fontSize: 11,
+                                      color: AppColors.secondaryText,
+                                      textAlign: TextAlign.left,
+                                    ),
                                   ),
                                   SizedBox(width: 15.w),
-                                  CommonImage(
-                                    size: 12,
-                                    imageSrc: privacyImage,
-                                  ),
+                                  CommonImage(size: 12, imageSrc: privacyImage),
                                 ],
                               ),
                             ),
@@ -206,18 +215,23 @@ class CommonPostCards extends StatelessWidget {
     );
   }
 
-  void _showBlockConfirmationDialog(BuildContext context, String postId) {
+  void _showBlockConfirmationDialog(BuildContext context, String userId) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text("Block User?"),
-        content: const Text("Are you sure you want to block this user? You won't see their posts anymore."),
+        content: const Text(
+          "Are you sure you want to block this user? You won't see their posts anymore.",
+        ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text("Cancel")),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Cancel"),
+          ),
           TextButton(
             onPressed: () {
               Navigator.pop(context);
-              _submitBlock(postId);
+              _submitBlock(userId);
             },
             child: const Text("Block", style: TextStyle(color: Colors.red)),
           ),
@@ -226,21 +240,31 @@ class CommonPostCards extends StatelessWidget {
     );
   }
 
-  Future<void> _submitBlock(String postId) async {
+  Future<void> _submitBlock(String userId) async {
     try {
-      final response = await ApiService.post(
-        ApiEndPoint.createBlock,
-        body: {"post": postId},
+      // Show Loading
+      showDialog(
+        context: Get.context!,
+        barrierDismissible: false,
+        builder: (context) => const CommonLoader(),
       );
 
+      final response = await ApiService.post(
+        "${ApiEndPoint.createBlock}/$userId",
+      );
+
+      // Hide Loading
+      Get.back();
+
       if (response.statusCode == 200 || response.statusCode == 201) {
-        // Locally remove the post from UI
+        // Locally remove all posts from this user from UI
         if (Get.isRegistered<ClickerController>()) {
-          Get.find<ClickerController>().removeBlockedContent(postId);
+          Get.find<ClickerController>().removePostsByUserId(userId);
         }
 
         successPopUps(
-          message: "User blocked successfully. You will no longer see their content.",
+          message:
+              "User blocked successfully. You will no longer see their content.",
           buttonTitle: "Done",
           onTap: () => Get.back(),
         );
@@ -248,6 +272,7 @@ class CommonPostCards extends StatelessWidget {
         Utils.errorSnackBar("Error", "Failed to block user");
       }
     } catch (e) {
+      Get.back(); // Hide loading
       Utils.errorSnackBar("Error", "Something went wrong");
     }
   }
@@ -390,13 +415,10 @@ class CommonPostCards extends StatelessWidget {
   Future<void> _submitReport(String postId, String reason) async {
     try {
       debugPrint("🚩 Reporting post: $postId for reason: $reason");
-      
+
       final response = await ApiService.post(
         ApiEndPoint.createReport,
-        body: {
-          "post": postId,
-          "reason": reason,
-        },
+        body: {"post": postId, "reason": reason},
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
@@ -411,7 +433,10 @@ class CommonPostCards extends StatelessWidget {
           onTap: () => Get.back(),
         );
       } else {
-        Utils.errorSnackBar("Error", response.data['message'] ?? "Failed to submit report");
+        Utils.errorSnackBar(
+          "Error",
+          response.data['message'] ?? "Failed to submit report",
+        );
       }
     } catch (e) {
       debugPrint("❌ Report Error: $e");
@@ -435,7 +460,6 @@ class _PostImageSlider extends StatefulWidget {
 }
 
 class _PostImageSliderState extends State<_PostImageSlider> {
-
   final ValueNotifier<int> _currentIndex = ValueNotifier<int>(0);
 
   @override
@@ -495,23 +519,20 @@ class _PostImageSliderState extends State<_PostImageSlider> {
                         borderRadius: BorderRadius.circular(20.r),
                         gradient: isActive
                             ? const LinearGradient(
-                          colors: [
-                            Color(0xFFFF0000),
-                            Color(0xFFF43C3C),
-                          ],
-                        )
+                                colors: [Color(0xFFFF0000), Color(0xFFF43C3C)],
+                              )
                             : null,
                         color: isActive
                             ? null
                             : Colors.grey.withValues(alpha: 0.35),
                         boxShadow: isActive
                             ? [
-                          BoxShadow(
-                            color: const Color(0xFFF66666),
-                            blurRadius: 6.r,
-                            offset: const Offset(0, 2),
-                          ),
-                        ]
+                                BoxShadow(
+                                  color: const Color(0xFFF66666),
+                                  blurRadius: 6.r,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ]
                             : [],
                       ),
                     );

@@ -308,6 +308,7 @@ class _ClickerScreenState extends State<ClickerScreen> {
                         return Padding(
                           padding: EdgeInsets.only(bottom: 16.h),
                           child: CommonPostCards(
+                            userid: data.user.id.toString(),
                             postId: data.id.toString(),
                             // Pass the post ID safely
                             onTapPhoto: () {
