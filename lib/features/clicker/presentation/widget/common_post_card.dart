@@ -205,7 +205,7 @@ class CommonPostCards extends StatelessWidget {
 
   void _showReportBottomSheet(BuildContext context, String postId) {
     final List<String> reportReasons = [
-      'Se/xual Content',
+      'Sexual Content',
       'Harassment / Bullying',
       'Hate Speech',
       'Violence',
@@ -338,7 +338,7 @@ class CommonPostCards extends StatelessWidget {
   /// ── Submit Report API Call ────────────────────────────────
   Future<void> _submitReport(String postId, String reason) async {
     try {
-      debugPrint("🚩 Reporting post: $postId for reason: $reason");
+      debugPrint(" Reporting post: $postId for reason: $reason");
 
       final response = await ApiService.post(
         ApiEndPoint.createReport,

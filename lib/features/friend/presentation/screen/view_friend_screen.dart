@@ -439,7 +439,7 @@ class _ViewFriendScreenState extends State<ViewFriendScreen> {
       builder: (context) => AlertDialog(
         title: const Text("Block User?"),
         content: const Text(
-          "Are you sure you want to block this user? You won't see their posts anymore.",
+          "Are you sure you want to block this user?.",
         ),
         actions: [
           TextButton(

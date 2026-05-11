@@ -14,7 +14,6 @@ import 'package:giolee78/features/clicker/presentation/widget/common_post_card.d
 import 'package:giolee78/features/notifications/presentation/controller/notifications_controller.dart';
 import 'package:giolee78/utils/constants/app_colors.dart';
 import 'package:giolee78/utils/constants/app_icons.dart';
-import '../../../addpost/my_post_model.dart';
 import '../../../addpost/presentation/widgets/full_screen_view_image.dart';
 import '../../../friend/presentation/screen/view_friend_screen.dart';
 import '../widget/webview_screen.dart';
