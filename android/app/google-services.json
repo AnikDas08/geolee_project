@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "627654989285-l2itsu284pt97f8fru8enkoeur1djgeb.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.justmetaverse.justclicker",
+            "certificate_hash": "e4d7c69f4217fbbe390fb206a0c7c605ac4968c1"
+          }
+        },
+        {
           "client_id": "627654989285-vldm7urfo29hv7f7ban9mqae6qk61r2s.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
