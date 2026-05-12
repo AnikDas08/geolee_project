@@ -303,7 +303,7 @@ class CreateAdsController extends GetxController {
         final available = await _iap.isAvailable();
         isStoreAvailable.value = available;
         if (available) {
-          Set<String> apiProductIds = plans.map((plan) {
+          final Set<String> apiProductIds = plans.map((plan) {
             return Platform.isAndroid ? plan.googleProductId : plan.appleProductId;
           }).where((id) => id.isNotEmpty).toSet();
           
@@ -344,7 +344,7 @@ class CreateAdsController extends GetxController {
       orElse: () => plans.first,
     );
 
-    String storeProductId = Platform.isAndroid ? plan.googleProductId : plan.appleProductId;
+    final String storeProductId = Platform.isAndroid ? plan.googleProductId : plan.appleProductId;
 
     isLoading.value = true;
     final available = await _iap.isAvailable();
@@ -369,7 +369,7 @@ class CreateAdsController extends GetxController {
 
     // STEP 1: CREATE AD (Pending)
     isLoading.value = true;
-    bool success = await _createPendingAd();
+    final bool success = await _createPendingAd();
     if (!success) {
       isLoading.value = false;
       return;
@@ -424,10 +424,10 @@ class CreateAdsController extends GetxController {
 
   void _buyProduct(ProductDetails product) {
     final param = PurchaseParam(productDetails: product);
-    _iap.buyConsumable(purchaseParam: param, autoConsume: true);
+    _iap.buyConsumable(purchaseParam: param);
   }
 
-  void _listenToPurchases(List<PurchaseDetails> purchaseDetailsList) async {
+  Future<void> _listenToPurchases(List<PurchaseDetails> purchaseDetailsList) async {
     for (var purchaseDetails in purchaseDetailsList) {
       if (purchaseDetails.status == PurchaseStatus.pending) {
         isLoading.value = true;

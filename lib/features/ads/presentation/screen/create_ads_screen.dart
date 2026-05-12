@@ -421,7 +421,7 @@ class _CreateAdsScreenState extends State<CreateAdsScreen> {
                             Builder(
                               builder: (context) {
                                 String displayPrice = '\$${plan.price.toStringAsFixed(2)}';
-                                String storeId = Platform.isAndroid ? plan.googleProductId : plan.appleProductId;
+                                final String storeId = Platform.isAndroid ? plan.googleProductId : plan.appleProductId;
                                 try {
                                   final product = controller.storeProducts.firstWhere((p) => p.id == storeId);
                                   displayPrice = product.price;

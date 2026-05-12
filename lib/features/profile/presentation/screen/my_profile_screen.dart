@@ -6,7 +6,6 @@ import 'package:giolee78/component/image/common_image.dart';
 import 'package:giolee78/component/text/common_text.dart';
 import 'package:giolee78/config/api/api_end_point.dart';
 import 'package:giolee78/features/profile/presentation/controller/my_profile_controller.dart';
-import 'package:giolee78/utils/app_utils.dart';
 import 'package:giolee78/utils/constants/app_colors.dart';
 import 'package:giolee78/utils/constants/app_images.dart';
 import 'package:giolee78/utils/extensions/extension.dart';

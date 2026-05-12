@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:giolee78/features/ads/presentation/controller/view_ads_screen_controller.dart';
-import 'package:giolee78/services/storage/storage_services.dart';
 import 'package:image_picker/image_picker.dart';
 
 import 'package:giolee78/config/api/api_end_point.dart';

@@ -95,7 +95,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   }
 
   Future<void> _enableLocation() async {
-    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    final bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

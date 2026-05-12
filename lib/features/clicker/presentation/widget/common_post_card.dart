@@ -10,7 +10,6 @@ import 'package:giolee78/features/clicker/presentation/controller/clicker_contro
 import 'package:giolee78/services/api/api_service.dart';
 import 'package:giolee78/utils/app_utils.dart';
 import 'package:giolee78/utils/constants/app_colors.dart';
-import 'package:giolee78/component/other_widgets/common_loader.dart';
 
 class CommonPostCards extends StatelessWidget {
   const CommonPostCards({
@@ -242,13 +241,13 @@ class CommonPostCards extends StatelessWidget {
                     ),
                   ),
                   SizedBox(height: 20.h),
-                  CommonText(
+                  const CommonText(
                     text: "Report Post",
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
                   SizedBox(height: 10.h),
-                  CommonText(
+                  const CommonText(
                     text: "Why are you reporting this post?",
                     fontSize: 14,
                     color: AppColors.secondaryText,

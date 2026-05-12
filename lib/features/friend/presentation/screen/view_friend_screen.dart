@@ -125,7 +125,7 @@ class _ViewFriendScreenState extends State<ViewFriendScreen> {
                 ),
               ),
             ],
-            icon: Icon(Icons.more_vert, color: AppColors.black),
+            icon: const Icon(Icons.more_vert, color: AppColors.black),
           ),
         ],
       ),
