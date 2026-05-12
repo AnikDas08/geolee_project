@@ -188,7 +188,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             color: AppColors.textColorFirst,
                           ),
                         ),
-                        // ✅ Badge
+                        //
                         if (notifController.unreadCount.value > 0)
                           Positioned(
                             right: -4,

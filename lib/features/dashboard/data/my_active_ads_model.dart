@@ -59,7 +59,7 @@ class MyActiveAdvertisement {
   final DateTime startAt;
   final DateTime endAt;
   final String plan;
-  final int price;
+  final double price;
   final String paymentStatus;
   final String? paidAt;
   final int reachCount;
@@ -109,7 +109,7 @@ class MyActiveAdvertisement {
       startAt: DateTime.parse(json['startAt']),
       endAt: DateTime.parse(json['endAt']),
       plan: json['plan'],
-      price: json['price'],
+      price: (json['price'] as num).toDouble(),
       paymentStatus: json['paymentStatus'],
       paidAt: json['paidAt'],
       reachCount: json['reachCount'],

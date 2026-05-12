@@ -78,7 +78,7 @@ class EditAdsScreen extends StatelessWidget {
                     _label('Ads Title'),
                     CommonTextField(
                       controller: controller.titleController,
-                      hintText: 'Delicious Fast Food',
+                      hintText: 'Enter Ads Title',
                     ),
                     SizedBox(height: 14.h),
 
@@ -86,14 +86,14 @@ class EditAdsScreen extends StatelessWidget {
                     CommonTextField(
                       controller: controller.descriptionController,
                       maxLines: 3,
-                      hintText: 'Description...',
+                      hintText: 'Enter your Ads description',
                     ),
                     SizedBox(height: 14.h),
 
                     _label('Focus Area'),
                     CommonTextField(
                       controller: controller.focusAreaController,
-                      hintText: 'California, New York',
+                      hintText: 'Select Focus Area',
                     ),
                     SizedBox(height: 14.h),
 
@@ -101,7 +101,7 @@ class EditAdsScreen extends StatelessWidget {
                     CommonTextField(
                       validator: OtherHelper.urlValidator,
                       controller: controller.websiteLinkController,
-                      hintText: ' e.g https//:www.website.com',
+                      hintText: ' e.g https://www.website.com',
                     ),
                     SizedBox(height: 20.h),
 
@@ -120,24 +120,23 @@ class EditAdsScreen extends StatelessWidget {
 
                     SizedBox(height: 16.h),
 
-                    /// -------- DATE PICKER --------
+                    /// -------- DATE (READ ONLY) --------
                     _label('Ad Start Date'),
-                    GestureDetector(
-                      onTap: () => controller.selectDate(
-                        context,
-                        controller.adStartDateController,
+                    CommonTextField(
+                      readOnly: true,
+                      controller: controller.adStartDateController,
+                      hintText: 'Select start date',
+                      suffixIcon: Icon(
+                        Icons.calendar_today,
+                        size: 20.sp,
+                        color: Colors.grey,
                       ),
-                      child: AbsorbPointer(
-                        child: CommonTextField(
-                          controller: controller.adStartDateController,
-                          hintText: 'Select start date',
-                          suffixIcon: Icon(
-                            Icons.calendar_today,
-                            size: 20.sp,
-                            color: AppColors.primaryColor,
-                          ),
-                        ),
-                      ),
+                    ),
+                    SizedBox(height: 6.h),
+                    CommonText(
+                      text: 'Ad start date cannot be changed',
+                      fontSize: 12.sp,
+                      color: Colors.grey,
                     ),
                     SizedBox(height: 20.h),
 

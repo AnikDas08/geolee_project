@@ -16,7 +16,7 @@ class OtherHelper {
 
   static String? urlValidator(value) {
     if (value == null || value.trim().isEmpty) {
-      return "Website link is required";
+      return null; // Make it optional
     }
 
     if (!value.startsWith("http://") && !value.startsWith("https://")) {

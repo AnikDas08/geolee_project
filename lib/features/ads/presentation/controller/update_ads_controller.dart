@@ -24,6 +24,9 @@ class UpdateAdsController extends GetxController {
   var plans = <PlanModel>[].obs;
   var isPlansLoading = false.obs;
 
+  var selectedLatitude = ''.obs;
+  var selectedLongitude = ''.obs;
+
   late String adsId;
   SingleAdvertisement? ad;
 
@@ -104,6 +107,10 @@ class UpdateAdsController extends GetxController {
 
         // Handle image
         debugPrint("🖼️ Raw image: ${ad?.image}");
+
+        // Handle coordinates
+        selectedLatitude.value = ad?.focusAreaLocation.coordinates[1].toString() ?? '0.0';
+        selectedLongitude.value = ad?.focusAreaLocation.coordinates[0].toString() ?? '0.0';
 
         if (ad?.image != null && ad!.image.isNotEmpty) {
           // Store only the image path/filename, not the full URL
@@ -323,8 +330,8 @@ class UpdateAdsController extends GetxController {
         "title": titleController.text.trim(),
         "description": descriptionController.text.trim(),
         "focusArea": focusAreaController.text.trim(),
-        "latitude": LocalStorage.lat.toString(),
-        "longitude": LocalStorage.long.toString(),
+        "latitude": selectedLatitude.value,
+        "longitude": selectedLongitude.value,
       };
 
       if (websiteLinkController.text.trim().isNotEmpty) {
@@ -405,11 +412,11 @@ class UpdateAdsController extends GetxController {
   /// ---------------- DISPOSE ----------------
   @override
   void onClose() {
-    // titleController.dispose();
-    // descriptionController.dispose();
-    // focusAreaController.dispose();
-    // websiteLinkController.dispose();
-    // adStartDateController.dispose();
+    titleController.dispose();
+    descriptionController.dispose();
+    focusAreaController.dispose();
+    websiteLinkController.dispose();
+    adStartDateController.dispose();
     super.onClose();
   }
 }

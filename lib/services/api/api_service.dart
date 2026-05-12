@@ -167,6 +167,8 @@ class ApiService {
         ? Map<String, String>.from(header)
         : {};
 
+    safeHeader['Content-Type'] = 'multipart/form-data';
+
     final Map<String, String> safeBody = body != null
         ? Map<String, String>.from(body)
         : {};

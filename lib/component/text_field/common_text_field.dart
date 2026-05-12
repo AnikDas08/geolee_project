@@ -32,6 +32,7 @@ class CommonTextField extends StatefulWidget {
     this.suffixIcon,
     this.maxLines,
     this.onChanged,
+    this.readOnly = false,
   });
 
   final String? hintText;
@@ -58,6 +59,7 @@ class CommonTextField extends StatefulWidget {
   final List<TextInputFormatter>? inputFormatters;
   final int? maxLines;
   final Function(String)? onChanged;
+  final bool readOnly;
 
   @override
   State<CommonTextField> createState() => _CommonTextFieldState();
@@ -91,6 +93,7 @@ class _CommonTextFieldState extends State<CommonTextField> {
         ),
       ),
       child: TextFormField(
+        readOnly: widget.readOnly,
         onChanged: widget.onChanged,
         autovalidateMode: AutovalidateMode.onUnfocus,
         keyboardType: widget.keyboardType,

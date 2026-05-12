@@ -244,7 +244,7 @@ class MyProfileScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   CommonText(
-                    text: 'Visible on Map',
+                    text: 'Visible to others',
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w600,
                   ),
