@@ -45,6 +45,7 @@ class CreateAdsController extends GetxController {
     });
   }
 
+
   // --- Places Autocomplete ---
   var placeSuggestions = <Map<String, dynamic>>[].obs;
   var isLoadingSuggestions = false.obs;
@@ -100,6 +101,8 @@ class CreateAdsController extends GetxController {
     }
   }
 
+
+
   // PLACES AUTOCOMPLETE ================================
 
   Future<void> searchPlaces(String query) async {
@@ -130,16 +133,12 @@ class CreateAdsController extends GetxController {
         if (data['status'] == 'OK') {
           final predictions = data['predictions'] as List;
           placeSuggestions.value = predictions
-              .map(
-                (p) => {
+              .map((p) => {
               'place_id': p['place_id'],
               'description': p['description'],
-              'main_text':
-              p['structured_formatting']?['main_text'] ??
+              'main_text': p['structured_formatting']?['main_text'] ??
                   p['description'],
-            },
-          )
-              .toList();
+            },).toList();
         } else {
           placeSuggestions.clear();
           debugPrint("Places API status: ${data['status']}");
