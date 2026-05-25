@@ -85,15 +85,10 @@ class CommonImage extends StatelessWidget {
         ),
       )
           : null,
-      progressIndicatorBuilder: (context, url, downloadProgress) => Center(
-        child: SizedBox(
-          width: 40,
-          height: 40,
-          child: CircularProgressIndicator(
-            strokeWidth: 2,
-            color: Colors.blue,
-            value: downloadProgress.progress,
-          ),
+      placeholder: (context, url) => Container(
+        decoration: BoxDecoration(
+          color: Colors.grey.withOpacity(0.2),
+          borderRadius: borderRadius > 0 ? BorderRadius.circular(borderRadius) : BorderRadius.zero,
         ),
       ),
       errorWidget: (context, url, error) => _buildErrorWidget(),

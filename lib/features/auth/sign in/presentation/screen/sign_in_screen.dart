@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:animate_do/animate_do.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:giolee78/component/image/common_image.dart';
@@ -17,7 +18,6 @@ import '../../../../../../../utils/constants/app_colors.dart';
 import '../../../../../../../utils/constants/app_string.dart';
 import '../../../../../../../utils/helpers/other_helper.dart';
 import '../widgets/do_not_account.dart';
-
 
 class SignInScreen extends StatelessWidget {
   const SignInScreen({super.key});
@@ -47,9 +47,11 @@ class SignInScreen extends StatelessWidget {
       /// Body Sections Starts here
       body: GetBuilder<SignInController>(
         builder: (controller) {
-          return SingleChildScrollView(
-            padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 24.h),
-            child: Form(
+          return FadeInUp(
+            duration: const Duration(milliseconds: 1000),
+            child: SingleChildScrollView(
+              padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 24.h),
+              child: Form(
               key: formKey,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -114,49 +116,53 @@ class SignInScreen extends StatelessWidget {
                   Row(
                     children: [
                       if (Platform.isAndroid)
-                      Expanded(
-                        child: GestureDetector(
-                          onTap: () => controller.socialLogin(provider:"google"),
-                          child: Container(
-                            height: 48.h,
-                            width: double.infinity,
-                            decoration: BoxDecoration(
-                              color: Colors.transparent,
-                              borderRadius: BorderRadius.circular(12.r),
-                              border: Border.all(color: Colors.grey, width: 2),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.grey.withValues(alpha: 0.1),
-                                  blurRadius: 8,
-                                  spreadRadius: 2,
-                                  offset: const Offset(0, 2),
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: () =>
+                                controller.socialLogin(provider: "google"),
+                            child: Container(
+                              height: 48.h,
+                              width: double.infinity,
+                              decoration: BoxDecoration(
+                                color: Colors.transparent,
+                                borderRadius: BorderRadius.circular(12.r),
+                                border: Border.all(
+                                  color: Colors.grey,
+                                  width: 2,
                                 ),
-                              ],
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                // Google Icon
-                                SvgPicture.asset(
-                                  'assets/icons/googleicon.svg',
-                                  height: 24.h,
-                                  width: 24.w,
-                                ),
-                                SizedBox(width: 10.w),
-                                // Google Text
-                                Text(
-                                  'Google',
-                                  style: TextStyle(
-                                    color: AppColors.textColorFirst,
-                                    fontSize: 16.sp,
-                                    fontWeight: FontWeight.w400,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.grey.withValues(alpha: 0.1),
+                                    blurRadius: 8,
+                                    spreadRadius: 2,
+                                    offset: const Offset(0, 2),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  // Google Icon
+                                  SvgPicture.asset(
+                                    'assets/icons/googleicon.svg',
+                                    height: 24.h,
+                                    width: 24.w,
+                                  ),
+                                  SizedBox(width: 10.w),
+                                  // Google Text
+                                  Text(
+                                    'Google',
+                                    style: TextStyle(
+                                      color: AppColors.textColorFirst,
+                                      fontSize: 16.sp,
+                                      fontWeight: FontWeight.w400,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ),
-                      ),
                       if (Platform.isIOS) ...[
                         SizedBox(width: 12.h),
                         Expanded(
@@ -170,7 +176,10 @@ class SignInScreen extends StatelessWidget {
                               decoration: BoxDecoration(
                                 color: Colors.transparent,
                                 borderRadius: BorderRadius.circular(12.r),
-                                border: Border.all(color: Colors.grey, width: 2),
+                                border: Border.all(
+                                  color: Colors.grey,
+                                  width: 2,
+                                ),
                                 boxShadow: [
                                   BoxShadow(
                                     color: Colors.grey.withValues(alpha: 0.1),
@@ -210,6 +219,7 @@ class SignInScreen extends StatelessWidget {
                 ],
               ),
             ),
+          )
           );
         },
       ),
@@ -331,8 +341,10 @@ class SignInScreen extends StatelessWidget {
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      child: const Text("Allow",
-                        style: TextStyle(color: Colors.white),),
+                      child: const Text(
+                        "Allow",
+                        style: TextStyle(color: Colors.white),
+                      ),
                     ),
                   ),
                 ],

@@ -75,18 +75,15 @@ class ClickerController extends GetxController {
   void onInit() {
     super.onInit();
     debugPrint("🚀 ClickerController onInit called");
+    // Start fetching posts immediately without blocking
     getAllPosts();
-    _getUniqueDeviceId();
-    getCurrentLocation();
-    updateProfileAndLocationVisible();
+    
+    // Run other setup tasks in parallel
+    _initParallelTasks();
 
     debugPrint("🔑 LocalStorage token: ${LocalStorage.token.isNotEmpty ? 'PRESENT' : 'EMPTY'}");
 
-    // Always call getBanners to see if it works for everyone
-    debugPrint("📡 Calling getBanners() from onInit (Global)");
-
     if (LocalStorage.token.isNotEmpty) {
-      getBanners();
       searchController.addListener(_onSearchChanged);
 
       // Trigger location suggestions as user types, with 500ms debounce
@@ -105,6 +102,18 @@ class ClickerController extends GetxController {
         });
       }
     }
+  }
+
+  Future<void> _initParallelTasks() async {
+    // Run these concurrently
+    await Future.wait([
+      _getUniqueDeviceId(),
+      getCurrentLocation(),
+      if (LocalStorage.token.isNotEmpty) getBanners(),
+    ]);
+    
+    // This depends on the location fetched above
+    updateProfileAndLocationVisible();
   }
 
   @override
@@ -230,10 +239,15 @@ class ClickerController extends GetxController {
       debugPrint("📡 [getBanners] Fetching location (with 5s timeout)...");
       Position position;
       try {
-        position = await Geolocator.getCurrentPosition(
-          desiredAccuracy: LocationAccuracy.low,
-          timeLimit: const Duration(seconds: 5),
-        );
+        Position? cachedPos = await Geolocator.getLastKnownPosition();
+        if (cachedPos != null) {
+          position = cachedPos;
+        } else {
+          position = await Geolocator.getCurrentPosition(
+            desiredAccuracy: LocationAccuracy.low,
+            timeLimit: const Duration(seconds: 5),
+          );
+        }
         debugPrint("📡 [getBanners] Location fetched: ${position.latitude}, ${position.longitude}");
       } catch (e) {
         debugPrint("📡 [getBanners] Location error or timeout: $e. Using fallback (0,0).");
@@ -302,7 +316,7 @@ class ClickerController extends GetxController {
       final List<String> queryParams = [];
 
       queryParams.add("page=${currentPage.value}");
-      queryParams.add("limit=30");
+      queryParams.add("limit=10");
 
       final String filter = clickerType ?? selectedFilter;
       if (filter != 'All') queryParams.add("clickerType=$filter");
@@ -497,9 +511,9 @@ class ClickerController extends GetxController {
     filtered = filtered.where((post) {
       final p = post.privacy.toLowerCase().trim();
       final isPublic = p == 'public';
+      final hasImages = (post.photos as List).isNotEmpty;
 
-
-      return isPublic;
+      return isPublic && hasImages;
     }).toList();
 
     if (selectedFilter != 'All') {
