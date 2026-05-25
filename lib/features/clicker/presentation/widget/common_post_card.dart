@@ -411,8 +411,8 @@ class _PostImageSliderState extends State<_PostImageSlider> {
                       width: double.infinity,
                       height: 190.h,
                       fill: BoxFit.cover,
-                      // ✅ Quality Fix: Height limit সরিয়ে শুধু Width limit রাখা হয়েছে যাতে Aspect Ratio ঠিক থাকে
-                      memCacheWidth: 1000,
+                      memCacheWidth: 800,
+                      memCacheHeight: (190 * 2.5).toInt(),
                     ),
                   ),
                 );
@@ -424,7 +424,6 @@ class _PostImageSliderState extends State<_PostImageSlider> {
         if (widget.images.length > 1)
           Padding(
             padding: EdgeInsets.only(top: 10.h),
-            // ✅ Fixed: ValueListenableBuilder — শুধু dots অংশ rebuild হবে
             child: ValueListenableBuilder<int>(
               valueListenable: _currentIndex,
               builder: (context, currentIdx, _) {
