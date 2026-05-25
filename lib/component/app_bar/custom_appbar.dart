@@ -13,7 +13,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final Color iconColors;
   final double height;
   final TextStyle? textStyle;
-  final VoidCallback? onBackTap; // 👈 Added custom back button handler
+  final VoidCallback? onBackTap;
 
   const CustomAppBar({
 
@@ -26,7 +26,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.textStyle,
     this.iconColors = Colors.black,
     this.showMessage = true,
-    this.onBackTap, // 👈 optional custom action
+    this.onBackTap,
   });
 
   @override
@@ -58,7 +58,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
             Positioned(
               left: 0,
               child: GestureDetector(
-                onTap: onBackTap ?? () => Navigator.pop(context), // 👈 Default is Get.back()
+                onTap: onBackTap ?? () => Navigator.pop(context),
                 child: Container(
                   margin: const EdgeInsets.symmetric(horizontal: 8),
                   decoration: const BoxDecoration(
