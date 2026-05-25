@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:animate_do/animate_do.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:giolee78/component/text/common_text.dart';
 import 'package:giolee78/services/storage/storage_keys.dart';
@@ -90,30 +91,36 @@ class _SplashScreenState extends State<SplashScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const CommonImage(
-              imageSrc: AppImages.logo,
-              size: 250,
-            ).center,
+        child: ZoomIn(
+          duration: const Duration(milliseconds: 1000),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const CommonImage(
+                imageSrc: AppImages.logo,
+                size: 250,
+              ).center,
 
-            SizedBox(height: 50.h),
+              SizedBox(height: 50.h),
 
-            FutureBuilder<String>(
-              future: getAppVersion(),
-              builder: (context, snapshot) {
-                if (!snapshot.hasData) return const SizedBox();
+              FadeInUp(
+                duration: const Duration(milliseconds: 1200),
+                child: FutureBuilder<String>(
+                  future: getAppVersion(),
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) return const SizedBox();
 
-                return CommonText(
-                  text: "Version: ${snapshot.data}",
-                  fontSize: 15.sp,
-                  color: Colors.green,
-                  fontWeight: FontWeight.w500,
-                );
-              },
-            ),
-          ],
+                    return CommonText(
+                      text: "Version: ${snapshot.data}",
+                      fontSize: 15.sp,
+                      color: Colors.green,
+                      fontWeight: FontWeight.w500,
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

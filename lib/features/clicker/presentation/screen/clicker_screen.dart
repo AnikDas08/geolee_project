@@ -1,6 +1,7 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:dots_indicator/dots_indicator.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:giolee78/services/storage/storage_services.dart';
@@ -92,12 +93,21 @@ class _ClickerScreenState extends State<ClickerScreen> {
       appBar: const CustomAppBar(notificationCount: 0),
       body: Obx(() {
         if (controller.isLoading.value && controller.posts.isEmpty) {
-          return const Center(child: CircularProgressIndicator());
+          return ListView.builder(
+            itemCount: 3,
+            padding: EdgeInsets.all(16.w),
+            itemBuilder: (context, index) => Padding(
+              padding: EdgeInsets.only(bottom: 16.h),
+              child: _buildSkeletonCard(),
+            ),
+          );
         }
         return RefreshIndicator(
           onRefresh: () async {
-            await controller.getBanners();
-            await controller.getAllPosts();
+            await Future.wait([
+              controller.getBanners(),
+              controller.getAllPosts(),
+            ]);
           },
           child: CustomScrollView(
             controller: _scrollController,
@@ -276,9 +286,7 @@ class _ClickerScreenState extends State<ClickerScreen> {
               // ── Posts List==================================================
               Builder(
                 builder: (context) {
-                  final postsWithImages = controller.filteredPosts
-                      .where((data) => (data.photos as List).isNotEmpty)
-                      .toList();
+                  final postsWithImages = controller.filteredPosts;
 
                   if (postsWithImages.isEmpty) {
                     return SliverToBoxAdapter(child: _buildEmptyState());
@@ -357,7 +365,37 @@ class _ClickerScreenState extends State<ClickerScreen> {
                   if (controller.isLoadingMore.value) {
                     return Padding(
                       padding: EdgeInsets.symmetric(vertical: 20.h),
-                      child: const Center(child: CircularProgressIndicator()),
+                      child: Center(
+                        child: Container(
+                          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(20.r),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.05),
+                                blurRadius: 10,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const CupertinoActivityIndicator(),
+                              SizedBox(width: 10.w),
+                              Text(
+                                "Loading more...",
+                                style: TextStyle(
+                                  fontSize: 12.sp,
+                                  fontWeight: FontWeight.w500,
+                                  color: AppColors.primaryColor,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
                     );
                   }
 
@@ -469,6 +507,67 @@ class _ClickerScreenState extends State<ClickerScreen> {
             SizedBox(height: 10.h),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildSkeletonCard() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14.r),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+            child: Row(
+              children: [
+                Container(
+                  width: 36.r,
+                  height: 36.r,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade300,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                SizedBox(width: 10.w),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: 120.w,
+                      height: 14.h,
+                      color: Colors.grey.shade300,
+                    ),
+                    SizedBox(height: 6.h),
+                    Container(
+                      width: 80.w,
+                      height: 10.h,
+                      color: Colors.grey.shade300,
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          Container(
+            width: double.infinity,
+            height: 190.h,
+            color: Colors.grey.shade300,
+          ),
+          SizedBox(height: 12.h),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 12.w),
+            child: Container(
+              width: 100.w,
+              height: 12.h,
+              color: Colors.grey.shade300,
+            ),
+          ),
+          SizedBox(height: 16.h),
+        ],
       ),
     );
   }

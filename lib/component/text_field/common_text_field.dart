@@ -33,6 +33,7 @@ class CommonTextField extends StatefulWidget {
     this.maxLines,
     this.onChanged,
     this.readOnly = false,
+    
   });
 
   final String? hintText;
@@ -75,8 +76,10 @@ class _CommonTextFieldState extends State<CommonTextField> {
   }
 
   void toggle() {
+    
     setState(() {
       obscureText = !obscureText;
+
     });
   }
 
@@ -108,6 +111,7 @@ class _CommonTextFieldState extends State<CommonTextField> {
         onFieldSubmitted: widget.onSubmitted,
         onTap: widget.onTap,
         validator: widget.validator,
+        
         decoration: InputDecoration(
           errorMaxLines: 2,
           filled: true,
@@ -157,9 +161,11 @@ class _CommonTextFieldState extends State<CommonTextField> {
   }
 
   OutlineInputBorder _buildBorder() {
+
     return OutlineInputBorder(
       borderRadius: BorderRadius.circular(widget.borderRadius.r),
       borderSide: BorderSide(color: widget.borderColor),
+
     );
   }
 }
