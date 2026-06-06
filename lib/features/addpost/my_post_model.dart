@@ -11,6 +11,8 @@ class MyPostModel {
     required this.data,
   });
 
+
+
   factory MyPostModel.fromJson(Map<dynamic, dynamic> json) => MyPostModel(
     success: json['success'] ?? false,
     message: json['message'] ?? '',
