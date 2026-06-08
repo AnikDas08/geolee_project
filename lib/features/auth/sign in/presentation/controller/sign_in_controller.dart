@@ -117,9 +117,7 @@ class SignInController extends GetxController {
 
   /// Social Sign-In==================================================
 
-  Future<void> socialLogin({
-    required String provider,
-  }) async {
+  Future<void> socialLogin({required String provider}) async {
     if (isLoading) return;
 
     isLoading = true;
@@ -162,15 +160,11 @@ class SignInController extends GetxController {
       if (response.statusCode == 200 || response.statusCode == 201) {
         final data = response.data;
         final token = data["data"]?['accessToken'] ?? '';
-        final userData =
-            data["data"]?['user'] ??
-                data["data"]; // Adjust based on API structure
+        final userData = data["data"]?['user'] ?? data["data"];
 
         await handleAuthSuccess(accessToken: token, userData: userData);
 
-
-
-        /// Fetch profile + save + navigate
+        /// Fetch profile + save + navigate    ===========================
         await getUserData();
 
         // Get.snackbar(
@@ -180,20 +174,20 @@ class SignInController extends GetxController {
         //   colorText: Colors.white,
         // );
 
+        /*
+         final prefs = await SharedPreferences.getInstance();
+          await prefs.setString('user_image', user.photoURL ?? '');
+
+        */
+
         Get.offAllNamed(AppRoutes.homeNav);
       } else {
-        Get.snackbar(
-          "Error",
-          response.message ?? "$provider login failed",
-        );
+        Get.snackbar("Error", response.message ?? "$provider login failed");
       }
     } catch (e) {
       debugPrint("$provider Sign-In Error: $e");
 
-      Get.snackbar(
-        "Error",
-        "$provider Sign-In failed: $e",
-      );
+      Get.snackbar("Error", "$provider Sign-In failed: $e");
     } finally {
       isLoading = false;
       update();
