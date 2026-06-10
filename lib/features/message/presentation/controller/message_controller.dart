@@ -115,29 +115,6 @@ class MessageController extends GetxController {
 
   static MessageController get instance => Get.put(MessageController());
 
-  /*
-  ================================================
-  MESSAGING PERMISSION LOGIC
-  ================================================
-
-  ✅ Actual friend (friendStatus==friends && friendStatusValue=='friends')
-     → সবসময় allow
-
-  ❌ বাকি সব (none, pending, received, none_continued):
-
-   rawDistanceKm values:
-    -1.0 → unknown (API তে distance আসেনি)  → BLOCK
-     0.0 → same location                    → ALLOW
-    >0.0 → actual distance                  → range check
-
-   Check order (important!):
-    1. isProfileLoaded false      → block
-    2. isLocationVisible false    → block
-    3. distance.value empty       → block  ← must be before rawDistanceKm check
-    4. rawDistanceKm == 0.0       → allow  ← same location
-    5. rawDistanceKm > radiusKm   → block
-    6. otherwise                  → allow
-*/
 
   bool get isMessagingBlocked {
     // ── Actual friend → no restriction
@@ -664,6 +641,12 @@ class MessageController extends GetxController {
   Future<void> sendMessage() async => await sendTextAndFile();
 
   Future<void> sendTextAndFile() async {
+    if (isSendingText ||
+        isUploadingImage ||
+        isUploadingMedia ||
+        isUploadingDocument) {
+      return;
+    }
     final text = messageController.text.trim();
     if (text.isEmpty && !hasPickedImage && !hasPickedFile) {
       return;

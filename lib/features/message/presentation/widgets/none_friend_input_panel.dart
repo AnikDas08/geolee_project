@@ -19,6 +19,11 @@ class NonFriendPanel extends StatelessWidget {
       // ── isMessagingBlocked: actual friend বাদে সবার জন্য distance/range check
       final bool isOutOfRange = controller.isMessagingBlocked;
 
+      final bool isBusy = controller.isSendingText ||
+          controller.isUploadingImage ||
+          controller.isUploadingMedia ||
+          controller.isUploadingDocument;
+
       return Container(
         decoration: BoxDecoration(
           color: Colors.white,
@@ -221,19 +226,19 @@ class NonFriendPanel extends StatelessWidget {
                     ),
                     SizedBox(width: 8.w),
                     GestureDetector(
-                      onTap: isOutOfRange ? null : controller.sendMessage,
+                      onTap: (isOutOfRange || isBusy) ? null : controller.sendMessage,
                       child: Container(
                         width: 46.w,
                         height: 46.w,
                         decoration: BoxDecoration(
-                          color: isOutOfRange
+                          color: (isOutOfRange || isBusy)
                               ? Colors.grey[300]
                               : AppColors.primaryColor,
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
                           Icons.send_rounded,
-                          color: isOutOfRange ? Colors.grey[500] : Colors.white,
+                          color: (isOutOfRange || isBusy) ? Colors.grey[500] : Colors.white,
                           size: 18.sp,
                         ),
                       ),
