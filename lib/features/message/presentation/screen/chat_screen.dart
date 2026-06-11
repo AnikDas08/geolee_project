@@ -61,7 +61,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
           "Your join request has been Cancel",
         );
       } else {
-        Get.snackbar("Error", response.message ?? "Failed to send request");
+        Get.snackbar("Error", response.message);
       }
     } catch (e) {
       debugPrint("cancel Request error is :$e");
@@ -108,7 +108,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
                     icon: const Icon(Icons.add, color: Colors.black),
                     onPressed: () {
                       final TabController tabController =
-                      DefaultTabController.of(context);
+                          DefaultTabController.of(context);
                       if (tabController.index == 0) {
                         Get.toNamed(AppRoutes.searchScreen);
                       } else {
@@ -123,8 +123,9 @@ class _ChatListScreenState extends State<ChatListScreen> {
               preferredSize: Size.fromHeight(48.h),
               child: Builder(
                 builder: (context) {
-                  final TabController tabController =
-                  DefaultTabController.of(context);
+                  final TabController tabController = DefaultTabController.of(
+                    context,
+                  );
                   return AnimatedBuilder(
                     animation: tabController,
                     builder: (context, _) {
@@ -186,8 +187,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
             init: con,
             builder: (controller) {
               return Padding(
-                padding:
-                EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
+                padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
                 child: Column(
                   children: [
                     // Search bar
@@ -205,20 +205,19 @@ class _ChatListScreenState extends State<ChatListScreen> {
                           color: Colors.grey[600],
                           size: 22.sp,
                         ),
-                        suffixIcon: controller.searchController.text
-                            .trim()
-                            .isNotEmpty
+                        suffixIcon:
+                            controller.searchController.text.trim().isNotEmpty
                             ? IconButton(
-                          icon: Icon(
-                            Icons.clear,
-                            color: Colors.grey[600],
-                            size: 20.sp,
-                          ),
-                          onPressed: () {
-                            FocusScope.of(context).unfocus();
-                            controller.clearSearch();
-                          },
-                        )
+                                icon: Icon(
+                                  Icons.clear,
+                                  color: Colors.grey[600],
+                                  size: 20.sp,
+                                ),
+                                onPressed: () {
+                                  FocusScope.of(context).unfocus();
+                                  controller.clearSearch();
+                                },
+                              )
                             : null,
                         filled: true,
                         fillColor: Colors.grey[100],
@@ -254,129 +253,129 @@ class _ChatListScreenState extends State<ChatListScreen> {
                               ? const CommonLoader()
                               : controller.filteredSingleChats.isEmpty
                               ? SizedBox(
-                            height: Get.height,
-                            width: Get.width,
-                            child: Center(
-                              child: Column(
-                                mainAxisAlignment:
-                                MainAxisAlignment.center,
-                                children: [
-                                  if (controller
-                                      .searchController.text
-                                      .trim()
-                                      .isEmpty) ...[
-                                    CommonImage(
-                                      imageSrc:
-                                      "assets/images/noData.png",
-                                      height: 100.h,
-                                      width: 100.w,
+                                  height: Get.height,
+                                  width: Get.width,
+                                  child: Center(
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        if (controller.searchController.text
+                                            .trim()
+                                            .isEmpty) ...[
+                                          CommonImage(
+                                            imageSrc:
+                                                "assets/images/noData.png",
+                                            height: 100.h,
+                                            width: 100.w,
+                                          ),
+                                          SizedBox(height: 20.h),
+                                          CommonText(
+                                            text: "No Chat List Found",
+                                            fontSize: 24.sp,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ] else ...[
+                                          Icon(
+                                            Icons.search_off,
+                                            size: 60.sp,
+                                            color: Colors.grey[400],
+                                          ),
+                                          SizedBox(height: 16.h),
+                                          CommonText(
+                                            text: "No results found",
+                                            fontSize: 18.sp,
+                                            fontWeight: FontWeight.w500,
+                                            color: Colors.grey,
+                                          ),
+                                          SizedBox(height: 8.h),
+                                          CommonText(
+                                            text:
+                                                "Try searching with different keywords",
+                                            fontSize: 14.sp,
+                                            color: Colors.grey,
+                                          ),
+                                        ],
+                                      ],
                                     ),
-                                    SizedBox(height: 20.h),
-                                    CommonText(
-                                      text: "No Chat List Found",
-                                      fontSize: 24.sp,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ] else ...[
-                                    Icon(
-                                      Icons.search_off,
-                                      size: 60.sp,
-                                      color: Colors.grey[400],
-                                    ),
-                                    SizedBox(height: 16.h),
-                                    CommonText(
-                                      text: "No results found",
-                                      fontSize: 18.sp,
-                                      fontWeight: FontWeight.w500,
-                                      color: Colors.grey,
-                                    ),
-                                    SizedBox(height: 8.h),
-                                    CommonText(
-                                      text:
-                                      "Try searching with different keywords",
-                                      fontSize: 14.sp,
-                                      color: Colors.grey,
-                                    ),
-                                  ],
-                                ],
-                              ),
-                            ),
-                          )
-                              : RefreshIndicator(
-                            onRefresh: () async {
-                              await con.getChatRepos();
-                              await con
-                                  .getCurrentLocationAndUpdateProfile();
-                              await con.getRadius();
-                              await con.fetchInitialData();
-                            },
-                            child: ListView.builder(
-                              controller:
-                              controller.singleScrollController,
-
-                              physics: const AlwaysScrollableScrollPhysics(),
-                              itemCount: controller
-                                  .filteredSingleChats.length +
-                                  (controller.isLoadingMoreSingle
-                                      ? 1
-                                      : 0),
-                              padding: EdgeInsets.only(top: 16.h),
-                              itemBuilder: (context, index) {
-                                if (index ==
-                                    controller
-                                        .filteredSingleChats.length) {
-                                  return Padding(
-                                    padding: EdgeInsets.all(16.h),
-                                    child: const Center(
-                                      child:
-                                      CircularProgressIndicator(
-                                        color: AppColors.primaryColor,
-                                      ),
-                                    ),
-                                  );
-                                }
-                                final ChatModel item = controller
-                                    .filteredSingleChats[index];
-                                return GestureDetector(
-                                  onTap: () {
-                                    Get.toNamed(
-                                      AppRoutes.message,
-                                      parameters: {
-                                        "userId":
-                                        item.participant.sId,
-                                        "chatId": item.id,
-                                        'isOnline': item.participant
-                                            .isOnline
-                                            .toString(),
-                                        "name": item.isGroup
-                                            ? (item.chatName ??
-                                            "Unnamed Group")
-                                            : item
-                                            .participant.fullName,
-                                        "image": item.isGroup
-                                            ? (item.chatImage ?? "")
-                                            : item.participant.image,
-                                        "distance": formatDistance(
-                                          item.distanceInKm,
-                                        ),
-                                        "requestStatus":
-                                        item.friendRequestStatus ??
-                                            "",
-                                      },
-                                    );
-                                  },
-                                  child: chatListItem(
-                                    item: item,
-                                    isFriend: item.isFriend,
-                                    isSearching: controller
-                                        .searchController.text
-                                        .trim()
-                                        .isNotEmpty,
                                   ),
-                                );
-                              },
-                            ),
-                          ),
+                                )
+                              : RefreshIndicator(
+                                  onRefresh: () async {
+                                    await con.getChatRepos();
+                                    await con
+                                        .getCurrentLocationAndUpdateProfile();
+                                    await con.getRadius();
+                                    await con.fetchInitialData();
+                                  },
+                                  child: ListView.builder(
+                                    controller:
+                                        controller.singleScrollController,
+
+                                    physics:
+                                        const AlwaysScrollableScrollPhysics(),
+                                    itemCount:
+                                        controller.filteredSingleChats.length +
+                                        (controller.isLoadingMoreSingle
+                                            ? 1
+                                            : 0),
+                                    padding: EdgeInsets.only(top: 16.h),
+                                    itemBuilder: (context, index) {
+                                      if (index ==
+                                          controller
+                                              .filteredSingleChats
+                                              .length) {
+                                        return Padding(
+                                          padding: EdgeInsets.all(16.h),
+                                          child: const Center(
+                                            child: CircularProgressIndicator(
+                                              color: AppColors.primaryColor,
+                                            ),
+                                          ),
+                                        );
+                                      }
+                                      final ChatModel item =
+                                          controller.filteredSingleChats[index];
+                                      return GestureDetector(
+                                        onTap: () {
+                                          Get.toNamed(
+                                            AppRoutes.message,
+                                            parameters: {
+                                              "userId": item.participant.sId,
+                                              "chatId": item.id,
+                                              'isOnline': item
+                                                  .participant
+                                                  .isOnline
+                                                  .toString(),
+                                              "name": item.isGroup
+                                                  ? (item.chatName ??
+                                                        "Unnamed Group")
+                                                  : item.participant.fullName,
+                                              "image": item.isGroup
+                                                  ? (item.chatImage ?? "")
+                                                  : item.participant.image,
+                                              "distance": formatDistance(
+                                                item.distanceInKm,
+                                              ),
+                                              "requestStatus":
+                                                  item.friendRequestStatus ??
+                                                  "",
+                                            },
+                                          );
+                                        },
+                                        child: chatListItem(
+                                          item: item,
+                                          isFriend: item.isFriend,
+                                          isSearching: controller
+                                              .searchController
+                                              .text
+                                              .trim()
+                                              .isNotEmpty,
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
 
                           // ─── Group Tab ───────────────────────────────
                           switch (controller.status) {
@@ -404,110 +403,109 @@ class _ChatListScreenState extends State<ChatListScreen> {
                               ),
                             ),
                             Status.completed =>
-                            controller.filteredChats.isEmpty
-                                ? Center(
-                              child: Column(
-                                mainAxisAlignment:
-                                MainAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    Icons.search_off,
-                                    size: 60.sp,
-                                    color: Colors.grey[400],
-                                  ),
-                                  SizedBox(height: 16.h),
-                                  CommonText(
-                                    text: "No results found",
-                                    fontSize: 18.sp,
-                                    fontWeight: FontWeight.w500,
-                                    color: Colors.grey,
-                                  ),
-                                  SizedBox(height: 8.h),
-                                  CommonText(
-                                    text:
-                                    "Try searching with different keywords",
-                                    fontSize: 14.sp,
-                                    color: Colors.grey,
-                                  ),
-                                ],
-                              ),
-                            )
-                                : RefreshIndicator(
-                              onRefresh: () async {
-                                await con.getChatRepos();
-                                await con
-                                    .getCurrentLocationAndUpdateProfile();
-                                await con.getRadius();
-                                await con.fetchInitialData();
-                              },
-                              child: ListView.builder(
-                                controller: controller.scrollController,
-
-                                physics:
-                                const AlwaysScrollableScrollPhysics(),
-                                itemCount:
-                                controller.filteredChats.length +
-                                    (controller.isLoadingMore
-                                        ? 1
-                                        : 0),
-                                padding: EdgeInsets.only(top: 16.h),
-                                itemBuilder: (context, index) {
-                                  if (index ==
-                                      controller.filteredChats.length) {
-                                    return Padding(
-                                      padding: EdgeInsets.all(16.h),
-                                      child: const Center(
-                                        child:
-                                        CircularProgressIndicator(
-                                          color: AppColors.primaryColor,
-                                        ),
+                              controller.filteredChats.isEmpty
+                                  ? Center(
+                                      child: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Icon(
+                                            Icons.search_off,
+                                            size: 60.sp,
+                                            color: Colors.grey[400],
+                                          ),
+                                          SizedBox(height: 16.h),
+                                          CommonText(
+                                            text: "No results found",
+                                            fontSize: 18.sp,
+                                            fontWeight: FontWeight.w500,
+                                            color: Colors.grey,
+                                          ),
+                                          SizedBox(height: 8.h),
+                                          CommonText(
+                                            text:
+                                                "Try searching with different keywords",
+                                            fontSize: 14.sp,
+                                            color: Colors.grey,
+                                          ),
+                                        ],
                                       ),
-                                    );
-                                  }
-                                  final ChatModel item =
-                                  controller.filteredChats[index];
-                                  return GestureDetector(
-                                    onTap: () {
-                                      if (!item.amIAParticipant) return;
-                                      Get.to(
-                                            () =>
-                                        const GroupMessageScreen(),
-                                        arguments: {
-                                          "chatId": item.id,
-                                          "groupName":
-                                          item.chatName ??
-                                              "Unnamed Group",
-                                          "memberCount":
-                                          item.memberCount,
-                                          "image":
-                                          item.chatImage ?? "",
-                                        },
-                                      );
-                                    },
-                                    child: chatListItem(
-                                      item: item,
-                                      isSearching: controller
-                                          .searchController.text
-                                          .trim()
-                                          .isNotEmpty,
-                                      onJoinTap: () {
-                                        final status = item
-                                            .joinRequestStatus
-                                            ?.toLowerCase();
-                                        if (status == "pending") {
-                                          _cancelJoinRequest(
-                                            item.joinRequestId ??
-                                                item.id,
-                                          );
-                                        } else {
-                                          _sendJoinRequest(item.id);
-                                        }
+                                    )
+                                  : RefreshIndicator(
+                                      onRefresh: () async {
+                                        await con.getChatRepos();
+                                        await con
+                                            .getCurrentLocationAndUpdateProfile();
+                                        await con.getRadius();
+                                        await con.fetchInitialData();
                                       },
+                                      child: ListView.builder(
+                                        controller: controller.scrollController,
+
+                                        physics:
+                                            const AlwaysScrollableScrollPhysics(),
+                                        itemCount:
+                                            controller.filteredChats.length +
+                                            (controller.isLoadingMore ? 1 : 0),
+                                        padding: EdgeInsets.only(top: 16.h),
+                                        itemBuilder: (context, index) {
+                                          if (index ==
+                                              controller.filteredChats.length) {
+                                            return Padding(
+                                              padding: EdgeInsets.all(16.h),
+                                              child: const Center(
+                                                child:
+                                                    CircularProgressIndicator(
+                                                      color: AppColors
+                                                          .primaryColor,
+                                                    ),
+                                              ),
+                                            );
+                                          }
+                                          final ChatModel item =
+                                              controller.filteredChats[index];
+                                          return GestureDetector(
+                                            onTap: () {
+                                              if (!item.amIAParticipant) return;
+                                              Get.to(
+                                                () =>
+                                                    const GroupMessageScreen(),
+                                                arguments: {
+                                                  "chatId": item.id,
+                                                  "groupName":
+                                                      item.chatName ??
+                                                      "Unnamed Group",
+                                                  "memberCount":
+                                                      item.memberCount,
+                                                  "image": item.chatImage ?? "",
+                                                },
+                                              );
+                                            },
+                                            child: chatListItem(
+                                              item: item,
+                                              isSearching: controller
+                                                  .searchController
+                                                  .text
+                                                  .trim()
+                                                  .isNotEmpty,
+                                              onJoinTap: () {
+                                                final status = item
+                                                    .joinRequestStatus
+                                                    ?.toLowerCase();
+                                                if (status == "pending") {
+                                                  _cancelJoinRequest(
+                                                    item.joinRequestId ??
+                                                        item.id,
+                                                  );
+                                                } else {
+                                                  _sendJoinRequest(item.id);
+                                                }
+                                              },
+                                            ),
+                                          );
+                                        },
+                                      ),
                                     ),
-                                  );
-                                },
-                              ),
-                            ),
                           },
                         ],
                       ),
